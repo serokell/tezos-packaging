@@ -1,0 +1,19 @@
+# SPDX-FileCopyrightText: 2019 TQ Tezos <https://tqtezos.com/>
+#
+# SPDX-License-Identifier: MPL-2.0
+diff --git a/src/bin_client/dune b/src/bin_client/dune
+index 6bee8e98..53006632 100644
+--- a/src/bin_client/dune
++++ b/src/bin_client/dune
+@@ -21,7 +21,10 @@
+                     -open Tezos_client_base
+                     -open Tezos_client_commands
+                     -open Tezos_client_base_unix
+-                    -linkall)))
++                    -linkall
++                    -ccopt -static
++                    -cclib "-lusb-1.0 -lhidapi-libusb -ludev"
++                    )))
+ 
+ (install
+  (section bin)

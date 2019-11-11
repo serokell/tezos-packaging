@@ -1,0 +1,35 @@
+# SPDX-FileCopyrightText: 2019 TQ Tezos <https://tqtezos.com/>
+#
+# SPDX-License-Identifier: MPL-2.0
+#
+# Parameters of repository traversal.
+traversal:
+  # Folders which we pretend do not exist
+  # (so they are neither analyzed nor can be referenced).
+  ignored:
+    # Git files
+    - .git
+
+# Verification parameters.
+verification:
+  # On 'anchor not found' error, how much similar anchors should be displayed as hint.
+  # Number should be between 0 and 1, larger value means stricter filter.
+  anchorSimilarityThreshold: 0.5
+
+  # When checking external references, how long to wait on request before
+  # declaring "Response timeout".
+  externalRefCheckTimeout: 10s
+
+  # File prefixes, references in which should not be analyzed.
+  notScanned:
+    # Github-specific files
+    - .github/pull_request_template.md
+
+  # Glob patterns describing the files which do not physically exist in the repository
+  # but should be treated as existing nevertheless.
+  virtualFiles:
+    # Github pages
+    - ../../issues
+    - ../../issues/*
+    - ../../pulls
+    - ../../pulls/*

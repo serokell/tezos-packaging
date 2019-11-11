@@ -1,0 +1,24 @@
+# SPDX-FileCopyrightText: 2019 TQ Tezos <https://tqtezos.com/>
+#
+# SPDX-License-Identifier: MPL-2.0
+
+env:
+  NIX_PATH: nixpkgs=channel:nixos-unstable
+
+steps:
+ - command: nix run nixpkgs.reuse -c reuse lint
+   label: reuse lint
+ - command: .buildkite/check-trailing-whitespace.sh
+   label: check trailing whitespace
+ - command: "nix run -f https://github.com/serokell/crossref-verifier/archive/master.tar.gz -c crossref-verify"
+   label: crossref-verify
+   soft_fail: true
+ - commands:
+   - nix-build -A tezos-client-static -o tezos-client-static
+   - nix-build -A tezos-client-rpm-package -o tezos-client-rpm
+   - nix-build -A tezos-client-deb-package -o tezos-client-deb
+   label: build and package
+   artifact_paths:
+     - ./tezos-client-static/bin/tezos-client
+     - ./tezos-client-rpm/*
+     - ./tezos-client-deb/*

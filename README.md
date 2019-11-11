@@ -6,6 +6,8 @@
 
 # `tezos-client`
 
+[![Build status](https://badge.buildkite.com/e899e9e54babcd14139e3bd4381bad39b5d680e08e7b7766d4.svg)](https://buildkite.com/serokell/tezos-client)
+
 `tezos-client` is CLI tool used for interaction with Tezos blockchain.
 This repo contains nix expression for building staticically linked
 tezos-client binaries that can be used with remote tezos nodes without
@@ -18,6 +20,12 @@ to build staticically linked `tezos-client` executable.
 
 Run `nix-build -A tezos-client-{rpm, deb}-package -o tezos-client-package` in order
 to build native `.rpm` or `.deb` package for RedHat and Debiab-based distros.
+
+## Obtain binary or packages from CI
+
+If you don't want to build these files from scratch, you can download artifacts
+produced by the CI. Go to the [master builds](https://buildkite.com/serokell/tezos-client/builds?branch=master)
+and download the artifacts from the `build and package` stage.
 
 ## `tezos-client` usage
 

@@ -1,0 +1,47 @@
+# SPDX-FileCopyrightText: 2019 TQ Tezos <https://tqtezos.com/>
+#
+# SPDX-License-Identifier: MPL-2.0
+diff --git a/src/bin_client/dune b/src/bin_client/dune
+index f42b53e6..7e47c074 100644
+--- a/src/bin_client/dune
++++ b/src/bin_client/dune
+@@ -28,7 +28,10 @@
+                     -open Tezos_client_base
+                     -open Tezos_client_commands
+                     -open Tezos_client_base_unix
+-                    -linkall)))
++                    -linkall
++                    -ccopt -static
++                    -cclib "-lusb-1.0 -lhidapi-libusb -ludev"
++                    )))
+ 
+ (install
+  (section bin)
+diff --git a/src/lib_base/p2p_addr.ml b/src/lib_base/p2p_addr.ml
+index d9139c4b..a3af815c 100644
+--- a/src/lib_base/p2p_addr.ml
++++ b/src/lib_base/p2p_addr.ml
+@@ -36,8 +36,8 @@ let encoding =
+     end
+     ~binary:begin
+       conv
+-        Ipaddr.V6.to_bytes
+-        Ipaddr.V6.of_bytes_exn
++        Ipaddr.V6.to_octets
++        Ipaddr.V6.of_octets_exn
+         string
+     end
+ 
+diff --git a/src/lib_protocol_environment/tezos_protocol_environment.ml b/src/lib_protocol_environment/tezos_protocol_environment.ml
+index 14acf631..7b0efcd8 100644
+--- a/src/lib_protocol_environment/tezos_protocol_environment.ml
++++ b/src/lib_protocol_environment/tezos_protocol_environment.ml
+@@ -300,7 +300,7 @@ module MakeV1 (Param : sig val name: string end) () = struct
+     let to_bits ?(pad_to = 0) z =
+       let bits = to_bits z in
+       let len = Pervasives.((numbits z + 7) / 8) in
+-      let full_len = Compare.Int.max pad_to len in
++      let full_len = Stdlib.max pad_to len in
+       if full_len = 0 then
+         MBytes.empty
+       else

@@ -24,7 +24,7 @@ let
       Version: ${majorVersion}.${minorVersion}
 
       %description
-      CLI executable that can be used for managing deployed TZBTC contract
+      ${pkgDesc.description}
 
       %files
       /usr/local/bin/${project}

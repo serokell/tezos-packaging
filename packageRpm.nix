@@ -6,35 +6,35 @@ pkgDesc:
 
 let
   project = pkgDesc.project;
-  majorVersion = pkgDesc.majorVersion;
-  minorVersion = pkgDesc.minorVersion;
-  pkgRevision = pkgDesc.packageRevision;
+  version = pkgDesc.version;
+  revision = pkgDesc.gitRevision;
   arch = pkgDesc.arch;
   bin = pkgDesc.bin;
-  pkgName = "${project}-${majorVersion}.${minorVersion}-${pkgRevision}.${arch}";
+  pkgName = "${project}-${version}-${revision}.${arch}";
   licenseFile = pkgDesc.licenseFile;
 
   writeSpecFile = writeTextFile {
     name = "${project}.spec";
     text = ''
       Name:    ${project}
-      Release: ${pkgRevision}
+      Version: ${version}
+      Release: ${revision}
       Summary: ${pkgDesc.description}
       License: ${pkgDesc.license}
-      Version: ${majorVersion}.${minorVersion}
 
       %description
       ${pkgDesc.description}
+      Maintainer: ${pkgDesc.maintainer}
 
       %files
       /usr/local/bin/${project}
-      %doc %name-%version/LICENSE
+      %doc %name/LICENSE
     '';
   };
 
 in rec {
   packageRpm =
-    stdenv.mkDerivation {
+    stdenv.mkDerivation rec {
       name = "${pkgName}.rpm";
 
       phases = "packagePhase";
@@ -45,8 +45,8 @@ in rec {
         cd rpmbuild
         mkdir SPECS
         cp ${writeSpecFile} SPECS/${project}.spec
-        mkdir -p BUILD/${project}-${majorVersion}.${minorVersion}
-        cp ${licenseFile} BUILD/${project}-${majorVersion}.${minorVersion}/LICENSE
+        mkdir -p BUILD/${project}
+        cp ${licenseFile} BUILD/${project}/LICENSE
 
         mkdir -p BUILDROOT/${pkgName}/usr/local/bin
         cp ${bin} BUILDROOT/${pkgName}/usr/local/bin/${project}

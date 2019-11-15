@@ -4,6 +4,7 @@
 
 env:
   NIX_PATH: nixpkgs=channel:nixos-unstable
+  cur_date: "$(date +\"%Y%m%d%H%M\")"
 
 steps:
  - command: nix run nixpkgs.reuse -c reuse lint
@@ -14,11 +15,17 @@ steps:
    label: crossref-verify
    soft_fail: true
  - commands:
-   - nix-build -A tezos-client-static -o tezos-client-static
-   - nix-build -A tezos-client-rpm-package -o tezos-client-rpm
-   - nix-build -A tezos-client-deb-package -o tezos-client-deb
+   - nix-build -A tezos-client-mainnet -o tezos-client-mainnet
+   - nix-build -A tezos-client-babylonnet -o tezos-client-babylonnet
+   - nix-build -A mainnet-rpm-package -o mainnet-rpm-package --arg timestamp ${cur_date}
+   - nix-build -A mainnet-deb-package -o mainnet-deb-package --arg timestamp ${cur_date}
+   - nix-build -A babylonnet-rpm-package -o babylonnet-rpm-package --arg timestamp ${cur_date}
+   - nix-build -A babylonnet-deb-package -o babylonnet-deb-package --arg timestamp ${cur_date}
    label: build and package
    artifact_paths:
-     - ./tezos-client-static/bin/tezos-client
-     - ./tezos-client-rpm/*
-     - ./tezos-client-deb/*
+     - ./tezos-client-mainnet/*
+     - ./tezos-client-babylonnet/*
+     - ./mainnet-rpm-package/*
+     - ./mainnet-deb-package/*
+     - ./babylonnet-rpm-package/*
+     - ./babylonnet-deb-package/*

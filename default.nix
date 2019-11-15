@@ -1,29 +1,47 @@
 # SPDX-FileCopyrightText: 2019 TQ Tezos <https://tqtezos.com/>
 #
 # SPDX-License-Identifier: MPL-2.0
-{ pkgs ? import <nixpkgs> { } }:
+{ pkgs ? import <nixpkgs> { }, timestamp ? "19700101" }:
 with pkgs;
 
 let
   root = ./.;
-  tezos-client-static = import ./nix/static.nix;
-  tezos-client-binary = "${tezos-client-static}/bin/tezos-client";
-  packageDesc = {
-    project = "tezos-client";
-    majorVersion = "1";
-    minorVersion = "0";
-    packageRevision = "0";
-    bin = tezos-client-binary;
+  mainnet = {
+    rev = "94f779a7";
+    sha256 = "16lxilng5q8fr2ll6h4hf7wlvac6nmw4cx10cbgzj5ks090bl97r";
+    patchFile = ./nix/fix-mainnet.patch;
+  };
+  babylonnet = {
+    rev = "b8731913";
+    sha256 = "1pakf1s6bg76fq42mb8fj1immz9g9wwimd522cpx8k28zf0hkl5i";
+    patchFile = ./nix/fix-babylonnet.patch;
+  };
+  tezos-client-static-mainnet = import ./nix/static.nix mainnet;
+  tezos-client-static-babylonnet = import ./nix/static.nix babylonnet;
+  binary-mainnet = "${tezos-client-static-mainnet}/bin/tezos-client";
+  binary-babylonnet = "${tezos-client-static-babylonnet}/bin/tezos-client";
+  packageDesc-mainnet = {
+    project = "tezos-client-mainnet";
+    version = toString timestamp;
+    bin = binary-mainnet;
     arch = "amd64";
     license = "MPL-2.0";
     dependencies = "";
     maintainer = "Serokell https://serokell.io";
     licenseFile = "${root}/LICENSES/MPL-2.0.txt";
     description = "CLI client for interacting with tezos blockchain";
+    gitRevision = mainnet.rev;
   };
-  buildDeb =
-    import ./packageDeb.nix { inherit stdenv writeTextFile; } packageDesc;
-  buildRpm = import ./packageRpm.nix { inherit stdenv writeTextFile; }
+
+  packageDesc-babylonnet = packageDesc-mainnet // {
+    project = "tezos-client-babylonnet";
+    bin = binary-babylonnet;
+    gitRevision = babylonnet.rev;
+  };
+
+  buildDeb = import ./packageDeb.nix { inherit stdenv writeTextFile; };
+  buildRpm = packageDesc:
+    import ./packageRpm.nix { inherit stdenv writeTextFile; }
     (packageDesc // { arch = "x86_64"; });
 
   inherit (vmTools)
@@ -31,13 +49,41 @@ let
     runInLinuxImage;
   ubuntuImage = makeImageFromDebDist debDistros.ubuntu1804x86_64;
   fedoraImage = makeImageFromRPMDist rpmDistros.fedora27x86_64;
-  tezos-client-rpm-package =
-    runInLinuxImage (buildRpm.packageRpm // { diskImage = fedoraImage; });
 
-  tezos-client-deb-package =
-    runInLinuxImage (buildDeb.packageDeb // { diskImage = ubuntuImage; });
+  mainnet-rpm-package = runInLinuxImage
+    ((buildRpm packageDesc-mainnet).packageRpm // { diskImage = fedoraImage; });
+
+  mainnet-deb-package = runInLinuxImage
+    ((buildDeb packageDesc-mainnet).packageDeb // { diskImage = ubuntuImage; });
+
+  babylonnet-rpm-package = runInLinuxImage
+    ((buildRpm packageDesc-babylonnet).packageRpm // {
+      diskImage = fedoraImage;
+    });
+
+  babylonnet-deb-package = runInLinuxImage
+    ((buildDeb packageDesc-babylonnet).packageDeb // {
+      diskImage = ubuntuImage;
+    });
+
+  tezos-client-mainnet = stdenv.mkDerivation rec {
+    name = "tezos-client-mainnet-${mainnet.rev}";
+    phases = "copyPhase";
+    copyPhase = ''
+      mkdir -p $out
+      cp ${binary-mainnet} $out/${name}
+    '';
+  };
+  tezos-client-babylonnet = stdenv.mkDerivation rec {
+    name = "tezos-client-babylonnet-${babylonnet.rev}";
+    phases = "copyPhase";
+    copyPhase = ''
+      mkdir -p $out
+      cp ${binary-babylonnet} $out/${name}
+    '';
+  };
 
 in rec {
-  inherit tezos-client-static tezos-client-rpm-package tezos-client-deb-package;
-
+  inherit tezos-client-mainnet tezos-client-babylonnet mainnet-deb-package
+    mainnet-rpm-package babylonnet-rpm-package babylonnet-deb-package;
 }

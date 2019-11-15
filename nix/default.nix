@@ -2,6 +2,8 @@
 #
 # SPDX-License-Identifier: MPL-2.0
 { pkgs ? import <nixpkgs> { } }:
+branchInfo:
+
 let
   oca = pkgs.ocaml-ng.ocamlPackages_4_07.overrideScope' (self: super: {
     bigstring = self.callPackage
@@ -240,17 +242,11 @@ let
 
         minimumOCamlVersion = "4.07";
 
-        #src = ./.;
-        #patches = [ ./fix.patch ]; # babylonnet
-        patches = [ ./fix-mainnet.patch ];
+        patches = [ branchInfo.patchFile ];
         src = fetchgit {
           url = "https://gitlab.com/tezos/tezos.git/";
-          # babylonnet:
-          #rev = "b8731913f21091e14dea9c2b6657e768c1342650";
-          #sha256 = "1pakf1s6bg76fq42mb8fj1immz9g9wwimd522cpx8k28zf0hkl5i";
-          # mainnet:
-          rev = "94f779a7517f04d1786d710b0b8deea7a9c1f762";
-          sha256 = "16lxilng5q8fr2ll6h4hf7wlvac6nmw4cx10cbgzj5ks090bl97r";
+          rev = branchInfo.rev;
+          sha256 = branchInfo.sha256;
         };
         preInstall = ''
           cp src/*/*.install .

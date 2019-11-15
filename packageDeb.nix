@@ -6,17 +6,17 @@ pkgDesc:
 
 let
   project = pkgDesc.project;
-  majorVersion = pkgDesc.majorVersion;
-  minorVersion = pkgDesc.minorVersion;
-  pkgRevision = pkgDesc.packageRevision;
+  version = pkgDesc.version;
+  revision = pkgDesc.gitRevision;
+  pkgArch = pkgDesc.arch;
   bin = pkgDesc.bin;
-  pkgName = "${project}_${majorVersion}.${minorVersion}-${pkgRevision}";
+  pkgName = "${project}_0ubuntu${version}-${revision}_${pkgArch}";
 
   writeControlFile = writeTextFile {
     name = "control";
     text = ''
       Package: ${project}
-      Version: ${majorVersion}.${minorVersion}-${pkgRevision}
+      Version: ${version}-${revision}
       Priority: optional
       Architecture: ${pkgDesc.arch}
       Depends: ${pkgDesc.dependencies}
@@ -42,7 +42,7 @@ in rec {
         cp ${writeControlFile} ${pkgName}/DEBIAN/control
 
         dpkg-deb --build ${pkgName}
-        mv ${pkgName}.deb $out
+        cp ${pkgName}.deb $out
       '';
     };
 }

@@ -15,11 +15,36 @@ using `babylonnet.sh` or `mainnet.sh` scripts.
 
 ## Build Instructions
 
-Run `nix-build -A tezos-client-static -o tezos-static`
-to build staticically linked `tezos-client` executable.
+### Statically built binary
 
-Run `nix-build -A tezos-client-{rpm, deb}-package -o tezos-client-package` in order
-to build native `.rpm` or `.deb` package for Red Hat and Debian-based distros.
+Run one of the following commands:
+```
+nix-build -A tezos-client-mainnet -o tezos-client
+nix-build -A tezos-client-babylonnet -o tezos-client
+```
+To build `mainnet` or `babylonnet` versions of `tezos-client` executable
+
+### Ubuntu `.deb` package
+
+Run one of the following commands:
+```
+nix-build -A mainnet-deb-package -o tezos-client-package --arg timestamp $(date +"%Y%m%d%H%M")
+nix-build -A babylonnet-deb-package -o tezos-client-package --arg timestamp $(date +"%Y%m%d%H%M")
+```
+
+To build `.deb` package with `mainnet` or `babylonnet` `tezos-client` executable. Once you install
+such package the command `tezos-client-mainnet` or `tezos-client-babylonnet` will be available.
+
+### Fedora `.rpm` package
+
+Run one of the following commands:
+```
+nix-build -A mainnet-rpm-package -o tezos-client-package --arg timestamp $(date +"%Y%m%d%H%M")
+nix-build -A babylonnet-rpm-package -o tezos-client-package --arg timestamp $(date +"%Y%m%d%H%M")
+```
+
+To build `.rpm` package with `mainnet` or `babylonnet` `tezos-client` executable. Once you install
+such package the command `tezos-client-mainnet` or `tezos-client-babylonnet` will be available.
 
 ## Obtain binary or packages from CI
 
@@ -29,9 +54,9 @@ click on `build and package` stage, choose `Artifacts` section and download file
 
 ## Ubuntu (Debian based distros) usage
 
-### Install downloaded `.deb` package
+### Install `.deb` package
 
-Download `.deb` file from the CI and double-click on it or run:
+Build or download `.deb` file from the CI and double-click on it or run:
 ```
 sudo apt install <path to deb file>
 ```
@@ -42,19 +67,20 @@ Also if you are using Ubuntu you can use PPA in order to install `tezos-client`.
 In order to do that run the following commands:
 ```
 sudo add-apt-repository ppa:serokell/tezos && sudo apt-get update
-sudo apt-get install tezos-client
+sudo apt-get install tezos-client-mainnet
+sudo apt-get install tezos-client-babylonnet
 ```
 
 ## Fedora (Red Hat) usage
 
-Download `.rpm` file from the CI and double-click on it or run:
+Build or download `.rpm` file from the CI and double-click on it or run:
 ```
 sudo yum localinstall <path to the rpm file>
 ```
 
 ## Other Linux distros usage
 
-Download statically built `tezos-client` binary from the CI.
+Download or build static `tezos-client` binary from the CI.
 Make it executable:
 ```
 chmod +x tezos-client

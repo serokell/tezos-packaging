@@ -14,8 +14,11 @@ For example
 - Fixed #100500 by adding lenses to exported items
 
 Write 'None' if there are no related issues (which is discouraged).
+Please use keywords to close related issues if they should be closed:
+https://help.github.com/en/github/managing-your-work-on-github/closing-issues-using-keywords
 -->
-https://github.com/serokell/tezos-client/issues/
+
+Resolves #
 
 #### Related changes (conditional)
 

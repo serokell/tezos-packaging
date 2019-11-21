@@ -2,7 +2,7 @@
 
 ## Reporting Issues
 
-Please [open an issue](https://github.com/serokell/tezos-client/issues/new)
+Please [open an issue](https://github.com/serokell/tezos-client/issues/new/choose)
 if you find a bug or have a feature request.
 Before submitting a bug report or feature request, check to make sure it hasn't already been submitted
 

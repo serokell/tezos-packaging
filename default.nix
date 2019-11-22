@@ -41,7 +41,7 @@ let
 
   buildDeb = import ./packageDeb.nix { inherit stdenv writeTextFile; };
   buildRpm = packageDesc:
-    import ./packageRpm.nix { inherit stdenv writeTextFile; }
+    import ./packageRpm.nix { inherit stdenv writeTextFile gnutar; }
     (packageDesc // { arch = "x86_64"; });
 
   inherit (vmTools)

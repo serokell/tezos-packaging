@@ -22,6 +22,13 @@ Run one of the following commands:
 nix-build -A tezos-client-mainnet -o tezos-client
 nix-build -A tezos-client-babylonnet -o tezos-client
 ```
+
+Or use Makefile:
+```bash
+make binary #build tezos-client-babylonnet
+make binary-mainnet #build tezos-client-mainnet
+```
+
 To build `mainnet` or `babylonnet` versions of `tezos-client` executable
 
 ### Ubuntu `.deb` package
@@ -30,6 +37,12 @@ Run one of the following commands:
 ```
 nix-build -A mainnet-deb-package -o tezos-client-package --arg timestamp $(date +"%Y%m%d%H%M")
 nix-build -A babylonnet-deb-package -o tezos-client-package --arg timestamp $(date +"%Y%m%d%H%M")
+```
+
+Or use Makefile:
+```bash
+make deb #build deb package with tezos-client-babylonnet
+make deb-mainnet #build deb package with tezos-client-mainnet
 ```
 
 To build `.deb` package with `mainnet` or `babylonnet` `tezos-client` executable. Once you install
@@ -41,6 +54,12 @@ Run one of the following commands:
 ```
 nix-build -A mainnet-rpm-package -o tezos-client-package --arg timestamp $(date +"%Y%m%d%H%M")
 nix-build -A babylonnet-rpm-package -o tezos-client-package --arg timestamp $(date +"%Y%m%d%H%M")
+```
+
+Or use Makefile:
+```bash
+make rpm #build rpm package with tezos-client-babylonnet
+make rpm-mainnet #build rpm package with tezos-client-mainnet
 ```
 
 To build `.rpm` package with `mainnet` or `babylonnet` `tezos-client` executable. Once you install

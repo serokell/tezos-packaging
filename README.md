@@ -24,7 +24,7 @@ to build native `.rpm` or `.deb` package for Red Hat and Debian-based distros.
 ## Obtain binary or packages from CI
 
 If you don't want to build these files from scratch, you can download artifacts
-produced by the CI. Go to the [latest master build](https://buildkite.com/serokell/tezos-client/builds/latest?branch=master),
+produced by the CI. Go to the [latest master build](https://buildkite.com/serokell/tezos-client-packaging/builds/latest?branch=master),
 click on `build and package` stage, choose `Artifacts` section and download files by clcking on the filenames.
 
 ## Ubuntu (Debian based distros) usage

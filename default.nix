@@ -39,32 +39,18 @@ let
     gitRevision = babylonnet.rev;
   };
 
-  buildDeb = import ./packageDeb.nix { inherit stdenv writeTextFile; };
+  buildDeb = import ./packageDeb.nix { inherit stdenv writeTextFile dpkg; };
   buildRpm = packageDesc:
-    import ./packageRpm.nix { inherit stdenv writeTextFile; }
-    (packageDesc // { arch = "x86_64"; });
+    import ./packageRpm.nix { inherit stdenv writeTextFile rpm buildFHSUserEnv; }
+      (packageDesc // { arch = "x86_64"; });
 
-  inherit (vmTools)
-    makeImageFromDebDist makeImageFromRPMDist debDistros rpmDistros
-    runInLinuxImage;
-  ubuntuImage = makeImageFromDebDist debDistros.ubuntu1804x86_64;
-  fedoraImage = makeImageFromRPMDist rpmDistros.fedora27x86_64;
+  mainnet-rpm-package = buildRpm packageDesc-mainnet;
 
-  mainnet-rpm-package = runInLinuxImage
-    ((buildRpm packageDesc-mainnet).packageRpm // { diskImage = fedoraImage; });
+  mainnet-deb-package = buildDeb packageDesc-mainnet;
 
-  mainnet-deb-package = runInLinuxImage
-    ((buildDeb packageDesc-mainnet).packageDeb // { diskImage = ubuntuImage; });
+  babylonnet-rpm-package = buildRpm packageDesc-babylonnet;
 
-  babylonnet-rpm-package = runInLinuxImage
-    ((buildRpm packageDesc-babylonnet).packageRpm // {
-      diskImage = fedoraImage;
-    });
-
-  babylonnet-deb-package = runInLinuxImage
-    ((buildDeb packageDesc-babylonnet).packageDeb // {
-      diskImage = ubuntuImage;
-    });
+  babylonnet-deb-package = buildDeb packageDesc-babylonnet;
 
   tezos-client-mainnet = stdenv.mkDerivation rec {
     name = "tezos-client-mainnet-${mainnet.rev}";

@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2019 TQ Tezos <https://tqtezos.com/>
 #
 # SPDX-License-Identifier: MPL-2.0
-{ stdenv, writeTextFile }:
+{ stdenv, writeTextFile, dpkg }:
 pkgDesc:
 
 let
@@ -26,23 +26,23 @@ let
     '';
   };
 
-in rec {
-  packageDeb =
-    stdenv.mkDerivation {
-      name = "${pkgName}.deb";
+in stdenv.mkDerivation rec {
+  name = "${pkgName}.deb";
 
-      phases = "packagePhase";
+  nativeBuildInputs = [ dpkg ];
 
-      packagePhase = ''
-        mkdir ${pkgName}
-        mkdir -p ${pkgName}/usr/local/bin
-        cp ${bin} ${pkgName}/usr/local/bin/${project}
+  phases = "packagePhase";
 
-        mkdir ${pkgName}/DEBIAN
-        cp ${writeControlFile} ${pkgName}/DEBIAN/control
+  packagePhase = ''
+    mkdir ${pkgName}
+    mkdir -p ${pkgName}/usr/local/bin
+    cp ${bin} ${pkgName}/usr/local/bin/${project}
 
-        dpkg-deb --build ${pkgName}
-        cp ${pkgName}.deb $out
-      '';
-    };
+    mkdir ${pkgName}/DEBIAN
+    cp ${writeControlFile} ${pkgName}/DEBIAN/control
+
+    dpkg-deb --build ${pkgName}
+    mkdir -p $out
+    cp ${name} $out/
+  '';
 }

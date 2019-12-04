@@ -92,14 +92,26 @@ sudo apt-get install tezos-client-babylonnet
 
 ## Fedora (Red Hat) usage
 
+
+### Install `.rpm` package
+
 Build or download `.rpm` file from the CI and double-click on it or run:
 ```
 sudo yum localinstall <path to the rpm file>
 ```
+### Use copr package with `tezos-client`
+
+Also if you are using Fedora you can use Copr in order to install `tezos-client`.
+In order to do that run the following commands:
+```
+sudo yum copr enable @Serokell/Tezos
+sudo yum install tezos-client-mainnet
+sudo yum install tezos-client-babylonnet
+```
 
 ## Other Linux distros usage
 
-Download or build static `tezos-client` binary from the CI.
+Build static `tezos-client` binary or download it from the CI.
 Make it executable:
 ```
 chmod +x tezos-client

@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: MPL-2.0
 
 env:
-  NIX_PATH: nixpkgs=channel:nixos-unstable
+  NIX_PATH: nixpkgs=https://github.com/serokell/nixpkgs/archive/master.tar.gz
   cur_date: "$(date +\"%Y%m%d%H%M\")"
 
 steps:

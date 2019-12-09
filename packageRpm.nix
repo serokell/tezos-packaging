@@ -77,7 +77,6 @@ in rec {
         mkdir SOURCES
         cp ${writeSpecFile} SPECS/${project}.spec
         cp ${sourceArchive} SOURCES/${sourceArchive.name}
-        ls SOURCES
         mkdir -p BUILD/${project}
         cp ${licenseFile} BUILD/${project}/LICENSE
 

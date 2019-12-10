@@ -343,7 +343,7 @@ let
           mkdir -p $out/bin
           # tezos-client and tezos-admin
           cp _build/default/src/bin_client/main_client.exe $out/bin/tezos-client
-          cp _build/default/src/bin_client/main_admin.exe $out/bin/tezos-client-admin
+          cp _build/default/src/bin_client/main_admin.exe $out/bin/tezos-admin-client
           # tezos-node
           cp _build/default/src/bin_node/main.exe $out/bin/tezos-node
           # tezos-baker

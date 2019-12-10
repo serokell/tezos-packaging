@@ -17,3 +17,18 @@ index 6bee8e98..53006632 100644
  
  (install
   (section bin)
+diff --git a/src/bin_node/dune b/src/bin_node/dune
+index 54920a2..8bd54be 100644
+--- a/src/bin_node/dune
++++ b/src/bin_node/dune
+@@ -28,7 +28,9 @@
+                    -open Tezos_validator
+                    -open Tezos_shell_context
+                    -open Tezos_protocol_updater
+-                   -linkall)))
++                   -linkall
++                   -ccopt -static
++                   )))
+ 
+ (install
+  (section bin)

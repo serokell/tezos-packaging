@@ -48,6 +48,22 @@ index 755e8d4..aeb8f2d 100644
  
  (alias
   (name runtest_lint)
+diff --git a/src/proto_005_PsBabyM1/bin_accuser/dune b/src/proto_005_PsBabyM1/bin_accuser/dune
+index 173ab99..eae42b2 100644
+--- a/src/proto_005_PsBabyM1/bin_accuser/dune
++++ b/src/proto_005_PsBabyM1/bin_accuser/dune
+@@ -9,7 +9,10 @@
+                    -open Tezos_client_005_PsBabyM1
+                    -open Tezos_client_commands
+                    -open Tezos_baking_005_PsBabyM1_commands
+-                   -open Tezos_client_base_unix)))
++                   -open Tezos_client_base_unix
++                   -ccopt -static
++                   -cclib "-lusb-1.0 -lhidapi-libusb -ludev"
++                   )))
+ 
+ (alias
+  (name runtest_lint)
 diff --git a/src/lib_base/p2p_addr.ml b/src/lib_base/p2p_addr.ml
 index d9139c4b..a3af815c 100644
 --- a/src/lib_base/p2p_addr.ml

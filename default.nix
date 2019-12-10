@@ -22,6 +22,26 @@ let
   };
   tezos-static-mainnet = import ./nix/static.nix mainnet;
   tezos-static-babylonnet = import ./nix/static.nix babylonnet;
+
+  packDirectory = archiveName: pathToPack:
+    stdenv.mkDerivation rec {
+      name = "${archiveName}.tar.gz";
+      phases = "archivePhase";
+      nativeBuildInputs = [ gnutar ];
+      archivePhase = ''
+        mkdir -p ${archiveName}
+        cp -a ${pathToPack}/. ${archiveName}/
+        tar -cvzf ${name} ${archiveName}
+        mkdir -p $out
+        cp ${name} $out/
+      '';
+    };
+  mainnet-binaries = packDirectory "tezos-mainnet-binaries-${mainnet.rev}"
+    "${tezos-static-mainnet}/bin";
+  babylonnet-binaries =
+    packDirectory "tezos-babylonnet-binaries-${babylonnet.rev}"
+    "${tezos-static-babylonnet}/bin";
+
   binary-mainnet = "${tezos-static-mainnet}/bin/tezos-client";
   binary-babylonnet = "${tezos-static-babylonnet}/bin/tezos-client";
   packageDesc-mainnet = {
@@ -78,5 +98,5 @@ let
 in rec {
   inherit tezos-client-mainnet tezos-client-babylonnet mainnet-deb-package
     mainnet-rpm-package babylonnet-rpm-package babylonnet-deb-package
-    tezos-static-mainnet tezos-static-babylonnet;
+    mainnet-binaries babylonnet-binaries;
 }

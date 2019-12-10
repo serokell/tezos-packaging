@@ -32,3 +32,19 @@ index 54920a2..8bd54be 100644
  
  (install
   (section bin)
+diff --git a/src/proto_005_PsBabyM1/bin_baker/dune b/src/proto_005_PsBabyM1/bin_baker/dune
+index 1414a08..12dba95 100644
+--- a/src/proto_005_PsBabyM1/bin_baker/dune
++++ b/src/proto_005_PsBabyM1/bin_baker/dune
+@@ -10,7 +10,10 @@
+                    -open Tezos_client_commands
+                    -open Tezos_baking_005_PsBabyM1_commands
+                    -open Tezos_stdlib_unix
+-                   -open Tezos_client_base_unix)))
++                   -open Tezos_client_base_unix
++                   -ccopt -static
++                   -cclib "-lusb-1.0 -lhidapi-libusb -ludev"
++                   )))
+ 
+ (alias
+  (name runtest_lint)

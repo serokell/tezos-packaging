@@ -337,6 +337,7 @@ let
           dune build src/proto_${branchInfo.protoName}/bin_accuser/tezos-accuser-${branchInfo.binarySuffix}.install
           dune build src/proto_${branchInfo.protoName}/bin_endorser/tezos-endorser-${branchInfo.binarySuffix}.install
           dune build src/bin_signer/tezos-signer.install
+          dune build src/lib_protocol_compiler/tezos-protocol-compiler.install
         '';
         installPhase = ''
           mkdir -p $out/bin
@@ -356,6 +357,8 @@ let
           $out/bin/tezos-endorser-${branchInfo.binarySuffix}
           # tezos-signer
           cp _build/default/src/bin_signer/main_signer.exe $out/bin/tezos-signer
+          # tezos-protocol-compiler
+          cp _build/default/src/lib_protocol_compiler/main_native.exe $out/bin/tezos-protocol-compiler
         '';
       }) { };
   });

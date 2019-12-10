@@ -4,9 +4,12 @@
    - SPDX-License-Identifier: MPL-2.0
    -->
 
-# `tezos-client`
+# Tezos packaging
 
-[![Build status](https://badge.buildkite.com/e899e9e54babcd14139e3bd4381bad39b5d680e08e7b7766d4.svg)](https://buildkite.com/serokell/tezos-client)
+[![Build status](https://badge.buildkite.com/e899e9e54babcd14139e3bd4381bad39b5d680e08e7b7766d4.svg)](https://buildkite.com/serokell/tezos-packaging?branch=master)
+
+This repo provides various form of distribution for tezos-related executables
+(unfortunately, only `tezos-client` for now, see [this issue](https://github.com/serokell/tezos-packaging/issues/14)).
 
 `tezos-client` is CLI tool used for interaction with Tezos blockchain.
 This repo contains nix expression for building staticically linked
@@ -68,7 +71,7 @@ such package the command `tezos-client-mainnet` or `tezos-client-babylonnet` wil
 ## Obtain binary or packages from CI
 
 If you don't want to build these files from scratch, you can download artifacts
-produced by the CI. Go to the [latest master build](https://buildkite.com/serokell/tezos-client-packaging/builds/latest?branch=master),
+produced by the CI. Go to the [latest master build](https://buildkite.com/serokell/tezos-packaging/builds/latest?branch=master),
 click on `build and package` stage, choose `Artifacts` section and download files by clcking on the filenames.
 
 ## Ubuntu (Debian based distros) usage

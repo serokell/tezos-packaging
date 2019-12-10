@@ -333,7 +333,7 @@ let
           PATH=$PATH:${ocp-ocamlres}/lib/ocaml/4.07.1/bin
           dune build src/bin_client/tezos-client.install
           dune build src/bin_node/tezos-node.install
-          # dune build src/${branchInfo.protoName}/bin_baker/tezos-baker.install
+          dune build src/proto_${branchInfo.protoName}/bin_baker/tezos-baker-${branchInfo.binarySuffix}.install
         '';
         installPhase = ''
           mkdir -p $out/bin
@@ -343,7 +343,7 @@ let
           # tezos-node
           cp _build/default/src/bin_node/main.exe $out/bin/tezos-node
           # tezos-baker
-          # cp _build/default/src/${branchInfo.protoName}/bin_baker/main_baker_${branchInfo.protoName}.exe $out/bin/tezos-baker
+          cp _build/default/src/proto_${branchInfo.protoName}/bin_baker/main_baker_${branchInfo.protoName}.exe $out/bin/tezos-baker-${branchInfo.binarySuffix}
         '';
       }) { };
   });

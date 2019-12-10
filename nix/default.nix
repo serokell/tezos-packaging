@@ -336,6 +336,7 @@ let
           dune build src/proto_${branchInfo.protoName}/bin_baker/tezos-baker-${branchInfo.binarySuffix}.install
           dune build src/proto_${branchInfo.protoName}/bin_accuser/tezos-accuser-${branchInfo.binarySuffix}.install
           dune build src/proto_${branchInfo.protoName}/bin_endorser/tezos-endorser-${branchInfo.binarySuffix}.install
+          dune build src/bin_signer/tezos-signer.install
         '';
         installPhase = ''
           mkdir -p $out/bin
@@ -353,6 +354,8 @@ let
           # tezos-endorser
           cp _build/default/src/proto_${branchInfo.protoName}/bin_endorser/main_endorser_${branchInfo.protoName}.exe \
           $out/bin/tezos-endorser-${branchInfo.binarySuffix}
+          # tezos-signer
+          cp _build/default/src/bin_signer/main_signer.exe $out/bin/tezos-signer
           # Reuse license from tezos repo in packaging
           cp LICENSE $out/LICENSE
           # Compress binaries with upx

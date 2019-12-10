@@ -80,6 +80,22 @@ index 9df7abf..e8402b8 100644
  
  (alias
   (name runtest_lint)
+diff --git a/src/bin_signer/dune b/src/bin_signer/dune
+index c06413b..a81e206 100644
+--- a/src/bin_signer/dune
++++ b/src/bin_signer/dune
+@@ -18,7 +18,10 @@
+                    -open Tezos_rpc_http
+                    -open Tezos_rpc_http_server
+                    -open Tezos_rpc_http_client_unix
+-                   -open Tezos_stdlib_unix)))
++                   -open Tezos_stdlib_unix
++                   -ccopt -static
++                   -cclib "-lusb-1.0 -lhidapi-libusb -ludev"
++                   )))
+ 
+ (alias
+  (name runtest_lint)
 diff --git a/src/lib_base/p2p_addr.ml b/src/lib_base/p2p_addr.ml
 index d9139c4b..a3af815c 100644
 --- a/src/lib_base/p2p_addr.ml

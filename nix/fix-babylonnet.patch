@@ -80,4 +80,19 @@ index d1b60c7..a738ef2 100644
  
  (alias
   (name runtest_lint)
+diff --git a/src/bin_signer/dune b/src/bin_signer/dune
+index e4c9a7c..2a5f941 100644
+--- a/src/bin_signer/dune
++++ b/src/bin_signer/dune
+@@ -19,7 +19,10 @@
+                    -open Tezos_rpc_http_server
+                    -open Tezos_rpc_http_client_unix
+                    -open Tezos_stdlib_unix
+-                   -open Tezos_stdlib)))
++                   -open Tezos_stdlib
++                   -ccopt -static
++                   -cclib "-lusb-1.0 -lhidapi-libusb -ludev"
++                   )))
+ 
+ (alias
   (name runtest_lint)

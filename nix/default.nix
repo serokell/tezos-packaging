@@ -229,13 +229,56 @@ let
           };
           propagatedBuildInputs = [ fmt astring ];
         }) { };
+    pprint = self.callPackage
+      ({ stdenv, fetchFromGitHub, buildDunePackage, ocamlbuild }:
+        buildDunePackage rec {
+          pname = "pprint";
+          version = "20180528";
+
+          minimumOCamlVersion = "4.03";
+          src = fetchFromGitHub {
+            owner = "fpottier";
+            repo = "${pname}";
+            rev = "${version}";
+            sha256 = "1jhmmd7ik1lx9y5niqv5rknhq02pkwmyxc5c0wndp5cyp8hsj0py";
+          };
+          buildInputs = [ ocamlbuild ];
+          buildPhase = "";
+          installPhase = ''
+            mkdir -p $out/lib/ocaml/4.07.1/site-lib
+            make install
+          '';
+          doCheck = false;
+        }) { };
+    ocp-ocamlres = self.callPackage
+      ({ stdenv, fetchFromGitHub, buildDunePackage, pprint, astring, base }:
+        buildDunePackage rec {
+          pname = "ocp-ocamlres";
+          version = "0.4";
+
+          minimumOCamlVersion = "4.03";
+          src = fetchFromGitHub {
+            owner = "OCamlPro";
+            repo = "${pname}";
+            rev = "v${version}";
+            sha256 = "0smfwrj8qhzknhzawygxi0vgl2af4vyi652fkma59rzjpvscqrnn";
+          };
+          buildInputs = [ pprint astring base ];
+          buildPhase = "";
+          installPhase = ''
+            mkdir -p $out/lib/ocaml/4.07.1/site-lib
+            mkdir -p $out/lib/ocaml/4.07.1/site-lib//../bin
+            make install
+          '';
+          doCheck = false;
+        }) { };
 
     tezos = self.callPackage ({ stdenv, fetchgit, buildDunePackage, base
       , bigstring, cohttp-lwt, cohttp-lwt-unix, cstruct, ezjsonm, hex, ipaddr
-      , js_of_ocaml, cmdliner, easy-format, ocp-ocamlres, tls, lwt4, lwt_log
+      , js_of_ocaml, cmdliner, easy-format, tls, lwt4, lwt_log
       , mtime, ocplib-endian, ptime, re, rresult, stdio, uri, uutf, zarith
-      , libusb1, hidapi, gmp, irmin, alcotest, dum, genspio, pprint, ocamlgraph
-      , findlib, digestif }:
+      , libusb1, hidapi, gmp, irmin, alcotest, dum, genspio, ocamlgraph, findlib
+      , digestif, ocp-ocamlres, pprint }:
       buildDunePackage rec {
         pname = "tezos";
         version = "0.0.1";
@@ -274,18 +317,33 @@ let
           stdio
           uri
           uutf
-          zarith # cmdliner easy-format js_of_ocaml ocp-ocamlres tls
+          zarith
+          cmdliner
+          # easy-format js_of_ocaml ocp-ocamlres tls
           # alcotest dum pprint
+          ocp-ocamlres
+          pprint
           ocamlgraph
           findlib
           genspio
         ] ++ [ libusb1 libusb1.out (gmp.override { withStatic = true; }) ];
         doCheck = false;
-        buildPhase = "dune build src/bin_client/tezos-client.install";
+        buildPhase = ''
+          # tezos-node build requires ocp-ocamlres binary in PATH
+          PATH=$PATH:${ocp-ocamlres}/lib/ocaml/4.07.1/bin
+          dune build src/bin_client/tezos-client.install
+          dune build src/bin_node/tezos-node.install
+          # dune build src/${branchInfo.protoName}/bin_baker/tezos-baker.install
+        '';
         installPhase = ''
           mkdir -p $out/bin
+          # tezos-client and tezos-admin
           cp _build/default/src/bin_client/main_client.exe $out/bin/tezos-client
-          cp _build/default/src/bin_client/main_admin.exe $out/bin/tezos-admin
+          cp _build/default/src/bin_client/main_admin.exe $out/bin/tezos-client-admin
+          # tezos-node
+          cp _build/default/src/bin_node/main.exe $out/bin/tezos-node
+          # tezos-baker
+          # cp _build/default/src/${branchInfo.protoName}/bin_baker/main_baker_${branchInfo.protoName}.exe $out/bin/tezos-baker
         '';
       }) { };
   });

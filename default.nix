@@ -10,16 +10,18 @@ let
     rev = "94f779a7";
     sha256 = "16lxilng5q8fr2ll6h4hf7wlvac6nmw4cx10cbgzj5ks090bl97r";
     patchFile = ./nix/fix-mainnet.patch;
+    protoName = "proto_005_PsBabyM1";
   };
   babylonnet = {
     rev = "b8731913";
     sha256 = "1pakf1s6bg76fq42mb8fj1immz9g9wwimd522cpx8k28zf0hkl5i";
     patchFile = ./nix/fix-babylonnet.patch;
+    protoName = "proto_005_PsBabyM1";
   };
-  tezos-client-static-mainnet = import ./nix/static.nix mainnet;
-  tezos-client-static-babylonnet = import ./nix/static.nix babylonnet;
-  binary-mainnet = "${tezos-client-static-mainnet}/bin/tezos-client";
-  binary-babylonnet = "${tezos-client-static-babylonnet}/bin/tezos-client";
+  tezos-static-mainnet = import ./nix/static.nix mainnet;
+  tezos-static-babylonnet = import ./nix/static.nix babylonnet;
+  binary-mainnet = "${tezos-static-mainnet}/bin/tezos-client";
+  binary-babylonnet = "${tezos-static-babylonnet}/bin/tezos-client";
   packageDesc-mainnet = {
     project = "tezos-client-mainnet";
     version = toString timestamp;
@@ -73,5 +75,6 @@ let
 
 in rec {
   inherit tezos-client-mainnet tezos-client-babylonnet mainnet-deb-package
-    mainnet-rpm-package babylonnet-rpm-package babylonnet-deb-package;
+    mainnet-rpm-package babylonnet-rpm-package babylonnet-deb-package
+    tezos-static-mainnet tezos-static-babylonnet;
 }

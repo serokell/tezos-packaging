@@ -96,3 +96,16 @@ index e4c9a7c..2a5f941 100644
  
  (alias
   (name runtest_lint)
+diff --git a/src/lib_protocol_compiler/dune b/src/lib_protocol_compiler/dune
+index 1142419..d8086b4 100644
+--- a/src/lib_protocol_compiler/dune
++++ b/src/lib_protocol_compiler/dune
+@@ -65,7 +65,7 @@
+  (public_name tezos-protocol-compiler)
+  (modes native)
+  (libraries tezos_protocol_compiler_native)
+- (flags (:standard -linkall))
++ (flags (:standard -linkall -ccopt -static))
+  (modules Main_native))
+ 
+ (executable

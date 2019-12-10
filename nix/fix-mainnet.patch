@@ -96,6 +96,19 @@ index c06413b..a81e206 100644
  
  (alias
   (name runtest_lint)
+diff --git a/src/lib_protocol_compiler/dune b/src/lib_protocol_compiler/dune
+index 7d70857..9fbe9cc 100644
+--- a/src/lib_protocol_compiler/dune
++++ b/src/lib_protocol_compiler/dune
+@@ -64,7 +64,7 @@
+  (public_name tezos-protocol-compiler)
+  (modes native)
+  (libraries tezos_protocol_compiler_native)
+- (flags (:standard -linkall))
++ (flags (:standard -linkall -ccopt -static))
+  (modules Main_native))
+ 
+ (executable
 diff --git a/src/lib_base/p2p_addr.ml b/src/lib_base/p2p_addr.ml
 index d9139c4b..a3af815c 100644
 --- a/src/lib_base/p2p_addr.ml

@@ -64,3 +64,20 @@ index 2f2a6fd..fd9773b 100644
  
  (alias
   (name runtest_lint)
+diff --git a/src/proto_005_PsBabyM1/bin_endorser/dune b/src/proto_005_PsBabyM1/bin_endorser/dune
+index d1b60c7..a738ef2 100644
+--- a/src/proto_005_PsBabyM1/bin_endorser/dune
++++ b/src/proto_005_PsBabyM1/bin_endorser/dune
+@@ -10,7 +10,10 @@
+                    -open Tezos_client_commands
+                    -open Tezos_baking_005_PsBabyM1_commands
+                    -open Tezos_stdlib_unix
+-                   -open Tezos_client_base_unix)))
++                   -open Tezos_client_base_unix
++                   -ccopt -static
++                   -cclib "-lusb-1.0 -lhidapi-libusb -ludev"
++                   )))
+ 
+ (alias
+  (name runtest_lint)
+  (name runtest_lint)

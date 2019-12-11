@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2019 TQ Tezos <https://tqtezos.com/>
 #
 # SPDX-License-Identifier: MPL-2.0
-{ stdenv, writeTextFile }:
+{ stdenv, writeTextFile, rpm, buildFHSUserEnv }:
 pkgDesc:
 
 let
@@ -28,32 +28,35 @@ let
 
       %files
       /usr/local/bin/${project}
-      %doc %name/LICENSE
     '';
   };
 
-in rec {
-  packageRpm =
-    stdenv.mkDerivation rec {
-      name = "${pkgName}.rpm";
+  rpmbuild-env = buildFHSUserEnv {
+    name = "rpmbuild-env";
+    multiPkgs = pkgs: [ rpm ];
+    runScript = "rpmbuild";
+  };
 
-      phases = "packagePhase";
+in stdenv.mkDerivation rec {
+  name = "${pkgName}";
 
-      packagePhase = ''
-        HOME=$PWD
-        mkdir rpmbuild
-        cd rpmbuild
-        mkdir SPECS
-        cp ${writeSpecFile} SPECS/${project}.spec
-        mkdir -p BUILD/${project}
-        cp ${licenseFile} BUILD/${project}/LICENSE
+  phases = "packagePhase";
+  buildInputs = [ rpmbuild-env ];
+  packagePhase = ''
+    HOME=$PWD
+    mkdir rpmbuild
+    cd rpmbuild
+    mkdir SPECS
+    cp ${writeSpecFile} SPECS/${project}.spec
+    mkdir -p BUILD/${project}
+    cp ${licenseFile} BUILD/${project}/LICENSE
 
-        mkdir -p BUILDROOT/${pkgName}/usr/local/bin
-        cp ${bin} BUILDROOT/${pkgName}/usr/local/bin/${project}
+    mkdir -p BUILDROOT/${pkgName}/usr/local/bin
+    cp ${bin} BUILDROOT/${pkgName}/usr/local/bin/${project}
 
-        rpmbuild -bb SPECS/${project}.spec
-        cp RPMS/${arch}/${pkgName}.rpm $out
-      '';
+    rpmbuild-env -bb SPECS/${project}.spec --dbpath $HOME
+    mkdir -p $out
+    cp RPMS/*/*.rpm $out/
+  '';
 
-    };
 }

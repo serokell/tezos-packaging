@@ -11,7 +11,7 @@ steps:
    label: reuse lint
  - command: .buildkite/check-trailing-whitespace.sh
    label: check trailing whitespace
- - command: "nix run -f https://github.com/serokell/crossref-verifier/archive/master.tar.gz -c crossref-verify"
+ - command: "nix run -f https://github.com/serokell/crossref-verifier/archive/68a1f9d25b6e7835fea8299b18a3e6c61dbb2a5c.tar.gz -c crossref-verify"
    label: crossref-verify
    soft_fail: true
  - commands:

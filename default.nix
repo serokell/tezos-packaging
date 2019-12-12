@@ -31,18 +31,20 @@ let
     licenseFile = "${root}/LICENSES/MPL-2.0.txt";
     description = "CLI client for interacting with tezos blockchain";
     gitRevision = mainnet.rev;
+    branchName = "mainnet";
   };
 
   packageDesc-babylonnet = packageDesc-mainnet // {
     project = "tezos-client-babylonnet";
     bin = binary-babylonnet;
     gitRevision = babylonnet.rev;
+    branchName = "babylonnet";
   };
 
   buildDeb = import ./packageDeb.nix { inherit stdenv writeTextFile dpkg; };
   buildRpm = packageDesc:
-    import ./packageRpm.nix { inherit stdenv writeTextFile rpm buildFHSUserEnv; }
-      (packageDesc // { arch = "x86_64"; });
+  import ./packageRpm.nix { inherit stdenv writeTextFile gnutar rpm buildFHSUserEnv; }
+    (packageDesc // { arch = "x86_64"; });
 
   mainnet-rpm-package = buildRpm packageDesc-mainnet;
 

@@ -36,67 +36,95 @@ let
         cp ${name} $out/
       '';
     };
+
   mainnet-binaries = packDirectory "tezos-mainnet-binaries-${mainnet.rev}"
     "${tezos-static-mainnet}/bin";
   babylonnet-binaries =
     packDirectory "tezos-babylonnet-binaries-${babylonnet.rev}"
     "${tezos-static-babylonnet}/bin";
 
-  binary-mainnet = "${tezos-static-mainnet}/bin/tezos-client";
-  binary-babylonnet = "${tezos-static-babylonnet}/bin/tezos-client";
-  packageDesc-mainnet = {
-    project = "tezos-client-mainnet";
-    version = toString timestamp;
-    bin = binary-mainnet;
-    arch = "amd64";
-    license = "MPL-2.0";
-    dependencies = "";
-    maintainer = "Serokell https://serokell.io";
-    licenseFile = "${root}/LICENSES/MPL-2.0.txt";
-    description = "CLI client for interacting with tezos blockchain";
-    gitRevision = mainnet.rev;
-    branchName = "mainnet";
-  };
+  mkPackageDescs = { executableName, binPath, description }@executableDesc:
+    let
+      mainnetDesc = {
+        inherit description;
+        bin = "${tezos-static-mainnet}/${binPath}";
+        gitRevision = mainnet.rev;
+        project = "${executableName}-mainnet";
+        version = toString timestamp;
+        arch = "amd64";
+        license = "MPL-2.0";
+        dependencies = "";
+        maintainer = "Serokell https://serokell.io";
+        licenseFile = "${root}/LICENSES/MPL-2.0.txt";
+        branchName = "mainnet";
+      };
+      babylonnetDesc = mainnetDesc // {
+        bin = "${tezos-static-babylonnet}/${binPath}";
+        project = "${executableName}-babylonnet";
+        gitRevision = babylonnet.rev;
+        branchName = "babylonnet";
+      };
+    in [ mainnetDesc babylonnetDesc ];
 
-  packageDesc-babylonnet = packageDesc-mainnet // {
-    project = "tezos-client-babylonnet";
-    bin = binary-babylonnet;
-    gitRevision = babylonnet.rev;
-    branchName = "babylonnet";
-  };
+  tezos-executables = [
+    { executableName = "tezos-client";
+      binPath = "/bin/tezos-client";
+      description = "CLI client for interacting with tezos blockchain";
+    }
+    { executableName = "tezos-client-admin";
+      binPath = "/bin/tezos-client-admin";
+      description = "Administration tool for the node";
+    }
+    { executableName = "tezos-node";
+      binPath = "/bin/tezos-client";
+      description =
+        "Entry point for initializing, configuring and running a Tezos node";
+    }
+    { executableName = "tezos-baker";
+      binPath = "/bin/tezos-baker-${mainnet.binarySuffix}";
+      description = "Daemon for baking";
+    }
+    { executableName = "tezos-accuser";
+      binPath = "/bin/tezos-accuser-${mainnet.binarySuffix}";
+      description = "Daemon for accusing";
+    }
+    { executableName = "tezos-endorser";
+      binPath = "/bin/tezos-endorser-${mainnet.binarySuffix}";
+      description = "Daemon for endorsing";
+    }
+    { executableName = "tezos-signer";
+      binPath = "/bin/tezos-signer";
+      description = "A client to remotely sign operations or blocks";
+    }
+  ];
+
+  packageDescs = lib.flatten (map mkPackageDescs tezos-executables);
 
   buildDeb = import ./packageDeb.nix { inherit stdenv writeTextFile dpkg; };
   buildRpm = packageDesc:
-  import ./packageRpm.nix { inherit stdenv writeTextFile gnutar rpm buildFHSUserEnv; }
-    (packageDesc // { arch = "x86_64"; });
+    import ./packageRpm.nix {
+      inherit stdenv writeTextFile gnutar rpm buildFHSUserEnv;
+    } (packageDesc // { arch = "x86_64"; });
 
-  mainnet-rpm-package = buildRpm packageDesc-mainnet;
+  moveDerivations = name: drvs:
+    stdenv.mkDerivation rec {
+      inherit name drvs;
 
-  mainnet-deb-package = buildDeb packageDesc-mainnet;
+      buildCommand = ''
+        mkdir -p ${name}
+        backup=$PWD
+        for drv in $drvs; do
+          cd $drv
+          cp * $backup/${name}/
+        done
+        cd $backup
+        mkdir -p $out
+        cp ${name}/* $out
+      '';
+    };
 
-  babylonnet-rpm-package = buildRpm packageDesc-babylonnet;
+  deb-packages = moveDerivations "deb-packages" (map buildDeb packageDescs);
 
-  babylonnet-deb-package = buildDeb packageDesc-babylonnet;
+  rpm-packages = moveDerivations "rpm-packages" (map buildRpm packageDescs);
 
-  tezos-client-mainnet = stdenv.mkDerivation rec {
-    name = "tezos-client-mainnet-${mainnet.rev}";
-    phases = "copyPhase";
-    copyPhase = ''
-      mkdir -p $out
-      cp ${binary-mainnet} $out/${name}
-    '';
-  };
-  tezos-client-babylonnet = stdenv.mkDerivation rec {
-    name = "tezos-client-babylonnet-${babylonnet.rev}";
-    phases = "copyPhase";
-    copyPhase = ''
-      mkdir -p $out
-      cp ${binary-babylonnet} $out/${name}
-    '';
-  };
-
-in rec {
-  inherit tezos-client-mainnet tezos-client-babylonnet mainnet-deb-package
-    mainnet-rpm-package babylonnet-rpm-package babylonnet-deb-package
-    mainnet-binaries babylonnet-binaries;
-}
+in rec { inherit deb-packages rpm-packages mainnet-binaries babylonnet-binaries; }

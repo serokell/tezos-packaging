@@ -17,10 +17,8 @@ steps:
  - commands:
    - nix-build -A mainnet-binaries -o mainnet-binaries
    - nix-build -A babylonnet-binaries -o babylonnet-binaries
-   - nix-build -A mainnet-rpm-package -o mainnet-rpm-package --arg timestamp ${cur_date}
-   - nix-build -A mainnet-deb-package -o mainnet-deb-package --arg timestamp ${cur_date}
-   - nix-build -A babylonnet-rpm-package -o babylonnet-rpm-package --arg timestamp ${cur_date}
-   - nix-build -A babylonnet-deb-package -o babylonnet-deb-package --arg timestamp ${cur_date}
+   - nix-build -A deb-packages -o deb-packages --arg timestamp ${cur_date}
+   - nix-build -A rpm-packages -o rpm-packages --arg timestamp ${cur_date}
    label: build and package
    artifact_paths:
      - ./mainnet-binaries/*
@@ -29,6 +27,8 @@ steps:
      - ./mainnet-deb-package/*
      - ./babylonnet-rpm-package/*
      - ./babylonnet-deb-package/*
+     - ./deb-packages/*
+     - ./rpm-packages/*
    branches: !master
  - commands:
    - GITHUB_TOKEN=$(cat ~/niv-bot-token) ./scripts/autorelease.sh

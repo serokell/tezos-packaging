@@ -1,7 +1,8 @@
 # SPDX-FileCopyrightText: 2019 TQ Tezos <https://tqtezos.com/>
 #
 # SPDX-License-Identifier: MPL-2.0
-{ pkgs ? import <nixpkgs> { }, timestamp ? "19700101", patches ? [] }:
+{ pkgs ? import <nixpkgs> { }, timestamp ? "19700101"
+, date ? "Thu, 1 Jan 1970 10:00:00 +0300", builderInfo ? "", patches ? [] }:
 with pkgs;
 
 let
@@ -110,21 +111,42 @@ let
     import ./packageRpm.nix {
       inherit stdenv writeTextFile gnutar rpm buildFHSUserEnv;
     } (packageDesc // { arch = "x86_64"; });
+  buildSourceDeb = packageDesc:
+    import ./packageSourceDeb.nix {
+      inherit stdenv writeTextFile writeScript runCommand;
+      inherit (lib) toLower;
+    } packageDesc { inherit date builderInfo; };
+  buildSourceRpm = packageDesc:
+    import ./packageRpm.nix {
+      inherit stdenv writeTextFile gnutar rpm buildFHSUserEnv;
+      buildSourcePackage = true;
+    } (packageDesc // { arch = "x86_64"; });
 
-  moveDerivations = name: drvs:
-    stdenv.mkDerivation rec {
-      inherit name drvs;
+  moveDerivations = drvs:
+    runCommand "move_derivations" { inherit drvs; } ''
+      mkdir -p $out
+      for drv in $drvs; do
+        ln -s $drv/* $out
+      done
+    '';
 
-      buildCommand = ''
-        mkdir -p $out
-        for drv in $drvs; do
-          cp $drv/* $out
-        done
-      '';
-    };
+  deb-packages = moveDerivations (map buildDeb packageDescs);
+  rpm-packages = moveDerivations (map buildRpm packageDescs);
 
-  deb-packages = moveDerivations "deb-packages" (map buildDeb packageDescs);
-  rpm-packages = moveDerivations "rpm-packages" (map buildRpm packageDescs);
+  inherit (vmTools)
+    makeImageFromDebDist commonDebPackages debDistros runInLinuxImage;
+  ubuntuImage = makeImageFromDebDist (debDistros.ubuntu1804x86_64 // {
+    packages = commonDebPackages
+      ++ [ "diffutils" "libc-bin" "build-essential" "debhelper" ];
+  });
+  buildSourceDebInVM = pkgDesc:
+    runInLinuxImage ((buildSourceDeb pkgDesc) // { diskImage = ubuntuImage; });
+
+  deb-source-packages =
+    moveDerivations (map buildSourceDebInVM packageDescs);
+
+  rpm-source-packages =
+    moveDerivations (map buildSourceRpm packageDescs);
 
   releaseFile = writeTextFile {
     name = "release-notes.md";
@@ -144,5 +166,6 @@ let
   '';
 
 in rec {
-  inherit deb-packages rpm-packages binaries tezos-license releaseNotes;
+  inherit deb-packages deb-source-packages rpm-source-packages rpm-packages
+    binaries tezos-license releaseNotes;
 }

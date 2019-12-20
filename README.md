@@ -119,6 +119,26 @@ To build `.deb` packages with tezos binaries.
 Once you built them, you can install `.deb` packages using the following command:
 ```
 sudo apt install <path to deb file>
+
+### Publish packages on Launchpad PPA
+
+In order to publish packages on PPA you will have to build source packages,
+you can do this by running the following commands:
+```
+nix-build -A deb-source-packages -o deb-source-packages \
+--arg builderInfo "\"Roman Melnikov <roman.melnikov@serokell.io>\"" \
+--arg timestamp "$(date +\"%Y%m%d%H%M\")" --arg date "\"$(date -R)\""
+# Note that buildInfo should contain information about user how is capable
+# in publishing packages on PPA
+
+# Copy files from /nix/store
+mkdir -p source-packages
+cp deb-source-packages/* source-packages
+# Sign *.changes files with your gpg key, which should be known
+# for Launchpad
+debsign source-packages/*.changes
+# dput all packages to PPA repository
+dput ppa:serokell/tezos source-package/*.changes
 ```
 
 ### Fedora `.rpm` packages
@@ -139,6 +159,20 @@ Once you built them, you can install `.rpm` packages using the following command
 ```
 sudo yum localinstall <path to the rpm file>
 ```
+
+### Publish packages on Fedora Copr
+
+In order to publish packages on Copr you will have to build source packages,
+you can do this by running the following command:
+```
+nix-build -A rpm-source-packages -o rpm-source-packages \
+--arg timestamp "$(date +\"%Y%m%d%H%M\")"
+# Copy files from /nix/store
+mkdir -p source-packages
+cp rpm-source-packages/* source-packages
+```
+After this `source-packages` directory will contain `.src.rpm` packages which
+can be uploaded to Copr repository.
 
 ## For Contributors
 

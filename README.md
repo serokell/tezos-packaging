@@ -6,7 +6,7 @@
 
 # Tezos packaging
 
-[![Build status](https://badge.buildkite.com/e899e9e54babcd14139e3bd4381bad39b5d680e08e7b7766d4.svg)](https://buildkite.com/serokell/tezos-packaging?branch=master)
+[![Build status](https://badge.buildkite.com/e899e9e54babcd14139e3bd4381bad39b5d680e08e7b7766d4.svg?branch=master)](https://buildkite.com/serokell/tezos-packaging)
 
 This repo provides various form of distribution for tezos-related executables
 (unfortunately, only `tezos-client` for now, see [this issue](https://github.com/serokell/tezos-packaging/issues/14)).

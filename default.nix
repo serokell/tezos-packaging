@@ -6,19 +6,19 @@ with pkgs;
 
 let
   root = ./.;
-  mainnet = {
+  mainnet = rec {
     rev = "94f779a7";
     sha256 = "16lxilng5q8fr2ll6h4hf7wlvac6nmw4cx10cbgzj5ks090bl97r";
     patchFile = ./nix/fix-mainnet.patch;
     protoName = "005_PsBabyM1";
-    binarySuffix = "005-PsBabyM1";
+    binarySuffix = builtins.replaceStrings ["_"] ["-"] protoName;
   };
-  babylonnet = {
+  babylonnet = rec {
     rev = "b8731913";
     sha256 = "1pakf1s6bg76fq42mb8fj1immz9g9wwimd522cpx8k28zf0hkl5i";
     patchFile = ./nix/fix-babylonnet.patch;
     protoName = "005_PsBabyM1";
-    binarySuffix = "005-PsBabyM1";
+    binarySuffix = builtins.replaceStrings ["_"] ["-"] protoName;
   };
   tezos-static-mainnet = import ./nix/static.nix mainnet;
   tezos-static-babylonnet = import ./nix/static.nix babylonnet;

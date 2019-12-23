@@ -71,8 +71,9 @@ let
       binPath = "/bin/tezos-client";
       description = "CLI client for interacting with tezos blockchain";
     }
-    { executableName = "tezos-client-admin";
-      binPath = "/bin/tezos-client-admin";
+    {
+      executableName = "tezos-admin-client";
+      binPath = "/bin/tezos-admin-client";
       description = "Administration tool for the node";
     }
     { executableName = "tezos-node";

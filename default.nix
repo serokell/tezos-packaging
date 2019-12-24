@@ -78,8 +78,9 @@ let
       binPath = "/bin/tezos-admin-client";
       description = "Administration tool for the node";
     }
-    { executableName = "tezos-node";
-      binPath = "/bin/tezos-client";
+    {
+      executableName = "tezos-node";
+      binPath = "/bin/tezos-node";
       description =
         "Entry point for initializing, configuring and running a Tezos node";
     }

@@ -6,19 +6,21 @@ with pkgs;
 
 let
   root = ./.;
+  protocol005 = rec {
+    protocolName = "005_PsBabyM1";
+    binarySuffix = builtins.replaceStrings ["_"] ["-"] protocolName;
+  };
   mainnet = rec {
     rev = "94f779a7";
     sha256 = "16lxilng5q8fr2ll6h4hf7wlvac6nmw4cx10cbgzj5ks090bl97r";
     patchFile = ./nix/fix-mainnet.patch;
-    protoName = "005_PsBabyM1";
-    binarySuffix = builtins.replaceStrings ["_"] ["-"] protoName;
+    protocol = protocol005;
   };
   babylonnet = rec {
     rev = "b8731913";
     sha256 = "1pakf1s6bg76fq42mb8fj1immz9g9wwimd522cpx8k28zf0hkl5i";
     patchFile = ./nix/fix-babylonnet.patch;
-    protoName = "005_PsBabyM1";
-    binarySuffix = builtins.replaceStrings ["_"] ["-"] protoName;
+    protocol = protocol005;
   };
   tezos-static-mainnet = import ./nix/static.nix mainnet;
   tezos-static-babylonnet = import ./nix/static.nix babylonnet;
@@ -82,15 +84,15 @@ let
         "Entry point for initializing, configuring and running a Tezos node";
     }
     { executableName = "tezos-baker";
-      binPath = "/bin/tezos-baker-${mainnet.binarySuffix}";
+      binPath = "/bin/tezos-baker-${protocol005.binarySuffix}";
       description = "Daemon for baking";
     }
     { executableName = "tezos-accuser";
-      binPath = "/bin/tezos-accuser-${mainnet.binarySuffix}";
+      binPath = "/bin/tezos-accuser-${protocol005.binarySuffix}";
       description = "Daemon for accusing";
     }
     { executableName = "tezos-endorser";
-      binPath = "/bin/tezos-endorser-${mainnet.binarySuffix}";
+      binPath = "/bin/tezos-endorser-${protocol005.binarySuffix}";
       description = "Daemon for endorsing";
     }
     { executableName = "tezos-signer";

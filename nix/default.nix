@@ -333,9 +333,9 @@ let
           PATH=$PATH:${ocp-ocamlres}/lib/ocaml/4.07.1/bin
           dune build src/bin_client/tezos-client.install
           dune build src/bin_node/tezos-node.install
-          dune build src/proto_${branchInfo.protoName}/bin_baker/tezos-baker-${branchInfo.binarySuffix}.install
-          dune build src/proto_${branchInfo.protoName}/bin_accuser/tezos-accuser-${branchInfo.binarySuffix}.install
-          dune build src/proto_${branchInfo.protoName}/bin_endorser/tezos-endorser-${branchInfo.binarySuffix}.install
+          dune build src/proto_${branchInfo.protocol.protocolName}/bin_baker/tezos-baker-${branchInfo.protocol.binarySuffix}.install
+          dune build src/proto_${branchInfo.protocol.protocolName}/bin_accuser/tezos-accuser-${branchInfo.protocol.binarySuffix}.install
+          dune build src/proto_${branchInfo.protocol.protocolName}/bin_endorser/tezos-endorser-${branchInfo.protocol.binarySuffix}.install
           dune build src/bin_signer/tezos-signer.install
           dune build src/lib_protocol_compiler/tezos-protocol-compiler.install
         '';
@@ -347,14 +347,14 @@ let
           # tezos-node
           cp _build/default/src/bin_node/main.exe $out/bin/tezos-node
           # tezos-baker
-          cp _build/default/src/proto_${branchInfo.protoName}/bin_baker/main_baker_${branchInfo.protoName}.exe \
-          $out/bin/tezos-baker-${branchInfo.binarySuffix}
+          cp _build/default/src/proto_${branchInfo.protocol.protocolName}/bin_baker/main_baker_${branchInfo.protocol.protocolName}.exe \
+          $out/bin/tezos-baker-${branchInfo.protocol.binarySuffix}
           # tezos-accuser
-          cp _build/default/src/proto_${branchInfo.protoName}/bin_accuser/main_accuser_${branchInfo.protoName}.exe \
-          $out/bin/tezos-accuser-${branchInfo.binarySuffix}
+          cp _build/default/src/proto_${branchInfo.protocol.protocolName}/bin_accuser/main_accuser_${branchInfo.protocol.protocolName}.exe \
+          $out/bin/tezos-accuser-${branchInfo.protocol.binarySuffix}
           # tezos-endorser
-          cp _build/default/src/proto_${branchInfo.protoName}/bin_endorser/main_endorser_${branchInfo.protoName}.exe \
-          $out/bin/tezos-endorser-${branchInfo.binarySuffix}
+          cp _build/default/src/proto_${branchInfo.protocol.protocolName}/bin_endorser/main_endorser_${branchInfo.protocol.protocolName}.exe \
+          $out/bin/tezos-endorser-${branchInfo.protocol.binarySuffix}
           # tezos-signer
           cp _build/default/src/bin_signer/main_signer.exe $out/bin/tezos-signer
           # tezos-protocol-compiler

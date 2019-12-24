@@ -267,7 +267,7 @@ let
           buildPhase = "";
           installPhase = ''
             mkdir -p $out/lib/ocaml/4.07.1/site-lib
-            mkdir -p $out/lib/ocaml/4.07.1/site-lib//../bin
+            mkdir -p $out/lib/ocaml/4.07.1/site-lib/../bin
             make install
           '';
           doCheck = false;

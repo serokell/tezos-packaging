@@ -25,10 +25,10 @@ let
     version = toString timestamp;
     bin = binary-mainnet;
     arch = "amd64";
-    license = "MPL-2.0";
+    license = "MIT";
     dependencies = "";
     maintainer = "Serokell https://serokell.io";
-    licenseFile = "${root}/LICENSES/MPL-2.0.txt";
+    licenseFile = "${tezos-client-static-mainnet}/LICENSE";
     description = "CLI client for interacting with tezos blockchain";
     gitRevision = mainnet.rev;
     branchName = "mainnet";
@@ -38,6 +38,7 @@ let
     project = "tezos-client-babylonnet";
     bin = binary-babylonnet;
     gitRevision = babylonnet.rev;
+    licenseFile = "${tezos-client-static-babylonnet}/LICENSE";
     branchName = "babylonnet";
   };
 

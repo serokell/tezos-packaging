@@ -286,6 +286,8 @@ let
           mkdir -p $out/bin
           cp _build/default/src/bin_client/main_client.exe $out/bin/tezos-client
           cp _build/default/src/bin_client/main_admin.exe $out/bin/tezos-admin
+          # Reuse license from tezos repo in packaging
+          cp LICENSE $out/LICENSE
         '';
       }) { };
   });

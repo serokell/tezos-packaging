@@ -68,11 +68,11 @@ make rpm-mainnet #build rpm package with tezos-client-mainnet
 To build `.rpm` package with `mainnet` or `babylonnet` `tezos-client` executable. Once you install
 such package the command `tezos-client-mainnet` or `tezos-client-babylonnet` will be available.
 
-## Obtain binary or packages from CI
+## Obtain binary or packages from github release
 
-If you don't want to build these files from scratch, you can download artifacts
-produced by the CI. Go to the [latest master build](https://buildkite.com/serokell/tezos-packaging/builds/latest?branch=master),
-click on `build and package` stage, choose `Artifacts` section and download files by clcking on the filenames.
+If you don't want to build these files from scratch, you can download assets from github release.
+Go to the [latest release](https://github.com/serokell/tezos-packaging/releases/latest)
+and download desired assets.
 
 ## Ubuntu (Debian based distros) usage
 

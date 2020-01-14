@@ -33,5 +33,4 @@ steps:
  - commands:
    - GITHUB_TOKEN=$(cat ~/niv-bot-token) ./scripts/autorelease.sh
    label: create auto pre-release
-   # TODO: uncomment me before merging
-   # branches: master
+   branches: master

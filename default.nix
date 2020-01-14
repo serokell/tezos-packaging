@@ -20,7 +20,10 @@ let
   tezos-client-static-babylonnet = import ./nix/static.nix babylonnet;
   binary-mainnet = "${tezos-client-static-mainnet}/bin/tezos-client";
   binary-babylonnet = "${tezos-client-static-babylonnet}/bin/tezos-client";
+  # Hopefully, there will always be a single LICENSE for all binaries and branches
+  licenseFile = "${tezos-client-static-mainnet}/LICENSE";
   packageDesc-mainnet = {
+    inherit licenseFile;
     project = "tezos-client-mainnet";
     version = toString timestamp;
     bin = binary-mainnet;
@@ -28,7 +31,6 @@ let
     license = "MIT";
     dependencies = "";
     maintainer = "Serokell https://serokell.io";
-    licenseFile = "${tezos-client-static-mainnet}/LICENSE";
     description = "CLI client for interacting with tezos blockchain";
     gitRevision = mainnet.rev;
     branchName = "mainnet";
@@ -38,7 +40,6 @@ let
     project = "tezos-client-babylonnet";
     bin = binary-babylonnet;
     gitRevision = babylonnet.rev;
-    licenseFile = "${tezos-client-static-babylonnet}/LICENSE";
     branchName = "babylonnet";
   };
 
@@ -71,8 +72,16 @@ let
       cp ${binary-babylonnet} $out/${name}
     '';
   };
+  tezos-license = stdenv.mkDerivation rec {
+    name = "LICENSE";
+    phases = "copyPhase";
+    copyPhase = ''
+      mkdir -p $out
+      cp ${licenseFile} $out/${name}
+    '';
+  };
 
 in rec {
   inherit tezos-client-mainnet tezos-client-babylonnet mainnet-deb-package
-    mainnet-rpm-package babylonnet-rpm-package babylonnet-deb-package;
+    mainnet-rpm-package babylonnet-rpm-package babylonnet-deb-package tezos-license;
 }

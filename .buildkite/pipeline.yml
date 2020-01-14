@@ -29,3 +29,8 @@ steps:
      - ./mainnet-deb-package/*
      - ./babylonnet-rpm-package/*
      - ./babylonnet-deb-package/*
+   branches: !master
+ - commands:
+   - GITHUB_TOKEN=$(cat ~/niv-bot-token) ./scripts/autorelease.sh
+   label: create auto pre-release
+   branches: master

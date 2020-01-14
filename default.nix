@@ -20,7 +20,7 @@ let
   tezos-client-static-babylonnet = import ./nix/static.nix babylonnet;
   binary-mainnet = "${tezos-client-static-mainnet}/bin/tezos-client";
   binary-babylonnet = "${tezos-client-static-babylonnet}/bin/tezos-client";
-  # Hopefully, there is always will be single LICENSE for all binaries and branches
+  # Hopefully, there will always be a single LICENSE for all binaries and branches
   licenseFile = "${tezos-client-static-mainnet}/LICENSE";
   packageDesc-mainnet = {
     inherit licenseFile;

@@ -235,7 +235,7 @@ let
       , js_of_ocaml, cmdliner, easy-format, ocp-ocamlres, tls, lwt4, lwt_log
       , mtime, ocplib-endian, ptime, re, rresult, stdio, uri, uutf, zarith
       , libusb1, hidapi, gmp, irmin, alcotest, dum, genspio, pprint, ocamlgraph
-      , findlib, digestif }:
+      , findlib, digestif, upx }:
       buildDunePackage rec {
         pname = "tezos";
         version = "0.0.1";
@@ -279,7 +279,7 @@ let
           ocamlgraph
           findlib
           genspio
-        ] ++ [ libusb1 libusb1.out (gmp.override { withStatic = true; }) ];
+        ] ++ [ libusb1 libusb1.out (gmp.override { withStatic = true; }) upx ];
         doCheck = false;
         buildPhase = "dune build src/bin_client/tezos-client.install";
         installPhase = ''
@@ -288,6 +288,8 @@ let
           cp _build/default/src/bin_client/main_admin.exe $out/bin/tezos-admin
           # Reuse license from tezos repo in packaging
           cp LICENSE $out/LICENSE
+          # Compress binaries with upx
+          upx $out/bin/*
         '';
       }) { };
   });

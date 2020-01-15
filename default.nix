@@ -36,10 +36,10 @@ let
         tar -cvzf $out/${name} --mode='u+rwX' -C ${pathToPack} $(ls ${pathToPack})
       '';
     };
-  mainnet-binaries = packDirectory "mainnet-binaries-${mainnet.rev}"
+  mainnet-binaries = packDirectory "binaries-mainnet-${mainnet.rev}"
     "${tezos-static-mainnet}/bin";
   babylonnet-binaries =
-    packDirectory "babylonnet-binaries-${babylonnet.rev}"
+    packDirectory "binaries-babylonnet-${babylonnet.rev}"
     "${tezos-static-babylonnet}/bin";
   licenseFile = "${tezos-static-mainnet}/LICENSE";
 

@@ -9,103 +9,43 @@
 [![Build status](https://badge.buildkite.com/e899e9e54babcd14139e3bd4381bad39b5d680e08e7b7766d4.svg?branch=master)](https://buildkite.com/serokell/tezos-packaging)
 
 This repo provides various form of distribution for tezos-related executables
-(unfortunately, only `tezos-client` for now, see [this issue](https://github.com/serokell/tezos-packaging/issues/14)).
+(`tezos-client`, `tezos-client-admin`, `tezos-node`, `tezos-baker`,
+`tezos-accuser`, `tezos-endorser`, `tezos-signer` and `tezos-protocol-compiler`).
 
-`tezos-client` is CLI tool used for interaction with Tezos blockchain.
-This repo contains nix expression for building staticically linked
-tezos-client binaries that can be used with remote tezos nodes without
-using `babylonnet.sh` or `mainnet.sh` scripts.
+## Obtain binaries or packages from github release
 
-## Build Instructions
-
-### Statically built binary
-
-Run one of the following commands:
-```
-nix-build -A tezos-client-mainnet -o tezos-client
-nix-build -A tezos-client-babylonnet -o tezos-client
-```
-
-Or use Makefile:
-```bash
-make binary #build tezos-client-babylonnet
-make binary-mainnet #build tezos-client-mainnet
-```
-
-To build `mainnet` or `babylonnet` versions of `tezos-client` executable
-
-### Ubuntu `.deb` package
-
-Run one of the following commands:
-```
-nix-build -A mainnet-deb-package -o tezos-client-package --arg timestamp $(date +"%Y%m%d%H%M")
-nix-build -A babylonnet-deb-package -o tezos-client-package --arg timestamp $(date +"%Y%m%d%H%M")
-```
-
-Or use Makefile:
-```bash
-make deb #build deb package with tezos-client-babylonnet
-make deb-mainnet #build deb package with tezos-client-mainnet
-```
-
-To build `.deb` package with `mainnet` or `babylonnet` `tezos-client` executable. Once you install
-such package the command `tezos-client-mainnet` or `tezos-client-babylonnet` will be available.
-
-### Fedora `.rpm` package
-
-Run one of the following commands:
-```
-nix-build -A mainnet-rpm-package -o tezos-client-package --arg timestamp $(date +"%Y%m%d%H%M")
-nix-build -A babylonnet-rpm-package -o tezos-client-package --arg timestamp $(date +"%Y%m%d%H%M")
-```
-
-Or use Makefile:
-```bash
-make rpm #build rpm package with tezos-client-babylonnet
-make rpm-mainnet #build rpm package with tezos-client-mainnet
-```
-
-To build `.rpm` package with `mainnet` or `babylonnet` `tezos-client` executable. Once you install
-such package the command `tezos-client-mainnet` or `tezos-client-babylonnet` will be available.
-
-## Obtain binary or packages from github release
-
-If you don't want to build these files from scratch, you can download assets from github release.
+Recomended way to get these binaries is to download them from assets from github release.
 Go to the [latest release](https://github.com/serokell/tezos-packaging/releases/latest)
 and download desired assets.
 
 ## Ubuntu (Debian based distros) usage
 
-### Install `.deb` package
+### Use PPA with `tezos-*` binaries
 
-Build or download `.deb` file from the CI and double-click on it or run:
-```
-sudo apt install <path to deb file>
-```
-
-### Use PPA with `tezos-client`
-
-Also if you are using Ubuntu you can use PPA in order to install `tezos-client`.
-In order to do that run the following commands:
+If you are using Ubuntu you can use PPA in order to install `tezos-*` executables.
+E.g, in order to do install `tezos-client` run the following commands:
 ```
 sudo add-apt-repository ppa:serokell/tezos && sudo apt-get update
 sudo apt-get install tezos-client-mainnet
 sudo apt-get install tezos-client-babylonnet
 ```
+Once you install such packages the commands `tezos-*` will be available.
+
+### Install `.deb` package locally
+
+As an alternative, you can download `.deb` file from release assets
+(they are located in `deb-packages.tar.gz` archive) and double-click on it or run:
+```
+sudo apt install <path to deb file>
+```
 
 ## Fedora (Red Hat) usage
 
+### Use copr package with `tezos-*` binaries
 
-### Install `.rpm` package
-
-Build or download `.rpm` file from the CI and double-click on it or run:
-```
-sudo yum localinstall <path to the rpm file>
-```
-### Use copr package with `tezos-client`
-
-Also if you are using Fedora you can use Copr in order to install `tezos-client`.
-In order to do that run the following commands:
+If you are using Fedora you can use Copr in order to install `tezos-*`
+executables.
+E.g. in order to install `tezos-client` run the following commands:
 ```
 # use dnf
 sudo dnf copr enable @Serokell/Tezos
@@ -117,10 +57,22 @@ sudo yum copr enable @Serokell/Tezos
 sudo yum install tezos-client-mainnet
 sudo yum install tezos-client-babylonnet
 ```
+Once you install such packages the commands `tezos-*` will be available.
+
+### Install `.rpm` package
+
+As an alternative, you can download `.rpm` file from release assets
+(they are located in `rpm-packages.tar.gz` archive) and double-click on it or run:
+```
+sudo yum localinstall <path to the rpm file>
+```
 
 ## Other Linux distros usage
 
-Build static `tezos-client` binary or download it from the CI.
+Download binaries from release assets.
+
+### `tezos-client` example
+
 Make it executable:
 ```
 chmod +x tezos-client
@@ -128,11 +80,56 @@ chmod +x tezos-client
 
 Run `./tezos-client` or add it to your PATH to be able to run it anywhere.
 
-## `tezos-client` usage
+## Build Instructions
 
-Run `tezos-client [global options] command [command options]`.
+Also, you can build all these binaries and packages from scratch using nix.
 
-Run `tezos-client man` to get more information.
+### Statically built binaries
+
+Run one of the following commands:
+```
+nix-build -A babylonnet-binaries -o babylonnet-binaries
+nix-build -A mainnet-binaries -o mainnet-binaries
+```
+
+Or use Makefile:
+```bash
+make binaries #build babylonnet version of binaries
+make binaries-mainnet #build mainnet version of binaries
+```
+
+To produce `tar.gz` archive with `babylonnet` or `mainnet` version of tezos
+binaries.
+
+### Ubuntu `.deb` packages
+
+Run the following command:
+```
+nix-build -A deb-packages -o deb-packages --arg timestamp $(date +"%Y%m%d%H%M")
+```
+
+Or use Makefile:
+```bash
+make deb-packages #build deb package
+```
+
+To build `.deb` packages with `mainnet` or `babylonnet` version of tezos
+binaries.
+
+### Fedora `.rpm` packages
+
+Run one of the following commands:
+```
+nix-build -A rpm-packages -o rpm-packages --arg timestamp $(date +"%Y%m%d%H%M")
+```
+
+Or use Makefile:
+```bash
+make rpm-packages #build rpm packages
+```
+
+To build `.rpm` packages with `mainnet` or `babylonnet` version of tezos
+binaries.
 
 ## For Contributors
 

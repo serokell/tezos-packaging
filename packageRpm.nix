@@ -1,7 +1,8 @@
 # SPDX-FileCopyrightText: 2019 TQ Tezos <https://tqtezos.com/>
 #
 # SPDX-License-Identifier: MPL-2.0
-{ stdenv, writeTextFile, gnutar, rpm, buildFHSUserEnv }:
+{ stdenv, writeTextFile, gnutar, rpm, buildFHSUserEnv
+, buildSourcePackage ? false }:
 pkgDesc:
 
 let
@@ -62,6 +63,7 @@ let
   };
 
 in stdenv.mkDerivation rec {
+  rpmBuildFlag = if buildSourcePackage then "-ba" else "-bb";
   name = "${pkgName}.rpm";
 
   phases = "packagePhase";
@@ -78,9 +80,9 @@ in stdenv.mkDerivation rec {
     cp ${sourceArchive} SOURCES/${sourceArchive.name}
     mkdir -p BUILD/${project}
     cp ${licenseFile} BUILD/${project}/LICENSE
-    rpmbuild-env -ba SPECS/${project}.spec --define '_bindir /usr/bin' --define '_datadir /usr/share'
+    rpmbuild-env ${rpmBuildFlag} SPECS/${project}.spec --define '_bindir /usr/bin' --define '_datadir /usr/share'
     mkdir -p $out
-    cp SRPMS/*.src.rpm $out/
+    ${if buildSourcePackage then "cp SRPMS/*.src.rpm $out/" else ""}
     cp RPMS/*/*.rpm $out/
   '';
 

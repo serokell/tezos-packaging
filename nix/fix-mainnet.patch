@@ -17,6 +17,98 @@ index f42b53e6..7e47c074 100644
  
  (install
   (section bin)
+diff --git a/src/bin_node/dune b/src/bin_node/dune
+index 54920a2..8bd54be 100644
+--- a/src/bin_node/dune
++++ b/src/bin_node/dune
+@@ -28,7 +28,9 @@
+                    -open Tezos_validator
+                    -open Tezos_shell_context
+                    -open Tezos_protocol_updater
+-                   -linkall)))
++                   -linkall
++                   -ccopt -static
++                   )))
+ 
+ (install
+  (section bin)
+diff --git a/src/proto_005_PsBabyM1/bin_baker/dune b/src/proto_005_PsBabyM1/bin_baker/dune
+index 755e8d4..aeb8f2d 100644
+--- a/src/proto_005_PsBabyM1/bin_baker/dune
++++ b/src/proto_005_PsBabyM1/bin_baker/dune
+@@ -9,7 +9,10 @@
+                    -open Tezos_client_005_PsBabyM1
+                    -open Tezos_client_commands
+                    -open Tezos_baking_005_PsBabyM1_commands
+-                   -open Tezos_client_base_unix)))
++                   -open Tezos_client_base_unix
++                   -ccopt -static
++                   -cclib "-lusb-1.0 -lhidapi-libusb -ludev"
++                   )))
+ 
+ (alias
+  (name runtest_lint)
+diff --git a/src/proto_005_PsBabyM1/bin_accuser/dune b/src/proto_005_PsBabyM1/bin_accuser/dune
+index 173ab99..eae42b2 100644
+--- a/src/proto_005_PsBabyM1/bin_accuser/dune
++++ b/src/proto_005_PsBabyM1/bin_accuser/dune
+@@ -9,7 +9,10 @@
+                    -open Tezos_client_005_PsBabyM1
+                    -open Tezos_client_commands
+                    -open Tezos_baking_005_PsBabyM1_commands
+-                   -open Tezos_client_base_unix)))
++                   -open Tezos_client_base_unix
++                   -ccopt -static
++                   -cclib "-lusb-1.0 -lhidapi-libusb -ludev"
++                   )))
+ 
+ (alias
+  (name runtest_lint)
+diff --git a/src/proto_005_PsBabyM1/bin_endorser/dune b/src/proto_005_PsBabyM1/bin_endorser/dune
+index 9df7abf..e8402b8 100644
+--- a/src/proto_005_PsBabyM1/bin_endorser/dune
++++ b/src/proto_005_PsBabyM1/bin_endorser/dune
+@@ -9,7 +9,10 @@
+                    -open Tezos_client_005_PsBabyM1
+                    -open Tezos_client_commands
+                    -open Tezos_baking_005_PsBabyM1_commands
+-                   -open Tezos_client_base_unix)))
++                   -open Tezos_client_base_unix
++                   -ccopt -static
++                   -cclib "-lusb-1.0 -lhidapi-libusb -ludev"
++                   )))
+ 
+ (alias
+  (name runtest_lint)
+diff --git a/src/bin_signer/dune b/src/bin_signer/dune
+index c06413b..a81e206 100644
+--- a/src/bin_signer/dune
++++ b/src/bin_signer/dune
+@@ -18,7 +18,10 @@
+                    -open Tezos_rpc_http
+                    -open Tezos_rpc_http_server
+                    -open Tezos_rpc_http_client_unix
+-                   -open Tezos_stdlib_unix)))
++                   -open Tezos_stdlib_unix
++                   -ccopt -static
++                   -cclib "-lusb-1.0 -lhidapi-libusb -ludev"
++                   )))
+ 
+ (alias
+  (name runtest_lint)
+diff --git a/src/lib_protocol_compiler/dune b/src/lib_protocol_compiler/dune
+index 7d70857..9fbe9cc 100644
+--- a/src/lib_protocol_compiler/dune
++++ b/src/lib_protocol_compiler/dune
+@@ -64,7 +64,7 @@
+  (public_name tezos-protocol-compiler)
+  (modes native)
+  (libraries tezos_protocol_compiler_native)
+- (flags (:standard -linkall))
++ (flags (:standard -linkall -ccopt -static))
+  (modules Main_native))
+ 
+ (executable
 diff --git a/src/lib_base/p2p_addr.ml b/src/lib_base/p2p_addr.ml
 index d9139c4b..a3af815c 100644
 --- a/src/lib_base/p2p_addr.ml

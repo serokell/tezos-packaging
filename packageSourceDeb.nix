@@ -62,6 +62,7 @@ let
     #!/usr/bin/make -f
     %:
     	dh $@
+    override_dh_strip:
   '';
 
 in runCommand "build_source_deb" { SOURCE_DATE_EPOCH = 1576846270; } ''

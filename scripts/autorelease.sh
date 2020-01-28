@@ -46,4 +46,4 @@ for file in $assets_dir/*; do
 done
 
 # Create release
-hub release create $assets -m "Automatic build on $(date -I)" --prerelease auto-release
+hub release create $assets -F $TEMPDIR/$project/*-release-notes.md --prerelease auto-release

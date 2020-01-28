@@ -38,8 +38,7 @@ let
     };
   mainnet-binaries = packDirectory "binaries-mainnet-${mainnet.rev}"
     "${tezos-static-mainnet}/bin";
-  babylonnet-binaries =
-    packDirectory "binaries-babylonnet-${babylonnet.rev}"
+  babylonnet-binaries = packDirectory "binaries-babylonnet-${babylonnet.rev}"
     "${tezos-static-babylonnet}/bin";
   licenseFile = "${tezos-static-mainnet}/LICENSE";
 
@@ -137,6 +136,25 @@ let
   deb-packages = moveDerivations "deb-packages" (map buildDeb packageDescs);
   rpm-packages = moveDerivations "rpm-packages" (map buildRpm packageDescs);
 
+  releaseFile = writeTextFile {
+    name = "release-notes.md";
+    text = ''
+      Automatic release on ${builtins.substring 0 8 timestamp}
+
+      This release contains assets based on [${babylonnet.rev} revision](https://gitlab.com/tezos/tezos/tree/${babylonnet.rev}) of babylonnet branch and
+      [${mainnet.rev} revision](https://gitlab.com/tezos/tezos/tree/${mainnet.rev}) of mainnet branch from [tezos repository](https://gitlab.com/tezos/tezos/).
+      <!--
+      When making a new release, replace `auto-release` with actual release tag:
+      -->
+      For more information about release assets see [README section](https://github.com/serokell/tezos-packaging/blob/auto-release/README.md#obtain-binaries-or-packages-from-github-release).
+    '';
+  };
+  releaseNotes = runCommand "release-notes" {} ''
+    mkdir -p $out
+    cp ${releaseFile} $out/
+  '';
+
 in rec {
-  inherit deb-packages rpm-packages mainnet-binaries babylonnet-binaries tezos-license;
+  inherit deb-packages rpm-packages mainnet-binaries babylonnet-binaries
+    tezos-license releaseNotes;
 }

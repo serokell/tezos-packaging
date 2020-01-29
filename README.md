@@ -18,8 +18,37 @@ Recomended way to get these binaries is to download them from assets from github
 Go to the [latest release](https://github.com/serokell/tezos-packaging/releases/latest)
 and download desired assets.
 
+We provide both individual and archived binaries for mainnet and babylonnet versions
+in order to be able to have static links for these binaries, also make it convenient
+to download single binary or obtain all binaries in one click.
+
+Individual binaries (as well as Ubuntu/Fedora packages) have `mainnet/babylonnet` suffix
+so that users can easily distinguish different branch versions. Some of the binaries names
+also contain protocol name in consistence with binaries that can be produced from source
+code using suggested [build instructions](https://tezos.gitlab.io/introduction/howtoget.html#build-from-sources).
+
+
+In addition to the binaries we provide all `.deb` and `.rpm` packages in `.tar.gz` archives
+for those who want to install them using local `.deb` or `.rpm` file.
+However, recommended way is to use remote Ubuntu or Fedora package repository,
+see [PPA](#ppa) and [Copr](#copr) for more information about remote package repositories.
+
+Contents of release:
+* `tezos-*-mainnet` static binaries based on mainnet branch.
+* `tezos-*-babylonnet` static binaries based babylonnet branch.
+* `packages-deb.tar.gz` `.deb` packages for both mainnet and babylonnet versions,
+it is recommended to use `apt` to install packages directly from remote repository.
+* `packages-rpm.tar.gz` `.rpm` packages for both mainnet and babylonnet versions,
+it is recommended to use `dnf` to install packages directly from remote repository.
+* `binaries-babylonnet-<revision>.tar.gz` archive with all babylonnet
+based binaries made from particular branch revision.
+* `binaries-babylonnet-<revision>.tar.gz` archive with all mainnet based
+binaries made from particular branch revision.
+* License file from [tezos repository](https://gitlab.com/tezos/tezos/).
+
 ## Ubuntu (Debian based distros) usage
 
+<a name="ppa"></a>
 ### Use PPA with `tezos-*` binaries
 
 If you are using Ubuntu you can use PPA in order to install `tezos-*` executables.
@@ -41,6 +70,7 @@ sudo apt install <path to deb file>
 
 ## Fedora (Red Hat) usage
 
+<a name="copr"></a>
 ### Use copr package with `tezos-*` binaries
 
 If you are using Fedora you can use Copr in order to install `tezos-*`

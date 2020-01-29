@@ -11,14 +11,14 @@ let
     binarySuffix = builtins.replaceStrings [ "_" ] [ "-" ] protocolName;
   };
   mainnet = {
-    rev = "94f779a7";
-    sha256 = "16lxilng5q8fr2ll6h4hf7wlvac6nmw4cx10cbgzj5ks090bl97r";
+    rev = "28309c81";
+    sha256 = "11cv76yfal572fhnhynkbga7wrdx5x1vym11is2xwlygn4p2dx2n";
     patchFile = ./nix/fix-mainnet.patch;
     protocol = protocol005;
   };
   babylonnet = {
-    rev = "b8731913";
-    sha256 = "1pakf1s6bg76fq42mb8fj1immz9g9wwimd522cpx8k28zf0hkl5i";
+    rev = "12002a35";
+    sha256 = "0j0xiicdid7wnygh9nlp0d2p57wgrbfglyfz56r8wx93s2q2m2c8";
     patchFile = ./nix/fix-babylonnet.patch;
     protocol = protocol005;
   };

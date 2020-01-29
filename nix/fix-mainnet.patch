@@ -2,10 +2,10 @@
 #
 # SPDX-License-Identifier: MPL-2.0
 diff --git a/src/bin_client/dune b/src/bin_client/dune
-index f42b53e6..7e47c074 100644
+index fa4ace8..18caca5 100644
 --- a/src/bin_client/dune
 +++ b/src/bin_client/dune
-@@ -28,7 +28,10 @@
+@@ -31,7 +31,10 @@
                      -open Tezos_client_base
                      -open Tezos_client_commands
                      -open Tezos_client_base_unix
@@ -17,29 +17,43 @@ index f42b53e6..7e47c074 100644
  
  (install
   (section bin)
-diff --git a/src/bin_node/dune b/src/bin_node/dune
-index 54920a2..8bd54be 100644
---- a/src/bin_node/dune
-+++ b/src/bin_node/dune
-@@ -28,7 +28,9 @@
-                    -open Tezos_validator
-                    -open Tezos_shell_context
-                    -open Tezos_protocol_updater
--                   -linkall)))
-+                   -linkall
+diff --git a/src/bin_signer/dune b/src/bin_signer/dune
+index e4c9a7c..2a5f941 100644
+--- a/src/bin_signer/dune
++++ b/src/bin_signer/dune
+@@ -19,7 +19,10 @@
+                    -open Tezos_rpc_http_server
+                    -open Tezos_rpc_http_client_unix
+                    -open Tezos_stdlib_unix
+-                   -open Tezos_stdlib)))
++                   -open Tezos_stdlib
 +                   -ccopt -static
++                   -cclib "-lusb-1.0 -lhidapi-libusb -ludev"
 +                   )))
  
- (install
-  (section bin)
-diff --git a/src/proto_005_PsBabyM1/bin_baker/dune b/src/proto_005_PsBabyM1/bin_baker/dune
-index 755e8d4..aeb8f2d 100644
---- a/src/proto_005_PsBabyM1/bin_baker/dune
-+++ b/src/proto_005_PsBabyM1/bin_baker/dune
-@@ -9,7 +9,10 @@
-                    -open Tezos_client_005_PsBabyM1
+ (alias
+  (name runtest_lint)
+diff --git a/src/lib_protocol_compiler/dune b/src/lib_protocol_compiler/dune
+index 1142419..d8086b4 100644
+--- a/src/lib_protocol_compiler/dune
++++ b/src/lib_protocol_compiler/dune
+@@ -65,7 +65,7 @@
+  (public_name tezos-protocol-compiler)
+  (modes native)
+  (libraries tezos_protocol_compiler_native)
+- (flags (:standard -linkall))
++ (flags (:standard -linkall -ccopt -static))
+  (modules Main_native))
+ 
+ (executable
+diff --git a/src/proto_005_PsBabyM1/bin_accuser/dune b/src/proto_005_PsBabyM1/bin_accuser/dune
+index 2f2a6fd..fd9773b 100644
+--- a/src/proto_005_PsBabyM1/bin_accuser/dune
++++ b/src/proto_005_PsBabyM1/bin_accuser/dune
+@@ -10,7 +10,10 @@
                     -open Tezos_client_commands
                     -open Tezos_baking_005_PsBabyM1_commands
+                    -open Tezos_stdlib_unix
 -                   -open Tezos_client_base_unix)))
 +                   -open Tezos_client_base_unix
 +                   -ccopt -static
@@ -48,14 +62,14 @@ index 755e8d4..aeb8f2d 100644
  
  (alias
   (name runtest_lint)
-diff --git a/src/proto_005_PsBabyM1/bin_accuser/dune b/src/proto_005_PsBabyM1/bin_accuser/dune
-index 173ab99..eae42b2 100644
---- a/src/proto_005_PsBabyM1/bin_accuser/dune
-+++ b/src/proto_005_PsBabyM1/bin_accuser/dune
-@@ -9,7 +9,10 @@
-                    -open Tezos_client_005_PsBabyM1
+diff --git a/src/proto_005_PsBabyM1/bin_baker/dune b/src/proto_005_PsBabyM1/bin_baker/dune
+index 1414a08..6044401 100644
+--- a/src/proto_005_PsBabyM1/bin_baker/dune
++++ b/src/proto_005_PsBabyM1/bin_baker/dune
+@@ -10,7 +10,10 @@
                     -open Tezos_client_commands
                     -open Tezos_baking_005_PsBabyM1_commands
+                    -open Tezos_stdlib_unix
 -                   -open Tezos_client_base_unix)))
 +                   -open Tezos_client_base_unix
 +                   -ccopt -static
@@ -65,13 +79,13 @@ index 173ab99..eae42b2 100644
  (alias
   (name runtest_lint)
 diff --git a/src/proto_005_PsBabyM1/bin_endorser/dune b/src/proto_005_PsBabyM1/bin_endorser/dune
-index 9df7abf..e8402b8 100644
+index d1b60c7..a738ef2 100644
 --- a/src/proto_005_PsBabyM1/bin_endorser/dune
 +++ b/src/proto_005_PsBabyM1/bin_endorser/dune
-@@ -9,7 +9,10 @@
-                    -open Tezos_client_005_PsBabyM1
+@@ -10,7 +10,10 @@
                     -open Tezos_client_commands
                     -open Tezos_baking_005_PsBabyM1_commands
+                    -open Tezos_stdlib_unix
 -                   -open Tezos_client_base_unix)))
 +                   -open Tezos_client_base_unix
 +                   -ccopt -static
@@ -80,60 +94,13 @@ index 9df7abf..e8402b8 100644
  
  (alias
   (name runtest_lint)
-diff --git a/src/bin_signer/dune b/src/bin_signer/dune
-index c06413b..a81e206 100644
---- a/src/bin_signer/dune
-+++ b/src/bin_signer/dune
-@@ -18,7 +18,10 @@
-                    -open Tezos_rpc_http
-                    -open Tezos_rpc_http_server
-                    -open Tezos_rpc_http_client_unix
--                   -open Tezos_stdlib_unix)))
-+                   -open Tezos_stdlib_unix
-+                   -ccopt -static
-+                   -cclib "-lusb-1.0 -lhidapi-libusb -ludev"
-+                   )))
- 
- (alias
-  (name runtest_lint)
-diff --git a/src/lib_protocol_compiler/dune b/src/lib_protocol_compiler/dune
-index 7d70857..9fbe9cc 100644
---- a/src/lib_protocol_compiler/dune
-+++ b/src/lib_protocol_compiler/dune
-@@ -64,7 +64,7 @@
-  (public_name tezos-protocol-compiler)
-  (modes native)
-  (libraries tezos_protocol_compiler_native)
-- (flags (:standard -linkall))
-+ (flags (:standard -linkall -ccopt -static))
-  (modules Main_native))
- 
- (executable
-diff --git a/src/lib_base/p2p_addr.ml b/src/lib_base/p2p_addr.ml
-index d9139c4b..a3af815c 100644
---- a/src/lib_base/p2p_addr.ml
-+++ b/src/lib_base/p2p_addr.ml
-@@ -36,8 +36,8 @@ let encoding =
-     end
-     ~binary:begin
-       conv
--        Ipaddr.V6.to_bytes
--        Ipaddr.V6.of_bytes_exn
-+        Ipaddr.V6.to_octets
-+        Ipaddr.V6.of_octets_exn
-         string
-     end
- 
-diff --git a/src/lib_protocol_environment/tezos_protocol_environment.ml b/src/lib_protocol_environment/tezos_protocol_environment.ml
-index 14acf631..7b0efcd8 100644
---- a/src/lib_protocol_environment/tezos_protocol_environment.ml
-+++ b/src/lib_protocol_environment/tezos_protocol_environment.ml
-@@ -300,7 +300,7 @@ module MakeV1 (Param : sig val name: string end) () = struct
-     let to_bits ?(pad_to = 0) z =
-       let bits = to_bits z in
-       let len = Pervasives.((numbits z + 7) / 8) in
--      let full_len = Compare.Int.max pad_to len in
-+      let full_len = Stdlib.max pad_to len in
-       if full_len = 0 then
-         MBytes.empty
-       else
+diff --git a/vendors/index/src/unix/dune b/vendors/index/src/unix/dune
+index 2981490..655fa7f 100644
+--- a/vendors/index/src/unix/dune
++++ b/vendors/index/src/unix/dune
+@@ -2,4 +2,4 @@
+  (public_name index.unix)
+  (name index_unix)
+  (c_names pread pwrite)
+- (libraries index logs logs.threaded threads unix))
++ (libraries index logs threads unix))

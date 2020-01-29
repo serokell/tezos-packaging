@@ -272,12 +272,33 @@ let
           '';
           doCheck = false;
         }) { };
+    ezjsonm = super.ezjsonm.overrideDerivation (o: rec {
+      version = "1.1.0";
+      name = "ezjsonm";
+      src = pkgs.fetchFromGitHub {
+        owner = "mirage";
+        repo = "ezjsonm";
+        rev = "v${version}";
+        sha256 = "064j9pzy01p3dv947khqyn7fkjbs3jmrqsg8limb4abnlaqxxs2s";
+      };
+    });
+    fmt = super.fmt.overrideDerivation (o: rec {
+      version = "0.8.8";
+      name = "fmt";
+      src = pkgs.fetchFromGitHub {
+        owner = "dbuenzli";
+        repo = "fmt";
+        rev = "v${version}";
+        sha256 = "06700rk442hn2yss04aqv2pr3c0l88zvv6sbwq0hg0fyyacmapl7";
+      };
+      propagatedBuildInputs = o.propagatedBuildInputs ++ [ self.stdlib-shims self.seq ];
+    });
 
     tezos = self.callPackage ({ stdenv, fetchgit, buildDunePackage, base
       , bigstring, cohttp-lwt, cohttp-lwt-unix, cstruct, ezjsonm, hex, ipaddr
-      , js_of_ocaml, cmdliner, easy-format, tls, lwt4, lwt_log
-      , mtime, ocplib-endian, ptime, re, rresult, stdio, uri, uutf, zarith
-      , libusb1, hidapi, gmp, irmin, alcotest, dum, genspio, ocamlgraph, findlib
+      , js_of_ocaml, cmdliner, easy-format, tls, lwt4, lwt_log, mtime
+      , ocplib-endian, ptime, re, rresult, stdio, uri, uutf, zarith, libusb1
+      , hidapi, gmp, irmin, alcotest, dum, genspio, ocamlgraph, findlib
       , digestif, ocp-ocamlres, pprint, upx }:
       buildDunePackage rec {
         pname = "tezos";
@@ -331,13 +352,11 @@ let
         buildPhase = ''
           # tezos-node build requires ocp-ocamlres binary in PATH
           PATH=$PATH:${ocp-ocamlres}/lib/ocaml/4.07.1/bin
-          dune build src/bin_client/tezos-client.install
-          dune build src/bin_node/tezos-node.install
-          dune build src/proto_${branchInfo.protocol.protocolName}/bin_baker/tezos-baker-${branchInfo.protocol.binarySuffix}.install
-          dune build src/proto_${branchInfo.protocol.protocolName}/bin_accuser/tezos-accuser-${branchInfo.protocol.binarySuffix}.install
-          dune build src/proto_${branchInfo.protocol.protocolName}/bin_endorser/tezos-endorser-${branchInfo.protocol.binarySuffix}.install
-          dune build src/bin_signer/tezos-signer.install
-          dune build src/lib_protocol_compiler/tezos-protocol-compiler.install
+          dune build src/bin_client/tezos-client.install src/bin_node/tezos-node.install \
+          src/proto_${branchInfo.protocol.protocolName}/bin_baker/tezos-baker-${branchInfo.protocol.binarySuffix}.install \
+          src/proto_${branchInfo.protocol.protocolName}/bin_accuser/tezos-accuser-${branchInfo.protocol.binarySuffix}.install \
+          src/proto_${branchInfo.protocol.protocolName}/bin_endorser/tezos-endorser-${branchInfo.protocol.binarySuffix}.install \
+          src/bin_signer/tezos-signer.install src/lib_protocol_compiler/tezos-protocol-compiler.install
         '';
         installPhase = ''
           mkdir -p $out/bin

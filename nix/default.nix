@@ -291,15 +291,74 @@ let
         rev = "v${version}";
         sha256 = "06700rk442hn2yss04aqv2pr3c0l88zvv6sbwq0hg0fyyacmapl7";
       };
-      propagatedBuildInputs = o.propagatedBuildInputs ++ [ self.stdlib-shims self.seq ];
+      propagatedBuildInputs = o.propagatedBuildInputs
+        ++ [ self.stdlib-shims self.seq ];
     });
+    json-data-encoding = self.callPackage ({ buildDunePackage, uri }:
+      buildDunePackage rec {
+        pname = "json-data-encoding";
+        version = "0.8";
+
+        minimumOCamlVersion = "4.03";
+        src = builtins.fetchTarball {
+          url =
+            "https://gitlab.com/nomadic-labs/json-data-encoding/-/archive/v0.8/json-data-encoding-v0.8.tar.gz";
+          sha256 = "1c6m2qvi9bm6qjxc38p6cia1f66r0rb9xf6b8svlj3jjymvqw889";
+        };
+        buildInputs = [ uri ];
+        doCheck = false;
+      }) { };
+    json-data-encoding-bson = self.callPackage
+      ({ buildDunePackage, json-data-encoding, ocplib-endian, uri }:
+        buildDunePackage rec {
+          pname = "json-data-encoding-bson";
+          version = "0.8";
+
+          minimumOCamlVersion = "4.03";
+          src = builtins.fetchTarball {
+            url =
+              "https://gitlab.com/nomadic-labs/json-data-encoding/-/archive/v0.8/json-data-encoding-v0.8.tar.gz";
+            sha256 = "1c6m2qvi9bm6qjxc38p6cia1f66r0rb9xf6b8svlj3jjymvqw889";
+          };
+          buildInputs = [ uri ocplib-endian json-data-encoding ];
+          doCheck = false;
+        }) { };
+    lwt-canceler = self.callPackage ({ buildDunePackage, lwt4 }:
+      buildDunePackage rec {
+        pname = "lwt-canceler";
+        version = "0.2";
+
+        minimumOCamlVersion = "4.03";
+        src = builtins.fetchTarball {
+          url =
+            "https://gitlab.com/nomadic-labs/lwt-canceler/-/archive/v0.2/lwt-canceler-v0.2.tar.gz";
+          sha256 = "07931486vg83sl1c268i0vyw61l8n8xs2krjsj43070zljqi8rf1";
+        };
+        buildInputs = [ lwt4 ];
+        doCheck = false;
+      }) { };
+    lwt-watcher = self.callPackage ({ buildDunePackage, lwt4 }:
+      buildDunePackage rec {
+        pname = "lwt-watcher";
+        version = "0.1";
+
+        minimumOCamlVersion = "4.03";
+        src = builtins.fetchTarball {
+          url =
+            "https://gitlab.com/nomadic-labs/lwt-watcher/-/archive/v0.1/lwt-watcher-v0.1.tar.gz";
+          sha256 = "0kaf7py02i0dn9rvrbzxh4ljfg059wc8xvm093m9wy7lsa68rax9";
+        };
+        buildInputs = [ lwt4 ];
+        doCheck = false;
+      }) { };
 
     tezos = self.callPackage ({ stdenv, fetchgit, buildDunePackage, base
       , bigstring, cohttp-lwt, cohttp-lwt-unix, cstruct, ezjsonm, hex, ipaddr
       , js_of_ocaml, cmdliner, easy-format, tls, lwt4, lwt_log, mtime
       , ocplib-endian, ptime, re, rresult, stdio, uri, uutf, zarith, libusb1
       , hidapi, gmp, irmin, alcotest, dum, genspio, ocamlgraph, findlib
-      , digestif, ocp-ocamlres, pprint, upx }:
+      , digestif, ocp-ocamlres, pprint, upx, json-data-encoding
+      , json-data-encoding-bson, lwt-canceler, lwt-watcher }:
       buildDunePackage rec {
         pname = "tezos";
         version = "0.0.1";
@@ -340,23 +399,35 @@ let
           uutf
           zarith
           cmdliner
-          # easy-format js_of_ocaml ocp-ocamlres tls
-          # alcotest dum pprint
+          easy-format
+          dum
+          # js_of_ocaml ocp-ocamlres tls
+          # alcotest pprint
           ocp-ocamlres
           pprint
           ocamlgraph
           findlib
           genspio
+          json-data-encoding
+          json-data-encoding-bson
+          lwt-canceler
+          lwt-watcher
         ] ++ [ libusb1 libusb1.out (gmp.override { withStatic = true; }) upx ];
         doCheck = false;
+        protocolsNames = map (x: x.protocolName) branchInfo.protocols;
         buildPhase = ''
           # tezos-node build requires ocp-ocamlres binary in PATH
           PATH=$PATH:${ocp-ocamlres}/lib/ocaml/4.07.1/bin
+          install_files=()
+          for protocol_name in $protocolsNames; do
+            protocol_suffix=$(echo "$protocol_name" | tr "_" "-")
+            install_files+=("src/proto_$protocol_name}/bin_baker/tezos-baker-$protocol_suffix.install" \
+                            "src/proto_$protocol_name}/bin_accuser/tezos-accuser-$protocol_suffix.install" \
+                            "src/proto_$protocol_name}/bin_endorser/tezos-endorser-$protocol_suffix.install")
+          done
           dune build src/bin_client/tezos-client.install src/bin_node/tezos-node.install \
-          src/proto_${branchInfo.protocol.protocolName}/bin_baker/tezos-baker-${branchInfo.protocol.binarySuffix}.install \
-          src/proto_${branchInfo.protocol.protocolName}/bin_accuser/tezos-accuser-${branchInfo.protocol.binarySuffix}.install \
-          src/proto_${branchInfo.protocol.protocolName}/bin_endorser/tezos-endorser-${branchInfo.protocol.binarySuffix}.install \
-          src/bin_signer/tezos-signer.install src/lib_protocol_compiler/tezos-protocol-compiler.install
+          src/bin_signer/tezos-signer.install src/lib_protocol_compiler/tezos-protocol-compiler.install "$(install_files[@])"
+
         '';
         installPhase = ''
           mkdir -p $out/bin
@@ -365,20 +436,23 @@ let
           cp _build/default/src/bin_client/main_admin.exe $out/bin/tezos-admin-client
           # tezos-node
           cp _build/default/src/bin_node/main.exe $out/bin/tezos-node
-          # tezos-baker
-          cp _build/default/src/proto_${branchInfo.protocol.protocolName}/bin_baker/main_baker_${branchInfo.protocol.protocolName}.exe \
-          $out/bin/tezos-baker-${branchInfo.protocol.binarySuffix}
-          # tezos-accuser
-          cp _build/default/src/proto_${branchInfo.protocol.protocolName}/bin_accuser/main_accuser_${branchInfo.protocol.protocolName}.exe \
-          $out/bin/tezos-accuser-${branchInfo.protocol.binarySuffix}
-          # tezos-endorser
-          cp _build/default/src/proto_${branchInfo.protocol.protocolName}/bin_endorser/main_endorser_${branchInfo.protocol.protocolName}.exe \
-          $out/bin/tezos-endorser-${branchInfo.protocol.binarySuffix}
           # tezos-signer
           cp _build/default/src/bin_signer/main_signer.exe $out/bin/tezos-signer
           # tezos-protocol-compiler
           cp _build/default/src/lib_protocol_compiler/main_native.exe $out/bin/tezos-protocol-compiler
           # Reuse license from tezos repo in packaging
+          for protocol_name in $protocolsNames; do
+            protocol_suffix=$(echo "$protocol_name" | tr "_" "-")
+            # tezos-baker
+            cp _build/default/src/proto_"$protocol_name"/bin_baker/main_baker_"$protocol_name".exe \
+              $out/bin/tezos-baker-"$protocol_suffix"
+            # tezos-accuser
+            cp _build/default/src/proto_"$protocol_name"/bin_accuser/main_accuser_"$protocol_name".exe \
+              $out/bin/tezos-accuser-"$protocol_suffix"
+            # tezos-endorser
+            cp _build/default/src/proto_"$protocol_name"/bin_endorser/main_endorser_"$protocol_name".exe \
+              $out/bin/tezos-endorser-"$protocol_suffix"
+          done
           cp LICENSE $out/LICENSE
           # Compress binaries with upx
           upx $out/bin/*

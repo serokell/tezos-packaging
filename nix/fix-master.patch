@@ -109,3 +109,13 @@ index 1142419..d8086b4 100644
   (modules Main_native))
  
  (executable
+diff --git a/vendors/index/src/unix/dune b/vendors/index/src/unix/dune
+index 2981490..655fa7f 100644
+--- a/vendors/index/src/unix/dune
++++ b/vendors/index/src/unix/dune
+@@ -2,4 +2,4 @@
+  (public_name index.unix)
+  (name index_unix)
+  (c_names pread pwrite)
+- (libraries index logs logs.threaded threads unix))
++ (libraries index logs threads unix))

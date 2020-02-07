@@ -18,15 +18,19 @@ Recomended way to get these binaries is to download them from assets from github
 Go to the [latest release](https://github.com/serokell/tezos-packaging/releases/latest)
 and download desired assets.
 
-We provide both individual and archived binaries for mainnet and babylonnet versions
+We provide both individual and archived binaries from master branch sources
 in order to be able to have static links for these binaries, also make it convenient
 to download single binary or obtain all binaries in one click.
 
-Individual binaries (as well as Ubuntu/Fedora packages) have `mainnet/babylonnet` suffix
-so that users can easily distinguish different branch versions. Some of the binaries names
-also contain protocol name in consistence with binaries that can be produced from source
-code using suggested [build instructions](https://tezos.gitlab.io/introduction/howtoget.html#build-from-sources).
+Some of the individual binaries (as well as Ubuntu/Fedora packages) contain protocol name
+to determine with which protocol binary is compatible with, specifically `005_PsBabyM1`
+protocol is currently used in `mainnet` and `babylonnet`, `006_PsCARTHA` protocol
+is currently used in `carthagenet`.
 
+Binaries without protocol name can be used with any network. E.g. `tezos-node` has `--network`
+option ([more information](http://tezos.gitlab.io/user/multinetwork.html) about multinetwork node)
+and `tezos-client` is compatible with any network node (Note that this is true only for binaries
+built from master branch sources).
 
 In addition to the binaries we provide all `.deb` and `.rpm` packages in `.tar.gz` archives
 for those who want to install them using local `.deb` or `.rpm` file.
@@ -34,15 +38,14 @@ However, recommended way is to use remote Ubuntu or Fedora package repository,
 see [PPA](#ppa) and [Copr](#copr) for more information about remote package repositories.
 
 Contents of release:
-* `tezos-*-mainnet` static binaries based on mainnet branch.
-* `tezos-*-babylonnet` static binaries based babylonnet branch.
+* `tezos-*-005-PsBabyM1` static binaries for 005 protocol.
+* `tezos-*-006-PsCARTHA` static binaries for 006 protocol.
 * `packages-deb.tar.gz` `.deb` packages for both mainnet and babylonnet versions,
 it is recommended to use `apt` to install packages directly from remote repository.
 * `packages-rpm.tar.gz` `.rpm` packages for both mainnet and babylonnet versions,
 it is recommended to use `dnf` to install packages directly from remote repository.
-* `binaries-babylonnet-<revision>.tar.gz` archive with all babylonnet
-based binaries made from particular branch revision.
-* `binaries-babylonnet-<revision>.tar.gz` archive with all mainnet based
+* `binaries-<revision>.tar.gz` archive with all binaries made from
+particular master branch revision.
 binaries made from particular branch revision.
 * License file from [tezos repository](https://gitlab.com/tezos/tezos/).
 
@@ -55,8 +58,8 @@ If you are using Ubuntu you can use PPA in order to install `tezos-*` executable
 E.g, in order to do install `tezos-client` run the following commands:
 ```
 sudo add-apt-repository ppa:serokell/tezos && sudo apt-get update
-sudo apt-get install tezos-client-mainnet
-sudo apt-get install tezos-client-babylonnet
+sudo apt-get install tezos-client
+sudo apt-get install tezos-baker-005-PsBabyM1
 ```
 Once you install such packages the commands `tezos-*` will be available.
 
@@ -79,13 +82,12 @@ E.g. in order to install `tezos-client` run the following commands:
 ```
 # use dnf
 sudo dnf copr enable @Serokell/Tezos
-sudo dnf install tezos-client-mainnet
-sudo dnf install tezos-client-babylonnet
+sudo dnf install tezos-client
+sudo dnf install tezos-baker-005-PsBabyM1
 
 # or use yum
 sudo yum copr enable @Serokell/Tezos
-sudo yum install tezos-client-mainnet
-sudo yum install tezos-client-babylonnet
+sudo yum install tezos-baker-005-PsBabyM1
 ```
 Once you install such packages the commands `tezos-*` will be available.
 
@@ -116,20 +118,17 @@ Also, you can build all these binaries and packages from scratch using nix.
 
 ### Statically built binaries
 
-Run one of the following commands:
+Run one the following command:
 ```
-nix-build -A babylonnet-binaries -o babylonnet-binaries
-nix-build -A mainnet-binaries -o mainnet-binaries
+nix-build -A binaries -o binaries
 ```
 
 Or use Makefile:
 ```bash
-make binaries #build babylonnet version of binaries
-make binaries-mainnet #build mainnet version of binaries
+make binaries
 ```
 
-To produce `tar.gz` archive with `babylonnet` or `mainnet` version of tezos
-binaries.
+To produce `tar.gz` archive tezos binaries.
 
 ### Ubuntu `.deb` packages
 
@@ -143,8 +142,7 @@ Or use Makefile:
 make deb-packages #build deb package
 ```
 
-To build `.deb` packages with `mainnet` or `babylonnet` version of tezos
-binaries.
+To build `.deb` packages with tezos binaries.
 
 ### Fedora `.rpm` packages
 
@@ -158,8 +156,7 @@ Or use Makefile:
 make rpm-packages #build rpm packages
 ```
 
-To build `.rpm` packages with `mainnet` or `babylonnet` version of tezos
-binaries.
+To build `.rpm` packages with tezos binaries.
 
 ## For Contributors
 

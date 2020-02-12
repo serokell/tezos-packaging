@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: MPL-2.0
 { stdenv, writeTextFile, writeScript, runCommand, toLower }:
 pkgDesc:
-{ date, builderInfo }:
+{ date, builderInfo, ubuntuVersion }:
 
 let
   project = toLower pkgDesc.project;
@@ -37,7 +37,7 @@ let
   writeChangelogFile = writeTextFile {
     name = "changelog";
     text = ''
-      ${project} (0ubuntu${version}-${revision}) xenial; urgency=medium
+      ${project} (0ubuntu${version}-${revision}) ${ubuntuVersion}; urgency=medium
 
         * Publish ${revision} revision of ${project}.
 

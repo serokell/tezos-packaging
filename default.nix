@@ -1,8 +1,9 @@
 # SPDX-FileCopyrightText: 2019 TQ Tezos <https://tqtezos.com/>
 #
 # SPDX-License-Identifier: MPL-2.0
-{ pkgs ? import <nixpkgs> { }, timestamp ? "19700101"
-, date ? "Thu, 1 Jan 1970 10:00:00 +0300", builderInfo ? "", patches ? [] }:
+{ pkgs ? import <nixpkgs> { }, timestamp ? "19700101", patches ? []
+, date ? "Thu, 1 Jan 1970 10:00:00 +0300", builderInfo ? ""
+, ubuntuVersion ? "bionic"}:
 with pkgs;
 
 let
@@ -115,7 +116,7 @@ let
     import ./packageSourceDeb.nix {
       inherit stdenv writeTextFile writeScript runCommand;
       inherit (lib) toLower;
-    } packageDesc { inherit date builderInfo; };
+    } packageDesc { inherit date builderInfo ubuntuVersion; };
   buildSourceRpm = packageDesc:
     import ./packageRpm.nix {
       inherit stdenv writeTextFile gnutar rpm buildFHSUserEnv;
@@ -142,11 +143,9 @@ let
   buildSourceDebInVM = pkgDesc:
     runInLinuxImage ((buildSourceDeb pkgDesc) // { diskImage = ubuntuImage; });
 
-  deb-source-packages =
-    moveDerivations (map buildSourceDebInVM packageDescs);
+  deb-source-packages = moveDerivations (map buildSourceDebInVM packageDescs);
 
-  rpm-source-packages =
-    moveDerivations (map buildSourceRpm packageDescs);
+  rpm-source-packages = moveDerivations (map buildSourceRpm packageDescs);
 
   releaseFile = writeTextFile {
     name = "release-notes.md";

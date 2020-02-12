@@ -127,9 +127,13 @@ you can do this by running the following commands:
 ```
 nix-build -A deb-source-packages -o deb-source-packages \
 --arg builderInfo "\"Roman Melnikov <roman.melnikov@serokell.io>\"" \
---arg timestamp "$(date +\"%Y%m%d%H%M\")" --arg date "\"$(date -R)\""
+--arg timestamp "$(date +\"%Y%m%d%H%M\")" --arg date "\"$(date -R)\"" \
+--arg ubuntuVersion "\"bionic\""
 # Note that buildInfo should contain information about user how is capable
 # in publishing packages on PPA
+# Also you can specify ubuntu version you're building packages for.
+# "bionic" (18.04 LTS) is default version. Consider building packages
+# for "eoan" and "xenial" as well.
 
 # Copy files from /nix/store
 mkdir -p source-packages

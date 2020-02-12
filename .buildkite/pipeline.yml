@@ -15,18 +15,12 @@ steps:
    label: crossref-verify
    soft_fail: true
  - commands:
-   - nix-build -A mainnet-binaries -o mainnet-binaries
-   - nix-build -A babylonnet-binaries -o babylonnet-binaries
+   - nix-build -A binaries -o binaries
    - nix-build -A deb-packages -o deb-packages --arg timestamp ${cur_date}
    - nix-build -A rpm-packages -o rpm-packages --arg timestamp ${cur_date}
    label: build and package
    artifact_paths:
-     - ./mainnet-binaries/*
-     - ./babylonnet-binaries/*
-     - ./mainnet-rpm-package/*
-     - ./mainnet-deb-package/*
-     - ./babylonnet-rpm-package/*
-     - ./babylonnet-deb-package/*
+     - ./binaries/*
      - ./deb-packages/*
      - ./rpm-packages/*
    branches: !master

@@ -40,13 +40,12 @@ see [PPA](#ppa) and [Copr](#copr) for more information about remote package repo
 Contents of release:
 * `tezos-*-005-PsBabyM1` static binaries for 005 protocol.
 * `tezos-*-006-PsCARTHA` static binaries for 006 protocol.
-* `packages-deb.tar.gz` `.deb` packages for both mainnet and babylonnet versions,
+* `packages-deb.tar.gz` `.deb` packages with binaries built from master branch sources,
 it is recommended to use `apt` to install packages directly from remote repository.
-* `packages-rpm.tar.gz` `.rpm` packages for both mainnet and babylonnet versions,
+* `packages-rpm.tar.gz` `.rpm` packages with binaries built from master branch sources,
 it is recommended to use `dnf` to install packages directly from remote repository.
 * `binaries-<revision>.tar.gz` archive with all binaries made from
 particular master branch revision.
-binaries made from particular branch revision.
 * License file from [tezos repository](https://gitlab.com/tezos/tezos/).
 
 ## Ubuntu (Debian based distros) usage
@@ -55,11 +54,13 @@ binaries made from particular branch revision.
 ### Use PPA with `tezos-*` binaries
 
 If you are using Ubuntu you can use PPA in order to install `tezos-*` executables.
-E.g, in order to do install `tezos-client` run the following commands:
+E.g, in order to do install `tezos-client` or `tezos-baker` run the following commands:
 ```
 sudo add-apt-repository ppa:serokell/tezos && sudo apt-get update
 sudo apt-get install tezos-client
-sudo apt-get install tezos-baker-005-PsBabyM1
+# dpkg-source prohibits uppercase in the packages names so the protocol
+# name is in lowercase
+sudo apt-get install tezos-baker-005-psbabym1
 ```
 Once you install such packages the commands `tezos-*` will be available.
 
@@ -78,7 +79,7 @@ sudo apt install <path to deb file>
 
 If you are using Fedora you can use Copr in order to install `tezos-*`
 executables.
-E.g. in order to install `tezos-client` run the following commands:
+E.g. in order to install `tezos-client` or `tezos-baker` run the following commands:
 ```
 # use dnf
 sudo dnf copr enable @Serokell/Tezos

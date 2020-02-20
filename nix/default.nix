@@ -365,7 +365,7 @@ let
 
         minimumOCamlVersion = "4.07";
 
-        patches = [ branchInfo.patchFile ];
+        patches = branchInfo.patches;
         src = fetchgit {
           url = "https://gitlab.com/tezos/tezos.git/";
           rev = branchInfo.rev;

@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2019 TQ Tezos <https://tqtezos.com/>
 #
 # SPDX-License-Identifier: MPL-2.0
-{ pkgs ? import <nixpkgs> { }, timestamp ? "19700101" }:
+{ pkgs ? import <nixpkgs> { }, timestamp ? "19700101", patches ? [] }:
 with pkgs;
 
 let
@@ -18,7 +18,7 @@ let
   master = {
     rev = "60b977cd";
     sha256 = "1v9v5z5i3cs9jw48m3xx9w4fqkns37nn464fr7hds7wgmwfmf1sp";
-    patchFile = ./nix/fix-master.patch;
+    patches = [ ./nix/fix-master.patch ] ++ patches;
     inherit protocols;
   };
   static-nix = import ./nix/static.nix;

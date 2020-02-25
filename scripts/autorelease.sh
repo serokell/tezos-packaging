@@ -14,10 +14,7 @@ assets_dir=$TEMPDIR/assets
 # Build release.nix
 nix-build release.nix -o "$TEMPDIR"/"$project" --arg timestamp "$(date +\"%Y%m%d%H%M\")"
 mkdir -p "$assets_dir"
-# Create archives with deb and rpm packages
-tar -cvzf "$assets_dir"/packages-deb.tar.gz --mode='u+rwX' -C "$TEMPDIR"/"$project" $(cd "$TEMPDIR"/"$project" && ls *.deb)
-tar -cvzf "$assets_dir"/packages-rpm.tar.gz --mode='u+rwX' -C "$TEMPDIR"/"$project" $(cd "$TEMPDIR"/"$project" && ls *.rpm)
-# Move these archives to assets
+# Move archive with binaries and tezos license to assets
 cp "$TEMPDIR"/"$project"/*.tar.gz "$assets_dir"
 cp "$TEMPDIR"/"$project"/LICENSE "$assets_dir"
 # Unpack binaries

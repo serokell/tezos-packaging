@@ -12,7 +12,7 @@ This repo provides various form of distribution for tezos-related executables
 (`tezos-client`, `tezos-client-admin`, `tezos-node`, `tezos-baker`,
 `tezos-accuser`, `tezos-endorser`, `tezos-signer` and `tezos-protocol-compiler`).
 
-## Obtain binaries or packages from github release
+## Obtain binaries from github release
 
 Recomended way to get these binaries is to download them from assets from github release.
 Go to the [latest release](https://github.com/serokell/tezos-packaging/releases/latest)
@@ -22,7 +22,7 @@ We provide both individual and archived binaries from master branch sources
 in order to be able to have static links for these binaries, also make it convenient
 to download single binary or obtain all binaries in one click.
 
-Some of the individual binaries (as well as Ubuntu/Fedora packages) contain protocol name
+Some of the individual binaries contain protocol name
 to determine with which protocol binary is compatible with, specifically `005_PsBabyM1`
 protocol is currently used in `mainnet` and `babylonnet`, `006_PsCARTHA` protocol
 is currently used in `carthagenet`.
@@ -32,26 +32,15 @@ option ([more information](http://tezos.gitlab.io/user/multinetwork.html) about 
 and `tezos-client` is compatible with any network node (Note that this is true only for binaries
 built from master branch sources).
 
-In addition to the binaries we provide all `.deb` and `.rpm` packages in `.tar.gz` archives
-for those who want to install them using local `.deb` or `.rpm` file.
-However, recommended way is to use remote Ubuntu or Fedora package repository,
-see [PPA](#ppa) and [Copr](#copr) for more information about remote package repositories.
-
 Contents of release:
 * `tezos-*-005-PsBabyM1` static binaries for 005 protocol.
 * `tezos-*-006-PsCARTHA` static binaries for 006 protocol.
-* `packages-deb.tar.gz` `.deb` packages with binaries built from master branch sources,
-it is recommended to use `apt` to install packages directly from remote repository.
-* `packages-rpm.tar.gz` `.rpm` packages with binaries built from master branch sources,
-it is recommended to use `dnf` to install packages directly from remote repository.
+* `tezos-*` static binaries that can be used with any protocol.
 * `binaries-<revision>.tar.gz` archive with all binaries made from
 particular master branch revision.
 * License file from [tezos repository](https://gitlab.com/tezos/tezos/).
 
-## Ubuntu (Debian based distros) usage
-
-<a name="ppa"></a>
-### Use PPA with `tezos-*` binaries
+## Ubuntu Launchpad PPA with `tezos-*` binaries
 
 If you are using Ubuntu you can use PPA in order to install `tezos-*` executables.
 E.g, in order to do install `tezos-client` or `tezos-baker` run the following commands:
@@ -64,18 +53,7 @@ sudo apt-get install tezos-baker-005-psbabym1
 ```
 Once you install such packages the commands `tezos-*` will be available.
 
-### Install `.deb` package locally
-
-As an alternative, you can download `.deb` file from release assets
-(they are located in `deb-packages.tar.gz` archive) and double-click on it or run:
-```
-sudo apt install <path to deb file>
-```
-
-## Fedora (Red Hat) usage
-
-<a name="copr"></a>
-### Use copr package with `tezos-*` binaries
+## Fedora Copr repository with `tezos-*` binaries
 
 If you are using Fedora you can use Copr in order to install `tezos-*`
 executables.
@@ -91,14 +69,6 @@ sudo yum copr enable @Serokell/Tezos
 sudo yum install tezos-baker-005-PsBabyM1
 ```
 Once you install such packages the commands `tezos-*` will be available.
-
-### Install `.rpm` package
-
-As an alternative, you can download `.rpm` file from release assets
-(they are located in `rpm-packages.tar.gz` archive) and double-click on it or run:
-```
-sudo yum localinstall <path to the rpm file>
-```
 
 ## Other Linux distros usage
 
@@ -131,6 +101,7 @@ make binaries
 
 To produce `tar.gz` archive tezos binaries.
 
+<a name="deb"></a>
 ### Ubuntu `.deb` packages
 
 Run the following command:
@@ -140,10 +111,15 @@ nix-build -A deb-packages -o deb-packages --arg timestamp $(date +"%Y%m%d%H%M")
 
 Or use Makefile:
 ```bash
-make deb-packages #build deb package
+make deb-packages #build deb packages
 ```
 
 To build `.deb` packages with tezos binaries.
+
+Once you built them, you can install `.deb` packages using the following command:
+```
+sudo apt install <path to deb file>
+```
 
 ### Fedora `.rpm` packages
 
@@ -158,6 +134,11 @@ make rpm-packages #build rpm packages
 ```
 
 To build `.rpm` packages with tezos binaries.
+
+Once you built them, you can install `.rpm` packages using the following command:
+```
+sudo yum localinstall <path to the rpm file>
+```
 
 ## For Contributors
 

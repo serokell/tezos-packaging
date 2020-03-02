@@ -119,6 +119,7 @@ To build `.deb` packages with tezos binaries.
 Once you built them, you can install `.deb` packages using the following command:
 ```
 sudo apt install <path to deb file>
+```
 
 ### Publish packages on Launchpad PPA
 

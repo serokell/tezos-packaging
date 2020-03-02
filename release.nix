@@ -3,7 +3,12 @@
 # SPDX-License-Identifier: MPL-2.0
 { pkgs ? import <nixpkgs> { }, timestamp ? "19700101" }:
 let
-  ignored_closures = [ "deb-packages" "rpm-packages" ];
+  ignored_closures = [
+    "deb-packages"
+    "rpm-packages"
+    "deb-source-packages"
+    "rpm-source-packages"
+  ];
   closures = builtins.attrValues
     (pkgs.lib.filterAttrs (n: v: !(builtins.elem n ignored_closures))
       (import ./. { inherit pkgs timestamp; }));

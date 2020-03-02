@@ -63,7 +63,7 @@ let
   };
 
 in stdenv.mkDerivation rec {
-  rpmBuildFlag = if buildSourcePackage then "-ba" else "-bb";
+  rpmBuildFlag = if buildSourcePackage then "-bs" else "-bb";
   name = "${pkgName}.rpm";
 
   phases = "packagePhase";
@@ -82,8 +82,7 @@ in stdenv.mkDerivation rec {
     cp ${licenseFile} BUILD/${project}/LICENSE
     rpmbuild-env ${rpmBuildFlag} SPECS/${project}.spec --define '_bindir /usr/bin' --define '_datadir /usr/share'
     mkdir -p $out
-    ${if buildSourcePackage then "cp SRPMS/*.src.rpm $out/" else ""}
-    cp RPMS/*/*.rpm $out/
+    ${if buildSourcePackage then "cp SRPMS/*.src.rpm $out/" else "cp RPMS/*/*.rpm $out/"}
   '';
 
 }

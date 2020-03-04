@@ -8,6 +8,7 @@ let
     "rpm-packages"
     "deb-source-packages"
     "rpm-source-packages"
+    "test-binaries"
   ];
   closures = builtins.attrValues
     (pkgs.lib.filterAttrs (n: v: !(builtins.elem n ignored_closures))

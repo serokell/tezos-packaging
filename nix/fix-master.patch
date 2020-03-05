@@ -80,6 +80,51 @@ index d1b60c7..a738ef2 100644
  
  (alias
   (name runtest_lint)
+diff --git a/src/proto_006_PsCARTHA/bin_accuser/dune b/src/proto_006_PsCARTHA/bin_accuser/dune
+index e99ac8f..5afd74b 100644
+--- a/src/proto_006_PsCARTHA/bin_accuser/dune
++++ b/src/proto_006_PsCARTHA/bin_accuser/dune
+@@ -10,7 +10,9 @@
+                    -open Tezos_client_commands
+                    -open Tezos_baking_006_PsCARTHA_commands
+                    -open Tezos_stdlib_unix
+-                   -open Tezos_client_base_unix)))
++                   -open Tezos_client_base_unix
++                   -ccopt -static
++                   -cclib "-lusb-1.0 -lhidapi-libusb -ludev")))
+ 
+ (alias
+  (name runtest_lint)
+diff --git a/src/proto_006_PsCARTHA/bin_baker/dune b/src/proto_006_PsCARTHA/bin_baker/dune
+index d96ef4c..baa8598 100644
+--- a/src/proto_006_PsCARTHA/bin_baker/dune
++++ b/src/proto_006_PsCARTHA/bin_baker/dune
+@@ -10,7 +10,9 @@
+                    -open Tezos_client_commands
+                    -open Tezos_baking_006_PsCARTHA_commands
+                    -open Tezos_stdlib_unix
+-                   -open Tezos_client_base_unix)))
++                   -open Tezos_client_base_unix
++                   -ccopt -static
++                   -cclib "-lusb-1.0 -lhidapi-libusb -ludev")))
+ 
+ (alias
+  (name runtest_lint)
+diff --git a/src/proto_006_PsCARTHA/bin_endorser/dune b/src/proto_006_PsCARTHA/bin_endorser/dune
+index c675ab3..ac0f52b 100644
+--- a/src/proto_006_PsCARTHA/bin_endorser/dune
++++ b/src/proto_006_PsCARTHA/bin_endorser/dune
+@@ -10,7 +10,9 @@
+                    -open Tezos_client_commands
+                    -open Tezos_baking_006_PsCARTHA_commands
+                    -open Tezos_stdlib_unix
+-                   -open Tezos_client_base_unix)))
++                   -open Tezos_client_base_unix
++                   -ccopt -static
++                   -cclib "-lusb-1.0 -lhidapi-libusb -ludev")))
+ 
+ (alias
+  (name runtest_lint)
 diff --git a/src/bin_signer/dune b/src/bin_signer/dune
 index e4c9a7c..2a5f941 100644
 --- a/src/bin_signer/dune

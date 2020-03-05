@@ -1,9 +1,9 @@
 # SPDX-FileCopyrightText: 2019 TQ Tezos <https://tqtezos.com/>
 #
 # SPDX-License-Identifier: MPL-2.0
-{ pkgs ? import <nixpkgs> { }, timestamp ? "19700101", patches ? []
+{ pkgs ? import <nixpkgs> { }, timestamp ? "19700101", patches ? [ ]
 , date ? "Thu, 1 Jan 1970 10:00:00 +0300", builderInfo ? ""
-, ubuntuVersion ? "bionic"}:
+, ubuntuVersion ? "bionic" }:
 with pkgs;
 
 let
@@ -164,7 +164,15 @@ let
     cp ${releaseFile} $out/
   '';
 
+  test-binaries = runCommand "test-binaries" { inherit tezos-static-master; } ''
+    for f in ${tezos-static-master}/bin/*; do
+      echo "$f"
+      "$f" --help &> /dev/null
+    done
+    mkdir -p $out
+  '';
+
 in rec {
   inherit deb-packages deb-source-packages rpm-source-packages rpm-packages
-    binaries tezos-license releaseNotes;
+    binaries tezos-license releaseNotes test-binaries;
 }

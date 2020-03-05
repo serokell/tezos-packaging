@@ -23,7 +23,11 @@ steps:
      - ./binaries/*
      - ./deb-packages/*
      - ./rpm-packages/*
-   branches: !master
+   branches: "!master"
+ - commands:
+   - nix-build -A test-binaries --no-out-link
+   label: test binaries
+   branches: "!master"
  - commands:
    - GITHUB_TOKEN=$(cat ~/niv-bot-token) ./scripts/autorelease.sh
    label: create auto pre-release

@@ -4,11 +4,18 @@
 #
 # SPDX-License-Identifier: MPL-2.0
 
+set -euo pipefail
+
 # Project name, inferred from repository name
 project=$(basename "$(pwd)")
 
 # The directory in which artifacts will be created
 TEMPDIR=$(mktemp -d)
+function finish {
+  rm -rf "$TEMPDIR"
+}
+trap finish EXIT
+
 assets_dir=$TEMPDIR/assets
 
 # Build release.nix
@@ -20,8 +27,8 @@ cp "$TEMPDIR"/"$project"/LICENSE "$assets_dir"
 # Unpack binaries
 tar -C "$assets_dir" -xvzf "$TEMPDIR"/"$project"/binaries-*.tar.gz
 
-# Delete release
-hub release delete auto-release
+# Delete release if it exists
+hub release delete auto-release || true
 
 # Update the tag
 git fetch # So that the script can be run from an arbitrary checkout

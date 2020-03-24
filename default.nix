@@ -18,8 +18,8 @@ let
   };
   protocols = [ protocol005 protocol006 ];
   master = {
-    rev = "60b977cd";
-    sha256 = "1v9v5z5i3cs9jw48m3xx9w4fqkns37nn464fr7hds7wgmwfmf1sp";
+    rev = "0737ae7a";
+    sha256 = "0hp4dh5xazgs894bx1v77vc1zfcgwg3ls3mqy3ylvrnbhhqx0m3x";
     patches = [ ./nix/fix-master.patch ] ++ patches;
     inherit protocols;
   };

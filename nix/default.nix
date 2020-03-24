@@ -5,7 +5,97 @@
 branchInfo:
 
 let
-  oca = pkgs.ocaml-ng.ocamlPackages_4_07.overrideScope' (self: super: {
+  oca = pkgs.ocaml-ng.ocamlPackages_4_09.overrideScope' (self: super: {
+    sexplib0 = self.callPackage ({ stdenv, fetchFromGitHub, buildDunePackage }:
+      buildDunePackage rec {
+        pname = "sexplib0";
+        version = "0.13.0";
+
+        minimumOCamlVersion = "4.04.2";
+
+        src = fetchFromGitHub {
+          owner = "janestreet";
+          repo = "${pname}";
+          rev = "v${version}";
+          sha256 = "1b1bk0xs1hqa12qs5y4h1yl3mq6xml4ya2570dyhdn1j0fbw4g3y";
+        };
+
+        buildInputs = [ ];
+        doCheck = true;
+      }) { };
+    parsexp = self.callPackage
+      ({ stdenv, fetchFromGitHub, buildDunePackage, sexplib0, base }:
+        buildDunePackage rec {
+          pname = "parsexp";
+          version = "0.13.0";
+
+          minimumOCamlVersion = "4.04.2";
+
+          src = fetchFromGitHub {
+            owner = "janestreet";
+            repo = "${pname}";
+            rev = "v${version}";
+            sha256 = "0fsxy5lpsvfadj8m2337j8iprs294dfikqxjcas7si74nskx6l38";
+          };
+
+          buildInputs = [ sexplib0 base ];
+          doCheck = true;
+        }) { };
+    sexplib = self.callPackage
+      ({ stdenv, fetchFromGitHub, buildDunePackage, sexplib0, base, num, parsexp }:
+        buildDunePackage rec {
+          pname = "sexplib";
+          version = "0.13.0";
+
+          minimumOCamlVersion = "4.04.2";
+
+          src = fetchFromGitHub {
+            owner = "janestreet";
+            repo = "${pname}";
+            rev = "v${version}";
+            sha256 = "059ypcyirw00x6dqa33x49930pwxcr3i72qz5pf220js2ai2nzhn";
+          };
+
+          buildInputs = [ sexplib0 base num parsexp ];
+          doCheck = true;
+        }) { };
+    base = self.callPackage
+      ({ stdenv, fetchFromGitHub, buildDunePackage, sexplib0 }:
+        buildDunePackage rec {
+          pname = "base";
+          version = "0.13.1";
+
+          minimumOCamlVersion = "4.04.2";
+
+          src = fetchFromGitHub {
+            owner = "janestreet";
+            repo = "${pname}";
+            rev = "v${version}";
+            sha256 = "08a5aymcgr5svvm8v0v20msd5cad64m6maakfbhz4172g7kd9jzw";
+          };
+
+          buildInputs = [ sexplib0 ];
+          doCheck = true;
+        }) { };
+    stdio = self.callPackage
+      ({ stdenv, fetchFromGitHub, buildDunePackage, base, sexplib0 }:
+
+        buildDunePackage rec {
+          pname = "stdio";
+          version = "0.13.0";
+
+          minimumOCamlVersion = "4.04.2";
+
+          src = fetchFromGitHub {
+            owner = "janestreet";
+            repo = "${pname}";
+            rev = "v${version}";
+            sha256 = "1hkj9vh8n8p3n5pvx7053xis1pfmqd8p7shjyp1n555xzimfxzgh";
+          };
+
+          buildInputs = [ base sexplib0 ];
+          doCheck = true;
+        }) { };
     bigstring = self.callPackage
       ({ stdenv, fetchFromGitHub, buildDunePackage, base }:
 
@@ -59,7 +149,7 @@ let
           buildInputs = [ ocamlbuild ];
           buildPhase = "make build";
           installPhase = ''
-            mkdir -p $out/lib/ocaml/4.07.1/site-lib
+            mkdir -p $out/lib/ocaml/4.09.0/site-lib
             make install
           '';
           doCheck = false;
@@ -93,7 +183,7 @@ let
           minimumOCamlVersion = "4.03";
           buildPhase = "";
           installPhase = ''
-            mkdir -p $out/lib/ocaml/4.07.1/site-lib
+            mkdir -p $out/lib/ocaml/4.09.0/site-lib
             make install
           '';
 
@@ -145,7 +235,7 @@ let
             make
           '';
           installPhase = ''
-            mkdir -p $out/lib/ocaml/4.07.1/site-lib
+            mkdir -p $out/lib/ocaml/4.09.0/site-lib
             make install-findlib
           '';
 
@@ -193,7 +283,13 @@ let
         rev = "v${version}";
         sha256 = "0v4lxc6g9mavx8nk7djzsvx1blw5wsjn2cg6k6a35fyv64xmwd73";
       };
-      propagatedBuildInputs = o.propagatedBuildInputs ++ [ self.sexplib ];
+      propagatedBuildInputs = o.propagatedBuildInputs ++ [ self.sexplib self.parsexp ];
+    });
+    cstruct-sexp = super.cstruct-sexp.overrideDerivation (o: rec {
+      propagatedBuildInputs = o.propagatedBuildInputs ++ [ self.parsexp self.sexplib0 self.base ];
+    });
+    ppx_cstruct = super.ppx_cstruct.overrideDerivation (o: rec {
+      propagatedBuildInputs = o.propagatedBuildInputs ++ [ self.parsexp ];
     });
     conduit-lwt-unix = super.conduit-lwt-unix.overrideDerivation (o: rec {
       version = "2.0.1";
@@ -206,16 +302,116 @@ let
       propagatedBuildInputs = [ self.conduit-lwt self.logs self.tls ];
     });
     cohttp = super.cohttp.overrideDerivation (o: rec {
-      version = "2.3.0";
-      name = "cohttp-2.3.0";
+      version = "2.5.1";
+      name = "cohttp-2.5.1";
       src = pkgs.fetchFromGitHub {
         owner = "mirage";
         repo = "ocaml-${o.pname}";
         rev = "v${version}";
-        sha256 = "0fag9zhv1lhbq1p4p1cmbav009x2d79kq3iv04pisj5y071qhhvr";
+        sha256 = "1rjdsc2d3y65rlqpjq3xqjjr1wxzqqbyjdg5z29vajncvyrpzk1z";
       };
       propagatedBuildInputs = o.propagatedBuildInputs ++ [ self.stdlib-shims ];
     });
+    ocaml-compilers-libs = self.callPackage
+      ({ stdenv, fetchFromGitHub, buildDunePackage }:
+        buildDunePackage rec {
+          pname = "ocaml-compilers-libs";
+          version = "0.12.1";
+          src = pkgs.fetchFromGitHub {
+            owner = "janestreet";
+            repo = "${pname}";
+            rev = "v${version}";
+            sha256 = "0jkhwmkrfq3ss5bv6i3m861alcr4ypngs6ci6bmzv3yfl7s8bwdf";
+          };
+          propagatedBuildInputs = [ ];
+        }) { };
+    ppx_derivers = self.callPackage
+      ({ stdenv, fetchFromGitHub, buildDunePackage, base, sexplib0, stdio }:
+        buildDunePackage rec {
+          pname = "ppx_derivers";
+          version = "1.2.1";
+          src = pkgs.fetchFromGitHub {
+            owner = "ocaml-ppx";
+            repo = "${pname}";
+            rev = "${version}";
+            sha256 = "0yqvqw58hbx1a61wcpbnl9j30n495k23qmyy2xwczqs63mn2nkpn";
+          };
+          propagatedBuildInputs = [ base sexplib0 stdio ];
+        }) { };
+    ppxlib = self.callPackage ({ stdenv, fetchFromGitHub, buildDunePackage, base
+      , sexplib0, stdio, ppx_derivers, ocaml-compiler-libs
+      , ocaml-migrate-parsetree }:
+      buildDunePackage rec {
+        pname = "ppxlib";
+        minimumOCamlVersion = "4.04";
+        version = "0.12.0";
+        src = pkgs.fetchFromGitHub {
+          owner = "ocaml-ppx";
+          repo = "${pname}";
+          rev = "${version}";
+          sha256 = "1cg0is23c05k1rc94zcdz452p9zn11dpqxm1pnifwx5iygz3w0a1";
+        };
+        propagatedBuildInputs = [
+          base
+          sexplib0
+          stdio
+          ppx_derivers
+          ocaml-compiler-libs
+          ocaml-migrate-parsetree
+        ];
+      }) { };
+    ppx_sexp_conv = self.callPackage
+      ({ stdenv, fetchFromGitHub, buildDunePackage, base, sexplib0, ppxlib }:
+        buildDunePackage rec {
+          pname = "ppx_sexp_conv";
+          minimumOCamlVersion = "4.04";
+          version = "0.13.0";
+          src = pkgs.fetchFromGitHub {
+            owner = "janestreet";
+            repo = "${pname}";
+            rev = "v${version}";
+            sha256 = "0jkhwmkrfq3ss6bv6i3m871alcr4xpngs6ci6bmzv3yfl7s8bwdf";
+          };
+          propagatedBuildInputs = [ base sexplib0 ppxlib ];
+        }) { };
+    cohttp-lwt = super.cohttp-lwt.overrideDerivation (o: rec {
+      version = "2.5.1";
+      name = "cohttp-lwt";
+      src = pkgs.fetchFromGitHub {
+        owner = "mirage";
+        repo = "ocaml-cohttp";
+        rev = "v${version}";
+        sha256 = "1rjdsc2d3y65rlqpjq3xqjjr1wxzqqbyjdg5z29vajncvyrpzk1z";
+      };
+      propagatedBuildInputs = o.propagatedBuildInputs
+        ++ [ self.stdlib-shims self.sexplib0 self.ppx_sexp_conv ];
+    });
+    fieldslib = self.callPackage
+      ({ stdenv, fetchFromGitHub, buildDunePackage, base, sexplib0 }:
+        buildDunePackage rec {
+          pname = "fieldslib";
+          version = "0.13.0";
+          src = pkgs.fetchFromGitHub {
+            owner = "janestreet";
+            repo = "${pname}";
+            rev = "v${version}";
+            sha256 = "0nsl0i9vjk73pr70ksxqa65rd5v84jzdaazryfdy6i4a5sfg7bxa";
+          };
+          propagatedBuildInputs = [ base sexplib0 ];
+        }) { };
+    ppx_fields_conv = self.callPackage ({ stdenv, fetchFromGitHub
+      , buildDunePackage, base, sexplib0, ppxlib, fieldslib }:
+      buildDunePackage rec {
+        pname = "ppx_fields_conv";
+        version = "0.13.0";
+        src = pkgs.fetchFromGitHub {
+          owner = "janestreet";
+          repo = "${pname}";
+          rev = "v${version}";
+          sha256 = "0biw0fgphj522bj9wgjk263i2w92vnpaabzr5zn0grihp4yqy8w4";
+        };
+        propagatedBuildInputs = [ base sexplib0 ppxlib fieldslib ];
+      }) { };
     domain-name = self.callPackage
       ({ stdenv, fetchFromGitHub, buildDunePackage, fmt, astring }:
         buildDunePackage rec {
@@ -245,7 +441,7 @@ let
           buildInputs = [ ocamlbuild ];
           buildPhase = "";
           installPhase = ''
-            mkdir -p $out/lib/ocaml/4.07.1/site-lib
+            mkdir -p $out/lib/ocaml/4.09.0/site-lib
             make install
           '';
           doCheck = false;
@@ -266,8 +462,8 @@ let
           buildInputs = [ pprint astring base ];
           buildPhase = "";
           installPhase = ''
-            mkdir -p $out/lib/ocaml/4.07.1/site-lib
-            mkdir -p $out/lib/ocaml/4.07.1/bin
+            mkdir -p $out/lib/ocaml/4.09.0/site-lib
+            mkdir -p $out/lib/ocaml/4.09.0/bin
             make install
           '';
           doCheck = false;
@@ -281,6 +477,10 @@ let
         rev = "v${version}";
         sha256 = "064j9pzy01p3dv947khqyn7fkjbs3jmrqsg8limb4abnlaqxxs2s";
       };
+      propagatedBuildInputs = o.propagatedBuildInputs ++ [ self.parsexp self.sexplib0 self.base ];
+    });
+    nocrypto = super.nocrypto.overrideDerivation (o: rec {
+      propagatedBuildInputs = o.propagatedBuildInputs ++ [ self.parsexp ];
     });
     fmt = super.fmt.overrideDerivation (o: rec {
       version = "0.8.8";
@@ -352,13 +552,187 @@ let
         doCheck = false;
       }) { };
 
+    data-encoding = self.callPackage ({ buildDunePackage, json-data-encoding
+      , json-data-encoding-bson, ezjsonm, zarith, uri, ocplib-endian }:
+      buildDunePackage rec {
+        pname = "data-encoding";
+        version = "0.2";
+
+        minimumOCamlVersion = "4.03";
+        src = builtins.fetchTarball {
+          url =
+            "https://gitlab.com/nomadic-labs/data-encoding/-/archive/0.2/data-encoding-0.2.tar.gz";
+          sha256 = "0d9c2ix2imqk4r0jfhnwak9laarlbsq9kmswvbnjzdm2g0hwin1d";
+        };
+        buildInputs = [
+          json-data-encoding
+          json-data-encoding-bson
+          ezjsonm
+          zarith
+          uri
+          ocplib-endian
+        ];
+        doCheck = false;
+      }) { };
+
+    resto = self.callPackage ({ buildDunePackage, json-data-encoding
+      , json-data-encoding-bson, uri, ocplib-endian, lwt4 }:
+      buildDunePackage rec {
+        pname = "resto";
+        version = "0.4";
+
+        minimumOCamlVersion = "4.03";
+        src = builtins.fetchTarball {
+          url =
+            "https://gitlab.com/nomadic-labs/resto/-/archive/v0.4/resto-v0.4.tar.gz";
+          sha256 = "0v0cyf8na21fnvy3abhhnnw8msh16dqcrp61pzaxj839rm62h3vy";
+        };
+        buildInputs =
+          [ json-data-encoding json-data-encoding-bson uri ocplib-endian lwt4 ];
+        doCheck = false;
+      }) { };
+
+    resto-json = self.callPackage ({ buildDunePackage, json-data-encoding
+      , json-data-encoding-bson, uri, ocplib-endian, lwt4, resto }:
+      buildDunePackage rec {
+        pname = "resto-json";
+        version = "0.4";
+
+        minimumOCamlVersion = "4.03";
+        src = builtins.fetchTarball {
+          url =
+            "https://gitlab.com/nomadic-labs/resto/-/archive/v0.4/resto-v0.4.tar.gz";
+          sha256 = "0v0cyf8na21fnvy3abhhnnw8msh16dqcrp61pzaxj839rm62h3vy";
+        };
+        buildInputs = [
+          json-data-encoding
+          json-data-encoding-bson
+          uri
+          ocplib-endian
+          lwt4
+          resto
+        ];
+        doCheck = false;
+      }) { };
+
+    resto-directory = self.callPackage ({ buildDunePackage, json-data-encoding
+      , json-data-encoding-bson, uri, ocplib-endian, lwt4, resto, resto-json }:
+      buildDunePackage rec {
+        pname = "resto-directory";
+        version = "0.4";
+
+        minimumOCamlVersion = "4.03";
+        src = builtins.fetchTarball {
+          url =
+            "https://gitlab.com/nomadic-labs/resto/-/archive/v0.4/resto-v0.4.tar.gz";
+          sha256 = "0v0cyf8na21fnvy3abhhnnw8msh16dqcrp61pzaxj839rm62h3vy";
+        };
+        buildInputs = [
+          json-data-encoding
+          json-data-encoding-bson
+          uri
+          ocplib-endian
+          lwt4
+          resto
+          resto-json
+        ];
+        doCheck = false;
+      }) { };
+
+    resto-cohttp = self.callPackage ({ buildDunePackage, json-data-encoding
+      , json-data-encoding-bson, uri, ocplib-endian, lwt4, resto, resto-json
+      , resto-directory, cohttp-lwt }:
+      buildDunePackage rec {
+        pname = "resto-cohttp";
+        version = "0.4";
+
+        minimumOCamlVersion = "4.03";
+        src = builtins.fetchTarball {
+          url =
+            "https://gitlab.com/nomadic-labs/resto/-/archive/v0.4/resto-v0.4.tar.gz";
+          sha256 = "0v0cyf8na21fnvy3abhhnnw8msh16dqcrp61pzaxj839rm62h3vy";
+        };
+        buildInputs = [
+          json-data-encoding
+          json-data-encoding-bson
+          uri
+          ocplib-endian
+          lwt4
+          resto
+          resto-json
+          resto-directory
+          cohttp-lwt
+        ];
+        doCheck = false;
+      }) { };
+
+    resto-cohttp-client = self.callPackage ({ buildDunePackage
+      , json-data-encoding, json-data-encoding-bson, uri, ocplib-endian, lwt4
+      , resto, resto-json, resto-directory, cohttp-lwt, resto-cohttp }:
+      buildDunePackage rec {
+        pname = "resto-cohttp-client";
+        version = "0.4";
+
+        minimumOCamlVersion = "4.03";
+        src = builtins.fetchTarball {
+          url =
+            "https://gitlab.com/nomadic-labs/resto/-/archive/v0.4/resto-v0.4.tar.gz";
+          sha256 = "0v0cyf8na21fnvy3abhhnnw8msh16dqcrp61pzaxj839rm62h3vy";
+        };
+        buildInputs = [
+          json-data-encoding
+          json-data-encoding-bson
+          uri
+          ocplib-endian
+          lwt4
+          resto
+          resto-json
+          resto-directory
+          cohttp-lwt
+          resto-cohttp
+        ];
+        doCheck = false;
+      }) { };
+
+    resto-cohttp-server = self.callPackage ({ buildDunePackage
+      , json-data-encoding, json-data-encoding-bson, uri, ocplib-endian, lwt4
+      , resto, resto-json, resto-directory, cohttp-lwt, resto-cohttp
+      , cohttp-lwt-unix }:
+      buildDunePackage rec {
+        pname = "resto-cohttp-server";
+        version = "0.4";
+
+        minimumOCamlVersion = "4.03";
+        src = builtins.fetchTarball {
+          url =
+            "https://gitlab.com/nomadic-labs/resto/-/archive/v0.4/resto-v0.4.tar.gz";
+          sha256 = "0v0cyf8na21fnvy3abhhnnw8msh16dqcrp61pzaxj839rm62h3vy";
+        };
+        buildInputs = [
+          json-data-encoding
+          json-data-encoding-bson
+          uri
+          ocplib-endian
+          lwt4
+          resto
+          resto-json
+          resto-directory
+          cohttp-lwt
+          resto-cohttp
+          cohttp-lwt-unix
+        ];
+        doCheck = false;
+      }) { };
+
     tezos = self.callPackage ({ stdenv, fetchgit, buildDunePackage, base
       , bigstring, cohttp-lwt, cohttp-lwt-unix, cstruct, ezjsonm, hex, ipaddr
       , js_of_ocaml, cmdliner, easy-format, tls, lwt4, lwt_log, mtime
       , ocplib-endian, ptime, re, rresult, stdio, uri, uutf, zarith, libusb1
       , hidapi, gmp, irmin, alcotest, dum, genspio, ocamlgraph, findlib
       , digestif, ocp-ocamlres, pprint, upx, json-data-encoding
-      , json-data-encoding-bson, lwt-canceler, lwt-watcher }:
+      , json-data-encoding-bson, lwt-canceler, lwt-watcher, data-encoding, resto
+      , resto-directory, resto-cohttp, resto-cohttp-client, resto-cohttp-server
+      }:
       buildDunePackage rec {
         pname = "tezos";
         version = "0.0.1";
@@ -412,12 +786,18 @@ let
           json-data-encoding-bson
           lwt-canceler
           lwt-watcher
+          data-encoding
+          resto
+          resto-directory
+          resto-cohttp
+          resto-cohttp-client
+          resto-cohttp-server
         ] ++ [ libusb1 libusb1.out (gmp.override { withStatic = true; }) upx ];
         doCheck = false;
         protocolsNames = map (x: x.protocolName) branchInfo.protocols;
         buildPhase = ''
           # tezos-node build requires ocp-ocamlres binary in PATH
-          PATH=$PATH:${ocp-ocamlres}/lib/ocaml/4.07.1/bin
+          PATH=$PATH:${ocp-ocamlres}/lib/ocaml/4.09.0/bin
           install_files=()
           for protocol_name in $protocolsNames; do
             protocol_suffix=$(echo "$protocol_name" | tr "_" "-")

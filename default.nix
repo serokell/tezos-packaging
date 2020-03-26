@@ -36,6 +36,7 @@ let
         tar -cvzf $out/${name} --mode='u+rwX' -C ${pathToPack} $(ls ${pathToPack})
       '';
     };
+
   binaries =
     packDirectory "binaries-${master.rev}" "${tezos-static-master}/bin";
   licenseFile = "${tezos-static-master}/LICENSE";
@@ -175,4 +176,5 @@ let
 in rec {
   inherit deb-packages deb-source-packages rpm-source-packages rpm-packages
     binaries tezos-license releaseNotes test-binaries;
+    binaries-drv = tezos-static-master;
 }

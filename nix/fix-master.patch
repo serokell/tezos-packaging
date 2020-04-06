@@ -142,7 +142,7 @@ index e4c9a7c..2a5f941 100644
  (alias
   (name runtest_lint)
 diff --git a/src/lib_protocol_compiler/dune b/src/lib_protocol_compiler/dune
-index 1142419..d8086b4 100644
+index 0902181..30fe55b 100644
 --- a/src/lib_protocol_compiler/dune
 +++ b/src/lib_protocol_compiler/dune
 @@ -65,7 +65,7 @@
@@ -155,12 +155,12 @@ index 1142419..d8086b4 100644
  
  (executable
 diff --git a/vendors/index/src/unix/dune b/vendors/index/src/unix/dune
-index 2981490..655fa7f 100644
+index 49e819d..833a3f4 100644
 --- a/vendors/index/src/unix/dune
 +++ b/vendors/index/src/unix/dune
 @@ -2,4 +2,4 @@
   (public_name index.unix)
   (name index_unix)
-  (c_names pread pwrite)
-- (libraries index logs logs.threaded threads unix))
-+ (libraries index logs threads unix))
+  (c_names fsync pread pwrite)
+- (libraries fmt index logs logs.threaded threads.posix unix))
++ (libraries fmt index logs threads.posix unix))

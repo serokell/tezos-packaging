@@ -9,7 +9,7 @@ let
     })).overrideDerivation (o:
       if o.stdenv.hostPlatform != o.stdenv.buildPlatform then {
         preConfigure = ''
-          configureFlagsArray+=("-cc" "$CC" "-as" "$AS" "-partialld" "$LD -r")
+          configureFlagsArray+=("CC=$CC" "AS=$AS" "PARTIALLD=$LD -r")
         '';
         configureFlags = o.configureFlags ++ [
           "-host ${o.stdenv.hostPlatform.config} -target ${o.stdenv.targetPlatform.config}"
@@ -23,7 +23,7 @@ let
     });
   dds = x: x.overrideAttrs (o: { dontDisableStatic = true; });
   nixpkgs-fixed = builtins.fetchTarball
-    "https://github.com/serokell/nixpkgs/archive/ocaml-cross-fixes.tar.gz";
+    "https://github.com/serokell/nixpkgs/archive/ocaml-cross-fixes-new.tar.gz";
   pkgsNative = import nixpkgs-fixed { };
   pkgs = import nixpkgs-fixed {
     crossSystem = pkgsNative.lib.systems.examples.musl64;
@@ -34,17 +34,17 @@ let
         getent = self.musl-bin;
         getconf = self.musl-bin;
         libev = dds super.libev;
-        libusb1 = dds (super.libusb1.override { systemd = self.eudev; });
+        libusb1 = dds (super.libusb1.override { systemd = self.eudev; enableSystemd = true; });
         hidapi = dds (super.hidapi.override { systemd = self.eudev; });
         glib = (super.glib.override { libselinux = null; }).overrideAttrs
           (o: { mesonFlags = o.mesonFlags ++ [ "-Dselinux=disabled" ]; });
         eudev = dds (super.eudev.overrideAttrs
           (o: { nativeBuildInputs = o.nativeBuildInputs ++ [ super.gperf ]; }));
         opaline = fixOcamlBuild (super.opaline.override {
-          ocamlPackages = self.ocaml-ng.ocamlPackages_4_07;
+          ocamlPackages = self.ocaml-ng.ocamlPackages_4_09;
         });
         ocaml-ng = super.ocaml-ng // {
-          ocamlPackages_4_07 = super.ocaml-ng.ocamlPackages_4_07.overrideScope'
+          ocamlPackages_4_09 = super.ocaml-ng.ocamlPackages_4_09.overrideScope'
             (oself: osuper: {
               ocaml = fixOcaml osuper.ocaml;
               findlib = fixOcamlBuild osuper.findlib;

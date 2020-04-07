@@ -1,0 +1,33 @@
+#!/usr/bin/env nix-shell
+#!nix-shell -p jq moreutils -i bash
+# SPDX-FileCopyrightText: 2019 TQ Tezos <https://tqtezos.com/>
+#
+# SPDX-License-Identifier: MPL-2.0
+
+edit(){
+  cat protocols.json | jq "$@" | sponge protocols.json
+}
+
+add(){
+  edit ".$1 += [\"$2\"]"
+}
+
+remove(){
+  edit "del(.$1[] | select(. == \"$2\"))"
+}
+
+removeAll(){
+  remove active $1
+  remove allowed $1
+  remove ignored $1
+}
+
+command=$1
+shift
+case $command in
+  activate) removeAll $1; add active $1;;
+  allow) removeAll $1; add allowed $1;;
+  ignore) removeAll $1; add ignored $1;;
+  forget) removeAll $1;;
+  *) jq . protocols.json
+esac

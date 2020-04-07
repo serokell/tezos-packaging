@@ -1,0 +1,56 @@
+{
+    "nixpkgs": {
+        "branch": "nixos-unstable",
+        "description": "Pinned Nixpkgs tree (master follows nixos-unstable-small, only tags have stable history)",
+        "homepage": "",
+        "owner": "nixos",
+        "repo": "nixpkgs-channels",
+        "rev": "3320a06049fc259e87a2bd98f4cd42f15f746b96",
+        "sha256": "1g5l186d5xh187vdcpfsz1ff8s749949c1pclvzfkylpar09ldkl",
+        "type": "tarball",
+        "url": "https://github.com/nixos/nixpkgs-channels/archive/3320a06049fc259e87a2bd98f4cd42f15f746b96.tar.gz",
+        "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
+    },
+    "opam-nix": {
+        "branch": "master",
+        "description": "A handy nix library to package OCaml software from OPAM repositories",
+        "homepage": null,
+        "owner": "balsoft",
+        "repo": "opam-nix",
+        "rev": "cd1ff9c88d981b83b4fbb8622328a8c42ad9336c",
+        "sha256": "0ficlpxj9nvg6l26b1jaszjhpgqfk7vdc7mgb052dss64hrzqcxb",
+        "type": "tarball",
+        "url": "https://github.com/balsoft/opam-nix/archive/cd1ff9c88d981b83b4fbb8622328a8c42ad9336c.tar.gz",
+        "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
+    },
+    "opam-repository": {
+        "branch": "master",
+        "description": "Main public package repository for OPAM, the source package manager of OCaml.",
+        "homepage": "https://opam.ocaml.org",
+        "owner": "ocaml",
+        "repo": "opam-repository",
+        "rev": "d67e70b40203a6a1c77ccb2edbe136c1509a73a3",
+        "sha256": "1yphw9xcss284p51qnml5jvfs4mhjcjgdka3wk25q0437zdzqj4n",
+        "type": "tarball",
+        "url": "https://github.com/ocaml/opam-repository/archive/d67e70b40203a6a1c77ccb2edbe136c1509a73a3.tar.gz",
+        "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
+    },
+    "tezos": {
+        "ref": "master",
+        "repo": "https://gitlab.com/tezos/tezos",
+        "rev": "e93d500e20d757a25c87a415de3f0074ec663c84",
+        "type": "git"
+    },
+    "xmldiff": {
+        "branch": "master",
+        "description": "Diffs on XML trees",
+        "homepage": "http://zoggy.github.io/xmldiff",
+        "owner": "zoggy",
+        "repo": "xmldiff",
+        "rev": "5873df80c1ba8c79287dc42e5008fac14cefffed",
+        "sha256": "0b92j9j2xdd2gyi9bgp39w0w1lkp0vc2rxq6wx6xdfvvklpprgb4",
+        "type": "tarball",
+        "url": "https://github.com/zoggy/xmldiff/archive/5873df80c1ba8c79287dc42e5008fac14cefffed.tar.gz",
+        "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
+    }
+}

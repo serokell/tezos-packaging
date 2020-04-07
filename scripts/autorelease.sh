@@ -19,13 +19,11 @@ trap finish EXIT
 assets_dir=$TEMPDIR/assets
 
 # Build release.nix
-nix-build release.nix -o "$TEMPDIR"/"$project" --arg timestamp "$(date +\"%Y%m%d%H%M\")"
+nix-build . -A release -o "$TEMPDIR"/"$project" --arg timestamp "$(date +\"%Y%m%d%H%M\")"
 mkdir -p "$assets_dir"
 # Move archive with binaries and tezos license to assets
-cp "$TEMPDIR"/"$project"/*.tar.gz "$assets_dir"
-cp "$TEMPDIR"/"$project"/LICENSE "$assets_dir"
-# Unpack binaries
-tar -C "$assets_dir" -xvzf "$TEMPDIR"/"$project"/binaries-*.tar.gz
+shopt -s extglob
+cp -L "$TEMPDIR"/"$project"/!(*.md) "$assets_dir"
 
 # Delete release if it exists
 hub release delete auto-release || true
@@ -43,4 +41,4 @@ for file in $assets_dir/*; do
 done
 
 # Create release
-hub release create "${assets[@]}" -F "$TEMPDIR"/"$project"/*-release-notes.md --prerelease auto-release
+hub release create "${assets[@]}" -F "$TEMPDIR"/"$project"/release-notes.md --prerelease auto-release

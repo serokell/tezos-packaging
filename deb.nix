@@ -1,15 +1,13 @@
 # SPDX-FileCopyrightText: 2019 TQ Tezos <https://tqtezos.com/>
 #
 # SPDX-License-Identifier: MPL-2.0
-{ stdenv, writeTextFile, dpkg }:
-pkgDesc:
-
+{ stdenv, writeTextFile, dpkg, meta }:
+pkg:
 let
-  project = pkgDesc.project;
-  version = pkgDesc.version;
-  revision = pkgDesc.gitRevision;
-  pkgArch = pkgDesc.arch;
-  bin = pkgDesc.bin;
+  project = pkg.meta.name;
+  version = meta.version;
+  revision = meta.gitRevision;
+  pkgArch = meta.arch;
   pkgName = "${project}_0ubuntu${version}-${revision}_${pkgArch}";
 
   writeControlFile = writeTextFile {
@@ -18,11 +16,11 @@ let
       Package: ${project}
       Version: ${version}-${revision}
       Priority: optional
-      Architecture: ${pkgDesc.arch}
-      Depends: ${pkgDesc.dependencies}
-      Maintainer: ${pkgDesc.maintainer}
+      Architecture: ${meta.arch}
+      Depends: ${meta.dependencies}
+      Maintainer: ${meta.maintainer}
       Description: ${project}
-       ${pkgDesc.description}
+       ${pkg.meta.description}
     '';
   };
 
@@ -36,7 +34,7 @@ in stdenv.mkDerivation rec {
   packagePhase = ''
     mkdir ${pkgName}
     mkdir -p ${pkgName}/usr/local/bin
-    cp ${bin} ${pkgName}/usr/local/bin/${project}
+    cp ${pkg}/bin/* ${pkgName}/usr/local/bin
 
     mkdir ${pkgName}/DEBIAN
     cp ${writeControlFile} ${pkgName}/DEBIAN/control

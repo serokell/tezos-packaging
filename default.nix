@@ -1,180 +1,89 @@
 # SPDX-FileCopyrightText: 2019 TQ Tezos <https://tqtezos.com/>
 #
 # SPDX-License-Identifier: MPL-2.0
-{ pkgs ? import <nixpkgs> { }, timestamp ? "19700101", patches ? [ ]
-, date ? "Thu, 1 Jan 1970 10:00:00 +0300", builderInfo ? ""
-, ubuntuVersion ? "bionic" }:
-with pkgs;
 
+{ timestamp ? "19700101", patches ? [ ], date ? "Thu, 1 Jan 1970 10:00:00 +0300"
+, builderInfo ? "", ubuntuVersion ? "bionic" }:
 let
-  root = ./.;
-  protocol005 = rec {
-    protocolName = "005_PsBabyM1";
-    binarySuffix = builtins.replaceStrings [ "_" ] [ "-" ] protocolName;
+  pkgs = import ./pkgs.nix { };
+  source = (import ./nix/sources.nix).tezos;
+  protocols = import ./protocols.nix;
+  bin = pkgs.callPackage ./bin.nix { };
+  release-binaries = import ./release-binaries.nix;
+  binaries = builtins.listToAttrs (map ({ name, ... }@meta: {
+    inherit name;
+    value = bin pkgs.pkgsMusl.ocamlPackages.${name} // { inherit meta; };
+  }) release-binaries);
+  commonMeta = {
+    gitRevision = source.rev;
+    version = toString timestamp;
+    license = "MPL-2.0";
+    dependencies = "";
+    maintainer = "Serokell https://serokell.io";
+    branchName = source.ref;
+    licenseFile = "${source}/LICENSE";
   };
-  protocol006 = rec {
-    protocolName = "006_PsCARTHA";
-    binarySuffix = builtins.replaceStrings [ "_" ] [ "-" ] protocolName;
+  rpmMeta = { arch = "x86_64"; };
+  debMeta = {
+    arch = "amd64";
+    inherit builderInfo ubuntuVersion date;
   };
-  protocols = [ protocol005 protocol006 ];
-  master = {
-    rev = "0737ae7a";
-    sha256 = "0hp4dh5xazgs894bx1v77vc1zfcgwg3ls3mqy3ylvrnbhhqx0m3x";
-    patches = [ ./nix/fix-master.patch ] ++ patches;
-    inherit protocols;
-  };
-  static-nix = import ./nix/static.nix;
-  tezos-static-master = static-nix master;
-
-  packDirectory = archiveName: pathToPack:
-    stdenv.mkDerivation rec {
-      name = "${archiveName}.tar.gz";
-      phases = "archivePhase";
-      nativeBuildInputs = [ gnutar ];
-      archivePhase = ''
-        mkdir -p $out
-        tar -cvzf $out/${name} --mode='u+rwX' -C ${pathToPack} $(ls ${pathToPack})
-      '';
-    };
-
-  binaries =
-    packDirectory "binaries-${master.rev}" "${tezos-static-master}/bin";
-  licenseFile = "${tezos-static-master}/LICENSE";
-
-  mkPackageDesc = { executableName, binPath, description }@executableDesc:
-    let
-      packageDesc = {
-        inherit description licenseFile;
-        bin = "${tezos-static-master}/${binPath}";
-        gitRevision = master.rev;
-        project = "${executableName}";
-        version = toString timestamp;
-        arch = "amd64";
-        license = "MPL-2.0";
-        dependencies = "";
-        maintainer = "Serokell https://serokell.io";
-        branchName = "master";
-      };
-    in packageDesc;
-
-  tezos-executables = [
-    {
-      executableName = "tezos-client";
-      binPath = "/bin/tezos-client";
-      description = "CLI client for interacting with tezos blockchain";
-    }
-    {
-      executableName = "tezos-admin-client";
-      binPath = "/bin/tezos-admin-client";
-      description = "Administration tool for the node";
-    }
-    {
-      executableName = "tezos-node";
-      binPath = "/bin/tezos-node";
-      description =
-        "Entry point for initializing, configuring and running a Tezos node";
-    }
-    {
-      executableName = "tezos-signer";
-      binPath = "/bin/tezos-signer";
-      description = "A client to remotely sign operations or blocks";
-    }
-  ] ++ lib.flatten (map (protocol: [
-    {
-      executableName = "tezos-baker-${protocol.binarySuffix}";
-      binPath = "/bin/tezos-baker-${protocol.binarySuffix}";
-      description = "Daemon for baking";
-    }
-    {
-      executableName = "tezos-accuser-${protocol.binarySuffix}";
-      binPath = "/bin/tezos-accuser-${protocol.binarySuffix}";
-      description = "Daemon for accusing";
-    }
-    {
-      executableName = "tezos-endorser-${protocol.binarySuffix}";
-      binPath = "/bin/tezos-endorser-${protocol.binarySuffix}";
-      description = "Daemon for endorsing";
-    }
-  ]) protocols);
-
-  tezos-license = stdenv.mkDerivation rec {
-    name = "LICENSE";
-    phases = "copyPhase";
-    copyPhase = ''
-      mkdir -p $out
-      cp ${licenseFile} $out/${name}
-    '';
-  };
-
-  packageDescs = map mkPackageDesc tezos-executables;
-
-  buildDeb = import ./packageDeb.nix { inherit stdenv writeTextFile dpkg; };
-  buildRpm = packageDesc:
-    import ./packageRpm.nix {
-      inherit stdenv writeTextFile gnutar rpm buildFHSUserEnv;
-    } (packageDesc // { arch = "x86_64"; });
-  buildSourceDeb = packageDesc:
-    import ./packageSourceDeb.nix {
-      inherit stdenv writeTextFile writeScript runCommand;
-      inherit (lib) toLower;
-    } packageDesc { inherit date builderInfo ubuntuVersion; };
-  buildSourceRpm = packageDesc:
-    import ./packageRpm.nix {
-      inherit stdenv writeTextFile gnutar rpm buildFHSUserEnv;
+  deb = builtins.mapAttrs
+    (_: pkgs.callPackage ./deb.nix { meta = commonMeta // debMeta; }) binaries;
+  rpm = builtins.mapAttrs
+    (_: pkgs.callPackage ./rpm.nix { meta = commonMeta // rpmMeta; }) binaries;
+  debSource = builtins.mapAttrs
+    (_: pkgs.callPackage ./debSource.nix { meta = commonMeta // debMeta; })
+    binaries;
+  rpmSource = builtins.mapAttrs (_:
+    pkgs.callPackage ./rpm.nix {
+      meta = commonMeta // rpmMeta;
       buildSourcePackage = true;
-    } (packageDesc // { arch = "x86_64"; });
+    }) binaries;
 
-  moveDerivations = drvs:
-    runCommand "move_derivations" { inherit drvs; } ''
-      mkdir -p $out
-      for drv in $drvs; do
-        ln -s $drv/* $out
-      done
-    '';
+  # Bundle the contents of a package set together, leaving the original attrs intact
+  bundle = name: pkgSet:
+    pkgSet // (pkgs.buildEnv {
+      inherit name;
+      paths = builtins.attrValues pkgSet;
+    });
 
-  deb-packages = moveDerivations (map buildDeb packageDescs);
-  rpm-packages = moveDerivations (map buildRpm packageDescs);
+  artifacts = { inherit binaries deb rpm debSource rpmSource; };
+  bundled = builtins.mapAttrs bundle artifacts;
+  release-notes = pkgs.writeTextDir "release-notes.md" ''
+    Automatic release on ${builtins.substring 0 8 timestamp}
 
-  inherit (vmTools)
-    makeImageFromDebDist commonDebPackages debDistros runInLinuxImage;
-  ubuntuImage = makeImageFromDebDist (debDistros.ubuntu1804x86_64 // {
-    packages = commonDebPackages
-      ++ [ "diffutils" "libc-bin" "build-essential" "debhelper" ];
-  });
-  buildSourceDebInVM = pkgDesc:
-    runInLinuxImage ((buildSourceDeb pkgDesc) // { diskImage = ubuntuImage; });
+    This release contains assets based on [revision ${source.rev}](https://gitlab.com/tezos/tezos/tree/${source.rev}) of ${source.ref} branch.
 
-  deb-source-packages = moveDerivations (map buildSourceDebInVM packageDescs);
+    This release targets the following protocols (ignored protocols are listed for reference):
+    ${builtins.concatStringsSep "\n" (map (x: "- [ ] `${x}`") protocols.ignored
+      ++ map (x: "- [x] `${x}`") (protocols.allowed ++ protocols.active))}
 
-  rpm-source-packages = moveDerivations (map buildSourceRpm packageDescs);
-
-  releaseFile = writeTextFile {
-    name = "release-notes.md";
-    text = ''
-      Automatic release on ${builtins.substring 0 8 timestamp}
-
-      This release contains assets based on [${master.rev} revision](https://gitlab.com/tezos/tezos/tree/${master.rev}) of master branch.
-      <!--
-      When making a new release, replace `auto-release` with actual release tag:
-      -->
-      For more information about release assets see [README section](https://github.com/serokell/tezos-packaging/blob/auto-release/README.md#obtain-binaries-or-packages-from-github-release).
-    '';
-  };
-  releaseNotes = runCommand "release-notes" { } ''
-    mkdir -p $out
-    cp ${releaseFile} $out/
+    <!--
+    When making a new release, replace `auto-release` with actual release tag:
+    -->
+    For more information about release assets see [README section](https://github.com/serokell/tezos-packaging/blob/auto-release/README.md#obtain-binaries-or-packages-from-github-release).
   '';
+  LICENSE = pkgs.writeTextDir "LICENSE" (builtins.readFile "${source}/LICENSE");
 
-  test-binaries = runCommand "test-binaries" { inherit tezos-static-master; } ''
-    for f in ${tezos-static-master}/bin/*; do
+  test-binaries = pkgs.runCommand "test-binaries" { } ''
+    for f in ${bundled.binaries}/bin/*; do
       echo "$f"
       "$f" --help &> /dev/null
     done
-    mkdir -p $out
+    touch $out
   '';
+  releaseNoTarball = pkgs.buildEnv {
+    name = "tezos-release";
+    paths = [ "${bundled.binaries}/bin" LICENSE release-notes ];
+  };
+  releaseTarball = pkgs.runCommand "release-tarball" { }
+    "mkdir $out; tar --owner=serokell:1000 --mode='u+rwX' -czhf $out/release.tar.gz -C ${releaseNoTarball} .";
 
-in rec {
-  inherit deb-packages deb-source-packages rpm-source-packages rpm-packages
-    binaries tezos-license releaseNotes test-binaries;
-    binaries-drv = tezos-static-master;
+in bundled // rec {
+  inherit test-binaries;
+  release = pkgs.buildEnv {
+    name = "tezos-release";
+    paths = [ releaseNoTarball releaseTarball ];
+  };
 }

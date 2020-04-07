@@ -15,12 +15,12 @@ steps:
    label: crossref-verify
    soft_fail: true
  - commands:
-   - nix-build -A binaries -o binaries
-   - nix-build -A deb-packages -o deb-packages --arg timestamp ${cur_date}
-   - nix-build -A rpm-packages -o rpm-packages --arg timestamp ${cur_date}
+   - "nix-shell -p gnutar --run 'nix-build -A binaries -o binaries'"
+   - nix-build -A deb -o deb-packages --arg timestamp ${cur_date}
+   - nix-build -A rpm -o rpm-packages --arg timestamp ${cur_date}
    label: build and package
    artifact_paths:
-     - ./binaries/*
+     - ./binaries/bin/*
      - ./deb-packages/*
      - ./rpm-packages/*
    branches: "!master"

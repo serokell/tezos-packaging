@@ -3,8 +3,8 @@
 # SPDX-License-Identifier: MPL-2.0
 
 let
-  protocols = (import ./protocols.nix).active;
-  protocolsFormatted = builtins.concatStringsSep ", " protocols;
+  protocols = import ./protocols.nix;
+  protocolsFormatted = builtins.concatStringsSep ", " (protocols.allowed ++ protocols.active);
 in[
   {
     name = "tezos-client";
@@ -32,4 +32,4 @@ in[
     name = "tezos-endorser-${protocol}";
     description = "Daemon for endorsing (protocol: ${protocol})";
   }
-]) protocols
+]) protocols.active

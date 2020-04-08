@@ -16,24 +16,25 @@ let
     packages = commonDebPackages
       ++ [ "diffutils" "libc-bin" "build-essential" "debhelper" ];
   });
+
   writeControlFile = writeTextFile {
     name = "control";
     text = ''
       Source: ${project}
       Section: utils
       Priority: optional
-      Maintainer: Serokell <hi@serokell.io>
+      Maintainer: ${meta.maintainer}
+      Description: ${project}
+        ${pkg.meta.description}
       Build-Depends: debhelper (>=9)
       Standards-Version: 3.9.7
       Homepage: https://gitlab.com/tezos/tezos/
-      #Vcs-Git: git@gitlab.com:tezos/tezos.git
-      #Vcs-Browser: https://gitlab.com/tezos/tezos.git
 
       Package: ${project}
       Architecture: ${meta.arch}
       Depends: ${meta.dependencies}
       Description: ${project}
-       ${pkg.meta.description}
+        ${pkg.meta.description}
     '';
   };
 
@@ -77,7 +78,7 @@ let
       cp ${writeChangelogFile} debian/changelog
       cp ${meta.licenseFile} debian/copyright
       echo 9 > debian/compat
-      echo "The Debian Package tezos-client-mainnet" > debian/README
+      echo "The Debian Package for ${project}" > debian/README
       echo "3.0 (native)" > debian/source/format
       cp ${writeRulesFile} debian/rules
       dpkg-buildpackage -S -us -uc | tee ../${project}_0ubuntu${version}-${revision}_source.buildinfo 2>&1

@@ -18,27 +18,10 @@ Recomended way to get these binaries is to download them from assets from github
 Go to the [latest release](https://github.com/serokell/tezos-packaging/releases/latest)
 and download desired assets.
 
-We provide both individual and archived binaries from master branch sources
-in order to be able to have static links for these binaries, also make it convenient
-to download single binary or obtain all binaries in one click.
-
-Some of the individual binaries contain protocol name
-to determine with which protocol binary is compatible with, specifically `005_PsBabyM1`
-protocol is currently used in `mainnet` and `babylonnet`, `006_PsCARTHA` protocol
-is currently used in `carthagenet`.
-
-Binaries without protocol name can be used with any network. E.g. `tezos-node` has `--network`
-option ([more information](http://tezos.gitlab.io/user/multinetwork.html) about multinetwork node)
-and `tezos-client` is compatible with any network node (Note that this is true only for binaries
-built from master branch sources).
-
-Contents of release:
-* `tezos-*-005-PsBabyM1` static binaries for 005 protocol.
-* `tezos-*-006-PsCARTHA` static binaries for 006 protocol.
-* `tezos-*` static binaries that can be used with any protocol.
-* `binaries-<revision>.tar.gz` archive with all binaries made from
-particular master branch revision.
-* License file from [tezos repository](https://gitlab.com/tezos/tezos/).
+Some of the individual binaries contain protocol name to determine
+with which protocol binary is compatible with. If this is not the
+case, then consult release notes to check which protocols are
+supported by that binary.
 
 ## Ubuntu Launchpad PPA with `tezos-*` binaries
 
@@ -87,26 +70,28 @@ Run `./tezos-client` or add it to your PATH to be able to run it anywhere.
 
 Also, you can build all these binaries and packages from scratch using nix.
 
+If you find it more convinient to use `make`, there are some targets provided for you.
+
 ### Statically built binaries
 
-Run one the following command:
-```
-nix-build -A binaries -o binaries
-```
-
-Or use Makefile:
+Run the following command:
 ```bash
-make binaries
+nix build -f. binaries
 ```
 
-To produce `tar.gz` archive tezos binaries.
+to produce all the binaries, or run
+```
+nix build -f. binaries.tezos-client
+```
+
+to build the `tezos-client` binary.
 
 <a name="deb"></a>
 ### Ubuntu `.deb` packages
 
 Run the following command:
 ```
-nix-build -A deb-packages -o deb-packages --arg timestamp $(date +"%Y%m%d%H%M")
+nix-build -A deb -o deb-packages --arg timestamp $(date +"%Y%m%d%H%M")
 ```
 
 Or use Makefile:
@@ -126,7 +111,7 @@ sudo apt install <path to deb file>
 In order to publish packages on PPA you will have to build source packages,
 you can do this by running the following commands:
 ```
-nix-build -A deb-source-packages -o deb-source-packages \
+nix-build -A debSource -o deb-source-packages \
 --arg builderInfo "\"Roman Melnikov <roman.melnikov@serokell.io>\"" \
 --arg timestamp "$(date +\"%Y%m%d%H%M\")" --arg date "\"$(date -R)\"" \
 --arg ubuntuVersion "\"bionic\""
@@ -150,7 +135,7 @@ dput ppa:serokell/tezos source-package/*.changes
 
 Run one of the following commands:
 ```
-nix-build -A rpm-packages -o rpm-packages --arg timestamp $(date +"%Y%m%d%H%M")
+nix-build -A rpm -o rpm-packages --arg timestamp $(date +"%Y%m%d%H%M")
 ```
 
 Or use Makefile:
@@ -170,7 +155,7 @@ sudo yum localinstall <path to the rpm file>
 In order to publish packages on Copr you will have to build source packages,
 you can do this by running the following command:
 ```
-nix-build -A rpm-source-packages -o rpm-source-packages \
+nix-build -A rpmSource -o rpm-source-packages \
 --arg timestamp "$(date +\"%Y%m%d%H%M\")"
 # Copy files from /nix/store
 mkdir -p source-packages

@@ -2,17 +2,16 @@
 #
 # SPDX-License-Identifier: MPL-2.0
 { stdenv, writeTextFile, gnutar, rpm, buildFHSUserEnv
-, buildSourcePackage ? false }:
-pkgDesc:
+, buildSourcePackage ? false, meta }:
+pkg:
 
 let
-  project = pkgDesc.project;
-  version = pkgDesc.version;
-  revision = pkgDesc.gitRevision;
-  arch = pkgDesc.arch;
-  bin = pkgDesc.bin;
+  project = pkg.meta.name;
+  version = meta.version;
+  revision = meta.gitRevision;
+  arch = meta.arch;
   pkgName = "${project}-${version}-${revision}.${arch}";
-  licenseFile = pkgDesc.licenseFile;
+  licenseFile = meta.licenseFile;
 
   rpmbuild-env = buildFHSUserEnv {
     name = "rpmbuild-env";
@@ -24,27 +23,28 @@ let
     name = "${project}.spec";
     text = ''
       %define debug_package %{nil}
-      %define _unpackaged_files_terminate_build 0
+      # %define _unpackaged_files_terminate_build 0
       Name:    ${project}
       Version: ${version}
       Release: ${revision}
-      Summary: ${pkgDesc.description}
-      License: ${pkgDesc.license}
+      Summary: ${pkg.meta.description}
+      License: ${meta.license}
       BuildArch: ${arch}
       Source0: ${project}-${version}.tar.gz
-      Source1: https://gitlab.com/tezos/tezos/tree/${pkgDesc.branchName}/
+      Source1: https://gitlab.com/tezos/tezos/tree/${meta.branchName}/
       %description
-      ${pkgDesc.description}
-      Maintainer: ${pkgDesc.maintainer}
+      ${pkg.meta.description}
+      Supports ${pkg.meta.supports}
+      Maintainer: ${meta.maintainer}
       %prep
       %setup -q
       %build
       %install
       mkdir -p %{buildroot}/%{_bindir}
-      install -m 0755 %{name} %{buildroot}/%{_bindir}/%{name}
+      install -m 0755 * %{buildroot}/%{_bindir}
       %files
       %license LICENSE
-      %{_bindir}/%{name}
+      %{_bindir}/*
     '';
   };
 
@@ -56,7 +56,7 @@ let
     archivePhase = ''
       mkdir ${project}-${version}
       cp ${licenseFile} ${project}-${version}/LICENSE
-      cp ${bin} ${project}-${version}/${project}
+      cp ${pkg}/bin/* ${project}-${version}/
       tar -cvzf ${name} ${project}-${version}
       cp ${name} $out
     '';
@@ -82,7 +82,10 @@ in stdenv.mkDerivation rec {
     cp ${licenseFile} BUILD/${project}/LICENSE
     rpmbuild-env ${rpmBuildFlag} SPECS/${project}.spec --define '_bindir /usr/bin' --define '_datadir /usr/share'
     mkdir -p $out
-    ${if buildSourcePackage then "cp SRPMS/*.src.rpm $out/" else "cp RPMS/*/*.rpm $out/"}
+    ${if buildSourcePackage then
+      "cp SRPMS/*.src.rpm $out/"
+    else
+      "cp RPMS/*/*.rpm $out/"}
   '';
 
 }

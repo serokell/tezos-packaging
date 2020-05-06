@@ -36,9 +36,9 @@
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
     },
     "tezos": {
-        "ref": "master",
+        "ref": "v7.0",
         "repo": "https://gitlab.com/tezos/tezos",
-        "rev": "e93d500e20d757a25c87a415de3f0074ec663c84",
+        "rev": "4053147fe577e9a04a5a09634a5645b2e26343e0",
         "type": "git"
     }
 }

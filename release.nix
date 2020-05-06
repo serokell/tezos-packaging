@@ -9,7 +9,7 @@ let
   release-notes = writeTextDir "release-notes.md" ''
     Automatic release on ${builtins.substring 0 8 timestamp}
 
-    This release contains assets based on [revision ${source.rev}](https://gitlab.com/tezos/tezos/tree/${source.rev}) of ${source.ref} branch.
+    This release contains assets based on [${source.ref} release](https://gitlab.com/tezos/tezos/tree/${source.ref}).
 
     Binaries without protocol suffixes support the following protocols (unsupported protocols are listed for reference):
     ${builtins.concatStringsSep "\n" (map (x: "- [ ] `${x}`") protocols.ignored
@@ -24,10 +24,11 @@ let
     name = "tezos-release-no-tarball";
     paths = [ "${bundled.binaries}/bin" LICENSE release-notes ];
   };
-  releaseTarball = runCommand "release-tarball" { }
-    "mkdir $out; tar --owner=serokell:1000 --mode='u+rwX' -czhf $out/release.tar.gz -C ${releaseNoTarball} .";
+  tarballName = "binaries-${builtins.replaceStrings ["v"] [""] source.ref}-1.tar.gz";
+  binariesTarball = runCommand "binaries-tarball" { }
+    "mkdir $out; tar --owner=serokell:1000 --mode='u+rwX' -czhf $out/${tarballName} -C ${bundled.binaries}/bin .";
   LICENSE = writeTextDir "LICENSE" (builtins.readFile "${source}/LICENSE");
 in buildEnv {
   name = "tezos-release";
-  paths = [ releaseNoTarball releaseTarball ];
+  paths = [ releaseNoTarball binariesTarball ];
 }

@@ -8,9 +8,9 @@ pkg:
 let
   project = pkg.meta.name;
   version = meta.version;
-  revision = meta.gitRevision;
+  release = meta.release;
   arch = meta.arch;
-  pkgName = "${project}-${version}-${revision}.${arch}";
+  pkgName = "${project}-${version}-${release}.${arch}";
   licenseFile = meta.licenseFile;
 
   rpmbuild-env = buildFHSUserEnv {
@@ -26,7 +26,8 @@ let
       # %define _unpackaged_files_terminate_build 0
       Name:    ${project}
       Version: ${version}
-      Release: ${revision}
+      Release: ${release}
+      Epoch: ${meta.epoch}
       Summary: ${pkg.meta.description}
       License: ${meta.license}
       BuildArch: ${arch}

@@ -59,6 +59,15 @@ let
       echo "$f"
       "$f" --help &> /dev/null
     done
+    # Test that tezos-node run works for carthagenet
+    ${bundled.binaries}/bin/tezos-node config init --data-dir node-dir --network carthagenet
+    ${bundled.binaries}/bin/tezos-node identity generate 1 --data-dir node-dir
+    timeout --preserve-status 5 ${bundled.binaries}/bin/tezos-node run --data-dir node-dir --network carthagenet
+    rm -rf node-dir
+    # Test that tezos-node run works for mainnet
+    ${bundled.binaries}/bin/tezos-node config init --data-dir node-dir --network mainnet
+    ${bundled.binaries}/bin/tezos-node identity generate 1 --data-dir node-dir
+    timeout --preserve-status 5 ${bundled.binaries}/bin/tezos-node run --data-dir node-dir --network mainnet
     touch $out
   '';
 

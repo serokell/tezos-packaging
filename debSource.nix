@@ -7,9 +7,9 @@ pkg:
 let
   project = lib.toLower pkg.meta.name;
   version = meta.version;
-  revision = meta.gitRevision;
+  release = meta.release;
+  epoch = meta.epoch;
   pkgArch = meta.arch;
-  pkgName = "${project}_0ubuntu${version}-${revision}_${pkgArch}";
   inherit (vmTools)
     makeImageFromDebDist commonDebPackages debDistros runInLinuxImage;
   ubuntuImage = makeImageFromDebDist (debDistros.ubuntu1804x86_64 // {
@@ -41,9 +41,9 @@ let
   writeChangelogFile = writeTextFile {
     name = "changelog";
     text = ''
-      ${project} (0ubuntu${version}-${revision}) ${meta.ubuntuVersion}; urgency=medium
+      ${project} (${epoch}:0ubuntu${version}-${release}) ${meta.ubuntuVersion}; urgency=medium
 
-        * Publish ${revision} revision of ${project}.
+        * Publish ${version}-${release} version of ${project}.
 
        -- ${meta.builderInfo} ${meta.date}
     '';
@@ -81,7 +81,7 @@ let
       echo "The Debian Package for ${project}" > debian/README
       echo "3.0 (native)" > debian/source/format
       cp ${writeRulesFile} debian/rules
-      dpkg-buildpackage -S -us -uc | tee ../${project}_0ubuntu${version}-${revision}_source.buildinfo 2>&1
+      dpkg-buildpackage -S -us -uc | tee ../${project}_${epoch}:0ubuntu${version}-${release}_source.buildinfo 2>&1
       mkdir -p $out
       cp ../*.* $out/
     '';

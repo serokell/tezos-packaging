@@ -14,12 +14,16 @@ let
     inherit (meta) name;
     value = bin pkgs.pkgsMusl.ocamlPackages.${meta.name} // { inherit meta; };
   }) release-binaries);
+
   commonMeta = {
-    gitRevision = source.rev;
-    version = toString timestamp;
+    # release should be updated in case we change something
+    release = "1";
+    # we switched from time-based versioning to proper tezos versioning
+    epoch = "1";
+    version = builtins.replaceStrings ["v"] [""] source.ref;
     license = "MPL-2.0";
     dependencies = "";
-    maintainer = "Serokell https://serokell.io";
+    maintainer = "Serokell https://serokell.io <hi@serokell.io>";
     branchName = source.ref;
     licenseFile = "${source}/LICENSE";
   };

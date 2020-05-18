@@ -6,15 +6,16 @@ pkg:
 let
   project = pkg.meta.name;
   version = meta.version;
-  revision = meta.gitRevision;
+  release = meta.release;
+  epoch = meta.epoch;
   pkgArch = meta.arch;
-  pkgName = "${project}_0ubuntu${version}-${revision}_${pkgArch}";
+  pkgName = "${project}_0ubuntu${version}-${release}_${pkgArch}";
 
   writeControlFile = writeTextFile {
     name = "control";
     text = ''
       Package: ${project}
-      Version: ${version}-${revision}
+      Version: ${epoch}:${version}-${release}
       Priority: optional
       Architecture: ${meta.arch}
       Depends: ${meta.dependencies}

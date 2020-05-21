@@ -20,7 +20,7 @@ let
     release = "1";
     # we switched from time-based versioning to proper tezos versioning
     epoch = "1";
-    version = builtins.replaceStrings ["v"] [""] source.ref;
+    version = builtins.replaceStrings [ "v" ] [ "" ] source.ref;
     license = "MPL-2.0";
     dependencies = "";
     maintainer = "Serokell https://serokell.io <hi@serokell.io>";

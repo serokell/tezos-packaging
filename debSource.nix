@@ -43,7 +43,7 @@ let
     text = ''
       ${project} (${epoch}:0ubuntu${version}-${release}) ${meta.ubuntuVersion}; urgency=medium
 
-        * Publish ${version}-${release} version of ${project}.
+        * Publish ${version}-${release} version of ${pkg.meta.name}.
 
        -- ${meta.builderInfo} ${meta.date}
     '';
@@ -58,7 +58,7 @@ let
 
       install:
       	mkdir -p $(DESTDIR)$(BINDIR)
-      	cp ${project} $(DESTDIR)$(BINDIR)
+      	cp ${pkg.meta.name} $(DESTDIR)$(BINDIR)
     '';
   };
 

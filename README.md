@@ -74,6 +74,8 @@ If you find it more convinient to use `make`, there are some targets provided fo
 
 ### Statically built binaries
 
+#### Using nix
+
 Run the following command:
 ```bash
 nix build -f. binaries
@@ -85,6 +87,18 @@ nix build -f. binaries.tezos-client
 ```
 
 to build the `tezos-client` binary.
+
+#### Using docker
+
+As an alternative one can build tezos binaries without nix using docker.
+
+[`docker-static-build.sh`](docker/docker-static-build.sh) will build these binaries
+using custom alpine image. In order to do that run the following commands:
+```sh
+cd docker
+./docker-static-build.sh
+```
+After that, `docker` directory will contain built static binaries.
 
 <a name="deb"></a>
 ### Ubuntu `.deb` packages

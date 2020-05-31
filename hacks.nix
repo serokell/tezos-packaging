@@ -11,7 +11,10 @@ with oself; {
   # FIXME opam-nix needs to do version resolution
   ezjsonm = osuper.ezjsonm.versions."1.1.0";
   ipaddr = osuper.ipaddr.versions."4.0.0";
-  conduit = osuper.conduit.versions."2.1.0";
+  conduit = osuper.conduit.versions."2.1.0".overrideAttrs (oa: rec {
+    buildInputs = [ oself.tls ] ++ oa.buildInputs;
+    propagatedBuildInputs = buildInputs;
+  });
   conduit-lwt-unix = osuper.conduit-lwt-unix.versions."2.0.2";
   cohttp-lwt-unix = osuper.cohttp-lwt-unix.versions."2.4.0";
   cohttp-lwt = osuper.cohttp-lwt.versions."2.4.0";

@@ -17,7 +17,7 @@ let
 
   commonMeta = {
     # release should be updated in case we change something
-    release = "1";
+    release = "2";
     # we switched from time-based versioning to proper tezos versioning
     epoch = "1";
     version = builtins.replaceStrings [ "v" ] [ "" ] source.ref;

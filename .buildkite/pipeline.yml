@@ -25,7 +25,8 @@ steps:
      - ./rpm-packages/*
    branches: "!master"
  - commands:
-   - nix-build -A test-binaries --no-out-link
+   - nix-build -A binaries -o binaries
+   - ./scripts/test-binaries.sh binaries/bin
    label: test binaries
    branches: "!master"
  - commands:

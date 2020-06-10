@@ -30,6 +30,12 @@ steps:
    label: test binaries
    branches: "!master"
  - commands:
+   - cd docker
+   - nix run nixpkgs.docker -c ./docker-static-build.sh
+   artifact_paths:
+     - ./tezos-*
+   label: build using docker
+ - commands:
    - GITHUB_TOKEN=$(cat ~/niv-bot-token) ./scripts/autorelease.sh
    label: create auto pre-release
    branches: master

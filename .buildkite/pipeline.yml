@@ -32,9 +32,10 @@ steps:
  - commands:
    - cd docker
    - nix run nixpkgs.docker -c ./docker-static-build.sh
+   - cd .. && ./scripts/test-binaries.sh docker
    artifact_paths:
-     - ./tezos-*
-   label: build using docker
+     - ./docker/tezos-*
+   label: build using docker and test binaries
  - commands:
    - GITHUB_TOKEN=$(cat ~/niv-bot-token) ./scripts/autorelease.sh
    label: create auto pre-release

@@ -56,6 +56,6 @@ let
   bundled = builtins.mapAttrs bundle artifacts;
 
   release =
-    pkgs.callPackage ./release.nix { inherit source bundled timestamp; };
+    pkgs.callPackage ./release.nix { inherit bundled timestamp commonMeta; };
 
 in bundled // rec { inherit release; }

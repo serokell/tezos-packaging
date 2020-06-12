@@ -15,7 +15,9 @@ If you report a bug, please provide steps to reproduce this bug and revision of 
 If you would like to contribute code to fix a bug, add a new feature, or
 otherwise improve our project, pull requests are most welcome.
 
-## Quick maintenance guide:
+## Quick maintenance guide for nix :
+
+All nix related files are located in the [nix](./nix) directory.
 
 - To update Tezos's revision to latest, `niv update tezos`
 - To update to some commit, `niv update tezos -a rev=...`

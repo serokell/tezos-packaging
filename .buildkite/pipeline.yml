@@ -15,9 +15,9 @@ steps:
    label: crossref-verify
    soft_fail: true
  - commands:
-   - nix-build -A binaries -o binaries
-   - nix-build -A deb -o deb-packages --arg timestamp ${cur_date}
-   - nix-build -A rpm -o rpm-packages --arg timestamp ${cur_date}
+   - nix-build ./nix -A binaries -o binaries
+   - nix-build ./nix -A deb -o deb-packages --arg timestamp ${cur_date}
+   - nix-build ./nix -A rpm -o rpm-packages --arg timestamp ${cur_date}
    label: build and package
    artifact_paths:
      - ./binaries/bin/*
@@ -25,9 +25,17 @@ steps:
      - ./rpm-packages/*
    branches: "!master"
  - commands:
-   - nix-build -A test-binaries --no-out-link
+   - nix-build ./nix -A binaries -o binaries
+   - ./scripts/test-binaries.sh binaries/bin
    label: test binaries
    branches: "!master"
+ - commands:
+   - cd docker
+   - nix run nixpkgs.docker -c ./docker-static-build.sh
+   - cd .. && ./scripts/test-binaries.sh docker
+   artifact_paths:
+     - ./docker/tezos-*
+   label: build using docker and test binaries
  - commands:
    - GITHUB_TOKEN=$(cat ~/niv-bot-token) ./scripts/autorelease.sh
    label: create auto pre-release

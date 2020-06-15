@@ -15,18 +15,7 @@ let
     value = bin pkgs.pkgsMusl.ocamlPackages.${meta.name} // { inherit meta; };
   }) release-binaries);
 
-  commonMeta = {
-    # release should be updated in case we change something
-    release = "2";
-    # we switched from time-based versioning to proper tezos versioning
-    epoch = "1";
-    version = builtins.replaceStrings [ "v" ] [ "" ] source.ref;
-    license = "MPL-2.0";
-    dependencies = "";
-    maintainer = "Serokell https://serokell.io <hi@serokell.io>";
-    branchName = source.ref;
-    licenseFile = "${source}/LICENSE";
-  };
+  inherit (import ../. {}) commonMeta;
   rpmMeta = { arch = "x86_64"; };
   debMeta = {
     arch = "amd64";
@@ -55,7 +44,4 @@ let
   artifacts = { inherit binaries deb rpm debSource rpmSource; };
   bundled = builtins.mapAttrs bundle artifacts;
 
-  release =
-    pkgs.callPackage ./release.nix { inherit bundled timestamp commonMeta; };
-
-in bundled // rec { inherit release; }
+in bundled

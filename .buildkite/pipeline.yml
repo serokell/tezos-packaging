@@ -38,6 +38,9 @@ steps:
      - ./docker/tezos-*
    label: build using docker and test binaries
  - commands:
+   - mkdir binaries
+   - buildkite-agent artifact download "docker/*" binaries --step "build using docker and test binaries"
+   - ls binaries
    - GITHUB_TOKEN=$(cat ~/niv-bot-token) ./scripts/autorelease.sh
    label: create auto pre-release
    branches: master

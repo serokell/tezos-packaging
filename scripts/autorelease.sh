@@ -19,7 +19,7 @@ trap finish EXIT
 assets_dir=$TEMPDIR/assets
 
 # Build release.nix
-nix-build ./nix -A release -o "$TEMPDIR"/"$project" --arg timestamp "$(date +\"%Y%m%d%H%M\")"
+nix-build -A release -o "$TEMPDIR"/"$project" --arg timestamp "$(date +\"%Y%m%d%H%M\")" --arg docker-binaries ./binaries/docker
 mkdir -p "$assets_dir"
 # Move archive with binaries and tezos license to assets
 shopt -s extglob

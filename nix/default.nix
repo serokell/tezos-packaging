@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: MPL-2.0
 
-{ timestamp ? "19700101", patches ? [ ], date ? "Thu, 1 Jan 1970 10:00:00 +0300"
+{ patches ? [ ], date ? "Thu, 1 Jan 1970 10:00:00 +0300"
 , builderInfo ? "", ubuntuVersion ? "bionic" }:
 let
   pkgs = import ./build/pkgs.nix { };

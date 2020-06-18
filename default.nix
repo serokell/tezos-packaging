@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: MPL-2.0
 
-{ timestamp ? "19700101", docker-binaries ? null }:
+{ docker-binaries ? null }:
 let
   pkgs = import ./nix/build/pkgs.nix { };
   source = (import ./nix/nix/sources.nix).tezos;
@@ -19,6 +19,6 @@ let
     licenseFile = "${source}/LICENSE";
   };
   release =
-    pkgs.callPackage ./release.nix { binaries = docker-binaries; inherit timestamp commonMeta; };
+    pkgs.callPackage ./release.nix { binaries = docker-binaries; inherit commonMeta; };
 
 in { inherit release commonMeta; }

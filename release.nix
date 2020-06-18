@@ -2,11 +2,11 @@
 #
 # SPDX-License-Identifier: MPL-2.0
 
-{ writeTextDir, runCommand, buildEnv, timestamp, binaries, commonMeta }:
+{ writeTextDir, runCommand, buildEnv, binaries, commonMeta }:
 let
   release-binaries = import ./nix/build/release-binaries.nix;
   release-notes = writeTextDir "release-notes.md" ''
-    Automatic release on ${builtins.substring 0 8 timestamp}
+    Automatic release
 
     This release contains assets based on [${commonMeta.branchName} release](https://gitlab.com/tezos/tezos/tree/${commonMeta.branchName}).
 

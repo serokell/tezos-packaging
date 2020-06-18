@@ -4,7 +4,7 @@
 
 { timestamp ? "19700101", docker-binaries ? null }:
 let
-  pkgs = import ./nix/pkgs.nix { };
+  pkgs = import ./nix/build/pkgs.nix { };
   source = (import ./nix/nix/sources.nix).tezos;
   commonMeta = {
     # release should be updated in case we change something

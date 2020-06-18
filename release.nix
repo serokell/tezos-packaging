@@ -4,7 +4,7 @@
 
 { writeTextDir, runCommand, buildEnv, timestamp, binaries, commonMeta }:
 let
-  release-binaries = import ./nix/release-binaries.nix;
+  release-binaries = import ./nix/build/release-binaries.nix;
   release-notes = writeTextDir "release-notes.md" ''
     Automatic release on ${builtins.substring 0 8 timestamp}
 

@@ -5,11 +5,11 @@
 { timestamp ? "19700101", patches ? [ ], date ? "Thu, 1 Jan 1970 10:00:00 +0300"
 , builderInfo ? "", ubuntuVersion ? "bionic" }:
 let
-  pkgs = import ./pkgs.nix { };
+  pkgs = import ./build/pkgs.nix { };
   source = (import ./nix/sources.nix).tezos;
   protocols = import ./protocols.nix;
-  bin = pkgs.callPackage ./bin.nix { };
-  release-binaries = import ./release-binaries.nix;
+  bin = pkgs.callPackage ./build/bin.nix { };
+  release-binaries = import ./build/release-binaries.nix;
   binaries = builtins.listToAttrs (map (meta: {
     inherit (meta) name;
     value = bin pkgs.pkgsMusl.ocamlPackages.${meta.name} // { inherit meta; };
@@ -22,14 +22,14 @@ let
     inherit builderInfo ubuntuVersion date;
   };
   deb = builtins.mapAttrs
-    (_: pkgs.callPackage ./deb.nix { meta = commonMeta // debMeta; }) binaries;
+    (_: pkgs.callPackage ./package/deb.nix { meta = commonMeta // debMeta; }) binaries;
   rpm = builtins.mapAttrs
-    (_: pkgs.callPackage ./rpm.nix { meta = commonMeta // rpmMeta; }) binaries;
+    (_: pkgs.callPackage ./package/rpm.nix { meta = commonMeta // rpmMeta; }) binaries;
   debSource = builtins.mapAttrs
-    (_: pkgs.callPackage ./debSource.nix { meta = commonMeta // debMeta; })
+    (_: pkgs.callPackage ./package/debSource.nix { meta = commonMeta // debMeta; })
     binaries;
   rpmSource = builtins.mapAttrs (_:
-    pkgs.callPackage ./rpm.nix {
+    pkgs.callPackage ./package/rpm.nix {
       meta = commonMeta // rpmMeta;
       buildSourcePackage = true;
     }) binaries;

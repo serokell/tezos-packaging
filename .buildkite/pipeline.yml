@@ -25,15 +25,16 @@ steps:
      - ./rpm-packages/*
    branches: "!master"
  - commands:
-   - nix-build ./nix -A binaries -o binaries
-   - ./scripts/test-binaries.sh binaries/bin
+   - buildkite-agent artifact download "binaries/bin/*" . --step "build and package"
+   - chmod +x ./binaries/bin/*
+   - nix-build tests/tezos-binaries.nix --no-out-link --arg path-to-binaries ./binaries/bin
    label: test binaries
    branches: "!master"
  - commands:
    - cd docker
    - nix run nixpkgs.docker -c ./docker-static-build.sh
    - nix run nixpkgs.upx -c upx tezos-*
-   - cd .. && ./scripts/test-binaries.sh docker
+   - cd .. && nix-build tests/tezos-binaries.nix --no-out-link --arg path-to-binaries ./docker
    artifact_paths:
      - ./docker/tezos-*
    label: build using docker and test binaries

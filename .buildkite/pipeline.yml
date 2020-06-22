@@ -32,11 +32,15 @@ steps:
  - commands:
    - cd docker
    - nix run nixpkgs.docker -c ./docker-static-build.sh
+   - nix run nixpkgs.upx -c upx tezos-*
    - cd .. && ./scripts/test-binaries.sh docker
    artifact_paths:
      - ./docker/tezos-*
    label: build using docker and test binaries
  - commands:
+   - mkdir binaries
+   - buildkite-agent artifact download "docker/*" binaries --step "build using docker and test binaries"
+   - ls binaries
    - GITHUB_TOKEN=$(cat ~/niv-bot-token) ./scripts/autorelease.sh
    label: create auto pre-release
    branches: master

@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: MPL-2.0
 
 let
-  protocols = import ./protocols.nix;
+  protocols = import ../protocols.nix;
   protocolsFormatted =
     builtins.concatStringsSep ", " (protocols.allowed ++ protocols.active);
 in [

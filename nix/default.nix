@@ -2,45 +2,34 @@
 #
 # SPDX-License-Identifier: MPL-2.0
 
-{ timestamp ? "19700101", patches ? [ ], date ? "Thu, 1 Jan 1970 10:00:00 +0300"
+{ patches ? [ ], date ? "Thu, 1 Jan 1970 10:00:00 +0300"
 , builderInfo ? "", ubuntuVersion ? "bionic" }:
 let
-  pkgs = import ./pkgs.nix { };
+  pkgs = import ./build/pkgs.nix { };
   source = (import ./nix/sources.nix).tezos;
   protocols = import ./protocols.nix;
-  bin = pkgs.callPackage ./bin.nix { };
-  release-binaries = import ./release-binaries.nix;
+  bin = pkgs.callPackage ./build/bin.nix { };
+  release-binaries = import ./build/release-binaries.nix;
   binaries = builtins.listToAttrs (map (meta: {
     inherit (meta) name;
     value = bin pkgs.pkgsMusl.ocamlPackages.${meta.name} // { inherit meta; };
   }) release-binaries);
 
-  commonMeta = {
-    # release should be updated in case we change something
-    release = "2";
-    # we switched from time-based versioning to proper tezos versioning
-    epoch = "1";
-    version = builtins.replaceStrings [ "v" ] [ "" ] source.ref;
-    license = "MPL-2.0";
-    dependencies = "";
-    maintainer = "Serokell https://serokell.io <hi@serokell.io>";
-    branchName = source.ref;
-    licenseFile = "${source}/LICENSE";
-  };
+  inherit (import ../. {}) commonMeta;
   rpmMeta = { arch = "x86_64"; };
   debMeta = {
     arch = "amd64";
     inherit builderInfo ubuntuVersion date;
   };
   deb = builtins.mapAttrs
-    (_: pkgs.callPackage ./deb.nix { meta = commonMeta // debMeta; }) binaries;
+    (_: pkgs.callPackage ./package/deb.nix { meta = commonMeta // debMeta; }) binaries;
   rpm = builtins.mapAttrs
-    (_: pkgs.callPackage ./rpm.nix { meta = commonMeta // rpmMeta; }) binaries;
+    (_: pkgs.callPackage ./package/rpm.nix { meta = commonMeta // rpmMeta; }) binaries;
   debSource = builtins.mapAttrs
-    (_: pkgs.callPackage ./debSource.nix { meta = commonMeta // debMeta; })
+    (_: pkgs.callPackage ./package/debSource.nix { meta = commonMeta // debMeta; })
     binaries;
   rpmSource = builtins.mapAttrs (_:
-    pkgs.callPackage ./rpm.nix {
+    pkgs.callPackage ./package/rpm.nix {
       meta = commonMeta // rpmMeta;
       buildSourcePackage = true;
     }) binaries;
@@ -55,7 +44,4 @@ let
   artifacts = { inherit binaries deb rpm debSource rpmSource; };
   bundled = builtins.mapAttrs bundle artifacts;
 
-  release =
-    pkgs.callPackage ./release.nix { inherit bundled timestamp commonMeta; };
-
-in bundled // rec { inherit release; }
+in bundled

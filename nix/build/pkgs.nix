@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: MPL-2.0
 
-{ sources ? import ./nix/sources.nix, pkgs ? import sources.nixpkgs { } }:
+{ sources ? import ../nix/sources.nix, pkgs ? import sources.nixpkgs { } }:
 let
   ocaml-overlay = import ./ocaml-overlay.nix { inherit sources pkgs; };
   static-overlay = import ./static-overlay.nix;

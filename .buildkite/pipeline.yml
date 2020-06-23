@@ -1,47 +1,54 @@
-# SPDX-FileCopyrightText: 2019 TQ Tezos <https://tqtezos.com/>
+# SPDX-FileCopyrightText: 2019-2020 TQ Tezos <https://tqtezos.com/>
 #
 # SPDX-License-Identifier: MPL-2.0
 
 env:
   NIX_PATH: nixpkgs=https://github.com/serokell/nixpkgs/archive/master.tar.gz
-  cur_date: '$(date --date="$(git show --no-patch --format=%ci)" +"%Y%m%d%H%M")'
 
 steps:
- - command: nix run nixpkgs.reuse -c reuse lint
-   label: reuse lint
- - command: .buildkite/check-trailing-whitespace.sh
-   label: check trailing whitespace
- - command: "nix run -f https://github.com/serokell/crossref-verifier/archive/68a1f9d25b6e7835fea8299b18a3e6c61dbb2a5c.tar.gz -c crossref-verify"
-   label: crossref-verify
+ - label: reuse lint
+   command: nix run -f . pkgs.reuse -c reuse lint
+ - label: check trailing whitespace
+   command: .buildkite/check-trailing-whitespace.sh
+ - label: crossref-verify
+   command: "nix run -f https://github.com/serokell/crossref-verifier/archive/68a1f9d25b6e7835fea8299b18a3e6c61dbb2a5c.tar.gz -c crossref-verify"
    soft_fail: true
- - commands:
+
+ - label: build and package via nix
+   commands:
    - nix-build ./nix -A binaries -o binaries
-   - nix-build ./nix -A deb -o deb-packages --arg timestamp ${cur_date}
-   - nix-build ./nix -A rpm -o rpm-packages --arg timestamp ${cur_date}
-   label: build and package
+   - nix-build ./nix -A deb -o deb-packages
+   - nix-build ./nix -A rpm -o rpm-packages
    artifact_paths:
      - ./binaries/bin/*
      - ./deb-packages/*
      - ./rpm-packages/*
    branches: "!master"
- - commands:
-   - buildkite-agent artifact download "binaries/bin/*" . --step "build and package"
+ - label: test nix-built binaries
+   commands:
+   - buildkite-agent artifact download "binaries/bin/*" . --step "build and package via nix"
    - chmod +x ./binaries/bin/*
    - nix-build tests/tezos-binaries.nix --no-out-link --arg path-to-binaries ./binaries/bin
-   label: test binaries
    branches: "!master"
- - commands:
+
+ - label: build via docker
+   commands:
    - cd docker
-   - nix run nixpkgs.docker -c ./docker-static-build.sh
-   - nix run nixpkgs.upx -c upx tezos-*
-   - cd .. && nix-build tests/tezos-binaries.nix --no-out-link --arg path-to-binaries ./docker
+   - nix run -f.. pkgs.docker -c ./docker-static-build.sh
+   - nix run -f.. pkgs.upx -c upx tezos-*
    artifact_paths:
      - ./docker/tezos-*
-   label: build using docker and test binaries
- - commands:
+ - label: test docker-built binaries
+   commands:
+   - buildkite-agent artifact download "docker/*" . --step "build via docker"
+   - chmod +x ./docker/*
+   - nix-build tests/tezos-binaries.nix --no-out-link --arg path-to-binaries ./docker
+   branches: "!master"
+
+ - label: create auto pre-release
+   commands:
    - mkdir binaries
-   - buildkite-agent artifact download "docker/*" binaries --step "build using docker and test binaries"
+   - buildkite-agent artifact download "docker/*" binaries --step "build via docker"
    - ls binaries
    - GITHUB_TOKEN=$(cat ~/niv-bot-token) ./scripts/autorelease.sh
-   label: create auto pre-release
    branches: master

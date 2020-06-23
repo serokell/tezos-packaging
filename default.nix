@@ -21,4 +21,4 @@ let
   release =
     pkgs.callPackage ./release.nix { binaries = docker-binaries; inherit commonMeta; };
 
-in { inherit release commonMeta; }
+in { inherit release commonMeta pkgs; }

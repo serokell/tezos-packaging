@@ -8,7 +8,7 @@ let
   source = (import ./nix/nix/sources.nix).tezos;
   commonMeta = {
     # release should be updated in case we change something
-    release = "2";
+    release = "1";
     # we switched from time-based versioning to proper tezos versioning
     epoch = "1";
     version = builtins.replaceStrings [ "v" ] [ "" ] source.ref;

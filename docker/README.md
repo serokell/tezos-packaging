@@ -8,10 +8,10 @@
 
 ## Statically built binaries
 
-Currently, we support only static binaries building using custom alpine image.
+Static binaries building using custom alpine image.
 
 [`docker-static-build.sh`](docker-static-build.sh) will build tezos binaries
-image defined in [Dockerfile](Dockerfile). In order to build them, just run the script
+image defined in [Dockerfile](build/Dockerfile). In order to build them, just run the script
 ```
 ./docker-static-build.sh
 ```

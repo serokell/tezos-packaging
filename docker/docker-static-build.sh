@@ -13,7 +13,7 @@ binaries=("tezos-accuser-006-PsCARTHA" "tezos-admin-client" "tezos-baker-006-PsC
           "tezos-client" "tezos-endorser-006-PsCARTHA" "tezos-node" "tezos-signer"
          )
 
-docker build -t alpine-tezos .
+docker build -t alpine-tezos -f build/Dockerfile .
 container_id="$(docker create alpine-tezos)"
 for b in "${binaries[@]}"; do
     docker cp "$container_id:/tezos/$b" "$b"

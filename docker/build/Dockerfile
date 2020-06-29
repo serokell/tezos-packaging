@@ -12,7 +12,7 @@ RUN cd libusb && autoreconf -fvi && ./configure && make && make install
 RUN git clone --single-branch --branch hidapi-0.9.0 https://github.com/libusb/hidapi.git --depth 1
 RUN cd hidapi && autoreconf -fvi && ./bootstrap && ./configure && make && make install
 RUN rm -rf libusb hidapi
-COPY ./static_libs.patch /static.patch
+COPY ./build/static_libs.patch /static.patch
 RUN git clone --single-branch --branch v7.2 https://gitlab.com/tezos/tezos.git --depth 1
 WORKDIR /tezos
 RUN git apply ../static.patch

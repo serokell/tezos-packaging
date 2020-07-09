@@ -17,11 +17,9 @@ steps:
  - label: build and package via nix
    commands:
    - nix-build ./nix -A binaries -o binaries
-   # - nix-build ./nix -A deb -o deb-packages
    - nix-build ./nix -A rpm -o rpm-packages
    artifact_paths:
      - ./binaries/bin/*
-     # - ./deb-packages/*
      - ./rpm-packages/*
    branches: "!master"
  - label: test nix-built binaries

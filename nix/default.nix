@@ -2,8 +2,7 @@
 #
 # SPDX-License-Identifier: MPL-2.0
 
-{ patches ? [ ], date ? "Thu, 1 Jan 1970 10:00:00 +0300"
-, builderInfo ? "", ubuntuVersion ? "bionic" }:
+{ patches ? [ ] }:
 let
   pkgs = import ./build/pkgs.nix { };
   source = (import ./nix/sources.nix).tezos;
@@ -17,17 +16,8 @@ let
 
   inherit (import ../. {}) commonMeta;
   rpmMeta = { arch = "x86_64"; };
-  debMeta = {
-    arch = "amd64";
-    inherit builderInfo ubuntuVersion date;
-  };
-  deb = builtins.mapAttrs
-    (_: pkgs.callPackage ./package/deb.nix { meta = commonMeta // debMeta; }) binaries;
   rpm = builtins.mapAttrs
     (_: pkgs.callPackage ./package/rpm.nix { meta = commonMeta // rpmMeta; }) binaries;
-  debSource = builtins.mapAttrs
-    (_: pkgs.callPackage ./package/debSource.nix { meta = commonMeta // debMeta; })
-    binaries;
   rpmSource = builtins.mapAttrs (_:
     pkgs.callPackage ./package/rpm.nix {
       meta = commonMeta // rpmMeta;
@@ -41,7 +31,7 @@ let
       paths = builtins.attrValues pkgSet;
     });
 
-  artifacts = { inherit binaries deb rpm debSource rpmSource; };
+  artifacts = { inherit binaries rpm rpmSource; };
   bundled = builtins.mapAttrs bundle artifacts;
 
 in bundled

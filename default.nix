@@ -6,18 +6,14 @@
 let
   pkgs = import ./nix/build/pkgs.nix { };
   source = (import ./nix/nix/sources.nix).tezos;
+  meta = builtins.fromJSON (builtins.readFile ./meta.json);
   commonMeta = {
-    # release should be updated in case we change something
-    release = "1";
-    # we switched from time-based versioning to proper tezos versioning
-    epoch = "1";
     version = builtins.replaceStrings [ "v" ] [ "" ] source.ref;
     license = "MPL-2.0";
     dependencies = "";
-    maintainer = "Serokell https://serokell.io <hi@serokell.io>";
     branchName = source.ref;
     licenseFile = "${source}/LICENSE";
-  };
+  } // meta;
   release =
     pkgs.callPackage ./release.nix { binaries = docker-binaries; inherit commonMeta; };
 

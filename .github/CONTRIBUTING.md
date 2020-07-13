@@ -15,16 +15,26 @@ If you report a bug, please provide steps to reproduce this bug and revision of 
 If you would like to contribute code to fix a bug, add a new feature, or
 otherwise improve our project, pull requests are most welcome.
 
-## Quick maintenance guide for nix :
+## Quick maintenance guide
+
+- Tezos revision is located in the [`sources.json`](../nix/nix/sources.json) file.
+  You can either update it manually to newer revision or use `niv` tool.
+  In order to do that run `niv update tezos` (this will update revision to latest).
+  `niv update tezos -a rev=...` will update wources to some commit.
+- Used tezos protocols can be changed by [`proto`](../script/proto) script.
+  This script requires `jq` and `moreutils` to be installed.
+  Currently used protocols are displayed in [`protocols.json`](../protocols.json).
+  - To add a new protocol, `./proto activate ...`.
+  - To stop building protocol-specific binaries for a protocol, but keep supporting it in
+    multi-protocol binaries, `./proto allow`.
+  - To deprecate a protocol, `./proto ignore ...`.
+
+### Nix specific maintenance
 
 All nix related files are located in the [nix](./nix) directory.
 
-- To update Tezos's revision to latest, `niv update tezos`
-- To update to some commit, `niv update tezos -a rev=...`
-- To add a new protocol after updating, `./proto activate ...`
-- To stop building protocol-specific binaries for a protocol, but keep supporting it in multi-protocol binaries, `./proto allow ...`
-- To deprecate a protocol, `./proto ignore ...`
-- If the build breaks because of a dependency issue, `nix repl pkgs.nix` can be very useful to investigate it
+If the build breaks because of a dependency issue, `nix repl pkgs.nix`
+can be very useful to investigate it.
 
 ## Legal
 

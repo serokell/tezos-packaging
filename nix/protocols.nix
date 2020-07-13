@@ -2,4 +2,4 @@
 #
 # SPDX-License-Identifier: MPL-2.0
 
-builtins.fromJSON (builtins.readFile ./protocols.json)
+builtins.fromJSON (builtins.readFile ../protocols.json)

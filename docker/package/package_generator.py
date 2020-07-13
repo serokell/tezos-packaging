@@ -29,7 +29,7 @@ tezos_sources = json.load(open("../nix/nix/sources.json", "r"))["tezos"]
 common_deps = ["libev-dev", "libgmp-dev", "libhidapi-dev", "m4", "perl", "pkg-config",
                "wget", "unzip", "rsync"]
 
-active_protocols = json.load(open("../nix/protocols.json", "r"))["active"]
+active_protocols = json.load(open("../protocols.json", "r"))["active"]
 
 version = f"{tezos_sources['ref'][1:]}"
 release = f"{meta['release']}"

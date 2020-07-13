@@ -1,11 +1,10 @@
-#!/usr/bin/env nix-shell
-#!nix-shell -p jq moreutils -i bash
+#!/usr/bin/env bash
 # SPDX-FileCopyrightText: 2019 TQ Tezos <https://tqtezos.com/>
 #
 # SPDX-License-Identifier: MPL-2.0
 
 edit(){
-  cat protocols.json | jq "$@" | sponge protocols.json
+  cat ../protocols.json | jq "$@" | sponge ../protocols.json
 }
 
 add(){
@@ -29,5 +28,5 @@ case $command in
   allow) removeAll $1; add allowed $1;;
   ignore) removeAll $1; add ignored $1;;
   forget) removeAll $1;;
-  *) jq . protocols.json
+  *) jq . ../protocols.json
 esac

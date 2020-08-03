@@ -32,7 +32,7 @@ sudo add-apt-repository ppa:serokell/tezos && sudo apt-get update
 sudo apt-get install tezos-client
 # dpkg-source prohibits uppercase in the packages names so the protocol
 # name is in lowercase
-sudo apt-get install tezos-baker-005-psbabym1
+sudo apt-get install tezos-baker-006-pscartha
 ```
 Once you install such packages the commands `tezos-*` will be available.
 
@@ -45,11 +45,11 @@ E.g. in order to install `tezos-client` or `tezos-baker` run the following comma
 # use dnf
 sudo dnf copr enable @Serokell/Tezos
 sudo dnf install tezos-client
-sudo dnf install tezos-baker-005-PsBabyM1
+sudo dnf install tezos-baker-006-PsCARTHA
 
 # or use yum
 sudo yum copr enable @Serokell/Tezos
-sudo yum install tezos-baker-005-PsBabyM1
+sudo yum install tezos-baker-006-PsCARTHA
 ```
 Once you install such packages the commands `tezos-*` will be available.
 

@@ -1,5 +1,5 @@
 Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 
-Files: .github/* nix/* protocols.json meta.json
+Files: .github/* nix/nix/* protocols.json meta.json
 Copyright: TQ Tezos <https://tqtezos.com>
 License: MPL-2.0

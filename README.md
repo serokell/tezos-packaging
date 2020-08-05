@@ -32,9 +32,35 @@ sudo add-apt-repository ppa:serokell/tezos && sudo apt-get update
 sudo apt-get install tezos-client
 # dpkg-source prohibits uppercase in the packages names so the protocol
 # name is in lowercase
-sudo apt-get install tezos-baker-005-psbabym1
+sudo apt-get install tezos-baker-006-pscartha
 ```
 Once you install such packages the commands `tezos-*` will be available.
+
+### Systemd units for `tezos-node` and daemons
+
+`tezos-node`, `tezos-accuser-006-pscartha`, `tezos-baker-006-pscartha` and
+`tezos-endorser-006-pscartha` packages have systemd files included to the
+package.
+
+Once you've installed the packages with systemd unit, you can run the service
+with the binary from the package using the following command:
+```
+systemctl start <package-name>.service
+```
+To stop the service run:
+```
+systemctl stop <package-name>.service
+```
+
+Each service has configuration file located in `/etc/default`. Default
+configurations can be found [here](docker/package/defaults/).
+
+Files created by the services will be located in `/var/lib/tezos/` by default.
+`tezos-{accuser, baker, endorser}-006-pscartha` services can have configurable
+data directory.
+
+`tezos-{accuser, endorser}` have configurable node address, so that they can be used with both
+remote and local node.
 
 ## Fedora Copr repository with `tezos-*` binaries
 
@@ -45,11 +71,11 @@ E.g. in order to install `tezos-client` or `tezos-baker` run the following comma
 # use dnf
 sudo dnf copr enable @Serokell/Tezos
 sudo dnf install tezos-client
-sudo dnf install tezos-baker-005-PsBabyM1
+sudo dnf install tezos-baker-006-PsCARTHA
 
 # or use yum
 sudo yum copr enable @Serokell/Tezos
-sudo yum install tezos-baker-005-PsBabyM1
+sudo yum install tezos-baker-006-PsCARTHA
 ```
 Once you install such packages the commands `tezos-*` will be available.
 

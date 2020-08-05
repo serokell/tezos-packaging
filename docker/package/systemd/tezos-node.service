@@ -1,0 +1,13 @@
+# SPDX-FileCopyrightText: 2020 TQ Tezos <https://tqtezos.com/>
+#
+# SPDX-License-Identifier: MPL-2.0
+
+[Unit]
+After=network.target
+Description=Tezos node
+
+[Service]
+EnvironmentFile=/etc/default/tezos-node
+ExecStart=/usr/bin/tezos-node-start
+StateDirectory=tezos
+User=tezos

@@ -1,0 +1,29 @@
+#!/usr/bin/bash
+
+# SPDX-FileCopyrightText: 2020 TQ Tezos <https://tqtezos.com/>
+#
+# SPDX-License-Identifier: MPL-2.0
+
+set -euo pipefail
+
+# $PROTOCOL should be defined in the system unit environment
+endorser="/usr/bin/tezos-endorser-$PROTOCOL"
+
+endorser_dir="$DATA_DIR/endorser"
+
+endorser_config="$endorser_dir/config"
+mkdir -p "$endorser_dir"
+
+if [ ! -f "$endorser_config" ]; then
+    "$endorser" --base-dir "$endorser_dir" \
+                --addr "$NODE_HOST" --port "$NODE_RPC_PORT" \
+                config init --output "$endorser_config" >/dev/null 2>&1
+else
+    "$endorser" --base-dir "$endorser_dir" \
+                --addr "$NODE_HOST" --port "$NODE_RPC_PORT" \
+                config update >/dev/null 2>&1
+fi
+
+exec "$endorser" --base-dir "$endorser_dir" \
+     --addr "$NODE_HOST" --port "$NODE_RPC_PORT" \
+     run "$@"

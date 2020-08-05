@@ -7,9 +7,16 @@ import os, sys, subprocess, json
 from distutils.dir_util import copy_tree
 
 class Package:
-    def __init__(self, name, desc):
+    def __init__(self, name, desc, systemd_unit=None):
         self.name = name
         self.desc = desc
+        self.systemd_unit = systemd_unit
+
+class SystemdUnit:
+    def __init__(self, name, startup_script, config_file):
+        self.name = name
+        self.startup_script = startup_script
+        self.config_file = config_file
 
 if sys.argv[1] == "source":
     is_source = True
@@ -43,7 +50,7 @@ Source: {pkg.name.lower()}
 Section: utils
 Priority: optional
 Maintainer: {meta['maintainer']}
-Build-Depends: debhelper (>=9), autotools-dev, {str_deps}
+Build-Depends: debhelper (>=9), dh-systemd (>= 1.5), autotools-dev, {str_deps}
 Standards-Version: 3.9.6
 Homepage: https://gitlab.com/tezos/tezos/
 
@@ -82,12 +89,21 @@ def gen_changelog(pkg: Package, ubuntu_version, maintainer, date, out):
         f.write(changelog_contents)
 
 def gen_rules(out):
-    rules_contents = '''#!/usr/bin/make -f
+    rules_contents = f'''#!/usr/bin/make -f
 
 %:
-	dh $@ '''
+	dh $@ {"--with systemd" if package.systemd_unit is not None else ""}
+override_dh_systemd_start:
+	dh_systemd_start --no-start'''
+
     with open(out, 'w') as f:
         f.write(rules_contents)
+
+def gen_install(pkg: Package, out):
+    install_contents = f'''debian/{pkg.systemd_unit.startup_script} usr/bin
+    '''
+    with open(out, 'w') as f:
+        f.write(install_contents)
 
 packages = [
     Package("tezos-client",
@@ -95,7 +111,9 @@ packages = [
     Package("tezos-admin-client",
             "Administration tool for the node") ,
     Package("tezos-node",
-            "Entry point for initializing, configuring and running a Tezos node"),
+            "Entry point for initializing, configuring and running a Tezos node",
+            SystemdUnit("tezos-node.service", "tezos-node-start", "tezos-node.conf")
+    ),
     Package("tezos-signer",
             "A client to remotely sign operations or blocks")
 ]
@@ -112,7 +130,8 @@ for protocol in active_protocols:
     for daemon in daemons:
         packages.append(
             Package(f"tezos-{daemon}-{protocol}",
-                daemon_decs[daemon]
+                    daemon_decs[daemon],
+                    SystemdUnit(f"tezos-{daemon}.service", f"tezos-{daemon}-start", f"tezos-{daemon}.conf")
             )
         )
 
@@ -129,6 +148,11 @@ for package in packages:
         subprocess.run(["tar", "-czf", f"{dir}.tar.gz", dir], check=True)
         os.chdir(dir)
         subprocess.run(["dh_make", "-syf" f"../{dir}.tar.gz"], check=True)
+        if package.systemd_unit is not None:
+            os.rename(f"../systemd/{package.systemd_unit.name}", f"debian/{package.name.lower()}.service")
+            os.rename(f"../defaults/{package.systemd_unit.config_file}", f"debian/{package.name.lower()}.default")
+            os.rename(f"../scripts/{package.systemd_unit.startup_script}", f"debian/{package.systemd_unit.startup_script}")
+            gen_install(package, "debian/install")
         gen_control_file(package, "debian/control")
         subprocess.run(["wget", "-q", "-O", "debian/copyright", f"https://gitlab.com/tezos/tezos/-/raw/v{version}/LICENSE"], check=True)
         subprocess.run("rm debian/*.ex debian/*.EX debian/README*", shell=True, check=True)

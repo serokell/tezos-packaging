@@ -1,0 +1,14 @@
+# SPDX-FileCopyrightText: 2020 TQ Tezos <https://tqtezos.com/>
+#
+# SPDX-License-Identifier: MPL-2.0
+
+[Unit]
+After=network.target
+Description=Tezos endorser
+
+[Service]
+EnvironmentFile=/etc/default/tezos-endorser-006-pscartha
+Environment="PROTOCOL=006-PsCARTHA"
+ExecStart=/usr/bin/tezos-endorser-start
+StateDirectory=tezos
+User=tezos

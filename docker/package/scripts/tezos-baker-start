@@ -1,0 +1,38 @@
+#!/usr/bin/bash
+
+# SPDX-FileCopyrightText: 2020 TQ Tezos <https://tqtezos.com/>
+#
+# SPDX-License-Identifier: MPL-2.0
+
+set -euo pipefail
+
+# $PROTOCOL should be defined in the system unit environment
+baker="/usr/bin/tezos-baker-$PROTOCOL"
+
+baker_dir="$DATA_DIR"
+node_data_dir="/var/lib/tezos/node/data"
+
+baker_config="$baker_dir/config"
+mkdir -p "$baker_dir"
+
+if [ ! -f "$baker_config" ]; then
+    "$baker" --base-dir "$baker_dir" \
+             --port "$NODE_RPC_PORT" \
+             config init --output "$baker_config" >/dev/null 2>&1
+else
+    "$baker" --base-dir "$baker_dir" \
+             --port "$NODE_RPC_PORT" \
+             config update >/dev/null 2>&1
+fi
+
+launch_baker() {
+    exec "$baker" \
+         --base-dir "$baker_dir" --port "$NODE_RPC_PORT" \
+         run with local node "$node_data_dir" "$@"
+}
+
+if [[ -z "$BAKER_ACCOUNT" ]]; then
+    launch_baker "$@"
+else
+    launch_baker "$BAKER_ACCOUNT" "$@"
+fi

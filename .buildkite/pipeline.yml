@@ -4,6 +4,7 @@
 
 env:
   NIX_PATH: nixpkgs=https://github.com/serokell/nixpkgs/archive/master.tar.gz
+  SET_VERSION: "export TEZOS_VERSION=\"$(cat nix/nix/sources.json | jq -r '.tezos.ref')\""
 
 steps:
  - label: reuse lint
@@ -31,6 +32,7 @@ steps:
 
  - label: build via docker
    commands:
+   - eval "$SET_VERSION"
    - cd docker
    - nix run -f.. pkgs.docker -c ./docker-static-build.sh
    - nix run -f.. pkgs.upx -c upx tezos-*
@@ -45,12 +47,14 @@ steps:
 
  - label: test deb source packages via docker
    commands:
+   - eval "$SET_VERSION"
    - nix run -f. pkgs.docker -c ./docker/docker-ubuntu-packages.sh source
    artifact_paths:
      - ./out/*
    branches: "!master"
  - label: test deb binary packages via docker
    commands:
+   - eval "$SET_VERSION"
    # Building all binary packages will take significant amount of time, so we build only one
    # in order to ensure package generation sanity
    - nix run -f. pkgs.docker -c ./docker/docker-ubuntu-packages.sh binary tezos-baker-006-PsCARTHA

@@ -31,14 +31,13 @@ if len(sys.argv) == 3:
 
 date = subprocess.check_output(["date", "-R"]).decode().strip()
 meta = json.load(open("../meta.json", "r"))
-tezos_sources = json.load(open("../nix/nix/sources.json", "r"))["tezos"]
 
 common_deps = ["libev-dev", "libgmp-dev", "libhidapi-dev", "m4", "perl", "pkg-config",
                "wget", "unzip", "rsync"]
 
 active_protocols = json.load(open("../protocols.json", "r"))["active"]
 
-version = f"{tezos_sources['ref'][1:]}"
+version = os.environ["TEZOS_VERSION"][1:]
 release = f"{meta['release']}"
 package_version = f"{meta['epoch']}:0ubuntu{version}-{release}"
 

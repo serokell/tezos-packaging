@@ -11,7 +11,7 @@ set -euo pipefail
 
 docker build -t tezos-ubuntu -f docker/package/Dockerfile .
 set +e
-container_id="$(docker create -t tezos-ubuntu "$@")"
+container_id="$(docker create --env TEZOS_VERSION="$TEZOS_VERSION" -t tezos-ubuntu "$@")"
 docker start -a "$container_id"
 docker cp "$container_id":/tezos-packaging/docker/out .
 set -e

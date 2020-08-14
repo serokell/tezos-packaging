@@ -13,7 +13,8 @@ RUN git clone --single-branch --branch hidapi-0.9.0 https://github.com/libusb/hi
 RUN cd hidapi && autoreconf -fvi && ./bootstrap && ./configure && make && make install
 RUN rm -rf libusb hidapi
 COPY ./build/static_libs.patch /static.patch
-RUN git clone --single-branch --branch v7.3 https://gitlab.com/tezos/tezos.git --depth 1
+ARG TEZOS_VERSION
+RUN git clone --single-branch --branch ${TEZOS_VERSION} https://gitlab.com/tezos/tezos.git --depth 1
 WORKDIR /tezos
 RUN git apply ../static.patch
 RUN export OPAMYES="true" && opam init --bare --disable-sandboxing && make build-deps

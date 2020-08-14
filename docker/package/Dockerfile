@@ -10,7 +10,6 @@ ENV USER dockerbuilder
 RUN useradd dockerbuilder && mkdir /tezos-packaging
 ENV HOME /tezos-packaging
 COPY meta.json /tezos-packaging/meta.json
-COPY nix/nix/sources.json /tezos-packaging/nix/nix/sources.json
 COPY protocols.json /tezos-packaging/protocols.json
 WORKDIR /tezos-packaging/docker
 ENV OPAMROOT "/tezos-packaging/docker/opamroot"

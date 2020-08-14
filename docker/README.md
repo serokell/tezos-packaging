@@ -11,8 +11,10 @@
 Static binaries building using custom alpine image.
 
 [`docker-static-build.sh`](docker-static-build.sh) will build tezos binaries
-image defined in [Dockerfile](build/Dockerfile). In order to build them, just run the script
+image defined in [Dockerfile](build/Dockerfile). In order to build them you should specify
+`TEZOS_VERSION` env variable and run the script:
 ```
+export TEZOS_VERSION="v7.3"
 ./docker-static-build.sh
 ```
 After that, directory will contain built static binaries.
@@ -30,8 +32,10 @@ version defined in [sources.json](../nix/nix/sources.json) and build native ubun
 
 ### `.deb` packages
 
-In order to build binary `.deb` packages run the following command:
+In order to build binary `.deb` packages specify `TEZOS_VERSION` and
+run the following command:
 ```
+export TEZOS_VERSION="v7.3"
 cd .. && ./docker/docker-ubuntu-packages.sh binary
 ```
 
@@ -39,6 +43,7 @@ It is also possible to build single package. In order to do that run the followi
 ```
 # cd .. && ./docker/docker-ubuntu-packages.sh binary <tezos-binary-name>
 # Example for baker
+export TEZOS_VERSION="v7.3"
 cd .. && ./docker/docker-ubuntu-packages.sh binary tezos-baker-006-PsCARTHA
 ```
 
@@ -54,8 +59,9 @@ sudo apt install <path to deb file>
 
 ### Source packages and publishing them on Launchpad PPA
 
-In order to build source packages run the following command:
+In order to build source packages run the following commands:
 ```
+export TEZOS_VERSION="v7.3"
 cd .. && ./docker/docker-ubuntu-packages.sh source
 # you can also build single source package
 cd .. && ./docker/docker-ubuntu-packages.sh source tezos-baker-006-PsCARTHA

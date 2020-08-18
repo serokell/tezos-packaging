@@ -19,6 +19,27 @@ export TEZOS_VERSION="v7.3"
 ```
 After that, directory will contain built static binaries.
 
+This script can optionally accept argument to define resulting binaries target architecture.
+Currently supported architectures are: `host` and `aarch64`, so that
+one can build native binaries for current architecture or build `aarch64` binaries on
+`x86_64` machine.
+
+### Compiling for `aarch64` on `x86_64` prerequisites
+
+Docker image defined in [`Dockerfile.aarch64`](build/Dockerfile.aarch64) uses qemu for
+compilation on `aarch64`. In particular it uses `qemu-aarch64-static` binary from
+[qemu-user-static repo](https://github.com/multiarch/qemu-user-static/).
+In order to be able to compile tezos using `aarch64` emulator you'll need to run:
+```
+docker run --rm --privileged multiarch/qemu-user-static:register --reset
+```
+This command will register qemu emulator in `binfmt_misc`.
+
+Once this is done you should run the following command to build `aarch64` static tezos binaries:
+```
+./docker-static-build.sh aarch64
+```
+
 ## Ubuntu packages
 
 We provide a way to build both binary and source native Ubuntu packages.

@@ -13,8 +13,27 @@ binaries=("tezos-accuser-006-PsCARTHA" "tezos-admin-client" "tezos-baker-006-PsC
           "tezos-client" "tezos-endorser-006-PsCARTHA" "tezos-node" "tezos-signer"
          )
 
-echo $TEZOS_VERSION
-docker build -t alpine-tezos -f build/Dockerfile --build-arg TEZOS_VERSION="$TEZOS_VERSION" .
+arch="host"
+
+if [[ -n "${1-}" ]]; then
+    arch="$1"
+fi
+
+if [[ $arch == "host" ]]; then
+    docker_file=build/Dockerfile
+elif [[ $arch == "aarch64" ]]; then
+    docker_file=build/Dockerfile.aarch64
+else
+    echo "Unsupported architecture: $arch"
+    echo "Only 'host' and 'aarch64' are currently supported"
+    exit 1
+fi
+
+if [[ $arch == "aarch64" && $(uname -m) != "x86_64" ]]; then
+    echo "Compiling for aarch64 is supported only from aarch64 and x86_64"
+fi
+
+docker build -t alpine-tezos -f "$docker_file" --build-arg TEZOS_VERSION="$TEZOS_VERSION" .
 container_id="$(docker create alpine-tezos)"
 for b in "${binaries[@]}"; do
     docker cp "$container_id:/tezos/$b" "$b"

@@ -2,7 +2,9 @@
 #
 # SPDX-License-Identifier: MPL-2.0
 { path-to-binaries ? null } @ args:
-import <nixpkgs/nixos/tests/make-test-python.nix> ({ pkgs, ... }:
+let
+  nixpkgs = (import ../nix/nix/sources.nix).nixpkgs;
+in import "${nixpkgs}/nixos/tests/make-test-python.nix" ({ pkgs, ... }:
 {
   nodes.machine = { ... }: { virtualisation.memorySize = 1024; };
 

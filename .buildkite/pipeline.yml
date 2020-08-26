@@ -3,7 +3,6 @@
 # SPDX-License-Identifier: MPL-2.0
 
 env:
-  NIX_PATH: nixpkgs=https://github.com/serokell/nixpkgs/archive/master.tar.gz
   SET_VERSION: "export TEZOS_VERSION=\"$(cat nix/nix/sources.json | jq -r '.tezos.ref')\""
 
 steps:

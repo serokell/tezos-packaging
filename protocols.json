@@ -1,18 +1,18 @@
 {
   "ignored": [
     "alpha",
-    "demo-counter",
+    "demo-counter"
+  ],
+  "allowed": [
+    "genesis",
+    "genesis-carthagenet",
+    "000-Ps9mPmXa",
     "001-PtCJ7pwo",
     "002-PsYLVpVv",
     "003-PsddFKi3",
     "004-Pt24m4xi",
     "005-PsBABY5H",
     "005-PsBabyM1"
-  ],
-  "allowed": [
-    "genesis",
-    "genesis-carthagenet",
-    "000-Ps9mPmXa"
   ],
   "active": [
     "006-PsCARTHA"

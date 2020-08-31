@@ -1,5 +1,5 @@
 #!/usr/bin/env nix-shell
-#!nix-shell -p gitAndTools.hub git rename -i bash
+#!nix-shell shell.nix -i bash
 # SPDX-FileCopyrightText: 2019 TQ Tezos <https://tqtezos.com/>
 #
 # SPDX-License-Identifier: MPL-2.0

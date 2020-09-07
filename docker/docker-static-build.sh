@@ -9,9 +9,11 @@
 
 set -euo pipefail
 
-binaries=("tezos-accuser-006-PsCARTHA" "tezos-admin-client" "tezos-baker-006-PsCARTHA"
-          "tezos-client" "tezos-endorser-006-PsCARTHA" "tezos-node" "tezos-signer"
-         )
+binaries=("tezos-admin-client" "tezos-client" "tezos-node" "tezos-signer")
+
+for proto in $(jq -r ".active | .[]" ../protocols.json); do
+    binaries+=("tezos-accuser-$proto" "tezos-baker-$proto" "tezos-endorser-$proto")
+done
 
 arch="host"
 

@@ -29,16 +29,10 @@
         "homepage": "https://opam.ocaml.org",
         "owner": "ocaml",
         "repo": "opam-repository",
-        "rev": "d67e70b40203a6a1c77ccb2edbe136c1509a73a3",
-        "sha256": "1yphw9xcss284p51qnml5jvfs4mhjcjgdka3wk25q0437zdzqj4n",
+        "rev": "4fb8d40be39a2a81da247008e1524bc795dd8fbe",
+        "sha256": "0m57154dd9sm02clczqxii1swgzpvaxms42xdn5djpjq96l5x899",
         "type": "tarball",
-        "url": "https://github.com/ocaml/opam-repository/archive/d67e70b40203a6a1c77ccb2edbe136c1509a73a3.tar.gz",
+        "url": "https://github.com/ocaml/opam-repository/archive/4fb8d40be39a2a81da247008e1524bc795dd8fbe.tar.gz",
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
-    },
-    "tezos": {
-        "ref": "v7.4",
-        "repo": "https://gitlab.com/tezos/tezos",
-        "rev": "e69b63f128701b2cdad665e8037a330305f591ce",
-        "type": "git"
     }
 }

@@ -4,8 +4,8 @@
 
 diff --git a/src/lib_stdlib_unix/file_descriptor_sink.ml b/src/lib_stdlib_unix/file_descriptor_sink.ml
 index 781668770..124dbaaef 100644
---- a/file_descriptor_sink.ml
-+++ b/file_descriptor_sink.ml
+--- a/src/lib_stdlib_unix/file_descriptor_sink.ml
++++ b/src/lib_stdlib_unix/file_descriptor_sink.ml
 @@ -24,6 +24,7 @@
  (*****************************************************************************)
  

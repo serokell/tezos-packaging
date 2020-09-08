@@ -5,13 +5,14 @@
 { docker-binaries ? null, docker-arm-binaries ? null }:
 let
   pkgs = import ./nix/build/pkgs.nix { };
-  source = (import ./nix/nix/sources.nix).tezos;
+  source = pkgs.ocamlPackages.tezos-client.src;
+
   meta = builtins.fromJSON (builtins.readFile ./meta.json);
   commonMeta = {
-    version = builtins.replaceStrings [ "v" ] [ "" ] source.ref;
+    version = pkgs.ocamlPackages.tezos-client.version;
     license = "MPL-2.0";
     dependencies = "";
-    branchName = source.ref;
+    branchName = "v${pkgs.ocamlPackages.tezos-client.version}";
     licenseFile = "${source}/LICENSE";
   } // meta;
   release = pkgs.callPackage ./release.nix

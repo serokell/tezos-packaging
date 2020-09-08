@@ -19,6 +19,7 @@ with oself; {
   cohttp-lwt-unix = osuper.cohttp-lwt-unix.versions."2.4.0";
   cohttp-lwt = osuper.cohttp-lwt.versions."2.4.0";
   macaddr = osuper.macaddr.versions."4.0.0";
+  index = osuper.index.versions."1.2.1";
 
   lwt = lwt4;
 
@@ -35,7 +36,14 @@ with oself; {
   bigstring = osuper.bigstring.overrideAttrs (_: { doCheck = false; });
 
   # FIXME vendors/index
-  index = oself.index-super;
+
+  # ???
+
+  blake2 = osuper.blake2.override { dune = oself.dune_2; };
+  hacl = osuper.hacl.override { dune = oself.dune_2; };
+  secp256k1-internal =
+    osuper.secp256k1-internal.override { dune = oself.dune_2; };
+  uecc = osuper.uecc.override { dune = oself.dune_2; };
 
   # FIXME dependencies in tezos-protocol-compiler.opam
   tezos-protocol-compiler = osuper.tezos-protocol-compiler.overrideAttrs

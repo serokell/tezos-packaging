@@ -4,14 +4,13 @@
 
 { sources ? import ./nix/sources.nix
 , protocols ? builtins.fromJSON (builtins.readFile ../../protocols.json)
-, hacks ? import ./hacks.nix
-, pkgs ? import sources.nixpkgs { }, opam-nix ? import sources.opam-nix pkgs }:
+, hacks ? import ./hacks.nix, pkgs ? import sources.nixpkgs { }
+, opam-nix ? import sources.opam-nix pkgs }:
 self: super: {
   ocamlPackages = self.ocaml-ng.ocamlPackages_4_09.overrideScope'
     (builtins.foldl' self.lib.composeExtensions (_: _: { }) [
       (opam-nix.traverseOPAMRepo' sources.opam-repository)
-      (oself: osuper: { index-super = osuper.index.versions."1.2.0"; })
-      (opam-nix.callOPAMPackage sources.tezos)
+      (oself: osuper: { inherit ((opam-nix.callOPAMPackage osuper.tezos-node.src) oself osuper) irmin irmin-pack; })
       (_: # Nullify all the ignored protocols so that we don't build them
         builtins.mapAttrs (name: pkg:
           if builtins.any
@@ -20,6 +19,12 @@ self: super: {
             null
           else
             pkg))
+      (oself: osuper:
+        builtins.mapAttrs (name: pkg:
+          if self.lib.hasPrefix "tezos" name && pkg ? override then
+            pkg.override { dune = oself.dune_2; }
+          else
+            pkg) osuper)
       (hacks self super)
       (opam-nix.cacheSources sources)
     ]);

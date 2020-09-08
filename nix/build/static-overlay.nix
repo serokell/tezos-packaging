@@ -16,6 +16,7 @@ let
     "-lusb-1.0 -lhidapi-libusb -ludev";
 in {
   ocaml = self.ocaml-ng.ocamlPackages_4_07.ocaml;
+  curl = super.curl.override { gssSupport = false; };
   libev = dds super.libev;
   libusb1 = dds (super.libusb1.override {
     systemd = self.eudev;

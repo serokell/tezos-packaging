@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2020 TQ Tezos <https://tqtezos.com/>
 #
 # SPDX-License-Identifier: MPL-2.0
-{ path-to-binaries ? null } @ args:
+{ path-to-binaries ? "${(import ../nix { }).binaries}/bin" } @ args:
 let
   nixpkgs = (import ../nix/nix/sources.nix).nixpkgs;
 in import "${nixpkgs}/nixos/tests/make-test-python.nix" ({ pkgs, ... }:

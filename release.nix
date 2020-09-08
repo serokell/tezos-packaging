@@ -17,7 +17,7 @@ let
   '';
   releaseNoTarball = buildEnv {
     name = "tezos-release-no-tarball";
-    paths = [ "${binaries}" LICENSE release-notes ];
+    paths = [ binaries LICENSE release-notes ];
   };
   tarballName = "binaries-${commonMeta.version}-${commonMeta.release}.tar.gz";
   binariesTarball = runCommand "binaries-tarball" { }

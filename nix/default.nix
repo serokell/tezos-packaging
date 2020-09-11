@@ -2,9 +2,9 @@
 #
 # SPDX-License-Identifier: MPL-2.0
 
-{ patches ? [ ] }:
+{ tezos-source ? null }:
 let
-  pkgs = import ./build/pkgs.nix { };
+  pkgs = import ./build/pkgs.nix { inherit tezos-source; };
   source = (import ./nix/sources.nix).tezos;
   protocols = import ./protocols.nix;
   bin = pkgs.callPackage ./build/bin.nix { };

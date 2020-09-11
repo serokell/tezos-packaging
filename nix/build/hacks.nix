@@ -28,6 +28,9 @@ with oself; {
   conf-libev = self.libev;
   conf-hidapi = self.hidapi;
   conf-pkg-config = self.pkg-config;
+  conf-rust = null;
+  conf-libffi = self.libffi;
+  ctypes-foreign = oself.ctypes;
 
   # FIXME X11 in nixpkgs musl
   lablgtk = null;
@@ -53,8 +56,11 @@ with oself; {
     });
 
   # FIXME apply this patch upstream
-  tezos-stdlib-unix = osuper.tezos-stdlib-unix.overrideAttrs
-    (_: { patches = [ ./stdlib-unix.patch ]; });
+  tezos-stdlib-unix = if isNull oself.tezos-source then
+    osuper.tezos-stdlib-unix.overrideAttrs
+    (_: { patches = [ ./stdlib-unix.patch ]; })
+  else
+    osuper.tezos-stdlib-unix;
 
   tezos-client = osuper.tezos-client.overrideAttrs
     (_: { postInstall = "rm $bin/tezos-admin-client $bin/*.sh"; });

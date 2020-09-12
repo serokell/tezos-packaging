@@ -4,6 +4,13 @@
 
 # This file needs to become empty.
 self: super: oself: osuper:
+
+let
+  fixHardeningWarning = pkg: if self.stdenv.isDarwin then pkg.overrideAttrs (_: {
+    hardeningDisable = [ "strictoverflow" ];
+    NIX_CFLAGS_COMPILE = "-Wno-error";
+  }) else pkg;
+in
 with oself; {
   # FIXME opam-nix needs to do this
   ocamlfind = findlib;
@@ -43,10 +50,10 @@ with oself; {
   # ???
 
   blake2 = osuper.blake2.override { dune = oself.dune_2; };
-  hacl = osuper.hacl.override { dune = oself.dune_2; };
   secp256k1-internal =
     osuper.secp256k1-internal.override { dune = oself.dune_2; };
   uecc = osuper.uecc.override { dune = oself.dune_2; };
+  hacl = fixHardeningWarning (osuper.hacl.override { dune = oself.dune_2; });
 
   # FIXME dependencies in tezos-protocol-compiler.opam
   tezos-protocol-compiler = osuper.tezos-protocol-compiler.overrideAttrs

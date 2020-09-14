@@ -83,4 +83,12 @@ with oself; {
 
   tezos-node =
     osuper.tezos-node.overrideAttrs (_: { postInstall = "rm $bin/*.sh"; });
-}
+} // builtins.mapAttrs
+  (name: pkg:
+    if self.lib.hasPrefix "tezos" name then
+      pkg.overrideAttrs ( oa: rec{
+        buildInputs = oa.buildInputs ++ [ self.openssl ];
+        propagatedBuildInputs = buildInputs;
+      })
+    else
+      pkg) osuper

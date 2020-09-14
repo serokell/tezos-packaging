@@ -12,15 +12,15 @@
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
     },
     "opam-nix": {
-        "branch": "master",
+        "branch": "rvem/account-optional-deps",
         "description": "A handy nix library to package OCaml software from OPAM repositories",
         "homepage": null,
         "owner": "balsoft",
         "repo": "opam-nix",
-        "rev": "a7b8e16ab28c840eab2c3be2f5069524dc87fd58",
-        "sha256": "0ydbwbirz1ag1lprl2mxz3cvzqxn945yfnakhzm19q2qm78zlb37",
+        "rev": "eff3e968165d05b8b6199ca119be792ce69b48f8",
+        "sha256": "1ixnwrslgr8qdzk48nj8vjwcgj24l1w77vx15q5y56nrigqpqr1f",
         "type": "tarball",
-        "url": "https://github.com/balsoft/opam-nix/archive/a7b8e16ab28c840eab2c3be2f5069524dc87fd58.tar.gz",
+        "url": "https://github.com/balsoft/opam-nix/archive/eff3e968165d05b8b6199ca119be792ce69b48f8.tar.gz",
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
     },
     "opam-repository": {

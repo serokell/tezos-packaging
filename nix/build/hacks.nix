@@ -22,7 +22,11 @@ with oself; {
     buildInputs = [ oself.tls ] ++ oa.buildInputs;
     propagatedBuildInputs = buildInputs;
   });
-  conduit-lwt-unix = osuper.conduit-lwt-unix.versions."2.0.2";
+  conduit-lwt-unix = osuper.conduit-lwt-unix.versions."2.0.2".overrideAttrs
+    (oa: rec {
+      buildInputs = self.lib.remove oself.launchd oa.buildInputs;
+      propagatedBuildInputs = buildInputs;
+    });
   cohttp-lwt-unix = osuper.cohttp-lwt-unix.versions."2.4.0";
   cohttp-lwt = osuper.cohttp-lwt.versions."2.4.0";
   macaddr = osuper.macaddr.versions."4.0.0";

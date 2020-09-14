@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: MPL-2.0
 
-{ docker-binaries ? null }:
+{ docker-binaries ? null, docker-arm-binaries ? null }:
 let
   pkgs = import ./nix/build/pkgs.nix { };
   source = (import ./nix/nix/sources.nix).tezos;
@@ -14,7 +14,7 @@ let
     branchName = source.ref;
     licenseFile = "${source}/LICENSE";
   } // meta;
-  release =
-    pkgs.callPackage ./release.nix { binaries = docker-binaries; inherit commonMeta; };
+  release = pkgs.callPackage ./release.nix
+    { binaries = docker-binaries; arm-binaries = docker-arm-binaries; inherit commonMeta; };
 
 in { inherit release commonMeta pkgs; }

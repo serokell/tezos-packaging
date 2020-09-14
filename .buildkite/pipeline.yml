@@ -37,6 +37,21 @@ steps:
    - nix run -f.. pkgs.upx -c upx tezos-*
    artifact_paths:
      - ./docker/tezos-*
+ # arm builer is an ubuntu machine without nix
+ - label: build arm via docker
+   commands:
+   - eval "$SET_VERSION"
+   - cd docker
+   - ./docker-static-build.sh
+   - upx tezos-*
+   - >
+     for f in ./tezos-*; do
+       mv "\$f" "\$f-arm64"
+     done
+   artifact_paths:
+     - ./docker/tezos-*
+   agents:
+     queue: "arm64-build"
  - label: test docker-built binaries
    commands:
    - buildkite-agent artifact download "docker/*" . --step "build via docker"
@@ -60,11 +75,13 @@ steps:
    - rm -rf out
    branches: "!master"
 
-
+ - wait
  - label: create auto pre-release
    commands:
    - mkdir binaries
+   - mkdir arm-binaries
    - buildkite-agent artifact download "docker/*" binaries --step "build via docker"
+   - buildkite-agent artifact download "docker/*" arm-binaries --step "build arm via docker"
    - ls binaries
    - GITHUB_TOKEN=$(cat ~/niv-bot-token) ./scripts/autorelease.sh
    branches: master

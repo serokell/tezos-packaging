@@ -1,0 +1,25 @@
+# SPDX-FileCopyrightText: 2020 TQ Tezos <https://tqtezos.com/>
+#
+# SPDX-License-Identifier: MPL-2.0
+
+FROM fedora:32
+RUN dnf update -y
+RUN dnf install -y libev-devel gmp-devel hidapi-devel m4 perl pkg-config \
+  rpmdevtools python3 wget opam rsync
+ENV USER dockerbuilder
+RUN useradd dockerbuilder && mkdir /tezos-packaging
+ENV HOME /tezos-packaging
+COPY meta.json /tezos-packaging/meta.json
+COPY protocols.json /tezos-packaging/protocols.json
+WORKDIR /tezos-packaging/docker
+ENV OPAMROOT "/tezos-packaging/docker/opamroot"
+RUN opam init --bare --yes --disable-sandboxing
+RUN opam switch create ocaml-base-compiler.4.09.1
+RUN opam switch set ocaml-base-compiler.4.09.1
+RUN opam install opam-bundle=0.4 --yes
+WORKDIR /tezos-packaging/docker
+COPY docker/package/package_generator.py /tezos-packaging/docker/package_generator.py
+COPY docker/package/systemd_files_generator.py /tezos-packaging/docker/systemd_files_generator.py
+COPY docker/package/defaults /tezos-packaging/docker/defaults
+COPY docker/package/scripts /tezos-packaging/docker/scripts
+ENTRYPOINT ["./package_generator.py"]

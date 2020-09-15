@@ -5,7 +5,7 @@
 FROM ubuntu:18.04
 RUN apt-get update && apt-get install -y libev-dev libgmp-dev libhidapi-dev m4 perl pkg-config \
   debhelper dh-make dh-systemd devscripts autotools-dev python3 python3-distutils wget
-RUN apt-get install -y software-properties-common && add-apt-repository ppa:avsm/ppa && apt-get update && apt-get install -y opam
+RUN apt-get install -y software-properties-common && add-apt-repository ppa:avsm/ppa -y && apt-get update && apt-get install -y opam
 ENV USER dockerbuilder
 RUN useradd dockerbuilder && mkdir /tezos-packaging
 ENV HOME /tezos-packaging

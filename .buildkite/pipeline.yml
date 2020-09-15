@@ -4,6 +4,7 @@
 
 env:
   SET_VERSION: "export TEZOS_VERSION=\"$(cat nix/nix/sources.json | jq -r '.tezos.ref')\""
+  USE_PODMAN: "True"
 
 steps:
  - label: reuse lint
@@ -29,11 +30,11 @@ steps:
    - nix-build tests/tezos-binaries.nix --no-out-link --arg path-to-binaries ./binaries/bin
    branches: "!master"
 
- - label: build via docker
+ - label: build via podman
    commands:
    - eval "$SET_VERSION"
    - cd docker
-   - nix run -f.. pkgs.docker -c ./docker-static-build.sh
+   - ./docker-static-build.sh
    - nix run -f.. pkgs.upx -c upx tezos-*
    artifact_paths:
      - ./docker/tezos-*
@@ -42,7 +43,8 @@ steps:
    commands:
    - eval "$SET_VERSION"
    - cd docker
-   - ./docker-static-build.sh
+   # arm builder doesn't have podman installed
+   - USE_PODMAN="False" ./docker-static-build.sh
    - upx tezos-*
    - >
      for f in ./tezos-*; do
@@ -54,24 +56,24 @@ steps:
      queue: "arm64-build"
  - label: test docker-built binaries
    commands:
-   - buildkite-agent artifact download "docker/*" . --step "build via docker"
+   - buildkite-agent artifact download "docker/*" . --step "build via podman"
    - chmod +x ./docker/*
    - nix-build tests/tezos-binaries.nix --no-out-link --arg path-to-binaries ./docker
    branches: "!master"
 
- - label: test deb source packages via docker
+ - label: test deb source packages via podman
    commands:
    - eval "$SET_VERSION"
-   - nix run -f. pkgs.docker -c ./docker/docker-ubuntu-packages.sh source
+   - ./docker/docker-ubuntu-packages.sh source
    artifact_paths:
      - ./out/*
    branches: "!master"
- - label: test deb binary packages via docker
+ - label: test deb binary packages via podman
    commands:
    - eval "$SET_VERSION"
    # Building all binary packages will take significant amount of time, so we build only one
    # in order to ensure package generation sanity
-   - nix run -f. pkgs.docker -c ./docker/docker-ubuntu-packages.sh binary tezos-baker-006-PsCARTHA
+   - ./docker/docker-ubuntu-packages.sh binary tezos-baker-006-PsCARTHA
    - rm -rf out
    branches: "!master"
 

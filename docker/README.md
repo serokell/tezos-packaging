@@ -6,6 +6,10 @@
 
 # Building and packaging tezos using docker
 
+The following scripts can be used with `podman` instead of `docker`
+as a virtualisation engine. In order to use `podman` you should
+set environment variable `USE_PODMAN="True"`.
+
 ## Statically built binaries
 
 Static binaries building using custom alpine image.

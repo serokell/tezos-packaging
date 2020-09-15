@@ -9,10 +9,16 @@
 # 'binary' or 'source' as an argument to this script.
 set -euo pipefail
 
-docker build -t tezos-ubuntu -f docker/package/Dockerfile .
+if [[ "${USE_PODMAN-}" == "True" ]]; then
+    virtualisation_engine="podman"
+else
+    virtualisation_engine="docker"
+fi
+
+"$virtualisation_engine" build -t tezos-ubuntu -f docker/package/Dockerfile .
 set +e
-container_id="$(docker create --env TEZOS_VERSION="$TEZOS_VERSION" -t tezos-ubuntu "$@")"
-docker start -a "$container_id"
-docker cp "$container_id":/tezos-packaging/docker/out .
+container_id="$("$virtualisation_engine" create --env TEZOS_VERSION="$TEZOS_VERSION" -t tezos-ubuntu "$@")"
+"$virtualisation_engine" start -a "$container_id"
+"$virtualisation_engine" cp "$container_id":/tezos-packaging/docker/out .
 set -e
-docker rm -v "$container_id"
+"$virtualisation_engine" rm -v "$container_id"

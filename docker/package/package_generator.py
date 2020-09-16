@@ -3,14 +3,19 @@
 #
 # SPDX-License-Identifier: MPL-2.0
 
-import os, sys, subprocess, json
+import os, shutil, sys, subprocess, json
 from distutils.dir_util import copy_tree
+from systemd_files_generator import gen_service, print_service_file
 
 class Package:
-    def __init__(self, name, desc, systemd_unit=None):
+    def __init__(self, name, desc, systemd_unit=None, target_proto=None):
         self.name = name
         self.desc = desc
         self.systemd_unit = systemd_unit
+        self.target_proto = target_proto
+
+    def get_full_name(self):
+        return self.name if self.target_proto is None else f"{self.name}-{self.target_proto}"
 
 class SystemdUnit:
     def __init__(self, name, startup_script, config_file):
@@ -45,7 +50,7 @@ package_version = f"{meta['epoch']}:0ubuntu{version}-{release}"
 def gen_control_file(pkg: Package, out):
     str_deps = ", ".join(common_deps)
     file_contents = f'''
-Source: {pkg.name.lower()}
+Source: {pkg.get_full_name().lower()}
 Section: utils
 Priority: optional
 Maintainer: {meta['maintainer']}
@@ -53,7 +58,7 @@ Build-Depends: debhelper (>=9), dh-systemd (>= 1.5), autotools-dev, {str_deps}
 Standards-Version: 3.9.6
 Homepage: https://gitlab.com/tezos/tezos/
 
-Package: {pkg.name.lower()}
+Package: {pkg.get_full_name().lower()}
 Architecture: amd64
 Depends: ${{shlibs:Depends}}, ${{misc:Depends}}
 Description: {pkg.desc}
@@ -67,19 +72,19 @@ def gen_makefile(pkg: Package, out):
 
 BINDIR=/usr/bin
 
-{pkg.name}:
+{pkg.get_full_name()}:
 	./compile.sh
-	cp $(CURDIR)/opam/default/bin/{pkg.name} {pkg.name}
+	cp $(CURDIR)/opam/default/bin/{pkg.get_full_name()} {pkg.get_full_name()}
 
-install: {pkg.name}
+install: {pkg.get_full_name()}
 	mkdir -p $(DESTDIR)$(BINDIR)
-	cp $(CURDIR)/{pkg.name} $(DESTDIR)$(BINDIR)
+	cp $(CURDIR)/{pkg.get_full_name()} $(DESTDIR)$(BINDIR)
 '''
     with open(out, 'w') as f:
         f.write(makefile_contents)
 
 def gen_changelog(pkg: Package, ubuntu_version, maintainer, date, out):
-    changelog_contents = f'''{pkg.name.lower()} ({package_version}) {ubuntu_version}; urgency=medium
+    changelog_contents = f'''{pkg.get_full_name().lower()} ({package_version}) {ubuntu_version}; urgency=medium
 
   * Publish {version}-{release} version of {pkg.name}
 
@@ -128,17 +133,18 @@ daemon_decs = {
 for protocol in active_protocols:
     for daemon in daemons:
         packages.append(
-            Package(f"tezos-{daemon}-{protocol}",
+            Package(f"tezos-{daemon}",
                     daemon_decs[daemon],
-                    SystemdUnit(f"tezos-{daemon}.service", f"tezos-{daemon}-start", f"tezos-{daemon}.conf")
+                    SystemdUnit(f"tezos-{daemon}.service", f"tezos-{daemon}-start", f"tezos-{daemon}.conf"),
+                    protocol
             )
         )
 
 for package in packages:
-    if package_to_build is None or package.name == package_to_build:
-        dir = f"{package.name.lower()}-0ubuntu{version}"
+    if package_to_build is None or package.get_full_name() == package_to_build:
+        dir = f"{package.get_full_name().lower()}-0ubuntu{version}"
         # tezos-client and tezos-admin-client are in one opam package
-        opam_package = "tezos-client" if package.name == "tezos-admin-client" else package.name
+        opam_package = "tezos-client" if package.get_full_name() == "tezos-admin-client" else package.get_full_name()
         subprocess.run(["opam", "exec", "--", "opam-bundle", f"{opam_package}={version}",
                         "--ocaml=4.09.1", "--yes", "--opam=2.0.5"], check=True)
         subprocess.run(["tar", "-zxf", f"{opam_package}-bundle.tar.gz"], check=True)
@@ -148,9 +154,14 @@ for package in packages:
         os.chdir(dir)
         subprocess.run(["dh_make", "-syf" f"../{dir}.tar.gz"], check=True)
         if package.systemd_unit is not None:
-            os.rename(f"../systemd/{package.systemd_unit.name}", f"debian/{package.name.lower()}.service")
-            os.rename(f"../defaults/{package.systemd_unit.config_file}", f"debian/{package.name.lower()}.default")
-            os.rename(f"../scripts/{package.systemd_unit.startup_script}", f"debian/{package.systemd_unit.startup_script}")
+            if package.target_proto is None:
+                service_file = gen_service(package.name)
+            else:
+                service_file = gen_service(package.name, package.target_proto)
+            service_file.service.environment_file = service_file.service.environment_file.lower()
+            print_service_file(service_file, f"debian/{package.get_full_name().lower()}.service")
+            shutil.copy(f"../defaults/{package.systemd_unit.config_file}", f"debian/{package.get_full_name().lower()}.default")
+            shutil.copy(f"../scripts/{package.systemd_unit.startup_script}", f"debian/{package.systemd_unit.startup_script}")
             gen_install(package, "debian/install")
         gen_control_file(package, "debian/control")
         subprocess.run(["wget", "-q", "-O", "debian/copyright", f"https://gitlab.com/tezos/tezos/-/raw/v{version}/LICENSE"], check=True)

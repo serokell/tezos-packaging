@@ -19,7 +19,7 @@ RUN opam switch set ocaml-base-compiler.4.09.1
 RUN opam install opam-bundle=0.4 --yes
 WORKDIR /tezos-packaging/docker
 COPY docker/package/package_generator.py /tezos-packaging/docker/package_generator.py
+COPY docker/package/systemd_files_generator.py /tezos-packaging/docker/systemd_files_generator.py
 COPY docker/package/defaults /tezos-packaging/docker/defaults
 COPY docker/package/scripts /tezos-packaging/docker/scripts
-COPY docker/package/systemd /tezos-packaging/docker/systemd
 ENTRYPOINT ["./package_generator.py"]

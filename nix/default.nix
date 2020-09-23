@@ -14,16 +14,6 @@ let
     value = bin pkgs.pkgsMusl.ocamlPackages.${meta.name} // { inherit meta; };
   }) release-binaries);
 
-  inherit (import ../. {}) commonMeta;
-  rpmMeta = { arch = "x86_64"; };
-  rpm = builtins.mapAttrs
-    (_: pkgs.callPackage ./package/rpm.nix { meta = commonMeta // rpmMeta; }) binaries;
-  rpmSource = builtins.mapAttrs (_:
-    pkgs.callPackage ./package/rpm.nix {
-      meta = commonMeta // rpmMeta;
-      buildSourcePackage = true;
-    }) binaries;
-
   # Bundle the contents of a package set together, leaving the original attrs intact
   bundle = name: pkgSet:
     pkgSet // (pkgs.buildEnv {
@@ -31,7 +21,7 @@ let
       paths = builtins.attrValues pkgSet;
     });
 
-  artifacts = { inherit binaries rpm rpmSource; };
+  artifacts = { inherit binaries; };
   bundled = builtins.mapAttrs bundle artifacts;
 
 in bundled

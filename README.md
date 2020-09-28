@@ -92,6 +92,24 @@ chmod +x tezos-client
 
 Run `./tezos-client` or add it to your PATH to be able to run it anywhere.
 
+### Systemd units for `tezos-node` and daemons
+
+You can set up `tezos-node` and `baker/endorser/accuser` daemons as a systemd unit.
+For this you'll need `.service` file to define systemd service. The easiest way
+to get one is to run [`gen_systemd_service_file.py`](gen_systemd_service_file.py).
+You should specify service name as a first argument and optionally provide target protocol
+as a second argument, e.g.:
+```
+./gen_systemd_service_file.py tezos-node
+# or
+./gen_systemd_service_file.py tezos-baker 006-PsCARTHA
+```
+After that you'll have `.service` file in the current directory.
+
+Apart, from `.service` file you'll need service startup script and default configuration
+file, they can be found in [`scripts`](./docker/package/scripts) and
+[`defaults`](./docker/package/defaults) folders respectively.
+
 ## Build Instructions
 
 This repository provides two distinct ways for building and packaging tezos binaries:

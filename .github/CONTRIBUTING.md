@@ -17,13 +17,15 @@ otherwise improve our project, pull requests are most welcome.
 
 ## Quick maintenance guide
 
-- Tezos revision is located in the [`sources.json`](../nix/nix/sources.json) file.
-  You can either update it manually to newer revision or use `niv` tool.
-  In order to do that run
-  `niv update tezos -a ref=<tag from tezos repo> -a rev=<commit in this tag>`
-  from the [`nix/`](../nix) directory. This command will update sources to some commit
-  from the given tag.
-- Used tezos protocols can be changed by [`proto`](../script/proto) script.
+- For nix-based assets tezos sources are fetched from the opam repository.
+  You can update them via `niv`. In order to do that run
+  `niv update opam-repository` from the [`nix/`](../nix) directory. This command will update
+  opam repository to the latest revision and thus will use the latest tezos version.
+  In order to build custom tezos version you can insert
+  `opam-nix.callOPAMPackage (builtins.fetchTarball https://gitlab.com/tezos/tezos/-/archive/<commit>/tezos-<commit>.tar.gz)`
+  to the [`ocaml-overlay.nix`](../nix/build/ocaml-overlay.nix).
+- For docker based assets tezos sources are fetched based on `TEZOS_VERSION` environment variable.
+- Used tezos protocols can be changed by [`proto`](../scripts/proto) script.
   This script requires `jq` and `moreutils` to be installed.
   Currently used protocols are displayed in [`protocols.json`](../protocols.json).
   - To add a new protocol, `./proto activate ...`.
@@ -33,7 +35,7 @@ otherwise improve our project, pull requests are most welcome.
 
 ### Nix specific maintenance
 
-All nix related files are located in the [nix](./nix) directory.
+All nix related files are located in the [nix](../nix) directory.
 
 If the build breaks because of a dependency issue, `nix repl pkgs.nix`
 can be very useful to investigate it.

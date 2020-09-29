@@ -72,6 +72,9 @@ EnvironmentFile={service_file.service.environment_file}
 {environment}ExecStart={service_file.service.exec_start}
 StateDirectory={service_file.service.state_directory}
 User={service_file.service.user}
+Group={service_file.service.user}
+[Install]
+WantedBy=multi-user.target
 '''
     with open(out, 'w') as f:
         f.write(file_contents)

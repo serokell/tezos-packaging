@@ -36,32 +36,6 @@ sudo apt-get install tezos-baker-006-pscartha
 ```
 Once you install such packages the commands `tezos-*` will be available.
 
-### Systemd units for `tezos-node` and daemons
-
-`tezos-node`, `tezos-accuser-006-pscartha`, `tezos-baker-006-pscartha` and
-`tezos-endorser-006-pscartha` packages have systemd files included to the
-package.
-
-Once you've installed the packages with systemd unit, you can run the service
-with the binary from the package using the following command:
-```
-systemctl start <package-name>.service
-```
-To stop the service run:
-```
-systemctl stop <package-name>.service
-```
-
-Each service has configuration file located in `/etc/default`. Default
-configurations can be found [here](docker/package/defaults/).
-
-Files created by the services will be located in `/var/lib/tezos/` by default.
-`tezos-{accuser, baker, endorser}-006-pscartha` services can have configurable
-data directory.
-
-`tezos-{accuser, endorser}` have configurable node address, so that they can be used with both
-remote and local node.
-
 ## Fedora Copr repository with `tezos-*` binaries
 
 If you are using Fedora you can use Copr in order to install `tezos-*`
@@ -92,9 +66,39 @@ chmod +x tezos-client
 
 Run `./tezos-client` or add it to your PATH to be able to run it anywhere.
 
-### Systemd units for `tezos-node` and daemons
+## Systemd units for `tezos-node` and daemons
 
-You can set up `tezos-node` and `baker/endorser/accuser` daemons as a systemd unit.
+### Systemd units on Ubuntu or Fedora
+
+`tezos-node`, `tezos-accuser-006-pscartha`, `tezos-baker-006-pscartha` and
+`tezos-endorser-006-pscartha` packages have systemd files included to the
+Ubuntu and Fedora packages.
+
+Once you've installed the packages with systemd unit, you can run the service
+with the binary from the package using the following command:
+```
+systemctl start <package-name>.service
+```
+To stop the service run:
+```
+systemctl stop <package-name>.service
+```
+
+Each service has configuration file located in `/etc/default`. Default
+configurations can be found [here](docker/package/defaults/).
+
+Files created by the services will be located in `/var/lib/tezos/` by default.
+`tezos-{accuser, baker, endorser}-<protocol>` services can have configurable
+data directory.
+
+`tezos-{accuser, endorser}` have configurable node address, so that they can be used with both
+remote and local node.
+
+### Systemd units on other systems
+
+If you're not using Ubuntu or Fedora you can still construct systemd units for binaries
+from scratch.
+
 For this you'll need `.service` file to define systemd service. The easiest way
 to get one is to run [`gen_systemd_service_file.py`](gen_systemd_service_file.py).
 You should specify service name as a first argument and optionally provide target protocol
@@ -109,6 +113,7 @@ After that you'll have `.service` file in the current directory.
 Apart, from `.service` file you'll need service startup script and default configuration
 file, they can be found in [`scripts`](./docker/package/scripts) and
 [`defaults`](./docker/package/defaults) folders respectively.
+
 
 ## Build Instructions
 

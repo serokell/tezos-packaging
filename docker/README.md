@@ -48,9 +48,9 @@ Once this is done you should run the following command to build `aarch64` static
 
 We provide a way to build both binary and source native Ubuntu packages.
 
-[`docker-ubuntu-packages.sh`](docker-ubuntu-packages.sh) will build source or binary
-packages depending on the passed argument (`source` and `binary` respectively).
-This script builds packages inside docker image defined in [Dockerfile](package/Dockerfile).
+[`docker-tezos-packages.sh`](docker-tezos-packages.sh) script with `ubuntu` argument
+will build source or binary packages depending on the passed argument (`source` and `binary` respectively).
+This script builds packages inside docker image defined in [Dockerfile-ubuntu](package/Dockerfile-ubuntu).
 This script uses [python script](package/package_generator.py) which generates meta information for
 tezos packages based on information defined in [meta.json](../meta.json) and current tezos
 version defined in [sources.json](../nix/nix/sources.json) and build native ubuntu packages.
@@ -61,15 +61,15 @@ In order to build binary `.deb` packages specify `TEZOS_VERSION` and
 run the following command:
 ```
 export TEZOS_VERSION="v7.3"
-cd .. && ./docker/docker-ubuntu-packages.sh binary
+cd .. && ./docker/docker-tezos-packages.sh ubuntu binary
 ```
 
 It is also possible to build single package. In order to do that run the following:
 ```
-# cd .. && ./docker/docker-ubuntu-packages.sh binary <tezos-binary-name>
+# cd .. && ./docker/docker-tezos-packages.sh ubuntu binary <tezos-binary-name>
 # Example for baker
 export TEZOS_VERSION="v7.3"
-cd .. && ./docker/docker-ubuntu-packages.sh binary tezos-baker-006-PsCARTHA
+cd .. && ./docker/docker-tezos-packages.sh ubuntu binary tezos-baker-006-PsCARTHA
 ```
 
 The build can take some time due to the fact that we build tezos and its dependencies
@@ -87,9 +87,9 @@ sudo apt install <path to deb file>
 In order to build source packages run the following commands:
 ```
 export TEZOS_VERSION="v7.3"
-cd .. && ./docker/docker-ubuntu-packages.sh source
+cd .. && ./docker/docker-tezos-packages.sh ubuntu source
 # you can also build single source package
-cd .. && ./docker/docker-ubuntu-packages.sh source tezos-baker-006-PsCARTHA
+cd .. && ./docker/docker-tezos-packages.sh ubuntu source tezos-baker-006-PsCARTHA
 ```
 
 Once the packages build is complete `../out` directory will contain files required
@@ -120,3 +120,49 @@ command for each `.changes` file:
 ```
 dput ppa:serokell/tezos ../out/<package>.changes
 ```
+
+## Fedora packages
+
+We provide a way to build both binary(`.rpm`) and source(`.src.rpm`) native Fedora packages.
+
+[`docker-tezos-packages.sh`](docker-tezos-packages.sh) script with `fedora` argument
+will build source or binary packages depending on the passed argument (`source` and `binary` respectively).
+
+### `.rpm` packages
+
+In order to build binary `.rpm` packages specify `TEZOS_VERSION` and
+run the following command:
+```
+export TEZOS_VERSION="v7.3"
+cd .. && ./docker/docker-tezos-packages.sh fedora binary
+```
+
+It is also possible to build single package. In order to do that run the following:
+```
+# cd .. && ./docker/docker-tezos-packages.sh fedora binary <tezos-binary-name>
+# Example for baker
+export TEZOS_VERSION="v7.3"
+cd .. && ./docker/docker-tezos-packages.sh fedora binary tezos-baker-006-PsCARTHA
+```
+
+The build can take some time due to the fact that we build tezos and its dependencies
+from scratch for each package individually.
+
+Once the build is completed the packages will be located in `../out` directory.
+
+In order to install `.rpm` package run the following command:
+```
+sudo yum localinstall <path to rpm file>
+```
+
+### `.src.rpm` packages
+
+In order to build source packages run the following commands:
+```
+export TEZOS_VERSION="v7.3"
+cd .. && ./docker/docker-tezos-packages.sh fedora source
+# you can also build single source package
+cd .. && ./docker/docker-tezos-packages.sh fedora source tezos-baker-006-PsCARTHA
+```
+
+Resulting `.src.rpm` packages can be either built locally or submitted to the Copr.

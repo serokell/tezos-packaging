@@ -15,17 +15,15 @@ steps:
    command: "nix run -f https://github.com/serokell/crossref-verifier/archive/68a1f9d25b6e7835fea8299b18a3e6c61dbb2a5c.tar.gz -c crossref-verify"
    soft_fail: true
 
- - label: build and package via nix
+ - label: build via nix
    commands:
    - nix-build ./nix -A binaries -o binaries
-   - nix-build ./nix -A rpm -o rpm-packages
    artifact_paths:
      - ./binaries/bin/*
-     - ./rpm-packages/*
    branches: "!master"
  - label: test nix-built binaries
    commands:
-   - buildkite-agent artifact download "binaries/bin/*" . --step "build and package via nix"
+   - buildkite-agent artifact download "binaries/bin/*" . --step "build via nix"
    - chmod +x ./binaries/bin/*
    - nix-build tests/tezos-binaries.nix --no-out-link --arg path-to-binaries ./binaries/bin
    branches: "!master"
@@ -64,7 +62,7 @@ steps:
  - label: test deb source packages via podman
    commands:
    - eval "$SET_VERSION"
-   - ./docker/docker-ubuntu-packages.sh source
+   - ./docker/docker-tezos-packages.sh ubuntu source
    artifact_paths:
      - ./out/*
    branches: "!master"
@@ -73,7 +71,22 @@ steps:
    - eval "$SET_VERSION"
    # Building all binary packages will take significant amount of time, so we build only one
    # in order to ensure package generation sanity
-   - ./docker/docker-ubuntu-packages.sh binary tezos-baker-006-PsCARTHA
+   - ./docker/docker-tezos-packages.sh ubuntu binary tezos-baker-006-PsCARTHA
+   - rm -rf out
+   branches: "!master"
+ - label: test rpm source packages via podman
+   commands:
+   - eval "$SET_VERSION"
+   - ./docker/docker-tezos-packages.sh fedora source
+   artifact_paths:
+     - ./out/*
+   branches: "!master"
+ - label: test rpm binary packages via podman
+   commands:
+   - eval "$SET_VERSION"
+   # Building all binary packages will take significant amount of time, so we build only one
+   # in order to ensure package generation sanity
+   - ./docker/docker-tezos-packages.sh fedora binary tezos-baker-007-PsDELPH1
    - rm -rf out
    branches: "!master"
 

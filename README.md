@@ -12,6 +12,13 @@ This repo provides various form of distribution for tezos-related executables
 (`tezos-client`, `tezos-client-admin`, `tezos-node`, `tezos-baker`,
 `tezos-accuser`, `tezos-endorser`, `tezos-signer` and `tezos-protocol-compiler`).
 
+Daemon binaries (as well as packages for them) have suffix that defines their target protocol,
+e.g. `tezos-baker-007-PsDELPH1` can be used only on the chain with 007 protocol.
+
+Other binaries can be used with all protocols if they're new enough. E.g.
+007 protocol is supported only from `v7.4`. `tezos-node` can be set up to run
+different networks, you can read more about this in [this article](https://tezos.gitlab.io/user/multinetwork.html).
+
 ## Obtain binaries from github release
 
 Recomended way to get these binaries is to download them from assets from github release.
@@ -70,8 +77,8 @@ Run `./tezos-client` or add it to your PATH to be able to run it anywhere.
 
 ### Systemd units on Ubuntu or Fedora
 
-`tezos-node`, `tezos-accuser-006-pscartha`, `tezos-baker-006-pscartha` and
-`tezos-endorser-006-pscartha` packages have systemd files included to the
+`tezos-node`, `tezos-accuser-<proto>`, `tezos-baker-<proto>` and
+`tezos-endorser-<proto>` packages have systemd files included to the
 Ubuntu and Fedora packages.
 
 Once you've installed the packages with systemd unit, you can run the service
@@ -101,19 +108,42 @@ from scratch.
 
 For this you'll need `.service` file to define systemd service. The easiest way
 to get one is to run [`gen_systemd_service_file.py`](gen_systemd_service_file.py).
-You should specify service name as a first argument and optionally provide target protocol
-as a second argument, e.g.:
+You should specify service name as an argument. Note that there are three
+predefined services for `tezos-node`: `tezos-node-{mainnet, carthagenet, delphinet}`.
+
+E.g.:
 ```
-./gen_systemd_service_file.py tezos-node
+./gen_systemd_service_file.py tezos-node-mainnet
 # or
-./gen_systemd_service_file.py tezos-baker 006-PsCARTHA
+./gen_systemd_service_file.py tezos-baker-007-PsDELPH1
 ```
 After that you'll have `.service` file in the current directory.
 
-Apart, from `.service` file you'll need service startup script and default configuration
+Apart from `.service` file you'll need service startup script and default configuration
 file, they can be found in [`scripts`](./docker/package/scripts) and
 [`defaults`](./docker/package/defaults) folders respectively.
 
+
+### Multiple similar systemd services
+
+It's possible to run multiple same services, e.g. two `tezos-node`s that run different
+networks.
+
+`tezos-node` packages provide three services out of the box:
+`tezos-node-delphinet`, `tezos-node-carthagenet` and `tezos-node-mainnet` that run
+`delphinet`, `carthagenet` and `mainnet` networks respectively.
+
+In order to start it run:
+```
+systemctl start tezos-node-<network>
+```
+
+Another case for running multiple similar systemd services is when one wants to have
+multiple daemons that target different protocols.
+Since daemons for different protocols are provided in the different packages, they will
+have different service files. The only thing that needs to be changed is config file.
+One should provide desired node address, data directory for daemon files and node directory
+(however, this is the case only for baker daemon).
 
 ## Build Instructions
 

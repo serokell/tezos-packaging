@@ -6,41 +6,36 @@
 
 set -euo pipefail
 
-: "${BIN_DIR:="/usr/bin"}"
-: "${DATA_DIR:="/var/lib/tezos"}"
+node="/usr/bin/tezos-node"
 
-node="$BIN_DIR/tezos-node"
-node_dir="$DATA_DIR/node"
-node_data_dir="$node_dir/data"
-
-mkdir -p "$node_data_dir"
-if [ ! -f "$node_data_dir/config.json" ]; then
+mkdir -p "$DATA_DIR"
+if [ ! -f "$DATA_DIR/config.json" ]; then
     echo "Configuring the node..."
     "$node" config init \
-            --data-dir "$node_data_dir" \
+            --data-dir "$DATA_DIR" \
             --rpc-addr ":$NODE_RPC_PORT" \
             --network "$NETWORK"
             "$@"
 else
     echo "Updating the node configuration..."
     "$node" config update \
-            --data-dir "$node_data_dir" \
+            --data-dir "$DATA_DIR" \
             --rpc-addr ":$NODE_RPC_PORT" \
             --network "$NETWORK"
             "$@"
 fi
 # Generate a new identity if not present
 
-if [ ! -f "$node_data_dir/identity.json" ]; then
+if [ ! -f "$DATA_DIR/identity.json" ]; then
     echo "Generating a new node identity..."
     "$node" identity generate "${IDENTITY_POW:-26}". \
-            --data-dir "$node_data_dir"
+            --data-dir "$DATA_DIR"
 fi
 
 # Launching the node
 
 if [[ -z "$CERT_PATH" || -z "$KEY_PATH" ]]; then
-    exec "$node" run --data-dir "$node_data_dir"
+    exec "$node" run --data-dir "$DATA_DIR"
 else
-    exec "$node" run --data-dir "$node_data_dir" --rpc-tls="$CERT_PATH","$KEY_PATH"
+    exec "$node" run --data-dir "$DATA_DIR" --rpc-tls="$CERT_PATH","$KEY_PATH"
 fi

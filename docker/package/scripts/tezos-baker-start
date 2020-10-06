@@ -10,7 +10,6 @@ set -euo pipefail
 baker="/usr/bin/tezos-baker-$PROTOCOL"
 
 baker_dir="$DATA_DIR"
-node_data_dir="/var/lib/tezos/node/data"
 
 baker_config="$baker_dir/config"
 mkdir -p "$baker_dir"
@@ -28,7 +27,7 @@ fi
 launch_baker() {
     exec "$baker" \
          --base-dir "$baker_dir" --port "$NODE_RPC_PORT" \
-         run with local node "$node_data_dir" "$@"
+         run with local node "$NODE_DATA_DIR" "$@"
 }
 
 if [[ -z "$BAKER_ACCOUNT" ]]; then

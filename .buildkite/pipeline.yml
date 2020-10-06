@@ -5,6 +5,7 @@
 env:
   SET_VERSION: "export TEZOS_VERSION=\"$(cat nix/nix/sources.json | jq -r '.tezos.ref')\""
   USE_PODMAN: "True"
+  OPAMJOBS: "1"
 
 steps:
  - label: reuse lint

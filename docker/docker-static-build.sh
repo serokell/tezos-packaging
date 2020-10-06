@@ -41,8 +41,8 @@ if [[ $arch == "aarch64" && $(uname -m) != "x86_64" ]]; then
     echo "Compiling for aarch64 is supported only from aarch64 and x86_64"
 fi
 
-"$virtualisation_engine" build -t alpine-tezos -f "$docker_file" --build-arg TEZOS_VERSION="$TEZOS_VERSION" .
-container_id="$("$virtualisation_engine" create alpine-tezos)"
+"$virtualisation_engine" build -t alpine-tezos-dalphanet -f "$docker_file" --build-arg TEZOS_VERSION="$TEZOS_VERSION" .
+container_id="$("$virtualisation_engine" create alpine-tezos-dalphanet)"
 for b in "${binaries[@]}"; do
     "$virtualisation_engine" cp "$container_id:/tezos/$b" "$b"
 done

@@ -108,13 +108,13 @@ index c675ab3c5..ac0f52b7a 100644
  
  (alias
   (name runtest_lint)
-diff --git a/src/proto_007_PsDELPH1/bin_accuser/dune b/src/proto_007_PsDELPH1/bin_accuser/dune
+diff --git a/src/proto_007_PryLyZ8A/bin_accuser/dune b/src/proto_007_PryLyZ8A/bin_accuser/dune
 index da3093f82..0e60e123a 100644
---- a/src/proto_007_PsDELPH1/bin_accuser/dune
-+++ b/src/proto_007_PsDELPH1/bin_accuser/dune
+--- a/src/proto_007_PryLyZ8A/bin_accuser/dune
++++ b/src/proto_007_PryLyZ8A/bin_accuser/dune
 @@ -10,7 +10,10 @@
                     -open Tezos_client_commands
-                    -open Tezos_baking_007_PsDELPH1_commands
+                    -open Tezos_baking_007_PryLyZ8A_commands
                     -open Tezos_stdlib_unix
 -                   -open Tezos_client_base_unix)))
 +                   -open Tezos_client_base_unix
@@ -124,13 +124,13 @@ index da3093f82..0e60e123a 100644
  
  (alias
   (name runtest_lint)
-diff --git a/src/proto_007_PsDELPH1/bin_baker/dune b/src/proto_007_PsDELPH1/bin_baker/dune
+diff --git a/src/proto_007_PryLyZ8A/bin_baker/dune b/src/proto_007_PryLyZ8A/bin_baker/dune
 index 490b09f8c..1e9d89a87 100644
---- a/src/proto_007_PsDELPH1/bin_baker/dune
-+++ b/src/proto_007_PsDELPH1/bin_baker/dune
+--- a/src/proto_007_PryLyZ8A/bin_baker/dune
++++ b/src/proto_007_PryLyZ8A/bin_baker/dune
 @@ -10,7 +10,10 @@
                     -open Tezos_client_commands
-                    -open Tezos_baking_007_PsDELPH1_commands
+                    -open Tezos_baking_007_PryLyZ8A_commands
                     -open Tezos_stdlib_unix
 -                   -open Tezos_client_base_unix)))
 +                   -open Tezos_client_base_unix
@@ -140,13 +140,13 @@ index 490b09f8c..1e9d89a87 100644
  
  (alias
   (name runtest_lint)
-diff --git a/src/proto_007_PsDELPH1/bin_endorser/dune b/src/proto_007_PsDELPH1/bin_endorser/dune
+diff --git a/src/proto_007_PryLyZ8A/bin_endorser/dune b/src/proto_007_PryLyZ8A/bin_endorser/dune
 index 074b4e006..cf801b59c 100644
---- a/src/proto_007_PsDELPH1/bin_endorser/dune
-+++ b/src/proto_007_PsDELPH1/bin_endorser/dune
+--- a/src/proto_007_PryLyZ8A/bin_endorser/dune
++++ b/src/proto_007_PryLyZ8A/bin_endorser/dune
 @@ -10,7 +10,9 @@
                     -open Tezos_client_commands
-                    -open Tezos_baking_007_PsDELPH1_commands
+                    -open Tezos_baking_007_PryLyZ8A_commands
                     -open Tezos_stdlib_unix
 -                   -open Tezos_client_base_unix)))
 +                   -open Tezos_client_base_unix
@@ -155,13 +155,3 @@ index 074b4e006..cf801b59c 100644
  
  (alias
   (name runtest_lint)
-diff --git a/vendors/index/src/unix/dune b/vendors/index/src/unix/dune
-index 49e819dd2..833a3f473 100644
---- a/vendors/index/src/unix/dune
-+++ b/vendors/index/src/unix/dune
-@@ -2,4 +2,4 @@
-  (public_name index.unix)
-  (name index_unix)
-  (c_names fsync pread pwrite)
-- (libraries fmt index logs logs.threaded threads.posix unix))
-+ (libraries fmt index logs threads.posix unix))

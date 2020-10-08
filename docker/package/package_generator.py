@@ -8,11 +8,12 @@ from distutils.dir_util import copy_tree
 from systemd_files_generator import gen_service, print_service_file
 
 class Package:
-    def __init__(self, name, desc, systemd_unit=None, target_proto=None):
+    def __init__(self, name, desc, systemd_unit=None, target_proto=None, optional_opam_deps=[]):
         self.name = name
         self.desc = desc
         self.systemd_unit = systemd_unit
         self.target_proto = target_proto
+        self.optional_opam_deps = optional_opam_deps
 
     def get_full_name(self):
         return self.name if self.target_proto is None else f"{self.name}-{self.target_proto}"
@@ -193,15 +194,18 @@ def gen_install(pkg: Package, out):
 
 packages = [
     Package("tezos-client",
-            "CLI client for interacting with tezos blockchain"),
+            "CLI client for interacting with tezos blockchain",
+            optional_opam_deps = ["tls", "ledgerwallet-tezos"]),
     Package("tezos-admin-client",
-            "Administration tool for the node") ,
+            "Administration tool for the node",
+            optional_opam_deps = ["tls"]),
     Package("tezos-node",
             "Entry point for initializing, configuring and running a Tezos node",
             SystemdUnit("tezos-node.service", "tezos-node-start", "tezos-node.conf")
     ),
     Package("tezos-signer",
-            "A client to remotely sign operations or blocks")
+            "A client to remotely sign operations or blocks",
+            optional_opam_deps = ["tls", "ledgerwallet-tezos"])
 ]
 
 daemons = ["baker", "accuser", "endorser"]
@@ -218,7 +222,8 @@ for protocol in active_protocols:
             Package(f"tezos-{daemon}",
                     daemon_decs[daemon],
                     SystemdUnit(f"tezos-{daemon}.service", f"tezos-{daemon}-start", f"tezos-{daemon}.conf"),
-                    protocol
+                    protocol,
+                    optional_opam_deps = ["tls", "ledgerwallet-tezos"]
             )
         )
 
@@ -230,8 +235,8 @@ for package in packages:
             dir = f"{package.get_full_name()}-{version}"
         # tezos-client and tezos-admin-client are in one opam package
         opam_package = "tezos-client" if package.get_full_name() == "tezos-admin-client" else package.get_full_name()
-        subprocess.run(["opam", "exec", "--", "opam-bundle", f"{opam_package}={version}",
-                        "--ocaml=4.09.1", "--yes", "--opam=2.0.5"], check=True)
+        subprocess.run(["opam", "exec", "--", "opam-bundle", f"{opam_package}={version}"] + package.optional_opam_deps +
+                       ["--ocaml=4.09.1", "--yes", "--opam=2.0.5"], check=True)
         subprocess.run(["tar", "-zxf", f"{opam_package}-bundle.tar.gz"], check=True)
         os.rename(f"{opam_package}-bundle", dir)
         gen_makefile(package, f"{dir}/Makefile")

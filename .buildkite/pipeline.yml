@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: MPL-2.0
 
 env:
-  SET_VERSION: "export TEZOS_VERSION=\"$(cat nix/nix/sources.json | jq -r '.tezos.ref')\""
+  SET_VERSION: "export TEZOS_VERSION=\"$(cat nix/nix/sources.json | jq -r '.tezos.ref' | cut -d'/' -f3)\""
   USE_PODMAN: "True"
 
 steps:

@@ -17,6 +17,7 @@ in import "${nixpkgs}/nixos/tests/make-test-python.nix" ({ pkgs, ... }:
     tezos_endorser = f"{path_to_binaries}/tezos-endorser-006-PsCARTHA"
     tezos_node = f"{path_to_binaries}/tezos-node"
     tezos_signer = f"{path_to_binaries}/tezos-signer"
+    tezos_codec = f"{path_to_binaries}/tezos-codec"
     openssl = "${pkgs.openssl.bin}/bin/openssl"
     binaries = [
         tezos_accuser,
@@ -26,6 +27,7 @@ in import "${nixpkgs}/nixos/tests/make-test-python.nix" ({ pkgs, ... }:
         tezos_endorser,
         tezos_node,
         tezos_signer,
+        tezos_codec,
     ]
     ${builtins.readFile ./test_script.py}'';
 }) args

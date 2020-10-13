@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: MPL-2.0
 
-{ sources ? import ./nix/sources.nix
+{ sources ? import ../nix/sources.nix
 , protocols ? builtins.fromJSON (builtins.readFile ../../protocols.json)
 , hacks ? import ./hacks.nix
 , pkgs ? import sources.nixpkgs { }, opam-nix ? import sources.opam-nix pkgs }:

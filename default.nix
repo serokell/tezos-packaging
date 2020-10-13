@@ -8,7 +8,7 @@ let
   source = (import ./nix/nix/sources.nix).tezos;
   meta = builtins.fromJSON (builtins.readFile ./meta.json);
   commonMeta = {
-    version = builtins.replaceStrings [ "v" ] [ "" ] source.ref;
+    version = builtins.replaceStrings [ "refs/tags/v" ] [ "" ] source.ref;
     license = "MPL-2.0";
     dependencies = "";
     branchName = source.ref;

@@ -4,13 +4,16 @@
 #
 # SPDX-License-Identifier: MPL-2.0
 
-import package.systemd_files_generator as gen
+from docker.package import *
 import sys
 
 if len(sys.argv) > 1:
-    service_name = sys.argv[1]
-    if len(sys.argv) == 3:
-        service_file = gen.gen_service(service_name, sys.argv[2])
-    else:
-        service_file = gen.gen_service(service_name)
-    gen.print_service_file(service_file, f"{service_name}.service")
+    binary_name = sys.argv[1]
+    for package in packages:
+        if binary_name == package.name:
+            for systemd_unit in package.systemd_units:
+                if systemd_unit.suffix is None:
+                    out_name = f"{package.name}.service"
+                else:
+                    out_name = f"{package.name}-{systemd_unit.suffix}.service"
+                print_service_file(systemd_unit.service_file, out_name)

@@ -56,7 +56,11 @@ active_protocols = json.load(open("../protocols.json", "r"))["active"]
 
 version = os.environ["TEZOS_VERSION"][1:]
 release = f"{meta['release']}"
-package_version = f"{meta['epoch']}:0ubuntu{version}-{release}"
+
+ubuntu_epoch = 2
+fedora_epoch = 1
+
+package_version = f"{ubuntu_epoch}:0ubuntu{version}-{release}"
 
 pwd = os.getcwd()
 home = os.environ["HOME"]
@@ -121,7 +125,7 @@ systemctl enable %{{name}}.service
 Name:    {full_package_name}
 Version: {version}
 Release: {release}
-Epoch: 1
+Epoch: {fedora_epoch}
 Summary: {pkg.desc}
 License: MPL-2.0
 BuildArch: x86_64

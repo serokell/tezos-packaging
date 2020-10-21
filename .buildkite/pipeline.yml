@@ -66,6 +66,7 @@ steps:
    artifact_paths:
      - ./out/*
    branches: "!master"
+   timeout_in_minutes: 30
  - label: test deb binary packages via podman
    commands:
    - eval "$SET_VERSION"
@@ -74,6 +75,7 @@ steps:
    - ./docker/docker-tezos-packages.sh ubuntu binary tezos-baker-006-PsCARTHA
    - rm -rf out
    branches: "!master"
+   timeout_in_minutes: 30
  - label: test rpm source packages via podman
    commands:
    - eval "$SET_VERSION"
@@ -81,6 +83,7 @@ steps:
    artifact_paths:
      - ./out/*
    branches: "!master"
+   timeout_in_minutes: 30
  - label: test rpm binary packages via podman
    commands:
    - eval "$SET_VERSION"
@@ -89,6 +92,7 @@ steps:
    - ./docker/docker-tezos-packages.sh fedora binary tezos-baker-007-PsDELPH1
    - rm -rf out
    branches: "!master"
+   timeout_in_minutes: 30
 
  - wait
  - label: create auto pre-release

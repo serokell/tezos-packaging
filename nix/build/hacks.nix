@@ -4,7 +4,18 @@
 
 # This file needs to become empty.
 self: super: oself: osuper:
-with oself; {
+
+let
+  fixHardeningWarning = pkg:
+    if self.stdenv.isDarwin then
+      pkg.overrideAttrs (_: {
+        hardeningDisable = [ "strictoverflow" ];
+        NIX_CFLAGS_COMPILE = "-Wno-error";
+      })
+    else
+      pkg;
+
+in with oself; {
   # FIXME opam-nix needs to do this
   ocamlfind = findlib;
 
@@ -19,6 +30,8 @@ with oself; {
   cohttp-lwt-unix = osuper.cohttp-lwt-unix.versions."2.4.0";
   cohttp-lwt = osuper.cohttp-lwt.versions."2.4.0";
   macaddr = osuper.macaddr.versions."4.0.0";
+
+  hacl = fixHardeningWarning osuper.hacl;
 
   lwt = lwt4;
 

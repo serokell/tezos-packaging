@@ -56,7 +56,9 @@ active_protocols = json.load(open("../protocols.json", "r"))["active"]
 
 version = os.environ["TEZOS_VERSION"][1:]
 release = f"{meta['release']}"
-package_version = f"{meta['epoch']}:0ubuntu{version}-{release}"
+
+ubuntu_epoch = 2
+fedora_epoch = 1
 
 pwd = os.getcwd()
 home = os.environ["HOME"]
@@ -121,7 +123,7 @@ systemctl enable %{{name}}.service
 Name:    {full_package_name}
 Version: {version}
 Release: {release}
-Epoch: 1
+Epoch: {fedora_epoch}
 Summary: {pkg.desc}
 License: MPL-2.0
 BuildArch: x86_64
@@ -167,7 +169,7 @@ install: {pkg.get_full_name()}
         f.write(makefile_contents)
 
 def gen_changelog(pkg: Package, ubuntu_version, maintainer, date, out):
-    changelog_contents = f'''{pkg.get_full_name().lower()} ({package_version}) {ubuntu_version}; urgency=medium
+    changelog_contents = f'''{pkg.get_full_name().lower()} ({ubuntu_epoch}:{version}-0ubuntu{release}) {ubuntu_version}; urgency=medium
 
   * Publish {version}-{release} version of {pkg.name}
 
@@ -230,7 +232,7 @@ for protocol in active_protocols:
 for package in packages:
     if package_to_build is None or package.get_full_name() == package_to_build:
         if is_ubuntu:
-            dir = f"{package.get_full_name().lower()}-0ubuntu{version}"
+            dir = f"{package.get_full_name().lower()}-{version}"
         else:
             dir = f"{package.get_full_name()}-{version}"
         # tezos-client and tezos-admin-client are in one opam package

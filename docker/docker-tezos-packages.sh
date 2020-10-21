@@ -20,7 +20,7 @@ target_os="${1-}"
 
 "$virtualisation_engine" build -t tezos-"$target_os" -f docker/package/Dockerfile-"$target_os" .
 set +e
-container_id="$("$virtualisation_engine" create --env TEZOS_VERSION="$TEZOS_VERSION" -t tezos-"$target_os" "$@")"
+container_id="$("$virtualisation_engine" create --env TEZOS_VERSION="$TEZOS_VERSION" --env OPAMSOLVERTIMEOUT=120 -t tezos-"$target_os" "$@")"
 "$virtualisation_engine" start -a "$container_id"
 exit_code="$?"
 "$virtualisation_engine" cp "$container_id":/tezos-packaging/docker/out .

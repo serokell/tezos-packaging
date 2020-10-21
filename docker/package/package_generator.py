@@ -1,28 +1,12 @@
-#!/usr/bin/env python3
 # SPDX-FileCopyrightText: 2020 TQ Tezos <https://tqtezos.com/>
 #
 # SPDX-License-Identifier: MPL-2.0
 
 import os, shutil, sys, subprocess, json
 from distutils.dir_util import copy_tree
-from systemd_files_generator import gen_service, print_service_file
 
-class Package:
-    def __init__(self, name, desc, systemd_unit=None, target_proto=None, optional_opam_deps=[]):
-        self.name = name
-        self.desc = desc
-        self.systemd_unit = systemd_unit
-        self.target_proto = target_proto
-        self.optional_opam_deps = optional_opam_deps
-
-    def get_full_name(self):
-        return self.name if self.target_proto is None else f"{self.name}-{self.target_proto}"
-
-class SystemdUnit:
-    def __init__(self, name, startup_script, config_file):
-        self.name = name
-        self.startup_script = startup_script
-        self.config_file = config_file
+from .model import Package, print_service_file
+from .packages import packages
 
 if sys.argv[1] == "ubuntu":
     is_ubuntu = True
@@ -43,7 +27,7 @@ if len(sys.argv) == 4:
     package_to_build = sys.argv[3]
 
 date = subprocess.check_output(["date", "-R"]).decode().strip()
-meta = json.load(open("../meta.json", "r"))
+meta = json.load(open(f"{os.path.dirname(__file__)}/../../meta.json", "r"))
 
 if is_ubuntu:
     run_deps = ["libev-dev", "libgmp-dev", "libhidapi-dev"]
@@ -52,7 +36,7 @@ else:
 build_deps = ["make", "m4", "perl", "pkg-config", "wget", "unzip", "rsync", "gcc"]
 common_deps = run_deps + build_deps
 
-active_protocols = json.load(open("../protocols.json", "r"))["active"]
+active_protocols = json.load(open(f"{os.path.dirname(__file__)}/../../protocols.json", "r"))["active"]
 
 version = os.environ["TEZOS_VERSION"][1:]
 release = f"{meta['release']}"
@@ -66,7 +50,7 @@ home = os.environ["HOME"]
 def gen_control_file(pkg: Package, out):
     str_build_deps = ", ".join(build_deps)
     file_contents = f'''
-Source: {pkg.get_full_name().lower()}
+Source: {pkg.name.lower()}
 Section: utils
 Priority: optional
 Maintainer: {meta['maintainer']}
@@ -74,7 +58,7 @@ Build-Depends: debhelper (>=9), dh-systemd (>= 1.5), autotools-dev, {str_build_d
 Standards-Version: 3.9.6
 Homepage: https://gitlab.com/tezos/tezos/
 
-Package: {pkg.get_full_name().lower()}
+Package: {pkg.name.lower()}
 Architecture: amd64
 Depends: ${{shlibs:Depends}}, ${{misc:Depends}}
 Description: {pkg.desc}
@@ -83,34 +67,66 @@ Description: {pkg.desc}
         f.write(file_contents)
 
 def gen_spec_file(pkg: Package, out):
-    full_package_name = package.name if package.target_proto is None else f"{package.name}-{package.target_proto}"
     build_requires = " ".join(build_deps + run_deps)
+    config_files = list(filter(lambda x: x is not None, map(lambda x: x.config_file, package.systemd_units)))
     requires = " ".join(run_deps)
-    if pkg.systemd_unit is not None:
-        systemd_deps = "systemd systemd-rpm-macros"
-        systemd_install =f'''
-mkdir -p %{{buildroot}}/%{{_unitdir}}
-install -m 644 %{{name}}.service %{{buildroot}}/%{{_unitdir}}
+    if len(pkg.systemd_units) > 0:
+        startup_scripts = list(set(map(lambda x: x.startup_script, pkg.systemd_units)))
+        install_unit_files = ""
+        systemd_unit_files = ""
+        enable_units = ""
+        systemd_units_post = ""
+        systemd_units_preun = ""
+        systemd_units_postun = ""
+        if len(config_files) == 1:
+            install_default = f'''
 mkdir -p %{{buildroot}}/%{{_sysconfdir}}/default
-install -m 644 %{{name}}.default %{{buildroot}}/%{{_sysconfdir}}/default/%{{name}}
-install -m 0755 {package.systemd_unit.startup_script} %{{buildroot}}/%{{_bindir}}
+install -m 644 %{{name}}.default %{{buildroot}}/%{{_sysconfdir}}/default/%{{name}}'''
+        else:
+            install_default = ""
+        for systemd_unit in pkg.systemd_units:
+            if systemd_unit.suffix is None:
+                install_unit_files += f"install -m 644 %{{name}}.service %{{buildroot}}/%{{_unitdir}}\n"
+                systemd_unit_files += f"%{{_unitdir}}/%{{name}}.service\n"
+                enable_units += f"systemctl enable %{{name}}.service\n"
+                systemd_units_post += f"%systemd_post %{{name}}.service\n"
+                systemd_units_preun += f"%systemd_preun %{{name}}.service\n"
+                systemd_units_postun += f"%systemd_postun_with_restart %{{name}}.service\n"
+            else:
+                install_unit_files += f"install -m 644 %{{name}}-{systemd_unit.suffix}.service %{{buildroot}}/%{{_unitdir}}\n"
+                systemd_unit_files += f"%{{_unitdir}}/%{{name}}-{systemd_unit.suffix}.service\n"
+                enable_units += f"systemctl enable %{{name}}-{systemd_unit.suffix}.service\n"
+                systemd_units_post += f"%systemd_post %{{name}}-{systemd_unit.suffix}.service\n"
+                systemd_units_preun += f"%systemd_preun %{{name}}-{systemd_unit.suffix}.service\n"
+                systemd_units_postun += f"%systemd_postun_with_restart %{{name}}-{systemd_unit.suffix}.service\n"
+        install_startup_scripts = ""
+        systemd_startup_files = ""
+        for startup_script in startup_scripts:
+            install_startup_scripts += f"install -m 0755 {startup_script} %{{buildroot}}/%{{_bindir}}\n"
+            systemd_startup_files += f"%{{_bindir}}/{startup_script}\n"
+        systemd_deps = "systemd systemd-rpm-macros"
+        systemd_install = f'''
+mkdir -p %{{buildroot}}/%{{_unitdir}}
+{install_unit_files}
+{install_default}
+{install_startup_scripts}
 '''
-        systemd_files =f'''
-%{{_bindir}}/{package.systemd_unit.startup_script}
-%{{_unitdir}}/%{{name}}.service
-%{{_sysconfdir}}/default/%{{name}}
+        systemd_files = f'''
+{systemd_startup_files}
+{systemd_unit_files}
+{ f"%{{_sysconfdir}}/default/%{{name}}" if len(config_files) == 1 else "" }
 '''
-        systemd_macros=f'''
+        systemd_macros= f'''
 %post
-%systemd_post %{{name}}.service
+{systemd_units_post}
 useradd tezos -d /var/lib/tezos || true
-systemctl enable %{{name}}.service
+{enable_units}
 
 %preun
-%systemd_preun %{{name}}.service
+{systemd_units_preun}
 
 %postun
-%systemd_postun_with_restart %{{name}}.service
+{systemd_units_postun}
 '''
     else:
         systemd_deps = ""
@@ -120,14 +136,14 @@ systemctl enable %{{name}}.service
 
     file_contents = f'''
 %define debug_package %{{nil}}
-Name:    {full_package_name}
+Name:    {pkg.name}
 Version: {version}
 Release: {release}
 Epoch: {fedora_epoch}
 Summary: {pkg.desc}
 License: MPL-2.0
 BuildArch: x86_64
-Source0: {full_package_name}-{version}.tar.gz
+Source0: {pkg.name}-{version}.tar.gz
 Source1: https://gitlab.com/tezos/tezos/tree/v{version}/
 BuildRequires: {build_requires} {systemd_deps}
 Requires: {requires}
@@ -157,19 +173,19 @@ def gen_makefile(pkg: Package, out):
 
 BINDIR=/usr/bin
 
-{pkg.get_full_name()}:
+{pkg.name}:
 	./compile.sh
-	cp $(CURDIR)/opam/default/bin/{pkg.get_full_name()} {pkg.get_full_name()}
+	cp $(CURDIR)/opam/default/bin/{pkg.name} {pkg.name}
 
-install: {pkg.get_full_name()}
+install: {pkg.name}
 	mkdir -p $(DESTDIR)$(BINDIR)
-	cp $(CURDIR)/{pkg.get_full_name()} $(DESTDIR)$(BINDIR)
+	cp $(CURDIR)/{pkg.name} $(DESTDIR)$(BINDIR)
 '''
     with open(out, 'w') as f:
         f.write(makefile_contents)
 
 def gen_changelog(pkg: Package, ubuntu_version, maintainer, date, out):
-    changelog_contents = f'''{pkg.get_full_name().lower()} ({ubuntu_epoch}:{version}-0ubuntu{release}) {ubuntu_version}; urgency=medium
+    changelog_contents = f'''{pkg.name.lower()} ({ubuntu_epoch}:{version}-0ubuntu{release}) {ubuntu_version}; urgency=medium
 
   * Publish {version}-{release} version of {pkg.name}
 
@@ -177,110 +193,87 @@ def gen_changelog(pkg: Package, ubuntu_version, maintainer, date, out):
     with open(out, 'w') as f:
         f.write(changelog_contents)
 
-def gen_rules(out):
+def gen_rules(pkg: Package, out):
+    override_dh_install_init = "override_dh_installinit:\n"
+    for systemd_unit in pkg.systemd_units:
+        if systemd_unit.suffix is not None:
+            override_dh_install_init += f"	dh_installinit --name={pkg.name}-{systemd_unit.suffix}\n"
     rules_contents = f'''#!/usr/bin/make -f
 
 %:
-	dh $@ {"--with systemd" if package.systemd_unit is not None else ""}
+	dh $@ {"--with systemd" if len(pkg.systemd_units) > 0 else ""}
 override_dh_systemd_start:
-	dh_systemd_start --no-start'''
+	dh_systemd_start --no-start
+{override_dh_install_init if len(pkg.systemd_units) > 1 else ""}'''
 
     with open(out, 'w') as f:
         f.write(rules_contents)
 
 def gen_install(pkg: Package, out):
-    install_contents = f'''debian/{pkg.systemd_unit.startup_script} usr/bin
-    '''
+    startup_scripts = list(set(map(lambda x: x.startup_script, pkg.systemd_units)))
+    install_contents = "\n".join(map(lambda x: f"debian/{x} usr/bin",
+                                     startup_scripts))
     with open(out, 'w') as f:
         f.write(install_contents)
 
-packages = [
-    Package("tezos-client",
-            "CLI client for interacting with tezos blockchain",
-            optional_opam_deps = ["tls", "ledgerwallet-tezos"]),
-    Package("tezos-admin-client",
-            "Administration tool for the node",
-            optional_opam_deps = ["tls"]),
-    Package("tezos-node",
-            "Entry point for initializing, configuring and running a Tezos node",
-            SystemdUnit("tezos-node.service", "tezos-node-start", "tezos-node.conf")
-    ),
-    Package("tezos-signer",
-            "A client to remotely sign operations or blocks",
-            optional_opam_deps = ["tls", "ledgerwallet-tezos"])
-]
-
-daemons = ["baker", "accuser", "endorser"]
-
-daemon_decs = {
-    "baker": "Daemon for baking",
-    "accuser": "Daemon for accusing",
-    "endorser": "Daemon for endorsing"
-}
-
-for protocol in active_protocols:
-    for daemon in daemons:
-        packages.append(
-            Package(f"tezos-{daemon}",
-                    daemon_decs[daemon],
-                    SystemdUnit(f"tezos-{daemon}.service", f"tezos-{daemon}-start", f"tezos-{daemon}.conf"),
-                    protocol,
-                    optional_opam_deps = ["tls", "ledgerwallet-tezos"]
-            )
-        )
-
 for package in packages:
-    if package_to_build is None or package.get_full_name() == package_to_build:
+    if package_to_build is None or package.name == package_to_build:
         if is_ubuntu:
-            dir = f"{package.get_full_name().lower()}-{version}"
+            dir = f"{package.name.lower()}-{version}"
         else:
-            dir = f"{package.get_full_name()}-{version}"
+            dir = f"{package.name}-{version}"
         # tezos-client and tezos-admin-client are in one opam package
-        opam_package = "tezos-client" if package.get_full_name() == "tezos-admin-client" else package.get_full_name()
+
+        opam_package = "tezos-client" if package.name == "tezos-admin-client" else package.name
         subprocess.run(["opam", "exec", "--", "opam-bundle", f"{opam_package}={version}"] + package.optional_opam_deps +
-                       ["--ocaml=4.09.1", "--yes", "--opam=2.0.5"], check=True)
+                        ["--ocaml=4.09.1", "--yes", "--opam=2.0.5"], check=True)
         subprocess.run(["tar", "-zxf", f"{opam_package}-bundle.tar.gz"], check=True)
         os.rename(f"{opam_package}-bundle", dir)
+        # subprocess.run(["mkdir", dir])
         gen_makefile(package, f"{dir}/Makefile")
+        config_files = list(filter(lambda x: x is not None, map(lambda x: x.config_file, package.systemd_units)))
+        if len(config_files) > 1:
+            raise Exception("Packages cannot have more than one default config file for package")
         if not is_ubuntu:
             subprocess.run(["wget", "-q", "-O", f"{dir}/LICENSE", f"https://gitlab.com/tezos/tezos/-/raw/v{version}/LICENSE"], check=True)
         if is_ubuntu:
             subprocess.run(["tar", "-czf", f"{dir}.tar.gz", dir], check=True)
             os.chdir(dir)
             subprocess.run(["dh_make", "-syf" f"../{dir}.tar.gz"], check=True)
-            if package.systemd_unit is not None:
-                if package.target_proto is None:
-                    service_file = gen_service(package.name)
+            if len(config_files) == 1:
+                shutil.copy(f"{os.path.dirname(__file__)}/defaults/{config_files[0]}", f"debian/{package.name.lower()}.default")
+            for systemd_unit in package.systemd_units:
+                if systemd_unit.service_file.service.environment_file is not None:
+                    systemd_unit.service_file.service.environment_file = systemd_unit.service_file.service.environment_file.lower()
+                if systemd_unit.suffix is None:
+                    print_service_file(systemd_unit.service_file, f"debian/{package.name.lower()}.service")
                 else:
-                    service_file = gen_service(package.name, package.target_proto)
-                service_file.service.environment_file = service_file.service.environment_file.lower()
-                print_service_file(service_file, f"debian/{package.get_full_name().lower()}.service")
-                shutil.copy(f"../defaults/{package.systemd_unit.config_file}", f"debian/{package.get_full_name().lower()}.default")
-                shutil.copy(f"../scripts/{package.systemd_unit.startup_script}", f"debian/{package.systemd_unit.startup_script}")
+                    print_service_file(systemd_unit.service_file, f"debian/{package.name.lower()}-{systemd_unit.suffix}.service")
+                shutil.copy(f"{os.path.dirname(__file__)}/scripts/{systemd_unit.startup_script}", f"debian/{systemd_unit.startup_script}")
                 gen_install(package, "debian/install")
             gen_control_file(package, "debian/control")
             subprocess.run(["wget", "-q", "-O", "debian/copyright", f"https://gitlab.com/tezos/tezos/-/raw/v{version}/LICENSE"], check=True)
             subprocess.run("rm debian/*.ex debian/*.EX debian/README*", shell=True, check=True)
             gen_changelog(package, "bionic", meta["maintainer"], date, "debian/changelog")
-            gen_rules("debian/rules")
+            gen_rules(package, "debian/rules")
             subprocess.run(["dpkg-buildpackage", "-S" if is_source else "-b", "-us", "-uc"],
-                        check=True)
+                           check=True)
             os.chdir("..")
         else:
-            if package.systemd_unit is not None:
-                if package.target_proto is None:
-                    service_file = gen_service(package.name)
+            for systemd_unit in package.systemd_units:
+                if systemd_unit.suffix is None:
+                    print_service_file(systemd_unit.service_file, f"{dir}/{package.name}.service")
                 else:
-                    service_file = gen_service(package.name, package.target_proto)
-                print_service_file(service_file, f"{dir}/{package.get_full_name()}.service")
-                shutil.copy(f"defaults/{package.systemd_unit.config_file}", f"{dir}/{package.get_full_name()}.default")
-                shutil.copy(f"scripts/{package.systemd_unit.startup_script}", f"{dir}/{package.systemd_unit.startup_script}")
+                    print_service_file(systemd_unit.service_file, f"{dir}/{package.name}-{systemd_unit.suffix}.service")
+                shutil.copy(f"{os.path.dirname(__file__)}/scripts/{systemd_unit.startup_script}", f"{dir}/{systemd_unit.startup_script}")
+            if len(config_files) == 1:
+                shutil.copy(f"{os.path.dirname(__file__)}/defaults/{config_files[0]}", f"{dir}/{package.name}.default")
             subprocess.run(["tar", "-czf", f"{dir}.tar.gz", dir], check=True)
             os.makedirs(f"{home}/rpmbuild/SPECS", exist_ok=True)
             os.makedirs(f"{home}/rpmbuild/SOURCES", exist_ok=True)
-            gen_spec_file(package, f"{home}/rpmbuild/SPECS/{package.get_full_name()}.spec")
+            gen_spec_file(package, f"{home}/rpmbuild/SPECS/{package.name}.spec")
             os.rename(f"{dir}.tar.gz", f"{home}/rpmbuild/SOURCES/{dir}.tar.gz")
-            subprocess.run(["rpmbuild", "-bs" if is_source else "-bb", f"{home}/rpmbuild/SPECS/{package.get_full_name()}.spec"],
+            subprocess.run(["rpmbuild", "-bs" if is_source else "-bb", f"{home}/rpmbuild/SPECS/{package.name}.spec"],
                            check = True)
         subprocess.run(f"rm -rf {dir}", shell=True, check=True)
 

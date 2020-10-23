@@ -4,23 +4,50 @@
 
 # This file needs to become empty.
 self: super: oself: osuper:
-with oself; {
+with oself; rec {
+  ocaml = self.ocaml-ng.ocamlPackages_4_09.ocaml.overrideAttrs (o: o // {
+    hardeningDisable = o.hardeningDisable ++
+                       self.stdenv.lib.optional self.stdenv.hostPlatform.isMusl "pie";
+  });
   # FIXME opam-nix needs to do this
   ocamlfind = findlib;
 
+  ocamlgraph = osuper.ocamlgraph.override (_: { gtkSupport = false; });
+
   # FIXME opam-nix needs to do version resolution
   ezjsonm = osuper.ezjsonm.versions."1.1.0";
-  ipaddr = osuper.ipaddr.versions."4.0.0";
+  ipaddr = osuper.ipaddr.versions."4.0.0".overrideAttrs (_: {
+    minimumOCamlVersion = "4.07";
+  });
+
+  # Here we pin old tls version because more recent versions
+  # cannot be build with dune < 2.0.0, which will require
+  # to override dune version for huge amount of dependencies.
+  # Also opam-nix currently unable to build tls package, so
+  # we build it in a bit hacky way.
+  tls = osuper.tls.versions."0.10.6".overrideAttrs (o: {
+    outputs = [ "out" ];
+    buildInputs = o.buildInputs ++ [ topkg ];
+    buildPhase = ''
+      ${topkg.run} build --tests false --with-mirage false --with-lwt true
+    '';
+    checkPhase = "${topkg.run} test";
+    inherit (topkg) installPhase;
+  });
+  x509 = osuper.x509.versions."0.9.0";
   conduit = osuper.conduit.versions."2.1.0".overrideAttrs (oa: rec {
-    buildInputs = [ oself.tls ] ++ oa.buildInputs;
+    buildInputs = [ tls ] ++ oa.buildInputs;
     propagatedBuildInputs = buildInputs;
+    minimumOCamlVersion = "4.07";
   });
   conduit-lwt-unix = osuper.conduit-lwt-unix.versions."2.0.2";
   cohttp-lwt-unix = osuper.cohttp-lwt-unix.versions."2.4.0";
   cohttp-lwt = osuper.cohttp-lwt.versions."2.4.0";
-  macaddr = osuper.macaddr.versions."4.0.0";
+  macaddr = osuper.macaddr.versions."4.0.0".overrideAttrs (_: {
+    minimumOCamlVersion = "4.07";
+  });
 
-  lwt = lwt4;
+  lwt = osuper.lwt.versions."4.2.1";
 
   # FIXME opam-nix needs to handle "external" (native) dependencies correctly
   conf-gmp = self.gmp;
@@ -57,5 +84,7 @@ with oself; {
   });
 
   tezos-node =
-    osuper.tezos-node.overrideAttrs (_: { postInstall = "rm $bin/*.sh"; });
+    osuper.tezos-node.overrideAttrs (o: rec {
+      postInstall = "rm $bin/*.sh";
+    });
 }

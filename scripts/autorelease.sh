@@ -27,19 +27,15 @@ shopt -s extglob
 cp -L "$TEMPDIR"/"$project"/!(*.md) "$assets_dir"
 
 # Delete release if it exists
-hub release delete auto-release || true
+gh release delete auto-release --yes || true
 
 # Update the tag
 git fetch # So that the script can be run from an arbitrary checkout
 git tag -f auto-release
 git push --force --tags
 
-# Combine all assets
-assets=()
-for file in $assets_dir/*; do
-    echo $file
-    assets+=("-a" $file)
-done
-
 # Create release
-hub release create "${assets[@]}" -F "$TEMPDIR"/"$project"/release-notes.md --prerelease auto-release
+gh release create -F "$TEMPDIR"/"$project"/release-notes.md --prerelease auto-release
+
+# Upload assets
+gh release upload auto-release "$assets_dir"/*

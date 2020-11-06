@@ -89,3 +89,7 @@ with subtest("test remote signer"):
     machine.succeed(
         f"{tezos_client} -d client-dir import secret key remote-signer-tcp tcp://127.0.0.1:22000/{signer_addr}"
     )
+
+with subtest("test encode and decode JSON"):
+    machine.succeed(f"{tezos_codec} encode timespan.system from 42.42")
+    machine.succeed(f"{tezos_codec} decode timespan.system from 404535c28f5c28f6")

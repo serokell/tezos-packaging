@@ -28,6 +28,11 @@ in [
     description = "A client to remotely sign operations or blocks";
     supports = protocolsFormatted;
   }
+  {
+    name = "tezos-codec";
+    description = "A client to decode and encode JSON";
+    supports = protocolsFormatted;
+  }
 ] ++ builtins.concatMap (protocol: [
   {
     name = "tezos-baker-${protocol}";

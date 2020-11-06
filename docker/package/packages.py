@@ -16,7 +16,9 @@ packages = [
             optional_opam_deps=["tls"]),
     Package("tezos-signer",
             "A client to remotely sign operations or blocks",
-            optional_opam_deps=["tls", "ledgerwallet-tezos"])
+            optional_opam_deps=["tls", "ledgerwallet-tezos"]),
+    Package("tezos-codec",
+            "A client to decode and encode JSON")
 ]
 
 node_units = []

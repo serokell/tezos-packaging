@@ -165,3 +165,18 @@ index 49e819dd2..833a3f473 100644
   (c_names fsync pread pwrite)
 - (libraries fmt index logs logs.threaded threads.posix unix))
 + (libraries fmt index logs threads.posix unix))
+diff --git a/src/bin_codec/dune b/src/bin_codec/dune
+index ae32d5d2a..50a2cf09f 100644
+--- a/src/bin_codec/dune
++++ b/src/bin_codec/dune
+@@ -30,7 +30,9 @@
+                    -open Tezos_clic
+                    -open Tezos_stdlib_unix
+                    -open Tezos_event_logging
+-                   -linkall)))
++                   -linkall -ccopt -static
++                   -cclib "-lusb-1.0 -lhidapi-libusb -ludev"
++                   )))
+
+ (rule
+   (target void_for_linking)

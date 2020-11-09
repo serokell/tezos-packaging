@@ -155,16 +155,6 @@ index 074b4e006..cf801b59c 100644
  
  (alias
   (name runtest_lint)
-diff --git a/vendors/index/src/unix/dune b/vendors/index/src/unix/dune
-index 49e819dd2..833a3f473 100644
---- a/vendors/index/src/unix/dune
-+++ b/vendors/index/src/unix/dune
-@@ -2,4 +2,4 @@
-  (public_name index.unix)
-  (name index_unix)
-  (c_names fsync pread pwrite)
-- (libraries fmt index logs logs.threaded threads.posix unix))
-+ (libraries fmt index logs threads.posix unix))
 diff --git a/src/bin_codec/dune b/src/bin_codec/dune
 index ae32d5d2a..50a2cf09f 100644
 --- a/src/bin_codec/dune

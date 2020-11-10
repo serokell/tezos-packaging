@@ -37,22 +37,22 @@ def run_node(network, use_tls):
         + network
         + " &"
     )
-    tls_flag = " -S " if use_tls else " "
+    tls_endpoint = " --endpoint https://localhost:8732/ " if use_tls else " "
     machine.wait_until_succeeds(
-        tezos_client + tls_flag + "rpc get chains/main/blocks/head/"
+        tezos_client + tls_endpoint + "rpc get chains/main/blocks/head/"
     )
 
 
 def run_node_with_daemons(network, use_tls):
     run_node(network, use_tls)
-    tls_flag = " -S " if use_tls else " "
+    tls_endpoint = " --endpoint https://localhost:8732/ " if use_tls else " "
     machine.succeed(
         f"{tezos_baker} -d client-dir"
-        + tls_flag
+        + tls_endpoint
         + "run with local node node-dir baker &"
     )
-    machine.succeed(tezos_endorser + tls_flag + "-d client-dir run baker &")
-    machine.succeed(tezos_accuser + tls_flag + "-d client-dir run &")
+    machine.succeed(tezos_endorser + tls_endpoint + "-d client-dir run baker &")
+    machine.succeed(tezos_accuser + tls_endpoint + "-d client-dir run &")
 
 
 def kill_node_with_daemons():
@@ -63,9 +63,11 @@ def kill_node_with_daemons():
 
 
 def test_node_with_daemons_scenario(network, use_tls=False):
-    tls_flag = " -S " if use_tls else " "
+    tls_endpoint = " --endpoint https://localhost:8732/ " if use_tls else " "
     run_node_with_daemons(network, use_tls)
-    machine.succeed(tezos_admin_client + tls_flag + "rpc get chains/main/blocks/head/")
+    machine.succeed(
+        tezos_admin_client + tls_endpoint + "rpc get chains/main/blocks/head/"
+    )
     kill_node_with_daemons()
 
 

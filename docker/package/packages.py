@@ -69,19 +69,27 @@ packages = [
             "A client to decode and encode JSON")
 ]
 
-node_units = []
-for network in networks:
-    env = [f"DATA_DIR=/var/lib/tezos/node-{network}", f"NETWORK={network}", "NODE_RPC_ADDR=127.0.0.1:8732",
-           "CERT_PATH=", "KEY_PATH="]
+
+def mk_node_unit(suffix, env, desc):
     service_file = ServiceFile(Unit(after=["network.target"], requires=[],
-                                    description=f"Tezos node {network}"),
+                                    description=desc),
                                Service(environment=env,
                                        exec_start="/usr/bin/tezos-node-start",
                                        state_directory="tezos", user="tezos"
-                                   ))
-    node_units.append(SystemdUnit(suffix=network,
-                                  service_file=service_file,
-                                  startup_script="tezos-node-start"))
+                               ))
+    return SystemdUnit(suffix=suffix, service_file=service_file, startup_script="tezos-node-start")
+
+
+node_units = []
+common_node_env = ["NODE_RPC_ADDR=127.0.0.1:8732", "CERT_PATH=", "KEY_PATH="]
+for network in networks:
+    env = [f"DATA_DIR=/var/lib/tezos/node-{network}", f"NETWORK={network}"] + common_node_env
+    node_units.append(mk_node_unit(suffix=network, env=env, desc=f"Tezos node {network}"))
+
+node_units.append(mk_node_unit(suffix="custom", env=["DATA_DIR=/var/lib/tezos/node-custom",
+                                                     "CUSTOM_NODE_CONFIG="] + common_node_env,
+                               desc="Tezos node with custom config"))
+
 packages.append(Package("tezos-node",
                         "Entry point for initializing, configuring and running a Tezos node",
                         node_units,

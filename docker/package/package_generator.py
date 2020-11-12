@@ -200,6 +200,7 @@ def gen_rules(pkg: Package, out):
     for systemd_unit in pkg.systemd_units:
         if systemd_unit.suffix is not None:
             override_dh_install_init += f"	dh_installinit --name={pkg.name}-{systemd_unit.suffix}\n"
+    override_dh_install_init += "	dh_installinit --noscripts\n"
     rules_contents = f'''#!/usr/bin/make -f
 
 %:
@@ -233,7 +234,7 @@ for package in packages:
         os.rename(f"{opam_package}-bundle", dir)
         # subprocess.run(["mkdir", dir])
         gen_makefile(package, f"{dir}/Makefile")
-        config_files = list(filter(lambda x: x is not None, map(lambda x: x.config_file, package.systemd_units)))
+        config_files = list(set(filter(lambda x: x is not None, map(lambda x: x.config_file, package.systemd_units))))
         if len(config_files) > 1:
             raise Exception("Packages cannot have more than one default config file for package")
         if not is_ubuntu:

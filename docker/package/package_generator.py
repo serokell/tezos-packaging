@@ -47,8 +47,9 @@ fedora_epoch = 1
 pwd = os.getcwd()
 home = os.environ["HOME"]
 
+
 def gen_control_file(pkg: Package, out):
-    str_build_deps = ", ".join(build_deps)
+    str_build_deps = ", ".join(common_deps)
     file_contents = f'''
 Source: {pkg.name.lower()}
 Section: utils
@@ -66,8 +67,9 @@ Description: {pkg.desc}
     with open(out, 'w') as f:
         f.write(file_contents)
 
+
 def gen_spec_file(pkg: Package, out):
-    build_requires = " ".join(build_deps + run_deps)
+    build_requires = " ".join(common_deps)
     config_files = list(filter(lambda x: x is not None, map(lambda x: x.config_file, package.systemd_units)))
     requires = " ".join(run_deps)
     if len(pkg.systemd_units) > 0:

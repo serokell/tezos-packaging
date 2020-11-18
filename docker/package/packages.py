@@ -5,7 +5,7 @@ import os, shutil, sys, subprocess, json
 
 from .model import Service, ServiceFile, SystemdUnit, Unit, Package
 
-networks = ["mainnet", "carthagenet", "delphinet"]
+networks = ["mainnet", "delphinet"]
 
 packages = [
     Package("tezos-client",

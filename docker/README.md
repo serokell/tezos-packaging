@@ -69,7 +69,7 @@ It is also possible to build single package. In order to do that run the followi
 # cd .. && ./docker/docker-tezos-packages.sh ubuntu binary <tezos-binary-name>
 # Example for baker
 export TEZOS_VERSION="v7.3"
-cd .. && ./docker/docker-tezos-packages.sh ubuntu binary tezos-baker-006-PsCARTHA
+cd .. && ./docker/docker-tezos-packages.sh ubuntu binary tezos-baker-007-PsDELPH1
 ```
 
 The build can take some time due to the fact that we build tezos and its dependencies
@@ -89,7 +89,7 @@ In order to build source packages run the following commands:
 export TEZOS_VERSION="v7.3"
 cd .. && ./docker/docker-tezos-packages.sh ubuntu source
 # you can also build single source package
-cd .. && ./docker/docker-tezos-packages.sh ubuntu source tezos-baker-006-PsCARTHA
+cd .. && ./docker/docker-tezos-packages.sh ubuntu source tezos-baker-007-PsDELPH1
 ```
 
 Once the packages build is complete `../out` directory will contain files required
@@ -142,7 +142,7 @@ It is also possible to build single package. In order to do that run the followi
 # cd .. && ./docker/docker-tezos-packages.sh fedora binary <tezos-binary-name>
 # Example for baker
 export TEZOS_VERSION="v7.3"
-cd .. && ./docker/docker-tezos-packages.sh fedora binary tezos-baker-006-PsCARTHA
+cd .. && ./docker/docker-tezos-packages.sh fedora binary tezos-baker-007-PsDELPH1
 ```
 
 The build can take some time due to the fact that we build tezos and its dependencies
@@ -162,7 +162,7 @@ In order to build source packages run the following commands:
 export TEZOS_VERSION="v7.3"
 cd .. && ./docker/docker-tezos-packages.sh fedora source
 # you can also build single source package
-cd .. && ./docker/docker-tezos-packages.sh fedora source tezos-baker-006-PsCARTHA
+cd .. && ./docker/docker-tezos-packages.sh fedora source tezos-baker-007-PsDELPH1
 ```
 
 Resulting `.src.rpm` packages can be either built locally or submitted to the Copr.

@@ -39,7 +39,7 @@ sudo add-apt-repository ppa:serokell/tezos && sudo apt-get update
 sudo apt-get install tezos-client
 # dpkg-source prohibits uppercase in the packages names so the protocol
 # name is in lowercase
-sudo apt-get install tezos-baker-006-pscartha
+sudo apt-get install tezos-baker-007-psdelph1
 ```
 Once you install such packages the commands `tezos-*` will be available.
 
@@ -52,11 +52,11 @@ E.g. in order to install `tezos-client` or `tezos-baker` run the following comma
 # use dnf
 sudo dnf copr enable @Serokell/Tezos
 sudo dnf install tezos-client
-sudo dnf install tezos-baker-006-PsCARTHA
+sudo dnf install tezos-baker-007-PsDELPH1
 
 # or use yum
 sudo yum copr enable @Serokell/Tezos
-sudo yum install tezos-baker-006-PsCARTHA
+sudo yum install tezos-baker-007-PsDELPH1
 ```
 Once you install such packages the commands `tezos-*` will be available.
 
@@ -109,7 +109,7 @@ from scratch.
 For this you'll need `.service` file to define systemd service. The easiest way
 to get one is to run [`gen_systemd_service_file.py`](gen_systemd_service_file.py).
 You should specify service name as an argument. Note that there are three
-predefined services for `tezos-node`: `tezos-node-{mainnet, carthagenet, delphinet}`.
+predefined services for `tezos-node`: `tezos-node-{mainnet, delphinet}`.
 
 E.g.:
 ```
@@ -130,8 +130,8 @@ It's possible to run multiple same services, e.g. two `tezos-node`s that run dif
 networks.
 
 `tezos-node` packages provide three services out of the box:
-`tezos-node-delphinet`, `tezos-node-carthagenet` and `tezos-node-mainnet` that run
-`delphinet`, `carthagenet` and `mainnet` networks respectively.
+`tezos-node-delphinet` and `tezos-node-mainnet` that run
+`delphinet` and `mainnet` networks respectively.
 
 In order to start it run:
 ```

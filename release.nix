@@ -2,13 +2,14 @@
 #
 # SPDX-License-Identifier: MPL-2.0
 
-{ writeTextDir, runCommand, buildEnv, binaries, arm-binaries, commonMeta }:
+{ writeTextDir, runCommand, buildEnv, binaries, arm-binaries, commonMeta, replaceStrings }:
 let
   release-binaries = import ./nix/build/release-binaries.nix;
+  version = replaceStrings ["refs/tags/"] [""] commonMeta.branchName;
   release-notes = writeTextDir "release-notes.md" ''
     Automatic release
 
-    This release contains assets based on [${commonMeta.branchName} release](https://gitlab.com/tezos/tezos/tree/${commonMeta.branchName}).
+    This release contains assets based on [${version} release](https://gitlab.com/tezos/tezos/tree/${version}).
 
     Binaries that target arm64 architecture has `-arm64` suffix in the name.
     Other binaries target x86_64.

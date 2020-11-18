@@ -4,7 +4,6 @@
 
 env:
   SET_VERSION: "export TEZOS_VERSION=\"$(cat nix/nix/sources.json | jq -r '.tezos.ref' | cut -d'/' -f3)\""
-  USE_PODMAN: "True"
 
 steps:
  - label: reuse lint
@@ -28,7 +27,7 @@ steps:
    - nix-build tests/tezos-binaries.nix --no-out-link --arg path-to-binaries ./binaries/bin
    branches: "!master"
 
- - label: build via podman
+ - label: build via docker
    commands:
    - eval "$SET_VERSION"
    - cd docker
@@ -36,13 +35,14 @@ steps:
    - nix run -f.. pkgs.upx -c upx tezos-*
    artifact_paths:
      - ./docker/tezos-*
+   agents:
+     queue: "docker"
  # arm builer is an ubuntu machine without nix
  - label: build arm via docker
    commands:
    - eval "$SET_VERSION"
    - cd docker
-   # arm builder doesn't have podman installed
-   - USE_PODMAN="False" ./docker-static-build.sh
+   - ./docker-static-build.sh
    - upx tezos-*
    - >
      for f in ./tezos-*; do
@@ -52,14 +52,18 @@ steps:
      - ./docker/tezos-*
    agents:
      queue: "arm64-build"
+
+ # binaries built by docker are tested on the another machine,
+ # so we should wait for docker build to finish
+ - wait
  - label: test docker-built binaries
    commands:
-   - buildkite-agent artifact download "docker/*" . --step "build via podman"
+   - buildkite-agent artifact download "docker/*" . --step "build via docker"
    - chmod +x ./docker/*
    - nix-build tests/tezos-binaries.nix --no-out-link --arg path-to-binaries ./docker
    branches: "!master"
 
- - label: test deb source packages via podman
+ - label: test deb source packages via docker
    commands:
    - eval "$SET_VERSION"
    - ./docker/docker-tezos-packages.sh ubuntu source
@@ -67,7 +71,9 @@ steps:
      - ./out/*
    branches: "!master"
    timeout_in_minutes: 30
- - label: test deb binary packages via podman
+   agents:
+     queue: "docker"
+ - label: test deb binary packages via docker
    commands:
    - eval "$SET_VERSION"
    # Building all binary packages will take significant amount of time, so we build only one
@@ -76,7 +82,9 @@ steps:
    - rm -rf out
    branches: "!master"
    timeout_in_minutes: 30
- - label: test rpm source packages via podman
+   agents:
+     queue: "docker"
+ - label: test rpm source packages via docker
    commands:
    - eval "$SET_VERSION"
    - ./docker/docker-tezos-packages.sh fedora source
@@ -84,7 +92,9 @@ steps:
      - ./out/*
    branches: "!master"
    timeout_in_minutes: 30
- - label: test rpm binary packages via podman
+   agents:
+     queue: "docker"
+ - label: test rpm binary packages via docker
    commands:
    - eval "$SET_VERSION"
    # Building all binary packages will take significant amount of time, so we build only one
@@ -93,13 +103,15 @@ steps:
    - rm -rf out
    branches: "!master"
    timeout_in_minutes: 30
+   agents:
+     queue: "docker"
 
  - wait
  - label: create auto pre-release
    commands:
    - mkdir binaries
    - mkdir arm-binaries
-   - buildkite-agent artifact download "docker/*" binaries --step "build via podman"
+   - buildkite-agent artifact download "docker/*" binaries --step "build via docker"
    - buildkite-agent artifact download "docker/*" arm-binaries --step "build arm via docker"
    - ls binaries
    - GITHUB_TOKEN=$(cat ~/niv-bot-token) ./scripts/autorelease.sh

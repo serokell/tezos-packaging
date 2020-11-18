@@ -69,14 +69,14 @@ def test_node_with_daemons_scenario(network, use_tls=False):
     kill_node_with_daemons()
 
 
-with subtest("run node with daemons on carthagenet"):
-    test_node_with_daemons_scenario("carthagenet")
+with subtest("run node with daemons on delphinet"):
+    test_node_with_daemons_scenario("delphinet")
 
 with subtest("run node with daemons on mainnet"):
     test_node_with_daemons_scenario("mainnet")
 
 with subtest("run node with daemons using tls"):
-    test_node_with_daemons_scenario("carthagenet", use_tls=True)
+    test_node_with_daemons_scenario("delphinet", use_tls=True)
 
 with subtest("test remote signer"):
     machine.succeed(f"{tezos_signer} -d signer-dir gen keys signer")

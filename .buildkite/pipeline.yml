@@ -78,7 +78,7 @@ steps:
    - eval "$SET_VERSION"
    # Building all binary packages will take significant amount of time, so we build only one
    # in order to ensure package generation sanity
-   - ./docker/docker-tezos-packages.sh ubuntu binary tezos-baker-006-PsCARTHA
+   - ./docker/docker-tezos-packages.sh ubuntu binary tezos-baker-007-PsDELPH1
    - rm -rf out
    branches: "!master"
    timeout_in_minutes: 30

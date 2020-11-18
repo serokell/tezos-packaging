@@ -114,5 +114,5 @@ steps:
    - buildkite-agent artifact download "docker/*" binaries --step "build via docker"
    - buildkite-agent artifact download "docker/*" arm-binaries --step "build arm via docker"
    - ls binaries
-   - GITHUB_TOKEN=$(cat ~/niv-bot-token) ./scripts/autorelease.sh
+   - ./scripts/autorelease.sh
    branches: master

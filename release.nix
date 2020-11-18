@@ -7,8 +7,6 @@ let
   release-binaries = import ./nix/build/release-binaries.nix;
   version = replaceStrings ["refs/tags/"] [""] commonMeta.branchName;
   release-notes = writeTextDir "release-notes.md" ''
-    Automatic release
-
     This release contains assets based on [${version} release](https://gitlab.com/tezos/tezos/tree/${version}).
 
     Binaries that target arm64 architecture has `-arm64` suffix in the name.

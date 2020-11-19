@@ -80,12 +80,11 @@ def gen_spec_file(pkg: Package, out):
         systemd_units_post = ""
         systemd_units_preun = ""
         systemd_units_postun = ""
-        if len(config_files) == 1:
-            install_default = f'''
-mkdir -p %{{buildroot}}/%{{_sysconfdir}}/default
-install -m 644 %{{name}}.default %{{buildroot}}/%{{_sysconfdir}}/default/%{{name}}'''
+        if len(config_files) > 0:
+            install_default = f"mkdir -p %{{buildroot}}/%{{_sysconfdir}}/default\n"
         else:
             install_default = ""
+        default_files = ""
         for systemd_unit in pkg.systemd_units:
             if systemd_unit.suffix is None:
                 install_unit_files += f"install -m 644 %{{name}}.service %{{buildroot}}/%{{_unitdir}}\n"
@@ -94,6 +93,10 @@ install -m 644 %{{name}}.default %{{buildroot}}/%{{_sysconfdir}}/default/%{{name
                 systemd_units_post += f"%systemd_post %{{name}}.service\n"
                 systemd_units_preun += f"%systemd_preun %{{name}}.service\n"
                 systemd_units_postun += f"%systemd_postun_with_restart %{{name}}.service\n"
+                if systemd_unit.config_file is not None:
+                    install_default += f"install -m 644 %{{name}}.default " + \
+                        f"%{{buildroot}}/%{{_sysconfdir}}/default/%{{name}}\n"
+                    default_files += f"%{{_sysconfdir}}/default/%{{name}}\n"
             else:
                 install_unit_files += f"install -m 644 %{{name}}-{systemd_unit.suffix}.service %{{buildroot}}/%{{_unitdir}}\n"
                 systemd_unit_files += f"%{{_unitdir}}/%{{name}}-{systemd_unit.suffix}.service\n"
@@ -101,6 +104,10 @@ install -m 644 %{{name}}.default %{{buildroot}}/%{{_sysconfdir}}/default/%{{name
                 systemd_units_post += f"%systemd_post %{{name}}-{systemd_unit.suffix}.service\n"
                 systemd_units_preun += f"%systemd_preun %{{name}}-{systemd_unit.suffix}.service\n"
                 systemd_units_postun += f"%systemd_postun_with_restart %{{name}}-{systemd_unit.suffix}.service\n"
+                if systemd_unit.config_file is not None:
+                    install_default += f"install -m 644 %{{name}}-{systemd_unit.suffix}.default " + \
+                        f"%{{buildroot}}/%{{_sysconfdir}}/default/%{{name}}-{systemd_unit.suffix}\n"
+                    default_files += f"%{{_sysconfdir}}/default/%{{name}}-{systemd_unit.suffix}\n"
         install_startup_scripts = ""
         systemd_startup_files = ""
         for startup_script in startup_scripts:
@@ -116,7 +123,7 @@ mkdir -p %{{buildroot}}/%{{_unitdir}}
         systemd_files = f'''
 {systemd_startup_files}
 {systemd_unit_files}
-{ f"%{{_sysconfdir}}/default/%{{name}}" if len(config_files) == 1 else "" }
+{default_files}
 '''
         systemd_macros= f'''
 %post
@@ -200,7 +207,6 @@ def gen_rules(pkg: Package, out):
     for systemd_unit in pkg.systemd_units:
         if systemd_unit.suffix is not None:
             override_dh_install_init += f"	dh_installinit --name={pkg.name}-{systemd_unit.suffix}\n"
-    override_dh_install_init += "	dh_installinit --noscripts\n"
     rules_contents = f'''#!/usr/bin/make -f
 
 %:
@@ -232,26 +238,26 @@ for package in packages:
                         ["--ocaml=4.09.1", "--yes", "--opam=2.0.5"], check=True)
         subprocess.run(["tar", "-zxf", f"{opam_package}-bundle.tar.gz"], check=True)
         os.rename(f"{opam_package}-bundle", dir)
-        # subprocess.run(["mkdir", dir])
         gen_makefile(package, f"{dir}/Makefile")
-        config_files = list(set(filter(lambda x: x is not None, map(lambda x: x.config_file, package.systemd_units))))
-        if len(config_files) > 1:
-            raise Exception("Packages cannot have more than one default config file for package")
         if not is_ubuntu:
             subprocess.run(["wget", "-q", "-O", f"{dir}/LICENSE", f"https://gitlab.com/tezos/tezos/-/raw/v{version}/LICENSE"], check=True)
         if is_ubuntu:
             subprocess.run(["tar", "-czf", f"{dir}.tar.gz", dir], check=True)
             os.chdir(dir)
             subprocess.run(["dh_make", "-syf" f"../{dir}.tar.gz"], check=True)
-            if len(config_files) == 1:
-                shutil.copy(f"{os.path.dirname(__file__)}/defaults/{config_files[0]}", f"debian/{package.name.lower()}.default")
             for systemd_unit in package.systemd_units:
                 if systemd_unit.service_file.service.environment_file is not None:
                     systemd_unit.service_file.service.environment_file = systemd_unit.service_file.service.environment_file.lower()
                 if systemd_unit.suffix is None:
+                    if systemd_unit.config_file is not None:
+                        shutil.copy(f"{os.path.dirname(__file__)}/defaults/{systemd_unit.config_file}",
+                                    f"debian/{package.name.lower()}.default")
                     print_service_file(systemd_unit.service_file, f"debian/{package.name.lower()}.service")
                 else:
                     print_service_file(systemd_unit.service_file, f"debian/{package.name.lower()}-{systemd_unit.suffix}.service")
+                    if systemd_unit.config_file is not None:
+                        shutil.copy(f"{os.path.dirname(__file__)}/defaults/{systemd_unit.config_file}",
+                                    f"debian/{package.name.lower()}-{systemd_unit.suffix}.default")
                 shutil.copy(f"{os.path.dirname(__file__)}/scripts/{systemd_unit.startup_script}", f"debian/{systemd_unit.startup_script}")
                 gen_install(package, "debian/install")
             gen_control_file(package, "debian/control")
@@ -266,11 +272,15 @@ for package in packages:
             for systemd_unit in package.systemd_units:
                 if systemd_unit.suffix is None:
                     print_service_file(systemd_unit.service_file, f"{dir}/{package.name}.service")
+                    if systemd_unit.config_file is not None:
+                        shutil.copy(f"{os.path.dirname(__file__)}/defaults/{systemd_unit.config_file}",
+                                    f"{dir}/{package.name}.default")
                 else:
                     print_service_file(systemd_unit.service_file, f"{dir}/{package.name}-{systemd_unit.suffix}.service")
+                    if systemd_unit.config_file is not None:
+                        shutil.copy(f"{os.path.dirname(__file__)}/defaults/{systemd_unit.config_file}",
+                                    f"{dir}/{package.name}-{systemd_unit.suffix}.default")
                 shutil.copy(f"{os.path.dirname(__file__)}/scripts/{systemd_unit.startup_script}", f"{dir}/{systemd_unit.startup_script}")
-            if len(config_files) == 1:
-                shutil.copy(f"{os.path.dirname(__file__)}/defaults/{config_files[0]}", f"{dir}/{package.name}.default")
             subprocess.run(["tar", "-czf", f"{dir}.tar.gz", dir], check=True)
             os.makedirs(f"{home}/rpmbuild/SPECS", exist_ok=True)
             os.makedirs(f"{home}/rpmbuild/SOURCES", exist_ok=True)

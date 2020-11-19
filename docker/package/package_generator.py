@@ -2,29 +2,37 @@
 #
 # SPDX-License-Identifier: LicenseRef-MIT-TQ
 
-import os, shutil, sys, subprocess, json
+import os, shutil, sys, subprocess, json, argparse
 from distutils.dir_util import copy_tree
 
 from .model import Package, print_service_file
 from .packages import packages
 
-if sys.argv[1] == "ubuntu":
+is_ubuntu = None
+is_source = None
+package_to_build = None
+
+parser = argparse.ArgumentParser()
+parser.add_argument("--os", required=True)
+parser.add_argument("--type", help="package type", required=True)
+parser.add_argument("--package", help="specify binary to package")
+args = parser.parse_args()
+
+if args.os == "ubuntu":
     is_ubuntu = True
-elif sys.argv[1] == "fedora":
+elif args.os == "fedora":
     is_ubuntu = False
 else:
-    raise Exception(f"Unexpected package target OS, only 'ubuntu' and 'fedora' are supported.")
+    raise Exception("Unexpected package target OS, only 'ubuntu' and 'fedora' are supported.")
 
-if sys.argv[2] == "source":
+if args.type == "source":
     is_source = True
-elif sys.argv[2] == "binary":
+elif args.type == "binary":
     is_source = False
 else:
     raise Exception("Unexpected package format, only 'source' and 'binary' are supported.")
 
-package_to_build = None
-if len(sys.argv) == 4:
-    package_to_build = sys.argv[3]
+package_to_build = args.package
 
 date = subprocess.check_output(["date", "-R"]).decode().strip()
 meta = json.load(open(f"{os.path.dirname(__file__)}/../../meta.json", "r"))
@@ -265,6 +273,7 @@ for package in packages:
             subprocess.run("rm debian/*.ex debian/*.EX debian/README*", shell=True, check=True)
             gen_changelog(package, "bionic", meta["maintainer"], date, "debian/changelog")
             gen_rules(package, "debian/rules")
+            subprocess.run(["ls"])
             subprocess.run(["dpkg-buildpackage", "-S" if is_source else "-b", "-us", "-uc"],
                            check=True)
             os.chdir("..")

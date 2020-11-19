@@ -16,11 +16,29 @@ else
     virtualisation_engine="docker"
 fi
 
-target_os="${1-}"
+args=()
+
+while true;
+do
+    arg="${1-}"
+    if [[ -z "$arg" ]];
+    then
+        break
+    fi
+    case $arg in
+        --os )
+            target_os="$2"
+            shift 2
+            ;;
+        * )
+            args+=("$arg")
+            shift
+    esac
+done
 
 "$virtualisation_engine" build -t tezos-"$target_os" -f docker/package/Dockerfile-"$target_os" .
 set +e
-container_id="$("$virtualisation_engine" create --env TEZOS_VERSION="$TEZOS_VERSION" --env OPAMSOLVERTIMEOUT=120 -t tezos-"$target_os" "$@")"
+container_id="$("$virtualisation_engine" create --env TEZOS_VERSION="$TEZOS_VERSION" --env OPAMSOLVERTIMEOUT=120 -t tezos-"$target_os" "${args[@]}")"
 "$virtualisation_engine" start -a "$container_id"
 exit_code="$?"
 "$virtualisation_engine" cp "$container_id":/tezos-packaging/docker/out .

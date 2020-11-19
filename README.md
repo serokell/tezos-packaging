@@ -77,8 +77,8 @@ Run `./tezos-client` or add it to your PATH to be able to run it anywhere.
 
 ### Systemd units on Ubuntu or Fedora
 
-`tezos-node`, `tezos-accuser-<proto>`, `tezos-baker-<proto>` and
-`tezos-endorser-<proto>` packages have systemd files included to the
+`tezos-node`, `tezos-accuser-<proto>`, `tezos-baker-<proto>`,
+`tezos-endorser-<proto>`, and `tezos-signer` packages have systemd files included to the
 Ubuntu and Fedora packages.
 
 Once you've installed the packages with systemd unit, you can run the service
@@ -144,6 +144,13 @@ Since daemons for different protocols are provided in the different packages, th
 have different service files. The only thing that needs to be changed is config file.
 One should provide desired node address, data directory for daemon files and node directory
 (however, this is the case only for baker daemon).
+
+`tezos-signer` package provides four services one for each mode in which signing daemon can run:
+* Over TCP socket (`tezos-signer-tcp.service`).
+* Over UNIX socker (`tezos-signer-unix.service`).
+* Over HTTP (`tezos-signer-http.service`).
+* Over HTTPS (`tezos-signer-https.service`)
+Each signer service has dedicated config file in e.g. `/etc/default/tezos-signer-{mode}`.
 
 ## Build Instructions
 

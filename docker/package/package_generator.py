@@ -1,6 +1,6 @@
 # SPDX-FileCopyrightText: 2020 TQ Tezos <https://tqtezos.com/>
 #
-# SPDX-License-Identifier: MPL-2.0
+# SPDX-License-Identifier: LicenseRef-MIT-TQ
 
 import os, shutil, sys, subprocess, json
 from distutils.dir_util import copy_tree
@@ -141,7 +141,7 @@ Version: {version}
 Release: {release}
 Epoch: {fedora_epoch}
 Summary: {pkg.desc}
-License: MPL-2.0
+License: MIT
 BuildArch: x86_64
 Source0: {pkg.name}-{version}.tar.gz
 Source1: https://gitlab.com/tezos/tezos/tree/v{version}/

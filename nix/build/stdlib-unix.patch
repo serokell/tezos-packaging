@@ -1,6 +1,6 @@
 # SPDX-FileCopyrightText: 2019 TQ Tezos <https://tqtezos.com/>
 #
-# SPDX-License-Identifier: MPL-2.0
+# SPDX-License-Identifier: LicenseRef-MIT-TQ
 
 diff --git a/src/lib_stdlib_unix/file_descriptor_sink.ml b/src/lib_stdlib_unix/file_descriptor_sink.ml
 index 781668770..124dbaaef 100644

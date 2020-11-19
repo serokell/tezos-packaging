@@ -1,6 +1,6 @@
 # SPDX-FileCopyrightText: 2020 TQ Tezos <https://tqtezos.com/>
 #
-# SPDX-License-Identifier: MPL-2.0
+# SPDX-License-Identifier: LicenseRef-MIT-TQ
 
 FROM ubuntu:18.04
 RUN apt-get update && apt-get install -y libev-dev libgmp-dev libhidapi-dev m4 perl pkg-config \

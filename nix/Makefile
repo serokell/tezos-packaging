@@ -1,6 +1,6 @@
 # SPDX-FileCopyrightText: 2019 TQ Tezos <https://tqtezos.com/>
 #
-# SPDX-License-Identifier: MPL-2.0
+# SPDX-License-Identifier: LicenseRef-MIT-TQ
 ts := $(shell date --date="$(git show --no-patch --format=%ci)" +"%Y%m%d%H%M")
 
 .PHONY: binaries rpm-packages deb-packages

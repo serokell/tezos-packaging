@@ -1,6 +1,6 @@
 # SPDX-FileCopyrightText: 2020 TQ Tezos <https://tqtezos.com/>
 #
-# SPDX-License-Identifier: MPL-2.0
+# SPDX-License-Identifier: LicenseRef-MIT-TQ
 diff --git a/src/bin_client/dune b/src/bin_client/dune
 index 28822fb9f..27c6b81ca 100644
 --- a/src/bin_client/dune

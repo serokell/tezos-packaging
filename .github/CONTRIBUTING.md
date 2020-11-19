@@ -52,7 +52,7 @@ but, basically, it all boils down to the following:
     ```
     # SPDX-FileCopyrightText: 2019 TQ Tezos <https://tqtezos.com/>
     #
-    # SPDX-License-Identifier: MPL-2.0
+    # SPDX-License-Identifier: LicenseRef-MIT-TQ
     ```
 
     (This is an example for Nix; adapt it as needed for other languages.)

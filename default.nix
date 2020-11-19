@@ -1,6 +1,6 @@
 # SPDX-FileCopyrightText: 2019 TQ Tezos <https://tqtezos.com/>
 #
-# SPDX-License-Identifier: MPL-2.0
+# SPDX-License-Identifier: LicenseRef-MIT-TQ
 
 { docker-binaries ? null, docker-arm-binaries ? null }:
 let
@@ -9,7 +9,7 @@ let
   meta = builtins.fromJSON (builtins.readFile ./meta.json);
   commonMeta = {
     version = builtins.replaceStrings [ "refs/tags/v" ] [ "" ] source.ref;
-    license = "MPL-2.0";
+    license = "MIT";
     dependencies = "";
     branchName = source.ref;
     licenseFile = "${source}/LICENSE";

@@ -1,6 +1,6 @@
 # SPDX-FileCopyrightText: 2020 TQ Tezos <https://tqtezos.com/>
 #
-# SPDX-License-Identifier: MPL-2.0
+# SPDX-License-Identifier: LicenseRef-MIT-TQ
 
 # This script is used in tezos-binaries.nix and isn't supposed to be run
 # other way than 'nix-build tezos-binaries.nix'

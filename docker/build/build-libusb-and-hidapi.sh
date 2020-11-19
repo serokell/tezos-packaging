@@ -2,7 +2,7 @@
 
 # SPDX-FileCopyrightText: 2020 TQ Tezos <https://tqtezos.com/>
 #
-# SPDX-License-Identifier: MPL-2.0
+# SPDX-License-Identifier: LicenseRef-MIT-TQ
 
 # This script builds and installs libusb and hidapi libraries. It's required since alpine
 # doesn't provide static versions for these libraries, thus we have to compile it ourselves.

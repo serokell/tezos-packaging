@@ -2,7 +2,7 @@
 
 # SPDX-FileCopyrightText: 2020 TQ Tezos <https://tqtezos.com/>
 #
-# SPDX-License-Identifier: MPL-2.0
+# SPDX-License-Identifier: LicenseRef-MIT-TQ
 
 # This script builds static tezos binaries. It expects patches required for static building to be
 # in parent directory, it also accepts tezos version as an argument.

@@ -15,6 +15,6 @@ let
     licenseFile = "${source}/LICENSE";
   } // meta;
   release = pkgs.callPackage ./release.nix
-    { binaries = docker-binaries; arm-binaries = docker-arm-binaries; inherit commonMeta; };
+    { binaries = docker-binaries; arm-binaries = docker-arm-binaries; inherit commonMeta; inherit (pkgs.lib) replaceStrings; };
 
 in { inherit release commonMeta pkgs; }

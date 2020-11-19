@@ -35,7 +35,7 @@ git tag -f auto-release
 git push --force --tags
 
 # Create release
-gh release create -F "$TEMPDIR"/"$project"/release-notes.md --prerelease auto-release
+gh release create -F "$TEMPDIR"/"$project"/release-notes.md --prerelease auto-release --title auto-release
 
 # Upload assets
 gh release upload auto-release "$assets_dir"/*

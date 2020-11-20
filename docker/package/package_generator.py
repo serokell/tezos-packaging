@@ -11,11 +11,13 @@ from .packages import packages
 is_ubuntu = None
 is_source = None
 package_to_build = None
+source_archive = None
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--os", required=True)
 parser.add_argument("--type", help="package type", required=True)
 parser.add_argument("--package", help="specify binary to package")
+parser.add_argument("--sources", help="specify source archive for single ubuntu package")
 args = parser.parse_args()
 
 if args.os == "ubuntu":
@@ -33,6 +35,7 @@ else:
     raise Exception("Unexpected package format, only 'source' and 'binary' are supported.")
 
 package_to_build = args.package
+source_archive = args.sources
 
 date = subprocess.check_output(["date", "-R"]).decode().strip()
 meta = json.load(open(f"{os.path.dirname(__file__)}/../../meta.json", "r"))
@@ -239,18 +242,21 @@ for package in packages:
             dir = f"{package.name.lower()}-{version}"
         else:
             dir = f"{package.name}-{version}"
-        # tezos-client and tezos-admin-client are in one opam package
-
-        opam_package = "tezos-client" if package.name == "tezos-admin-client" else package.name
-        subprocess.run(["opam", "exec", "--", "opam-bundle", f"{opam_package}={version}"] + package.optional_opam_deps +
-                        ["--ocaml=4.09.1", "--yes", "--opam=2.0.5"], check=True)
-        subprocess.run(["tar", "-zxf", f"{opam_package}-bundle.tar.gz"], check=True)
-        os.rename(f"{opam_package}-bundle", dir)
-        gen_makefile(package, f"{dir}/Makefile")
-        if not is_ubuntu:
-            subprocess.run(["wget", "-q", "-O", f"{dir}/LICENSE", f"https://gitlab.com/tezos/tezos/-/raw/v{version}/LICENSE"], check=True)
+        if source_archive is None:
+            opam_package = "tezos-client" if package.name == "tezos-admin-client" else package.name
+            subprocess.run(["opam", "exec", "--", "opam-bundle", f"{opam_package}={version}"] + package.optional_opam_deps +
+                            ["--ocaml=4.09.1", "--yes", "--opam=2.0.5"], check=True)
+            subprocess.run(["tar", "-zxf", f"{opam_package}-bundle.tar.gz"], check=True)
+            os.rename(f"{opam_package}-bundle", dir)
+            gen_makefile(package, f"{dir}/Makefile")
+            if not is_ubuntu:
+                subprocess.run(["wget", "-q", "-O", f"{dir}/LICENSE", f"https://gitlab.com/tezos/tezos/-/raw/v{version}/LICENSE"], check=True)
         if is_ubuntu:
-            subprocess.run(["tar", "-czf", f"{dir}.tar.gz", dir], check=True)
+            if source_archive is None:
+                subprocess.run(["tar", "-czf", f"{dir}.tar.gz", dir], check=True)
+            else:
+                shutil.copy(f"{os.path.dirname(__file__)}/../{source_archive}", f"{dir}.tar.gz")
+                subprocess.run(["tar", "-xzf", f"{dir}.tar.gz"], check=True)
             os.chdir(dir)
             subprocess.run(["dh_make", "-syf" f"../{dir}.tar.gz"], check=True)
             for systemd_unit in package.systemd_units:
@@ -273,11 +279,12 @@ for package in packages:
             subprocess.run("rm debian/*.ex debian/*.EX debian/README*", shell=True, check=True)
             gen_changelog(package, "bionic", meta["maintainer"], date, "debian/changelog")
             gen_rules(package, "debian/rules")
-            subprocess.run(["ls"])
             subprocess.run(["dpkg-buildpackage", "-S" if is_source else "-b", "-us", "-uc"],
                            check=True)
             os.chdir("..")
         else:
+            if source_archive is not None:
+                raise Exception("Sources archive provision isn't supported for Fedora packages")
             for systemd_unit in package.systemd_units:
                 if systemd_unit.suffix is None:
                     print_service_file(systemd_unit.service_file, f"{dir}/{package.name}.service")
@@ -318,4 +325,4 @@ else:
 for f in os.listdir(artifacts_dir):
     for ext in exts:
         if f.endswith(ext):
-            os.rename(f"{artifacts_dir}/{f}", os.path.join("out", f))
+            shutil.copy(f"{artifacts_dir}/{f}", os.path.join("out", f))

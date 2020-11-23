@@ -1,0 +1,31 @@
+#!/usr/bin/bash
+
+# SPDX-FileCopyrightText: 2020 TQ Tezos <https://tqtezos.com/>
+#
+# SPDX-License-Identifier: LicenseRef-MIT-TQ
+
+set -euo pipefail
+
+# $PROTOCOL should be defined in the system unit environment
+signer="/usr/bin/tezos-signer"
+
+if [[ -n $PIDFILE ]]; then
+   pid_file_args=("--pid-file" "$PIDFILE")
+else
+   pid_file_args=()
+fi
+
+if [[ -n $MAGIC_BYTES ]]; then
+   magic_bytes_args=("--magic-bytes" "$MAGIC_BYTES")
+else
+   magic_bytes_args=()
+fi
+
+if [[ -n $CHECK_HIGH_WATERMARK ]]; then
+   check_high_watermark_args=("--check-high-watermark")
+else
+   check_high_watermark_args=()
+fi
+
+"$signer" -d "$DATA_DIR" "${pid_file_args[@]}" "${magic_bytes_args[@]}" \
+  "${check_high_watermark_args[@]}" "$@"

@@ -7,6 +7,53 @@ from .model import Service, ServiceFile, SystemdUnit, Unit, Package
 
 networks = ["mainnet", "delphinet"]
 
+signer_units = [
+    SystemdUnit(
+        ServiceFile(Unit(after=["network.target"],
+                         description="Tezos signer daemon running over TCP socket"),
+                    Service(environment_file="/etc/default/tezos-signer-tcp",
+                            environment=["ADDRESS=127.0.0.1", "PORT=8000", "TIMEOUT=1"],
+                            exec_start="/usr/bin/tezos-signer-start launch socket signer " \
+                            + " --address ${ADDRESS} --port ${PORT} --timeout ${TIMEOUT}",
+                            state_directory="tezos", user="tezos")),
+        suffix="tcp",
+        startup_script="tezos-signer-start",
+        config_file="tezos-signer.conf"),
+    SystemdUnit(
+        ServiceFile(Unit(after=["network.target"],
+                         description="Tezos signer daemon running over UNIX socket"),
+                    Service(environment_file="/etc/default/tezos-signer-unix",
+                            environment=["SOCKET="],
+                            exec_start="/usr/bin/tezos-signer-start launch local signer " \
+                            + "--socket ${SOCKET}",
+                            state_directory="tezos", user="tezos")),
+        suffix="unix",
+        startup_script="tezos-signer-start",
+        config_file="tezos-signer.conf"),
+    SystemdUnit(
+        ServiceFile(Unit(after=["network.target"],
+                         description="Tezos signer daemon running over HTTP"),
+                    Service(environment_file="/etc/default/tezos-signer-http",
+                            environment=["CERT_PATH=", "KEY_PATH=", "ADDRESS=127.0.0.1", "PORT=8080"],
+                            exec_start="/usr/bin/tezos-signer-start launch http signer " \
+                            + "--address ${ADDRESS} --port ${PORT}",
+                            state_directory="tezos", user="tezos")),
+        suffix="http",
+        startup_script="tezos-signer-start",
+        config_file="tezos-signer.conf"),
+    SystemdUnit(
+        ServiceFile(Unit(after=["network.target"],
+                         description="Tezos signer daemon running over HTTPs"),
+                    Service(environment_file="/etc/default/tezos-signer-https",
+                            environment=["CERT_PATH=", "KEY_PATH=", "ADDRESS=127.0.0.1", "PORT=8080"],
+                            exec_start="/usr/bin/tezos-signer-start launch https signer " \
+                            + "${CERT_PATH} ${KEY_PATH} --address ${ADDRESS} --port ${PORT}",
+                            state_directory="tezos", user="tezos")),
+        suffix="https",
+        startup_script="tezos-signer-start",
+        config_file="tezos-signer.conf")
+]
+
 packages = [
     Package("tezos-client",
             "CLI client for interacting with tezos blockchain",
@@ -16,7 +63,8 @@ packages = [
             optional_opam_deps=["tls"]),
     Package("tezos-signer",
             "A client to remotely sign operations or blocks",
-            optional_opam_deps=["tls", "ledgerwallet-tezos"]),
+            optional_opam_deps=["tls", "ledgerwallet-tezos"],
+            systemd_units=signer_units),
     Package("tezos-codec",
             "A client to decode and encode JSON")
 ]

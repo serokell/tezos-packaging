@@ -7,7 +7,7 @@ from typing import List
 # There are more possible fields, but only these are used by tezos services
 class Service:
     def __init__(self, exec_start: str, state_directory:str, user: str,
-                 environment_file: str=None, environment: List[str]=[],):
+                 environment_file: str=None, environment: List[str]=[]):
         self.environment_file = environment_file
         self.environment = environment
         self.exec_start = exec_start

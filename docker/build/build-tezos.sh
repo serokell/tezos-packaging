@@ -16,4 +16,4 @@ git apply ../static.patch
 export OPAMYES="true"
 opam init --bare --disable-sandboxing
 make build-deps
-eval "$(opam env)" && make
+eval "$(opam env)" && make && make build-sandbox

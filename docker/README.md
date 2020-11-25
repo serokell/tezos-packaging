@@ -181,4 +181,10 @@ cd .. && ./docker/docker-tezos-packages.sh --os fedora --type source
 cd .. && ./docker/docker-tezos-packages.sh --os fedora --type source --package tezos-baker-007-PsDELPH1
 ```
 
+Sign source packages:
+```
+rpm --add-sign out/*.src.rpm
+```
+Note, that in order to sign them, you'll need gpg key to be set up in `~/.rpmmacros`.
+
 Resulting `.src.rpm` packages can be either built locally or submitted to the Copr.

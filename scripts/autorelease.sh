@@ -22,6 +22,9 @@ assets_dir=$TEMPDIR/assets
 nix-build -A release -o "$TEMPDIR"/"$project" --arg timestamp "$(date +\"%Y%m%d%H%M\")" \
           --arg docker-binaries ./binaries/docker --arg docker-arm-binaries ./arm-binaries/docker
 mkdir -p "$assets_dir"
+for asset in "$assets_dir"/*; do
+    sha256sum "$asset" > "$asset.sha256"
+done
 # Move archive with binaries and tezos license to assets
 shopt -s extglob
 cp -L "$TEMPDIR"/"$project"/!(*.md) "$assets_dir"

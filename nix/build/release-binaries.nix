@@ -33,6 +33,11 @@ in [
     description = "A client to decode and encode JSON";
     supports = protocolsFormatted;
   }
+  {
+    name = "tezos-sandbox";
+    description = "A tool for setting up and running testing scenarios with the local blockchain";
+    supports = protocolsFormatted;
+  }
 ] ++ builtins.concatMap (protocol: [
   {
     name = "tezos-baker-${protocol}";

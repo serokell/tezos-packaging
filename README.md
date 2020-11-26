@@ -8,9 +8,16 @@
 
 [![Build status](https://badge.buildkite.com/e899e9e54babcd14139e3bd4381bad39b5d680e08e7b7766d4.svg?branch=master)](https://buildkite.com/serokell/tezos-packaging)
 
-This repo provides various form of distribution for tezos-related executables
-(`tezos-client`, `tezos-client-admin`, `tezos-node`, `tezos-baker`,
-`tezos-accuser`, `tezos-endorser`, `tezos-signer` and `tezos-protocol-compiler`).
+This repo provides various form of distribution for tezos-related executables:
+* `tezos-client`
+* `tezos-admin-client`
+* `tezos-node`
+* `tezos-baker`
+* `tezos-accuser`
+* `tezos-endorser`
+* `tezos-signer`
+* `tezos-codec`
+* `tezos-sandbox`
 
 Daemon binaries (as well as packages for them) have suffix that defines their target protocol,
 e.g. `tezos-baker-007-PsDELPH1` can be used only on the chain with 007 protocol.

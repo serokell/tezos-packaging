@@ -25,5 +25,5 @@ in
 { pkgs ? import (import ../nix/nix/sources.nix {}).nixpkgs { inherit overlays; } }:
 with pkgs;
 mkShell {
-  buildInputs = [ gh git rename ];
+  buildInputs = [ gh git rename gnupg ];
 }

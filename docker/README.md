@@ -61,15 +61,15 @@ In order to build binary `.deb` packages specify `TEZOS_VERSION` and
 run the following command:
 ```
 export TEZOS_VERSION="v7.3"
-cd .. && ./docker/docker-tezos-packages.sh ubuntu binary
+cd .. && ./docker/docker-tezos-packages.sh --os ubuntu --type binary
 ```
 
 It is also possible to build single package. In order to do that run the following:
 ```
-# cd .. && ./docker/docker-tezos-packages.sh ubuntu binary <tezos-binary-name>
+# cd .. && ./docker/docker-tezos-packages.sh --os ubuntu --type binary --package <tezos-binary-name>
 # Example for baker
 export TEZOS_VERSION="v7.3"
-cd .. && ./docker/docker-tezos-packages.sh ubuntu binary tezos-baker-007-PsDELPH1
+cd .. && ./docker/docker-tezos-packages.sh --os ubuntu --type binary --package tezos-baker-007-PsDELPH1
 ```
 
 The build can take some time due to the fact that we build tezos and its dependencies
@@ -87,9 +87,9 @@ sudo apt install <path to deb file>
 In order to build source packages run the following commands:
 ```
 export TEZOS_VERSION="v7.3"
-cd .. && ./docker/docker-tezos-packages.sh ubuntu source
+cd .. && ./docker/docker-tezos-packages.sh --os ubuntu --type source
 # you can also build single source package
-cd .. && ./docker/docker-tezos-packages.sh ubuntu source tezos-baker-007-PsDELPH1
+cd .. && ./docker/docker-tezos-packages.sh --os ubuntu --type source --package tezos-baker-007-PsDELPH1
 ```
 
 Once the packages build is complete `../out` directory will contain files required
@@ -121,6 +121,22 @@ command for each `.changes` file:
 dput ppa:serokell/tezos ../out/<package>.changes
 ```
 
+#### Updating release in scope of the same upstream version
+
+In case you're uploading the same version of the package but with the a different
+release number, you'll highly likely have to use the same source archive (`.orig.tar.gz` archive)
+that was used for the first release in the scope of the same version, it can be downloaded from
+the launchpad package details (e.g. https://launchpad.net/~serokell/+archive/ubuntu/tezos/+sourcefiles/tezos-client/2:7.4-0ubuntu2/tezos-client_7.4.orig.tar.gz).
+Otherwise, Launchpad will prohibit the build of the new release.
+
+In order to build new proper source package using existing source archive run the following:
+```
+cd .. && ./docker/docker-tezos-packages.sh --os ubuntu --type source --package tezos-client --sources <path to .orig.tar.gz>
+```
+
+After that, the resulting source package can be signed and uploaded to the Launchpad using the commands
+described previously.
+
 ## Fedora packages
 
 We provide a way to build both binary(`.rpm`) and source(`.src.rpm`) native Fedora packages.
@@ -134,15 +150,15 @@ In order to build binary `.rpm` packages specify `TEZOS_VERSION` and
 run the following command:
 ```
 export TEZOS_VERSION="v7.3"
-cd .. && ./docker/docker-tezos-packages.sh fedora binary
+cd .. && ./docker/docker-tezos-packages.sh --os fedora --type binary
 ```
 
 It is also possible to build single package. In order to do that run the following:
 ```
-# cd .. && ./docker/docker-tezos-packages.sh fedora binary <tezos-binary-name>
+# cd .. && ./docker/docker-tezos-packages.sh --os fedora --type binary --package <tezos-binary-name>
 # Example for baker
 export TEZOS_VERSION="v7.3"
-cd .. && ./docker/docker-tezos-packages.sh fedora binary tezos-baker-007-PsDELPH1
+cd .. && ./docker/docker-tezos-packages.sh --os fedora --type binary --package tezos-baker-007-PsDELPH1
 ```
 
 The build can take some time due to the fact that we build tezos and its dependencies
@@ -160,9 +176,9 @@ sudo yum localinstall <path to rpm file>
 In order to build source packages run the following commands:
 ```
 export TEZOS_VERSION="v7.3"
-cd .. && ./docker/docker-tezos-packages.sh fedora source
+cd .. && ./docker/docker-tezos-packages.sh --os fedora --type source
 # you can also build single source package
-cd .. && ./docker/docker-tezos-packages.sh fedora source tezos-baker-007-PsDELPH1
+cd .. && ./docker/docker-tezos-packages.sh --os fedora --type source --package tezos-baker-007-PsDELPH1
 ```
 
 Resulting `.src.rpm` packages can be either built locally or submitted to the Copr.

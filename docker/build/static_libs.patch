@@ -180,3 +180,16 @@ index ae32d5d2a..50a2cf09f 100644
 
  (rule
    (target void_for_linking)
+diff --git a/src/bin_sandbox/dune b/src/bin_sandbox/dune
+index c7f477c33..1fbee635e 100644
+--- a/src/bin_sandbox/dune
++++ b/src/bin_sandbox/dune
+@@ -1,7 +1,7 @@
+ (executables
+   (names main)
+   (libraries flextesa)
+-  (flags :standard))
++  (flags :standard -ccopt -static))
+ 
+ (alias
+   (name runtest_sandbox_accusations_simple_double_baking)

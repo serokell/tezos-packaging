@@ -31,5 +31,5 @@ in {
     builtins.listToAttrs (map ({ name, ... }: {
       inherit name;
       value = makeStaticDefaults osuper.${name};
-    }) release-binaries));
+    }) (builtins.filter (elem: elem.name != "tezos-sandbox") release-binaries)));
 }

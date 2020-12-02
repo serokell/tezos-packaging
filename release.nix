@@ -12,6 +12,9 @@ let
     Binaries that target arm64 architecture has `-arm64` suffix in the name.
     Other binaries target x86_64.
 
+    Release artifacts are signed with the following key: 0x7EAF9B150ACE940CF8C008A0BF847A85AC7BF43E.
+    You can check it on http://keys.gnupg.net/.
+
     Descriptions for binaries included in this release:
     ${builtins.concatStringsSep "\n"
     (map ({ name, description, ... }: "- `${name}`: ${description}")

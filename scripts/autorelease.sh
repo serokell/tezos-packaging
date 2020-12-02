@@ -25,6 +25,12 @@ mkdir -p "$assets_dir"
 # Move archive with binaries and tezos license to assets
 shopt -s extglob
 cp -L "$TEMPDIR"/"$project"/!(*.md) "$assets_dir"
+# Iterate over assets, calculate sha256sum and sign them in order
+# to include this additional info to the release assets as well
+for asset in $assets_dir/*; do
+    sha256sum "$asset" | sed 's/ .*/ /' > "$asset.sha256"
+    gpg --armor --detach-sign "$asset"
+done
 
 # Delete release if it exists
 gh release delete auto-release --yes || true

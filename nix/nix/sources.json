@@ -17,10 +17,10 @@
         "homepage": null,
         "owner": "balsoft",
         "repo": "opam-nix",
-        "rev": "a7b8e16ab28c840eab2c3be2f5069524dc87fd58",
-        "sha256": "0ydbwbirz1ag1lprl2mxz3cvzqxn945yfnakhzm19q2qm78zlb37",
+        "rev": "3d619a4c9f759e8ee13f428faac0d13938f087ee",
+        "sha256": "1gp1skm7nkvfg0sdyc2jal44rbfsja8hcl393rs0zhm41b7j61vm",
         "type": "tarball",
-        "url": "https://github.com/balsoft/opam-nix/archive/a7b8e16ab28c840eab2c3be2f5069524dc87fd58.tar.gz",
+        "url": "https://github.com/balsoft/opam-nix/archive/3d619a4c9f759e8ee13f428faac0d13938f087ee.tar.gz",
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
     },
     "opam-repository": {

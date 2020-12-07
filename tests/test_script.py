@@ -37,7 +37,11 @@ def run_node(network, use_tls):
         + network
         + " &"
     )
-    tls_endpoint = " --endpoint https://localhost:8732/ " if use_tls else " "
+    tls_endpoint = (
+        " --endpoint https://127.0.0.1:8732/ "
+        if use_tls
+        else " --endpoint http://127.0.0.1:8732/ "
+    )
     machine.wait_until_succeeds(
         tezos_client + tls_endpoint + "rpc get chains/main/blocks/head/"
     )
@@ -45,7 +49,11 @@ def run_node(network, use_tls):
 
 def run_node_with_daemons(network, use_tls):
     run_node(network, use_tls)
-    tls_endpoint = " --endpoint https://localhost:8732/ " if use_tls else " "
+    tls_endpoint = (
+        " --endpoint https://127.0.0.1:8732/ "
+        if use_tls
+        else " --endpoint http://127.0.0.1:8732/ "
+    )
     machine.succeed(
         f"{tezos_baker} -d client-dir"
         + tls_endpoint
@@ -63,7 +71,11 @@ def kill_node_with_daemons():
 
 
 def test_node_with_daemons_scenario(network, use_tls=False):
-    tls_endpoint = " --endpoint https://localhost:8732/ " if use_tls else " "
+    tls_endpoint = (
+        " --endpoint https://127.0.0.1:8732/ "
+        if use_tls
+        else " --endpoint http://127.0.0.1:8732/ "
+    )
     run_node_with_daemons(network, use_tls)
     machine.succeed(
         tezos_admin_client + tls_endpoint + "rpc get chains/main/blocks/head/"

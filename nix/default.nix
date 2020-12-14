@@ -7,12 +7,11 @@ let
   pkgs = import ./build/pkgs.nix { };
   source = (import ./nix/sources.nix).tezos;
   protocols = import ./protocols.nix;
-  bin = pkgs.callPackage ./build/bin.nix { };
   release-binaries = builtins.filter (elem: elem.name != "tezos-sandbox")
     (import ./build/release-binaries.nix);
   binaries = builtins.listToAttrs (map (meta: {
     inherit (meta) name;
-    value = bin pkgs.pkgsMusl.ocamlPackages.${meta.name} // { inherit meta; };
+    value = pkgs.ocamlPackages.${meta.name} // { inherit meta; };
   }) release-binaries);
 
   # Bundle the contents of a package set together, leaving the original attrs intact

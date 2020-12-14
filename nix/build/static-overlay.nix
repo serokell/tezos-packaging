@@ -32,4 +32,5 @@ in {
       inherit name;
       value = makeStaticDefaults osuper.${name};
     }) (builtins.filter (elem: elem.name != "tezos-sandbox") release-binaries)));
+  libffi = dds super.libffi;
 }

@@ -5,7 +5,7 @@ FROM alpine:3.11
 RUN apk update
 RUN apk --no-cache --virtual add rsync git m4 build-base patch unzip \
   bubblewrap wget pkgconfig gmp-dev libev-dev hidapi-dev eudev-dev perl opam libusb-dev bash \
-  autoconf automake libtool linux-headers
+  autoconf automake libtool linux-headers cargo libffi-dev
 COPY ./build/build-libusb-and-hidapi.sh /build-libusb-and-hidapi.sh
 RUN /build-libusb-and-hidapi.sh
 COPY ./build/static_libs.patch /static.patch

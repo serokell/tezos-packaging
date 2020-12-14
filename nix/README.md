@@ -6,7 +6,7 @@
 
 # Building and packaging tezos using nix
 
-## Statically built binaries
+## Dynamically built binaries
 
 In order to build all binaries run:
 ```bash

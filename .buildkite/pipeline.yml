@@ -17,14 +17,10 @@ steps:
  - label: build via nix
    commands:
    - nix-build ./nix -A binaries -o binaries
-   artifact_paths:
-     - ./binaries/bin/*
    branches: "!master"
  - label: test nix-built binaries
    commands:
-   - buildkite-agent artifact download "binaries/bin/*" . --step "build via nix"
-   - chmod +x ./binaries/bin/*
-   - nix-build tests/tezos-binaries.nix --no-out-link --arg path-to-binaries ./binaries/bin
+   - nix-build tests/tezos-nix-binaries.nix --no-out-link
    branches: "!master"
 
  - label: build via docker

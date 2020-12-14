@@ -4,9 +4,16 @@
 { path-to-binaries ? null } @ args:
 let
   nixpkgs = (import ../nix/nix/sources.nix).nixpkgs;
-in import "${nixpkgs}/nixos/tests/make-test-python.nix" ({ pkgs, ... }:
+  pkgs = import ../nix/build/pkgs.nix {};
+  zcash = import ../nix/build/zcash.nix {};
+in import "${nixpkgs}/nixos/tests/make-test-python.nix" ({ ... }:
 {
-  nodes.machine = { ... }: { virtualisation.memorySize = 1024; };
+  nodes.machine = { ... }: {
+    virtualisation.memorySize = 1024;
+    virtualisation.diskSize = 1024;
+    environment.sessionVariables.XDG_DATA_DIRS =
+      [ "${zcash}" ];
+  };
 
   testScript = ''
     path_to_binaries = "${path-to-binaries}"

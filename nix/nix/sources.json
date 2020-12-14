@@ -17,10 +17,10 @@
         "homepage": null,
         "owner": "balsoft",
         "repo": "opam-nix",
-        "rev": "a7b8e16ab28c840eab2c3be2f5069524dc87fd58",
-        "sha256": "0ydbwbirz1ag1lprl2mxz3cvzqxn945yfnakhzm19q2qm78zlb37",
+        "rev": "3d619a4c9f759e8ee13f428faac0d13938f087ee",
+        "sha256": "1gp1skm7nkvfg0sdyc2jal44rbfsja8hcl393rs0zhm41b7j61vm",
         "type": "tarball",
-        "url": "https://github.com/balsoft/opam-nix/archive/a7b8e16ab28c840eab2c3be2f5069524dc87fd58.tar.gz",
+        "url": "https://github.com/balsoft/opam-nix/archive/3d619a4c9f759e8ee13f428faac0d13938f087ee.tar.gz",
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
     },
     "opam-repository": {
@@ -29,16 +29,16 @@
         "homepage": "https://opam.ocaml.org",
         "owner": "ocaml",
         "repo": "opam-repository",
-        "rev": "d67e70b40203a6a1c77ccb2edbe136c1509a73a3",
-        "sha256": "1yphw9xcss284p51qnml5jvfs4mhjcjgdka3wk25q0437zdzqj4n",
+        "rev": "ca8560e5f86de88fe8d1a1050a1e125b55b587e7",
+        "sha256": "18xxs1gadsc4a361mjv7pgjb43d2dn9z0ahk1c4pjpj6lajhbxw9",
         "type": "tarball",
-        "url": "https://github.com/ocaml/opam-repository/archive/d67e70b40203a6a1c77ccb2edbe136c1509a73a3.tar.gz",
+        "url": "https://github.com/ocaml/opam-repository/archive/ca8560e5f86de88fe8d1a1050a1e125b55b587e7.tar.gz",
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
     },
     "tezos": {
-        "ref": "refs/tags/v7.5",
+        "ref": "refs/tags/v8.0-rc2",
         "repo": "https://gitlab.com/tezos/tezos",
-        "rev": "ce36545683607b68d59e03ec6122a50a09909462",
+        "rev": "c4907703d66e5f75d2da525a6b66a893f80d8093",
         "type": "git"
     }
 }

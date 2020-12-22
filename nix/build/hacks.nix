@@ -74,7 +74,7 @@ rec {
       '' + o.buildPhase;
   });
 
-  sapling = osuper.sapling.overrideAttrs (o:
+  tezos-sapling = osuper.tezos-sapling.overrideAttrs (o:
     let extern-C-patch = ./librustzcash-extern-C.patch; in
     rec {
       buildInputs = o.buildInputs ++ [ librustzcash rustc-bls12-381 self.gcc self.git ];

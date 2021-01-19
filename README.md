@@ -80,6 +80,28 @@ chmod +x tezos-client
 
 Run `./tezos-client` or add it to your PATH to be able to run it anywhere.
 
+## Brew tap for macOS
+
+If you're using macOS and `brew`, you can install Tezos binaries from the tap
+provided by this repository. In order to do that run the following:
+```
+brew tap serokell/tezos-packaging https://github.com/serokell/tezos-packaging.git
+brew install tezos-client
+```
+
+### Building brew bottles
+
+It's possible to provide prebuilt macOS packages for brew called bottles. They're supposed
+to be built before making the new release and included to it. In order to build all bottles run
+`build-bottles.sh` script:
+```
+./scripts/build-bottles.sh
+```
+
+Note that this might take a while, because builds don't share common parts and for each binary
+dependencies are compiled from scratch. Once the bottles are built, the corresponding sections in the
+formulas should be updated. Also, bottles should be uploaded to the release artifacts.
+
 ## Systemd units for `tezos-node` and daemons
 
 ### Systemd units on Ubuntu or Fedora

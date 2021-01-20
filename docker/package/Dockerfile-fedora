@@ -4,8 +4,8 @@
 
 FROM fedora:32
 RUN dnf update -y
-RUN dnf install -y libev-devel gmp-devel hidapi-devel m4 perl pkg-config \
-  rpmdevtools python3 wget opam rsync
+RUN dnf install -y libev-devel gmp-devel hidapi-devel libffi-devel m4 perl pkg-config \
+  rpmdevtools python3 wget opam rsync which cargo
 ENV USER dockerbuilder
 RUN useradd dockerbuilder && mkdir /tezos-packaging
 ENV HOME /tezos-packaging

@@ -41,10 +41,10 @@ date = subprocess.check_output(["date", "-R"]).decode().strip()
 meta = json.load(open(f"{os.path.dirname(__file__)}/../../meta.json", "r"))
 
 if is_ubuntu:
-    run_deps = ["libev-dev", "libgmp-dev", "libhidapi-dev"]
+    run_deps = ["libev-dev", "libgmp-dev", "libhidapi-dev", "libffi-dev"]
 else:
-    run_deps = ["libev-devel", "gmp-devel", "hidapi-devel"]
-build_deps = ["make", "m4", "perl", "pkg-config", "wget", "unzip", "rsync", "gcc"]
+    run_deps = ["libev-devel", "gmp-devel", "hidapi-devel", "libffi-devel"]
+build_deps = ["make", "m4", "perl", "pkg-config", "wget", "unzip", "rsync", "gcc", "cargo"]
 common_deps = run_deps + build_deps
 
 active_protocols = json.load(open(f"{os.path.dirname(__file__)}/../../protocols.json", "r"))["active"]

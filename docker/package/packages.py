@@ -5,7 +5,7 @@ import os, shutil, sys, subprocess, json
 
 from .model import Service, ServiceFile, SystemdUnit, Unit, Package
 
-networks = ["mainnet", "delphinet"]
+networks = ["mainnet", "delphinet", "edonet"]
 
 signer_units = [
     SystemdUnit(
@@ -98,7 +98,8 @@ daemon_decs = {
 
 default_testnets = {
     "006-PsCARTHA": "carthagenet",
-    "007-PsDELPH1": "delphinet"
+    "007-PsDELPH1": "delphinet",
+    "008-PtEdoTez": "edonet"
 }
 
 for proto in active_protocols:

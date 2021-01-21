@@ -9,9 +9,10 @@ class TezosBaker007Psdelph1 < Tezos
   desc "Daemon for baking"
 
   bottle do
-    root_url "https://github.com/serokell/tezos-packaging/releases/download/v8.1-1/"
+    root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosBaker007Psdelph1.version}/"
     cellar :any
     sha256 "5987ec0292c3324b2d194da55175f20490f9a2c41b23df9a9cd8355ec37dde1d" => :mojave
+    sha256 "24ef8ab58d747ccaf93c53003b45d06cceffc4b610e86fb25f1c89cc7f345e61" => :catalina
   end
 
   def install

@@ -9,9 +9,10 @@ class TezosAdminClient < Tezos
   desc "Administration tool for the node"
 
   bottle do
-    root_url "https://github.com/serokell/tezos-packaging/releases/download/v8.1-1/"
+    root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosAdminClient.version}/"
     cellar :any
     sha256 "85cc3175582cf85a68fce480f5147f7717d1b3d4a7c2afe0e263be0c4055b63f" => :mojave
+    sha256 "85ab3e2eefbd8de39a6daf83aa82e7b49e28b5d2908ba5dec53a30444cb597a0" => :catalina
   end
 
   def install

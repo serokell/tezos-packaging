@@ -26,6 +26,17 @@ Other binaries can be used with all protocols if they're new enough. E.g.
 007 protocol is supported only from `v7.4`. `tezos-node` can be set up to run
 different networks, you can read more about this in [this article](https://tezos.gitlab.io/user/multinetwork.html).
 
+## Table of contents
+
+* [Static linux binaries](#static-linux)
+* [Native Ubuntu packages](#ubuntu)
+* [Native Fedora packages](#fedora)
+* [Other linux](#linux)
+* [Brew tap for macOS](#macos)
+* [Systemd services for Tezos binaries](#systemd)
+* [Building instructions](#building)
+
+<a name="static-linux"></a>
 ## Obtain binaries from github release
 
 Recomended way to get these binaries is to download them from assets from github release.
@@ -37,6 +48,7 @@ with which protocol binary is compatible with. If this is not the
 case, then consult release notes to check which protocols are
 supported by that binary.
 
+<a name="ubuntu"></a>
 ## Ubuntu Launchpad PPA with `tezos-*` binaries
 
 If you are using Ubuntu you can use PPA in order to install `tezos-*` executables.
@@ -50,6 +62,7 @@ sudo apt-get install tezos-baker-007-psdelph1
 ```
 Once you install such packages the commands `tezos-*` will be available.
 
+<a name="fedora"></a>
 ## Fedora Copr repository with `tezos-*` binaries
 
 If you are using Fedora you can use Copr in order to install `tezos-*`
@@ -67,6 +80,7 @@ sudo yum install tezos-baker-007-PsDELPH1
 ```
 Once you install such packages the commands `tezos-*` will be available.
 
+<a name="linux"></a>
 ## Other Linux distros usage
 
 Download binaries from release assets.
@@ -80,6 +94,7 @@ chmod +x tezos-client
 
 Run `./tezos-client` or add it to your PATH to be able to run it anywhere.
 
+<a name="macos"></a>
 ## Brew tap for macOS
 
 If you're using macOS and `brew`, you can install Tezos binaries from the tap
@@ -102,6 +117,7 @@ Note that this might take a while, because builds don't share common parts and f
 dependencies are compiled from scratch. Once the bottles are built, the corresponding sections in the
 formulas should be updated. Also, bottles should be uploaded to the release artifacts.
 
+<a name="systemd"></a>
 ## Systemd units for `tezos-node` and daemons
 
 ### Systemd units on Ubuntu or Fedora
@@ -181,6 +197,7 @@ One should provide desired node address, data directory for daemon files and nod
 * Over HTTPS (`tezos-signer-https.service`)
 Each signer service has dedicated config file in e.g. `/etc/default/tezos-signer-{mode}`.
 
+<a name="building"></a>
 ## Build Instructions
 
 This repository provides two distinct ways for building and packaging tezos binaries:

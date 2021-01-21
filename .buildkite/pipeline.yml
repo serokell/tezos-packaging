@@ -86,8 +86,9 @@ steps:
    # in order to ensure package generation sanity
    - ./docker/docker-tezos-packages.sh --os ubuntu --type binary --package tezos-baker-007-PsDELPH1
    - rm -rf out
-   branches: "!master"
-   timeout_in_minutes: 30
+   # It takes much time to build binary package, so we do it only on master
+   branches: "master"
+   timeout_in_minutes: 90
    agents:
      queue: "docker"
  - label: test rpm source packages via docker
@@ -107,8 +108,9 @@ steps:
    # in order to ensure package generation sanity
    - ./docker/docker-tezos-packages.sh --os fedora --type binary --package tezos-baker-007-PsDELPH1
    - rm -rf out
-   branches: "!master"
-   timeout_in_minutes: 30
+   # It takes much time to build binary package, so we do it only on master
+   branches: "master"
+   timeout_in_minutes: 90
    agents:
      queue: "docker"
 

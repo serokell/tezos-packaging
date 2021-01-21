@@ -52,6 +52,12 @@ active_protocols = json.load(open(f"{os.path.dirname(__file__)}/../../protocols.
 version = os.environ["TEZOS_VERSION"][1:]
 release = f"{meta['release']}"
 
+ubuntu_versions = [
+    "bionic",  # 18.04
+    "focal",  # 20.04
+    "groovy"  # 20.10
+]
+
 ubuntu_epoch = 2
 fedora_epoch = 1
 
@@ -205,7 +211,7 @@ install: {pkg.name}
         f.write(makefile_contents)
 
 def gen_changelog(pkg: Package, ubuntu_version, maintainer, date, out):
-    changelog_contents = f'''{pkg.name.lower()} ({ubuntu_epoch}:{version}-0ubuntu{release}) {ubuntu_version}; urgency=medium
+    changelog_contents = f'''{pkg.name.lower()} ({ubuntu_epoch}:{version}-0ubuntu{release}~{ubuntu_version}) {ubuntu_version}; urgency=medium
 
   * Publish {version}-{release} version of {pkg.name}
 
@@ -257,31 +263,33 @@ for package in packages:
             else:
                 shutil.copy(f"{os.path.dirname(__file__)}/../{source_archive}", f"{dir}.tar.gz")
                 subprocess.run(["tar", "-xzf", f"{dir}.tar.gz"], check=True)
-            os.chdir(dir)
-            subprocess.run(["dh_make", "-syf" f"../{dir}.tar.gz"], check=True)
-            for systemd_unit in package.systemd_units:
-                if systemd_unit.service_file.service.environment_file is not None:
-                    systemd_unit.service_file.service.environment_file = systemd_unit.service_file.service.environment_file.lower()
-                if systemd_unit.suffix is None:
-                    if systemd_unit.config_file is not None:
-                        shutil.copy(f"{os.path.dirname(__file__)}/defaults/{systemd_unit.config_file}",
-                                    f"debian/{package.name.lower()}.default")
-                    print_service_file(systemd_unit.service_file, f"debian/{package.name.lower()}.service")
-                else:
-                    print_service_file(systemd_unit.service_file, f"debian/{package.name.lower()}-{systemd_unit.suffix}.service")
-                    if systemd_unit.config_file is not None:
-                        shutil.copy(f"{os.path.dirname(__file__)}/defaults/{systemd_unit.config_file}",
-                                    f"debian/{package.name.lower()}-{systemd_unit.suffix}.default")
-                shutil.copy(f"{os.path.dirname(__file__)}/scripts/{systemd_unit.startup_script}", f"debian/{systemd_unit.startup_script}")
-                gen_install(package, "debian/install")
-            gen_control_file(package, "debian/control")
-            subprocess.run(["wget", "-q", "-O", "debian/copyright", f"https://gitlab.com/tezos/tezos/-/raw/v{version}/LICENSE"], check=True)
-            subprocess.run("rm debian/*.ex debian/*.EX debian/README*", shell=True, check=True)
-            gen_changelog(package, "bionic", meta["maintainer"], date, "debian/changelog")
-            gen_rules(package, "debian/rules")
-            subprocess.run(["dpkg-buildpackage", "-S" if is_source else "-b", "-us", "-uc"],
-                           check=True)
-            os.chdir("..")
+            for ubuntu_version in ubuntu_versions:
+                os.chdir(dir)
+                subprocess.run(["rm", "-r", "debian"])
+                subprocess.run(["dh_make", "-syf" f"../{dir}.tar.gz"], check=True)
+                for systemd_unit in package.systemd_units:
+                    if systemd_unit.service_file.service.environment_file is not None:
+                        systemd_unit.service_file.service.environment_file = systemd_unit.service_file.service.environment_file.lower()
+                    if systemd_unit.suffix is None:
+                        if systemd_unit.config_file is not None:
+                            shutil.copy(f"{os.path.dirname(__file__)}/defaults/{systemd_unit.config_file}",
+                                        f"debian/{package.name.lower()}.default")
+                        print_service_file(systemd_unit.service_file, f"debian/{package.name.lower()}.service")
+                    else:
+                        print_service_file(systemd_unit.service_file, f"debian/{package.name.lower()}-{systemd_unit.suffix}.service")
+                        if systemd_unit.config_file is not None:
+                            shutil.copy(f"{os.path.dirname(__file__)}/defaults/{systemd_unit.config_file}",
+                                        f"debian/{package.name.lower()}-{systemd_unit.suffix}.default")
+                    shutil.copy(f"{os.path.dirname(__file__)}/scripts/{systemd_unit.startup_script}", f"debian/{systemd_unit.startup_script}")
+                    gen_install(package, "debian/install")
+                gen_control_file(package, "debian/control")
+                subprocess.run(["wget", "-q", "-O", "debian/copyright", f"https://gitlab.com/tezos/tezos/-/raw/v{version}/LICENSE"], check=True)
+                subprocess.run("rm debian/*.ex debian/*.EX debian/README*", shell=True, check=True)
+                gen_changelog(package, ubuntu_version, meta["maintainer"], date, "debian/changelog")
+                gen_rules(package, "debian/rules")
+                subprocess.run(["dpkg-buildpackage", "-S" if is_source else "-b", "-us", "-uc"],
+                            check=True)
+                os.chdir("..")
         else:
             if source_archive is not None:
                 raise Exception("Sources archive provision isn't supported for Fedora packages")

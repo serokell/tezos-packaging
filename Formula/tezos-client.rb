@@ -9,9 +9,9 @@ class TezosClient < Tezos
   desc "CLI client for interacting with tezos blockchain"
 
   bottle do
-    root_url "https://github.com/serokell/tezos-packaging/releases/download/auto-release"
+    root_url "https://github.com/serokell/tezos-packaging/releases/download/v8.1-1/"
     cellar :any
-    sha256 "bd2914e75b77de28b1362832023deda078025a68a046011e26c5efb05e9a4497" => :mojave
+    sha256 "b8e78e557bda6fb821201c99d88bf04831ec49398c087dfd26586fe047bcfa11" => :mojave
   end
 
   def install

@@ -8,6 +8,12 @@ class TezosAccuser008Ptedotez < Tezos
   init
   desc "Daemon for accusing"
 
+  bottle do
+    root_url "https://github.com/serokell/tezos-packaging/releases/download/v8.1-1/"
+    cellar :any
+    sha256 "edb15ab67300edf8f79fe1d4b17f9971cf42441f0a291a99407ee7ade328e643" => :mojave
+  end
+
   def install
     make_deps
     install_template "src/proto_008_PtEdoTez/bin_accuser/main_accuser_008_PtEdoTez.exe",

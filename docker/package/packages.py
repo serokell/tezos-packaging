@@ -71,7 +71,7 @@ packages = [
 
 node_units = []
 for network in networks:
-    env = [f"DATA_DIR=/var/lib/tezos/node-{network}", f"NETWORK={network}", "NODE_RPC_PORT=8732",
+    env = [f"DATA_DIR=/var/lib/tezos/node-{network}", f"NETWORK={network}", "NODE_RPC_ADDR=127.0.0.1:8732",
            "CERT_PATH=", "KEY_PATH="]
     service_file = ServiceFile(Unit(after=["network.target"], requires=[],
                                     description=f"Tezos node {network}"),
@@ -103,9 +103,7 @@ default_testnets = {
 }
 
 for proto in active_protocols:
-    service_file_baker = ServiceFile(Unit(after=["network.target",
-                                                 f"tezos-node-{default_testnets[proto]}.service"],
-                                          requires=[f"tezos-node-{default_testnets[proto]}.service"],
+    service_file_baker = ServiceFile(Unit(after=["network.target"],
                                           description="Tezos baker"),
                                      Service(environment_file=f"/etc/default/tezos-baker-{proto}",
                                              environment=[f"PROTOCOL={proto}"],
@@ -136,9 +134,9 @@ for proto in active_protocols:
                             proto,
                             optional_opam_deps=["tls", "ledgerwallet-tezos"]))
     packages.append(Package(f"tezos-endorser-{proto}", "Daemon for endorsing",
-                            [SystemdUnit(service_file=service_file_accuser,
+                            [SystemdUnit(service_file=service_file_endorser,
                                          startup_script="tezos-endorser-start",
-                                         config_file="tezos-baker.conf")],
+                                         config_file="tezos-endorser.conf")],
                             proto,
                             optional_opam_deps=["tls", "ledgerwallet-tezos"]))
 

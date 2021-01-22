@@ -13,23 +13,16 @@ if [ ! -f "$DATA_DIR/config.json" ]; then
     echo "Configuring the node..."
     "$node" config init \
             --data-dir "$DATA_DIR" \
-            --rpc-addr ":$NODE_RPC_PORT" \
+            --rpc-addr "$NODE_RPC_ADDR" \
             --network "$NETWORK"
             "$@"
 else
     echo "Updating the node configuration..."
     "$node" config update \
             --data-dir "$DATA_DIR" \
-            --rpc-addr ":$NODE_RPC_PORT" \
+            --rpc-addr "$NODE_RPC_ADDR" \
             --network "$NETWORK"
             "$@"
-fi
-# Generate a new identity if not present
-
-if [ ! -f "$DATA_DIR/identity.json" ]; then
-    echo "Generating a new node identity..."
-    "$node" identity generate "${IDENTITY_POW:-26}". \
-            --data-dir "$DATA_DIR"
 fi
 
 # Launching the node

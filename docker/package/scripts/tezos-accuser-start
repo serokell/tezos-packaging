@@ -16,14 +16,14 @@ mkdir -p "$accuser_dir"
 
 if [ ! -f "$accuser_config" ]; then
     "$accuser" --base-dir "$accuser_dir" \
-               --addr "$NODE_HOST" --port "$NODE_RPC_PORT" \
+               --endpoint "$NODE_RPC_ENDPOINT" \
                config init --output "$accuser_config" >/dev/null 2>&1
 else
     "$accuser" --base-dir "$accuser_dir" \
-               --addr "$NODE_HOST" --port "$NODE_RPC_PORT" \
+               --endpoint "$NODE_RPC_ENDPOINT" \
                config update >/dev/null 2>&1
 fi
 
 exec "$accuser" --base-dir "$accuser_dir" \
-     --addr "$NODE_HOST" --port "$NODE_RPC_PORT" \
+     --endpoint "$NODE_RPC_ENDPOINT" \
      run "$@"

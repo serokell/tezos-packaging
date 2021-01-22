@@ -49,6 +49,16 @@ steps:
    agents:
      queue: "arm64-build"
 
+ - label: check brew formulas
+   commands:
+     # Check all formulas except 'tezos.rb' because it's a base class for all other formulas
+     - find ./Formula -type f ! -name "tezos.rb" -name "*.rb" -exec brew info {} +
+     # All formulas share the same source URL inherited by the Tezos class, so it's fine
+     # to fetch sources for only one formula
+     - brew fetch -s ./Formula/tezos-client.rb
+   agents:
+     queue: "x86_64-darwin"
+
  # binaries built by docker are tested on the another machine,
  # so we should wait for docker build to finish
  - wait

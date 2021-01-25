@@ -97,7 +97,6 @@ daemon_decs = {
 }
 
 default_testnets = {
-    "006-PsCARTHA": "carthagenet",
     "007-PsDELPH1": "delphinet",
     "008-PtEdoTez": "edonet"
 }

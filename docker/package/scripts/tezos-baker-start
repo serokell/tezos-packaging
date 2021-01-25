@@ -16,17 +16,17 @@ mkdir -p "$baker_dir"
 
 if [ ! -f "$baker_config" ]; then
     "$baker" --base-dir "$baker_dir" \
-             --port "$NODE_RPC_PORT" \
+             --endpoint "$NODE_RPC_ENDPOINT" \
              config init --output "$baker_config" >/dev/null 2>&1
 else
     "$baker" --base-dir "$baker_dir" \
-             --port "$NODE_RPC_PORT" \
+             --endpoint "$NODE_RPC_ENDPOINT" \
              config update >/dev/null 2>&1
 fi
 
 launch_baker() {
     exec "$baker" \
-         --base-dir "$baker_dir" --port "$NODE_RPC_PORT" \
+         --base-dir "$baker_dir" --endpoint "$NODE_RPC_ENDPOINT" \
          run with local node "$NODE_DATA_DIR" "$@"
 }
 

@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: LicenseRef-MIT-TQ
 import os, shutil, sys, subprocess, json
 
-from .model import Service, ServiceFile, SystemdUnit, Unit, Package
+from .model import Service, ServiceFile, SystemdUnit, Unit, OpamBasedPackage
 
 networks = ["mainnet", "delphinet", "edonet"]
 
@@ -55,18 +55,18 @@ signer_units = [
 ]
 
 packages = [
-    Package("tezos-client",
-            "CLI client for interacting with tezos blockchain",
-            optional_opam_deps=["tls", "ledgerwallet-tezos"]),
-    Package("tezos-admin-client",
-            "Administration tool for the node",
-            optional_opam_deps=["tls"]),
-    Package("tezos-signer",
-            "A client to remotely sign operations or blocks",
-            optional_opam_deps=["tls", "ledgerwallet-tezos"],
-            systemd_units=signer_units),
-    Package("tezos-codec",
-            "A client to decode and encode JSON")
+    OpamBasedPackage("tezos-client",
+                     "CLI client for interacting with tezos blockchain",
+                     optional_opam_deps=["tls", "ledgerwallet-tezos"]),
+    OpamBasedPackage("tezos-admin-client",
+                     "Administration tool for the node",
+                     optional_opam_deps=["tls"]),
+    OpamBasedPackage("tezos-signer",
+                     "A client to remotely sign operations or blocks",
+                     optional_opam_deps=["tls", "ledgerwallet-tezos"],
+                     systemd_units=signer_units),
+    OpamBasedPackage("tezos-codec",
+                     "A client to decode and encode JSON")
 ]
 
 
@@ -90,17 +90,16 @@ node_units.append(mk_node_unit(suffix="custom", env=["DATA_DIR=/var/lib/tezos/no
                                                      "CUSTOM_NODE_CONFIG="] + common_node_env,
                                desc="Tezos node with custom config"))
 
-packages.append(Package("tezos-node",
-                        "Entry point for initializing, configuring and running a Tezos node",
-                        node_units,
-                        optional_opam_deps=[
-                            "tezos-embedded-protocol-001-PtCJ7pwo",
-                            "tezos-embedded-protocol-002-PsYLVpVv",
-                            "tezos-embedded-protocol-003-PsddFKi3",
-                            "tezos-embedded-protocol-004-Pt24m4xi",
-                            "tezos-embedded-protocol-005-PsBABY5H",
-                            "tezos-embedded-protocol-005-PsBabyM1",
-                            "tezos-embedded-protocol-006-PsCARTHA"]))
+packages.append(OpamBasedPackage("tezos-node",
+                                 node_units,
+                                 optional_opam_deps=[
+                                     "tezos-embedded-protocol-001-PtCJ7pwo",
+                                     "tezos-embedded-protocol-002-PsYLVpVv",
+                                     "tezos-embedded-protocol-003-PsddFKi3",
+                                     "tezos-embedded-protocol-004-Pt24m4xi",
+                                     "tezos-embedded-protocol-005-PsBABY5H",
+                                     "tezos-embedded-protocol-005-PsBabyM1",
+                                     "tezos-embedded-protocol-006-PsCARTHA"]))
 
 active_protocols = json.load(open(f"{os.path.dirname( __file__)}/../../protocols.json", "r"))["active"]
 
@@ -136,22 +135,22 @@ for proto in active_protocols:
                                                 environment=[f"PROTOCOL={proto}"],
                                                 exec_start="/usr/bin/tezos-endorser-start",
                                                 state_directory="tezos", user="tezos"))
-    packages.append(Package(f"tezos-baker-{proto}", "Daemon for baking",
-                            [SystemdUnit(service_file=service_file_baker,
-                                         startup_script="tezos-baker-start",
-                                         config_file="tezos-baker.conf")],
-                            proto,
-                            optional_opam_deps=["tls", "ledgerwallet-tezos"]))
-    packages.append(Package(f"tezos-accuser-{proto}", "Daemon for accusing",
-                            [SystemdUnit(service_file=service_file_accuser,
-                                         startup_script="tezos-accuser-start",
-                                         config_file="tezos-accuser.conf")],
-                            proto,
-                            optional_opam_deps=["tls", "ledgerwallet-tezos"]))
-    packages.append(Package(f"tezos-endorser-{proto}", "Daemon for endorsing",
-                            [SystemdUnit(service_file=service_file_endorser,
-                                         startup_script="tezos-endorser-start",
-                                         config_file="tezos-endorser.conf")],
-                            proto,
-                            optional_opam_deps=["tls", "ledgerwallet-tezos"]))
+    packages.append(OpamBasedPackage(f"tezos-baker-{proto}", "Daemon for baking",
+                                     [SystemdUnit(service_file=service_file_baker,
+                                                  startup_script="tezos-baker-start",
+                                                  config_file="tezos-baker.conf")],
+                                     proto,
+                                     optional_opam_deps=["tls", "ledgerwallet-tezos"]))
+    packages.append(OpamBasedPackage(f"tezos-accuser-{proto}", "Daemon for accusing",
+                                     [SystemdUnit(service_file=service_file_accuser,
+                                                  startup_script="tezos-accuser-start",
+                                                  config_file="tezos-accuser.conf")],
+                                     proto,
+                                     optional_opam_deps=["tls", "ledgerwallet-tezos"]))
+    packages.append(OpamBasedPackage(f"tezos-endorser-{proto}", "Daemon for endorsing",
+                                     [SystemdUnit(service_file=service_file_endorser,
+                                                  startup_script="tezos-endorser-start",
+                                                  config_file="tezos-endorser.conf")],
+                                     proto,
+                                     optional_opam_deps=["tls", "ledgerwallet-tezos"]))
 

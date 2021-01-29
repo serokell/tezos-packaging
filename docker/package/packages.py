@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: LicenseRef-MIT-TQ
 import os, shutil, sys, subprocess, json
 
-from .model import Service, ServiceFile, SystemdUnit, Unit, Package
+from .model import Service, ServiceFile, SystemdUnit, Unit, OpamBasedPackage
 
 networks = ["mainnet", "delphinet", "edonet"]
 
@@ -55,18 +55,18 @@ signer_units = [
 ]
 
 packages = [
-    Package("tezos-client",
-            "CLI client for interacting with tezos blockchain",
-            optional_opam_deps=["tls", "ledgerwallet-tezos"]),
-    Package("tezos-admin-client",
-            "Administration tool for the node",
-            optional_opam_deps=["tls"]),
-    Package("tezos-signer",
-            "A client to remotely sign operations or blocks",
-            optional_opam_deps=["tls", "ledgerwallet-tezos"],
-            systemd_units=signer_units),
-    Package("tezos-codec",
-            "A client to decode and encode JSON")
+    OpamBasedPackage("tezos-client",
+                     "CLI client for interacting with tezos blockchain",
+                     optional_opam_deps=["tls", "ledgerwallet-tezos"]),
+    OpamBasedPackage("tezos-admin-client",
+                     "Administration tool for the node",
+                     optional_opam_deps=["tls"]),
+    OpamBasedPackage("tezos-signer",
+                     "A client to remotely sign operations or blocks",
+                     optional_opam_deps=["tls", "ledgerwallet-tezos"],
+                     systemd_units=signer_units),
+    OpamBasedPackage("tezos-codec",
+                     "A client to decode and encode JSON")
 ]
 
 node_units = []
@@ -82,7 +82,7 @@ for network in networks:
     node_units.append(SystemdUnit(suffix=network,
                                   service_file=service_file,
                                   startup_script="tezos-node-start"))
-packages.append(Package("tezos-node",
+packages.append(OpamBasedPackage("tezos-node",
                         "Entry point for initializing, configuring and running a Tezos node",
                         node_units))
 
@@ -120,22 +120,22 @@ for proto in active_protocols:
                                                 environment=[f"PROTOCOL={proto}"],
                                                 exec_start="/usr/bin/tezos-endorser-start",
                                                 state_directory="tezos", user="tezos"))
-    packages.append(Package(f"tezos-baker-{proto}", "Daemon for baking",
-                            [SystemdUnit(service_file=service_file_baker,
-                                         startup_script="tezos-baker-start",
-                                         config_file="tezos-baker.conf")],
-                            proto,
-                            optional_opam_deps=["tls", "ledgerwallet-tezos"]))
-    packages.append(Package(f"tezos-accuser-{proto}", "Daemon for accusing",
-                            [SystemdUnit(service_file=service_file_accuser,
-                                         startup_script="tezos-accuser-start",
-                                         config_file="tezos-accuser.conf")],
-                            proto,
-                            optional_opam_deps=["tls", "ledgerwallet-tezos"]))
-    packages.append(Package(f"tezos-endorser-{proto}", "Daemon for endorsing",
-                            [SystemdUnit(service_file=service_file_endorser,
-                                         startup_script="tezos-endorser-start",
-                                         config_file="tezos-endorser.conf")],
-                            proto,
-                            optional_opam_deps=["tls", "ledgerwallet-tezos"]))
+    packages.append(OpamBasedPackage(f"tezos-baker-{proto}", "Daemon for baking",
+                                     [SystemdUnit(service_file=service_file_baker,
+                                                  startup_script="tezos-baker-start",
+                                                  config_file="tezos-baker.conf")],
+                                     proto,
+                                     optional_opam_deps=["tls", "ledgerwallet-tezos"]))
+    packages.append(OpamBasedPackage(f"tezos-accuser-{proto}", "Daemon for accusing",
+                                     [SystemdUnit(service_file=service_file_accuser,
+                                                  startup_script="tezos-accuser-start",
+                                                  config_file="tezos-accuser.conf")],
+                                     proto,
+                                     optional_opam_deps=["tls", "ledgerwallet-tezos"]))
+    packages.append(OpamBasedPackage(f"tezos-endorser-{proto}", "Daemon for endorsing",
+                                     [SystemdUnit(service_file=service_file_endorser,
+                                                  startup_script="tezos-endorser-start",
+                                                  config_file="tezos-endorser.conf")],
+                                     proto,
+                                     optional_opam_deps=["tls", "ledgerwallet-tezos"]))
 

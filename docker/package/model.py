@@ -185,35 +185,35 @@ useradd tezos -d /var/lib/tezos || true
             systemd_macros = ""
 
         file_contents = f'''
-    %define debug_package %{{nil}}
-    Name:    {self.name}
-    Version: {version}
-    Release: {release}
-    Epoch: {fedora_epoch}
-    Summary: {self.desc}
-    License: MIT
-    BuildArch: x86_64
-    Source0: {self.name}-{version}.tar.gz
-    Source1: https://gitlab.com/tezos/tezos/tree/v{version}/
-    BuildRequires: {build_requires} {systemd_deps}
-    Requires: {requires}
-    %description
-    {self.desc}
-    Maintainer: {meta['maintainer']}
-    %prep
-    %setup -q
-    %build
-    %install
-    make %{{name}}
-    mkdir -p %{{buildroot}}/%{{_bindir}}
-    install -m 0755 %{{name}} %{{buildroot}}/%{{_bindir}}
-    {systemd_install}
-    %files
-    %license LICENSE
-    %{{_bindir}}/%{{name}}
-    {systemd_files}
-    {systemd_macros}
-    '''
+%define debug_package %{{nil}}
+Name:    {self.name}
+Version: {version}
+Release: {release}
+Epoch: {fedora_epoch}
+Summary: {self.desc}
+License: MIT
+BuildArch: x86_64
+Source0: {self.name}-{version}.tar.gz
+Source1: https://gitlab.com/tezos/tezos/tree/v{version}/
+BuildRequires: {build_requires} {systemd_deps}
+Requires: {requires}
+%description
+{self.desc}
+Maintainer: {meta['maintainer']}
+%prep
+%setup -q
+%build
+%install
+make %{{name}}
+mkdir -p %{{buildroot}}/%{{_bindir}}
+install -m 0755 %{{name}} %{{buildroot}}/%{{_bindir}}
+{systemd_install}
+%files
+%license LICENSE
+%{{_bindir}}/%{{name}}
+{systemd_files}
+{systemd_macros}
+'''
         with open(out, 'w') as f:
             f.write(file_contents)
 
@@ -264,6 +264,102 @@ override_dh_systemd_start:
                                          startup_scripts))
         with open(out, 'w') as f:
             f.write(install_contents)
+
+
+class TezosSaplingParamsPackage(AbstractPackage):
+    def __init__(self):
+        self.name = "tezos-sapling-params"
+        self.desc = "Sapling params required in the runtime by the Tezos binaries"
+        self.systemd_units = []
+        self.targetProto = None
+
+    def fetch_sources(self, out_dir):
+        os.makedirs(out_dir)
+        subprocess.run(["wget", "-P", out_dir, f"https://gitlab.com/tezos/opam-repository/-/raw/v{version}/zcash-params/sapling-spend.params"])
+        subprocess.run(["wget", "-P", out_dir, f"https://gitlab.com/tezos/opam-repository/-/raw/v{version}/zcash-params/sapling-output.params"])
+
+    def gen_control_file(self, deps, out):
+        file_contents = f'''
+Source: {self.name}
+Section: utils
+Priority: optional
+Maintainer: {meta['maintainer']}
+Build-Depends: debhelper (>=9), dh-systemd (>= 1.5), autotools-dev, wget
+Standards-Version: 3.9.6
+Homepage: https://gitlab.com/tezos/tezos/
+
+Package: {self.name.lower()}
+Architecture: amd64
+Depends: ${{shlibs:Depends}}, ${{misc:Depends}}
+Description: {self.desc}
+'''
+        with open(out, 'w') as f:
+            f.write(file_contents)
+
+    def gen_spec_file(self, build_deps, run_deps, out):
+        file_contents = f'''
+%define debug_package %{{nil}}
+Name:    {self.name}
+Version: {version}
+Release: {release}
+Epoch: {fedora_epoch}
+Summary: {self.desc}
+License: MIT
+BuildArch: x86_64
+Source0: {self.name}-{version}.tar.gz
+BuildRequires: wget
+%description
+{self.desc}
+Maintainer: {meta['maintainer']}
+%prep
+%setup -q
+%build
+%install
+mkdir -p %{{buildroot}}/%{{_datadir}}/zcash-params
+install -m 0755 sapling-spend.params %{{buildroot}}/%{{_datadir}}/zcash-params
+install -m 0755 sapling-output.params %{{buildroot}}/%{{_datadir}}/zcash-params
+
+%files
+%license LICENSE
+%{{_datadir}}/zcash-params/sapling-spend.params
+%{{_datadir}}/zcash-params/sapling-output.params
+'''
+        with open(out, 'w') as f:
+            f.write(file_contents)
+
+    def gen_makefile(self, out):
+        file_contents = '''
+.PHONY: install
+
+DATADIR=/usr/share/zcash-params/
+
+tezos-sapling-params:
+
+install: tezos-sapling-params
+	mkdir -p $(DESTDIR)$(DATADIR)
+	cp $(CURDIR)/sapling-spend.params $(DESTDIR)$(DATADIR)
+	cp $(CURDIR)/sapling-output.params $(DESTDIR)$(DATADIR)
+'''
+        with open(out, 'w') as f:
+            f.write(file_contents)
+
+    def gen_changelog(self, ubuntu_version, maintainer, date, out):
+        changelog_contents = f'''{self.name.lower()} ({ubuntu_epoch}:{version}-0ubuntu{release}~{ubuntu_version}) {ubuntu_version}; urgency=medium
+
+  * Publish {version}-{release} version of {self.name}
+
+ -- {maintainer} {date}'''
+        with open(out, 'w') as f:
+            f.write(changelog_contents)
+
+    def gen_rules(self, out):
+        rules_contents = '''#!/usr/bin/make -f
+
+%:
+	dh $@
+'''
+        with open(out, 'w') as f:
+            f.write(rules_contents)
 
 
 def print_service_file(service_file: ServiceFile, out):

@@ -94,7 +94,7 @@ for package in packages:
                             shutil.copy(f"{os.path.dirname(__file__)}/defaults/{systemd_unit.config_file}",
                                         f"debian/{package.name.lower()}-{systemd_unit.suffix}.default")
                     shutil.copy(f"{os.path.dirname(__file__)}/scripts/{systemd_unit.startup_script}", f"debian/{systemd_unit.startup_script}")
-                    package.gen_install("debian/install")
+                package.gen_install("debian/install")
                 package.gen_control_file(common_deps, "debian/control")
                 subprocess.run(["wget", "-q", "-O", "debian/copyright", f"https://gitlab.com/tezos/tezos/-/raw/v{version}/LICENSE"], check=True)
                 subprocess.run("rm debian/*.ex debian/*.EX debian/README*", shell=True, check=True)

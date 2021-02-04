@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: LicenseRef-MIT-TQ
 import os, shutil, sys, subprocess, json
 
-from .model import Service, ServiceFile, SystemdUnit, Unit, OpamBasedPackage
+from .model import Service, ServiceFile, SystemdUnit, Unit, OpamBasedPackage, TezosSaplingParamsPackage
 
 networks = ["mainnet", "delphinet", "edonet"]
 
@@ -154,3 +154,4 @@ for proto in active_protocols:
                                      proto,
                                      optional_opam_deps=["tls", "ledgerwallet-tezos"]))
 
+packages.append(TezosSaplingParamsPackage())

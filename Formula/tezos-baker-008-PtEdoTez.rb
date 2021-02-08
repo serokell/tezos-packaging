@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: LicenseRef-MIT-TQ
 
-require File.join(File.dirname(__FILE__), "tezos")
+require File.join(File.dirname(__FILE__), "..", "FormulaAbstract", "tezos")
 
 class TezosBaker008Ptedotez < Tezos
   init

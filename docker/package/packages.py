@@ -84,7 +84,15 @@ for network in networks:
                                   startup_script="tezos-node-start"))
 packages.append(Package("tezos-node",
                         "Entry point for initializing, configuring and running a Tezos node",
-                        node_units))
+                        node_units,
+                        optional_opam_deps=[
+                            "tezos-embedded-protocol-001-PtCJ7pwo",
+                            "tezos-embedded-protocol-002-PsYLVpVv",
+                            "tezos-embedded-protocol-003-PsddFKi3",
+                            "tezos-embedded-protocol-004-Pt24m4xi",
+                            "tezos-embedded-protocol-005-PsBABY5H",
+                            "tezos-embedded-protocol-005-PsBabyM1",
+                            "tezos-embedded-protocol-006-PsCARTHA"]))
 
 active_protocols = json.load(open(f"{os.path.dirname( __file__)}/../../protocols.json", "r"))["active"]
 

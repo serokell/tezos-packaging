@@ -69,50 +69,51 @@ steps:
    - nix-build tests/tezos-binaries.nix --no-out-link --arg path-to-binaries ./docker
    branches: "!master"
 
- - label: test deb source packages via docker
-   commands:
-   - eval "$SET_VERSION"
-   - ./docker/docker-tezos-packages.sh --os ubuntu --type source
-   artifact_paths:
-     - ./out/*
-   branches: "!master"
-   timeout_in_minutes: 30
-   agents:
-     queue: "docker"
- - label: test deb binary packages via docker
-   commands:
-   - eval "$SET_VERSION"
-   # Building all binary packages will take significant amount of time, so we build only one
-   # in order to ensure package generation sanity
-   - ./docker/docker-tezos-packages.sh --os ubuntu --type binary --package tezos-baker-007-PsDELPH1
-   - rm -rf out
-   # It takes much time to build binary package, so we do it only on master
-   branches: "master"
-   timeout_in_minutes: 90
-   agents:
-     queue: "docker"
- - label: test rpm source packages via docker
-   commands:
-   - eval "$SET_VERSION"
-   - ./docker/docker-tezos-packages.sh --os fedora --type source
-   artifact_paths:
-     - ./out/*
-   branches: "!master"
-   timeout_in_minutes: 30
-   agents:
-     queue: "docker"
- - label: test rpm binary packages via docker
-   commands:
-   - eval "$SET_VERSION"
-   # Building all binary packages will take significant amount of time, so we build only one
-   # in order to ensure package generation sanity
-   - ./docker/docker-tezos-packages.sh --os fedora --type binary --package tezos-baker-007-PsDELPH1
-   - rm -rf out
-   # It takes much time to build binary package, so we do it only on master
-   branches: "master"
-   timeout_in_minutes: 90
-   agents:
-     queue: "docker"
+ # TODO: Uncomment once https://github.com/ocaml/opam-repository/pull/18133 is merged
+ # - label: test deb source packages via docker
+ #   commands:
+ #   - eval "$SET_VERSION"
+ #   - ./docker/docker-tezos-packages.sh --os ubuntu --type source
+ #   artifact_paths:
+ #     - ./out/*
+ #   branches: "!master"
+ #   timeout_in_minutes: 30
+ #   agents:
+ #     queue: "docker"
+ # - label: test deb binary packages via docker
+ #   commands:
+ #   - eval "$SET_VERSION"
+ #   # Building all binary packages will take significant amount of time, so we build only one
+ #   # in order to ensure package generation sanity
+ #   - ./docker/docker-tezos-packages.sh --os ubuntu --type binary --package tezos-baker-007-PsDELPH1
+ #   - rm -rf out
+ #   # It takes much time to build binary package, so we do it only on master
+ #   branches: "master"
+ #   timeout_in_minutes: 90
+ #   agents:
+ #     queue: "docker"
+ # - label: test rpm source packages via docker
+ #   commands:
+ #   - eval "$SET_VERSION"
+ #   - ./docker/docker-tezos-packages.sh --os fedora --type source
+ #   artifact_paths:
+ #     - ./out/*
+ #   branches: "!master"
+ #   timeout_in_minutes: 30
+ #   agents:
+ #     queue: "docker"
+ # - label: test rpm binary packages via docker
+ #   commands:
+ #   - eval "$SET_VERSION"
+ #   # Building all binary packages will take significant amount of time, so we build only one
+ #   # in order to ensure package generation sanity
+ #   - ./docker/docker-tezos-packages.sh --os fedora --type binary --package tezos-baker-007-PsDELPH1
+ #   - rm -rf out
+ #   # It takes much time to build binary package, so we do it only on master
+ #   branches: "master"
+ #   timeout_in_minutes: 90
+ #   agents:
+ #     queue: "docker"
 
  - wait
  - label: create auto pre-release

@@ -11,8 +11,6 @@ class TezosBaker008Ptedo2zk < Tezos
   bottle do
     root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosBaker008Ptedo2zk.version}/"
     cellar :any
-    sha256 "401a4f9b578fc854e36f752ecfd6c9b83b167ab41201c3044495b385d17750ce" => :mojave
-    sha256 "d189db274b0efd42252ddfa4888f9f25981c23427724a7bc5ac1b3366572161e" => :catalina
   end
 
   def install

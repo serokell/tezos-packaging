@@ -231,13 +231,13 @@ index e822ec9a1..f92c34805 100644
  
  (rule
   (alias runtest_lint)
-diff --git a/src/proto_008_PtEdoTez/bin_accuser/dune b/src/proto_008_PtEdoTez/bin_accuser/dune
+diff --git a/src/proto_008_PtEdo2Zk/bin_accuser/dune b/src/proto_008_PtEdo2Zk/bin_accuser/dune
 index 7474b94d8..4b0db6760 100644
---- a/src/proto_008_PtEdoTez/bin_accuser/dune
-+++ b/src/proto_008_PtEdoTez/bin_accuser/dune
+--- a/src/proto_008_PtEdo2Zk/bin_accuser/dune
++++ b/src/proto_008_PtEdo2Zk/bin_accuser/dune
 @@ -10,7 +10,9 @@
                     -open Tezos_client_commands
-                    -open Tezos_baking_008_PtEdoTez_commands
+                    -open Tezos_baking_008_PtEdo2Zk_commands
                     -open Tezos_stdlib_unix
 -                   -open Tezos_client_base_unix)))
 +                   -open Tezos_client_base_unix
@@ -246,13 +246,13 @@ index 7474b94d8..4b0db6760 100644
  
  (rule
   (alias runtest_lint)
-diff --git a/src/proto_008_PtEdoTez/bin_baker/dune b/src/proto_008_PtEdoTez/bin_baker/dune
+diff --git a/src/proto_008_PtEdo2Zk/bin_baker/dune b/src/proto_008_PtEdo2Zk/bin_baker/dune
 index 3131e95c8..9b71de1e2 100644
---- a/src/proto_008_PtEdoTez/bin_baker/dune
-+++ b/src/proto_008_PtEdoTez/bin_baker/dune
+--- a/src/proto_008_PtEdo2Zk/bin_baker/dune
++++ b/src/proto_008_PtEdo2Zk/bin_baker/dune
 @@ -10,7 +10,9 @@
                     -open Tezos_client_commands
-                    -open Tezos_baking_008_PtEdoTez_commands
+                    -open Tezos_baking_008_PtEdo2Zk_commands
                     -open Tezos_stdlib_unix
 -                   -open Tezos_client_base_unix)))
 +                   -open Tezos_client_base_unix
@@ -261,13 +261,13 @@ index 3131e95c8..9b71de1e2 100644
  
  (rule
   (alias runtest_lint)
-diff --git a/src/proto_008_PtEdoTez/bin_endorser/dune b/src/proto_008_PtEdoTez/bin_endorser/dune
+diff --git a/src/proto_008_PtEdo2Zk/bin_endorser/dune b/src/proto_008_PtEdo2Zk/bin_endorser/dune
 index 81ebe6075..43e57a2d0 100644
---- a/src/proto_008_PtEdoTez/bin_endorser/dune
-+++ b/src/proto_008_PtEdoTez/bin_endorser/dune
+--- a/src/proto_008_PtEdo2Zk/bin_endorser/dune
++++ b/src/proto_008_PtEdo2Zk/bin_endorser/dune
 @@ -10,7 +10,9 @@
                     -open Tezos_client_commands
-                    -open Tezos_baking_008_PtEdoTez_commands
+                    -open Tezos_baking_008_PtEdo2Zk_commands
                     -open Tezos_stdlib_unix
 -                   -open Tezos_client_base_unix)))
 +                   -open Tezos_client_base_unix

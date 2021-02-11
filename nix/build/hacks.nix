@@ -137,7 +137,7 @@ rec {
       buildInputs = o.buildInputs ++ [ librustzcash ];
       XDG_DATA_DIRS = "${zcash-params}:$XDG_DATA_DIRS";
     });
-  tezos-protocol-008-PtEdoTez-parameters = osuper.tezos-protocol-008-PtEdoTez-parameters.overrideAttrs
+  tezos-protocol-008-PtEdo2Zk-parameters = osuper.tezos-protocol-008-PtEdo2Zk-parameters.overrideAttrs
     (o: rec {
       buildInputs = o.buildInputs ++ [ librustzcash ];
       XDG_DATA_DIRS = "${zcash-params}:$XDG_DATA_DIRS";
@@ -169,17 +169,17 @@ rec {
       buildInputs = o.buildInputs ++ [ librustzcash self.makeWrapper ];
       postFixup = zcash-post-fixup o;
     });
-  tezos-accuser-008-PtEdoTez = osuper.tezos-accuser-008-PtEdoTez.overrideAttrs
+  tezos-accuser-008-PtEdo2Zk = osuper.tezos-accuser-008-PtEdo2Zk.overrideAttrs
     (o: {
       buildInputs = o.buildInputs ++ [ librustzcash self.makeWrapper ];
       postFixup = zcash-post-fixup o;
     });
-  tezos-baker-008-PtEdoTez = osuper.tezos-baker-008-PtEdoTez.overrideAttrs
+  tezos-baker-008-PtEdo2Zk = osuper.tezos-baker-008-PtEdo2Zk.overrideAttrs
     (o: {
       buildInputs = o.buildInputs ++ [ librustzcash self.makeWrapper ];
       postFixup = zcash-post-fixup o;
     });
-  tezos-endorser-008-PtEdoTez = osuper.tezos-endorser-008-PtEdoTez.overrideAttrs
+  tezos-endorser-008-PtEdo2Zk = osuper.tezos-endorser-008-PtEdo2Zk.overrideAttrs
     (o: {
       buildInputs = o.buildInputs ++ [ librustzcash self.makeWrapper ];
       postFixup = zcash-post-fixup o;

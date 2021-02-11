@@ -11,8 +11,6 @@ class TezosClient < Tezos
   bottle do
     root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosClient.version}/"
     cellar :any
-    sha256 "b8e78e557bda6fb821201c99d88bf04831ec49398c087dfd26586fe047bcfa11" => :mojave
-    sha256 "387cfbd1a97878b40e92d0ffdc2293ef3df6945838ec8df5851fd3ea195fabfd" => :catalina
   end
 
   def install

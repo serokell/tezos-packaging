@@ -13,9 +13,9 @@ class Tezos < Formula
     end
     homepage "https://gitlab.com/tezos/tezos"
 
-    url "https://gitlab.com/tezos/tezos.git", :tag => "v8.1", :shallow => false
+    url "https://gitlab.com/tezos/tezos.git", :tag => "v8.2", :shallow => false
 
-    version "v8.1-1"
+    version "v8.2-1"
 
     build_dependencies = %w[pkg-config autoconf rsync wget opam rust]
     build_dependencies.each do |dependency|

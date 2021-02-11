@@ -41,6 +41,10 @@ class AbstractPackage:
         pass
 
     @abstractmethod
+    def fetch_dependencies(self, out_dir):
+        pass
+
+    @abstractmethod
     def gen_control_file(self, out):
         pass
 
@@ -73,19 +77,27 @@ fedora_epoch = 1
 
 
 class OpamBasedPackage(AbstractPackage):
-    def __init__(self, name: str, desc: str, systemd_units: List[SystemdUnit]=[],
+    def __init__(self, name: str, opam_file_path:str, desc: str, systemd_units: List[SystemdUnit]=[],
                  target_proto: str=None, optional_opam_deps=[]):
         self.name = name
+        self.opam_file_path = opam_file_path
         self.desc = desc
         self.systemd_units = systemd_units
         self.target_proto = target_proto
         self.optional_opam_deps = optional_opam_deps
+        self.sources_path = "sources"
 
     def fetch_sources(self, out_dir):
+        subprocess.run(["git", "clone", "--single-branch", "--branch", f"v{version}",
+                        "https://gitlab.com/tezos/tezos.git", "--depth", "1"], check=True)
+        os.rename("tezos", out_dir)
+
+    def fetch_dependencies(self, out_dir):
         opam_package = "tezos-client" if self.name == "tezos-admin-client" else self.name
         subprocess.run(["opam", "exec", "--", "opam-bundle", f"{opam_package}={version}"] + self.optional_opam_deps +
                        ["--ocaml=4.09.1", "--yes", "--opam=2.0.5"], check=True)
         subprocess.run(["tar", "-zxf", f"{opam_package}-bundle.tar.gz"], check=True)
+        subprocess.run(["rm", f"{opam_package}-bundle.tar.gz"])
         os.rename(f"{opam_package}-bundle", out_dir)
 
 
@@ -185,35 +197,35 @@ useradd tezos -d /var/lib/tezos || true
             systemd_macros = ""
 
         file_contents = f'''
-    %define debug_package %{{nil}}
-    Name:    {self.name}
-    Version: {version}
-    Release: {release}
-    Epoch: {fedora_epoch}
-    Summary: {self.desc}
-    License: MIT
-    BuildArch: x86_64
-    Source0: {self.name}-{version}.tar.gz
-    Source1: https://gitlab.com/tezos/tezos/tree/v{version}/
-    BuildRequires: {build_requires} {systemd_deps}
-    Requires: {requires}
-    %description
-    {self.desc}
-    Maintainer: {meta['maintainer']}
-    %prep
-    %setup -q
-    %build
-    %install
-    make %{{name}}
-    mkdir -p %{{buildroot}}/%{{_bindir}}
-    install -m 0755 %{{name}} %{{buildroot}}/%{{_bindir}}
-    {systemd_install}
-    %files
-    %license LICENSE
-    %{{_bindir}}/%{{name}}
-    {systemd_files}
-    {systemd_macros}
-    '''
+%define debug_package %{{nil}}
+Name:    {self.name}
+Version: {version}
+Release: {release}
+Epoch: {fedora_epoch}
+Summary: {self.desc}
+License: MIT
+BuildArch: x86_64
+Source0: {self.name}-{version}.tar.gz
+Source1: https://gitlab.com/tezos/tezos/tree/v{version}/
+BuildRequires: {build_requires} {systemd_deps}
+Requires: {requires}
+%description
+{self.desc}
+Maintainer: {meta['maintainer']}
+%prep
+%setup -q
+%build
+%install
+DEPSDIR=deps make %{{name}}
+mkdir -p %{{buildroot}}/%{{_bindir}}
+install -m 0755 %{{name}} %{{buildroot}}/%{{_bindir}}
+{systemd_install}
+%files
+%license LICENSE
+%{{_bindir}}/%{{name}}
+{systemd_files}
+{systemd_macros}
+'''
         with open(out, 'w') as f:
             f.write(file_contents)
 
@@ -222,10 +234,12 @@ useradd tezos -d /var/lib/tezos || true
 .PHONY: install
 
 BINDIR=/usr/bin
+export PATH := $(shell pwd)/$(DEPSDIR)/bootstrap/bin:$(PATH)
 
 {self.name}:
-	./compile.sh
-	cp $(CURDIR)/opam/default/bin/{self.name} {self.name}
+	./$(DEPSDIR)/configure.sh
+	export PATH=$$PATH; opam install --yes --root=$(DEPSDIR)/opam {self.sources_path}/{os.path.dirname(self.opam_file_path)}
+	cp $(DEPSDIR)/opam/default/bin/{self.name} {self.name}
 
 install: {self.name}
 	mkdir -p $(DESTDIR)$(BINDIR)
@@ -250,6 +264,8 @@ install: {self.name}
                 override_dh_install_init += f"	dh_installinit --name={self.name}-{systemd_unit.suffix}\n"
         rules_contents = f'''#!/usr/bin/make -f
 
+export DEPSDIR := debian/deps
+
 %:
 	dh $@ {"--with systemd" if len(self.systemd_units) > 0 else ""}
 override_dh_systemd_start:
@@ -258,6 +274,12 @@ override_dh_systemd_start:
 
         with open(out, 'w') as f:
             f.write(rules_contents)
+
+    def gen_include_binaries(self, binaries, out):
+        file_contents = '\n'.join(binaries)
+        #print(file_contents)
+        with open(out, 'w') as f:
+            f.write(file_contents)
 
     def gen_install(self, out):
         startup_scripts = list(set(map(lambda x: x.startup_script, self.systemd_units)))

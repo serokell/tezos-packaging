@@ -47,8 +47,6 @@ else:
 build_deps = ["make", "m4", "perl", "pkg-config", "wget", "unzip", "rsync", "gcc", "cargo"]
 common_deps = run_deps + build_deps
 
-active_protocols = json.load(open(f"{os.path.dirname(__file__)}/../../protocols.json", "r"))["active"]
-
 version = os.environ["TEZOS_VERSION"][1:]
 release = f"{meta['release']}"
 
@@ -57,9 +55,6 @@ ubuntu_versions = [
     "focal",  # 20.04
     "groovy"  # 20.10
 ]
-
-ubuntu_epoch = 2
-fedora_epoch = 1
 
 pwd = os.getcwd()
 home = os.environ["HOME"]
@@ -71,8 +66,10 @@ for package in packages:
             dir = f"{package.name.lower()}-{version}"
         else:
             dir = f"{package.name}-{version}"
+        package.fetch_dependencies("opam_dependencies")
         if source_archive is None:
-            package.fetch_sources(dir)
+            os.makedirs(dir)
+            package.fetch_sources(f"{dir}/sources")
             package.gen_makefile(f"{dir}/Makefile")
             if not is_ubuntu:
                 subprocess.run(["wget", "-q", "-O", f"{dir}/LICENSE", f"https://gitlab.com/tezos/tezos/-/raw/v{version}/LICENSE"], check=True)
@@ -86,6 +83,12 @@ for package in packages:
                 os.chdir(dir)
                 subprocess.run(["rm", "-r", "debian"])
                 subprocess.run(["dh_make", "-syf" f"../{dir}.tar.gz"], check=True)
+                shutil.copytree("../opam_dependencies", f"debian/deps")
+                b = []
+                for root, _, files in os.walk("debian/deps"):
+                    for f in files:
+                        b.append(os.path.join(root, f))
+                package.gen_include_binaries(b, "debian/source/include-binaries")
                 for systemd_unit in package.systemd_units:
                     if systemd_unit.service_file.service.environment_file is not None:
                         systemd_unit.service_file.service.environment_file = systemd_unit.service_file.service.environment_file.lower()
@@ -124,6 +127,7 @@ for package in packages:
                         shutil.copy(f"{os.path.dirname(__file__)}/defaults/{systemd_unit.config_file}",
                                     f"{dir}/{package.name}-{systemd_unit.suffix}.default")
                 shutil.copy(f"{os.path.dirname(__file__)}/scripts/{systemd_unit.startup_script}", f"{dir}/{systemd_unit.startup_script}")
+            shutil.copytree("opam_dependencies", f"{dir}/deps")
             subprocess.run(["tar", "-czf", f"{dir}.tar.gz", dir], check=True)
             os.makedirs(f"{home}/rpmbuild/SPECS", exist_ok=True)
             os.makedirs(f"{home}/rpmbuild/SOURCES", exist_ok=True)

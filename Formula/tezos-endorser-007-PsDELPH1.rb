@@ -11,6 +11,7 @@ class TezosEndorser007Psdelph1 < Tezos
   bottle do
     root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosEndorser007Psdelph1.version}/"
     cellar :any
+    sha256 "474040ee021cd5df167ef2aa8078f8169d26f6574475170de0f067015aff46a8" => :catalina
   end
 
   def install

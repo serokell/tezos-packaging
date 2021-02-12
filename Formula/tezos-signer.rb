@@ -11,6 +11,7 @@ class TezosSigner < Tezos
   bottle do
     root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosSigner.version}/"
     cellar :any
+    sha256 "8a0dc41a239c0acd6b0cf8456b48cf2c39a40cbf1fcc93c013bf5b83198e9471" => :catalina
   end
 
   def install

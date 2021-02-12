@@ -12,6 +12,7 @@ class TezosEndorser007Psdelph1 < Tezos
     root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosEndorser007Psdelph1.version}/"
     cellar :any
     sha256 "474040ee021cd5df167ef2aa8078f8169d26f6574475170de0f067015aff46a8" => :catalina
+    sha256 "0a4e9b96898e48bf7c273b309dfde242d84ba230028c7de1de035c3c816de1c4" => :mojave
   end
 
   def install

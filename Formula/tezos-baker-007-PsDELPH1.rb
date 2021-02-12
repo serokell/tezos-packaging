@@ -12,6 +12,7 @@ class TezosBaker007Psdelph1 < Tezos
     root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosBaker007Psdelph1.version}/"
     cellar :any
     sha256 "c915cc5827546a2f2842b7904d17e6a962a3a16fbe019a2cf50335fb7fb91b18" => :catalina
+    sha256 "381aee11b3c9019c0dabd32b57fd0015dee97682855af22feaf42cb208d9d083" => :mojave
   end
 
   def install

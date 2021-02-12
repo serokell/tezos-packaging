@@ -11,6 +11,7 @@ class TezosEndorser008Ptedo2zk < Tezos
   bottle do
     root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosEndorser008Ptedo2zk.version}/"
     cellar :any
+    sha256 "24ed930b86471a647840b15405d91fa2a7f0215b12196e36a266442e6e5492b1" => :catalina
   end
 
   def install

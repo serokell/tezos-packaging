@@ -74,12 +74,14 @@ fedora_epoch = 1
 
 class OpamBasedPackage(AbstractPackage):
     def __init__(self, name: str, desc: str, systemd_units: List[SystemdUnit]=[],
-                 target_proto: str=None, optional_opam_deps=[]):
+                 target_proto: str=None, optional_opam_deps: List[str]=[],
+                 requires_sapling_params: bool=False):
         self.name = name
         self.desc = desc
         self.systemd_units = systemd_units
         self.target_proto = target_proto
         self.optional_opam_deps = optional_opam_deps
+        self.requires_sapling_params = requires_sapling_params
 
     def fetch_sources(self, out_dir):
         opam_package = "tezos-client" if self.name == "tezos-admin-client" else self.name
@@ -102,7 +104,7 @@ Homepage: https://gitlab.com/tezos/tezos/
 
 Package: {self.name.lower()}
 Architecture: amd64
-Depends: ${{shlibs:Depends}}, ${{misc:Depends}}
+Depends: ${{shlibs:Depends}}, ${{misc:Depends}}, {"tezos-sapling-params" if self.requires_sapling_params else ""}
 Description: {self.desc}
 '''
         with open(out, 'w') as f:
@@ -196,7 +198,7 @@ BuildArch: x86_64
 Source0: {self.name}-{version}.tar.gz
 Source1: https://gitlab.com/tezos/tezos/tree/v{version}/
 BuildRequires: {build_requires} {systemd_deps}
-Requires: {requires}
+Requires: {requires}, {"tezos-sapling-params" if self.requires_sapling_params else ""}
 %description
 {self.desc}
 Maintainer: {meta['maintainer']}

@@ -18,14 +18,14 @@ if [[ -z "${CUSTOM_NODE_CONFIG:-}" ]]; then
         "$node" config init \
                 --data-dir "$DATA_DIR" \
                 --rpc-addr "$NODE_RPC_ADDR" \
-                --network "$NETWORK"
+                ${NETWORK:+"--network=$NETWORK"} \
                 "$@"
     else
         echo "Updating the node configuration..."
         "$node" config update \
                 --data-dir "$DATA_DIR" \
                 --rpc-addr "$NODE_RPC_ADDR" \
-                --network "$NETWORK"
+                ${NETWORK:+"--network=$NETWORK"}
                 "$@"
     fi
 else

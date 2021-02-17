@@ -85,18 +85,52 @@ def mk_node_unit(suffix, env, desc):
     return SystemdUnit(suffix=suffix, service_file=service_file, startup_script="tezos-node-start")
 
 
+# v8.2 tezos-node doesn't have predefined config for edo2net, so we're providing
+# this config to the service manually
+edo2net_config = '''{
+"p2p": {},
+"network":
+    { "genesis":
+        { "timestamp": "2021-02-11T14:00:00Z",
+          "block": "BLockGenesisGenesisGenesisGenesisGenesisdae8bZxCCxh",
+          "protocol": "PtYuensgYBb3G3x1hLLbCmcav8ue8Kyd2khADcL5LsT5R1hcXex" },
+      "genesis_parameters":
+        { "values":
+            { "genesis_pubkey":
+                "edpkugeDwmwuwyyD3Q5enapgEYDxZLtEUFFSrvVwXASQMVEqsvTqWu" } },
+      "chain_name": "TEZOS_EDO2NET_2021-02-11T14:00:00Z",
+      "sandboxed_chain_name": "SANDBOXED_TEZOS",
+      "default_bootstrap_peers":
+        [ "edonet.tezos.co.il", "188.40.128.216:29732", "edo2net.kaml.fr",
+          "edonet2.smartpy.io", "51.79.165.131", "edonetb.boot.tezostaquito.io" ] }
+}
+'''
+
 node_units = []
-node_postinst_steps = ""
+node_postinst_steps = postinst_steps_common
 common_node_env = ["NODE_RPC_ADDR=127.0.0.1:8732", "CERT_PATH=", "KEY_PATH="]
 for network in networks:
     env = [f"DATA_DIR=/var/lib/tezos/node-{network}", f"NETWORK={network}"] + common_node_env
     node_units.append(mk_node_unit(suffix=network, env=env, desc=f"Tezos node {network}"))
     node_postinst_steps += f"mkdir -p /var/lib/tezos/node-{network}\n"
 
+# Add custom config service
 node_units.append(mk_node_unit(suffix="custom", env=["DATA_DIR=/var/lib/tezos/node-custom",
                                                      "CUSTOM_NODE_CONFIG="] + common_node_env,
                                desc="Tezos node with custom config"))
 node_postinst_steps += "mkdir -p /var/lib/tezos/node-custom\n"
+
+# Add edo2net service
+node_units.append(mk_node_unit(suffix="edo2net", env=common_node_env + ["DATA_DIR=/var/lib/tezos/node-edo2net"],
+                               desc="Tezos node edo2net"))
+
+node_postinst_steps += f'''mkdir -p /var/lib/tezos/node-edo2net
+rm -f /var/lib/tezos/node-edo2net/config.json
+cat > /var/lib/tezos/node-edo2net/config.json <<- EOM
+{edo2net_config}
+EOM
+chown tezos:tezos /var/lib/tezos/node-edo2net/config.json
+'''
 
 packages.append(OpamBasedPackage("tezos-node",
                                  "Entry point for initializing, configuring and running a Tezos node",

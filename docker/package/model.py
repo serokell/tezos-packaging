@@ -64,6 +64,10 @@ class AbstractPackage:
     def gen_install(self, out):
         pass
 
+    @abstractmethod
+    def gen_postinst(self, out):
+        pass
+
 
 meta = json.load(open(f"{os.path.dirname(__file__)}/../../meta.json", "r"))
 version = os.environ["TEZOS_VERSION"][1:]
@@ -75,13 +79,14 @@ fedora_epoch = 1
 class OpamBasedPackage(AbstractPackage):
     def __init__(self, name: str, desc: str, systemd_units: List[SystemdUnit]=[],
                  target_proto: str=None, optional_opam_deps: List[str]=[],
-                 requires_sapling_params: bool=False):
+                 requires_sapling_params: bool=False, postinst_steps: str=""):
         self.name = name
         self.desc = desc
         self.systemd_units = systemd_units
         self.target_proto = target_proto
         self.optional_opam_deps = optional_opam_deps
         self.requires_sapling_params = requires_sapling_params
+        self.postinst_steps = postinst_steps
 
     def fetch_sources(self, out_dir):
         opam_package = "tezos-client" if self.name == "tezos-admin-client" else self.name
@@ -171,8 +176,8 @@ mkdir -p %{{buildroot}}/%{{_unitdir}}
             systemd_macros= f'''
 %post
 {systemd_units_post}
-useradd tezos -d /var/lib/tezos || true
 {enable_units}
+{self.postinst_steps}
 
 %preun
 {systemd_units_preun}
@@ -266,6 +271,15 @@ override_dh_systemd_start:
                                          startup_scripts))
         with open(out, 'w') as f:
             f.write(install_contents)
+
+    def gen_postinst(self, out):
+        postinst_contents = f'''#!/bin/sh
+
+set -e
+{self.postinst_steps}
+'''
+        with open(out, 'w') as f:
+            f.write(postinst_contents)
 
 
 class TezosSaplingParamsPackage(AbstractPackage):

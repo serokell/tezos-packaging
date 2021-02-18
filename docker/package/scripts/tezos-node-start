@@ -7,28 +7,37 @@
 set -euo pipefail
 
 node="/usr/bin/tezos-node"
+# default location of the config file
+config_file="$DATA_DIR/config.json"
 
 mkdir -p "$DATA_DIR"
-if [ ! -f "$DATA_DIR/config.json" ]; then
-    echo "Configuring the node..."
-    "$node" config init \
-            --data-dir "$DATA_DIR" \
-            --rpc-addr "$NODE_RPC_ADDR" \
-            --network "$NETWORK"
-            "$@"
+# CUSTOM_NODE_CONFIG can be provided in the tezos-node-custom.service environment
+if [[ -z "${CUSTOM_NODE_CONFIG:-}" ]]; then
+    if [[ ! -f "$config_file" ]]; then
+        echo "Configuring the node..."
+        "$node" config init \
+                --data-dir "$DATA_DIR" \
+                --rpc-addr "$NODE_RPC_ADDR" \
+                --network "$NETWORK"
+                "$@"
+    else
+        echo "Updating the node configuration..."
+        "$node" config update \
+                --data-dir "$DATA_DIR" \
+                --rpc-addr "$NODE_RPC_ADDR" \
+                --network "$NETWORK"
+                "$@"
+    fi
 else
-    echo "Updating the node configuration..."
-    "$node" config update \
-            --data-dir "$DATA_DIR" \
-            --rpc-addr "$NODE_RPC_ADDR" \
-            --network "$NETWORK"
-            "$@"
+    echo "Run using custom node config file"
+    config_file="$CUSTOM_NODE_CONFIG"
 fi
 
 # Launching the node
 
 if [[ -z "$CERT_PATH" || -z "$KEY_PATH" ]]; then
-    exec "$node" run --data-dir "$DATA_DIR"
+    exec "$node" run --data-dir "$DATA_DIR" --config-file="$config_file"
 else
-    exec "$node" run --data-dir "$DATA_DIR" --rpc-tls="$CERT_PATH","$KEY_PATH"
+    exec "$node" run --data-dir "$DATA_DIR" --config-file="$config_file" \
+        --rpc-tls="$CERT_PATH","$KEY_PATH"
 fi

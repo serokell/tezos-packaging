@@ -183,6 +183,11 @@ In order to start it run:
 systemctl start tezos-node-<network>
 ```
 
+In addition to node services where the config is predefined to a specific network
+(e.g. `tezos-node-mainnet` or `tezos-node-delphinet`), it's possible to run `tezos-node-custom`
+service and provide a path to the custom node config file via the
+`CUSTOM_NODE_CONFIG` variable in the `tezos-node-custom.service` file.
+
 Another case for running multiple similar systemd services is when one wants to have
 multiple daemons that target different protocols.
 Since daemons for different protocols are provided in the different packages, they will

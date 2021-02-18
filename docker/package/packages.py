@@ -127,6 +127,8 @@ default_testnets = {
     "008-PtEdoTez": "edonet"
 }
 
+daemon_postinst = postinst_steps_common + "\nmkdir -p /var/lib/tezos/client\n"
+
 for proto in active_protocols:
     service_file_baker = ServiceFile(Unit(after=["network.target"],
                                           description="Tezos baker"),
@@ -153,23 +155,20 @@ for proto in active_protocols:
                                      proto,
                                      optional_opam_deps=["tls", "ledgerwallet-tezos"],
                                      requires_sapling_params=True,
-                                     postinst_steps=postinst_steps_common + '''
-mkdir -p /var/lib/tezos/baker'''))
+                                     postinst_steps=daemon_postinst))
     packages.append(OpamBasedPackage(f"tezos-accuser-{proto}", "Daemon for accusing",
                                      [SystemdUnit(service_file=service_file_accuser,
                                                   startup_script="tezos-accuser-start",
                                                   config_file="tezos-accuser.conf")],
                                      proto,
                                      optional_opam_deps=["tls", "ledgerwallet-tezos"],
-                                     postinst_steps=postinst_steps_common + '''
-mkdir -p /var/lib/tezos/accuser'''))
+                                     postinst_steps=daemon_postinst))
     packages.append(OpamBasedPackage(f"tezos-endorser-{proto}", "Daemon for endorsing",
                                      [SystemdUnit(service_file=service_file_endorser,
                                                   startup_script="tezos-endorser-start",
                                                   config_file="tezos-endorser.conf")],
                                      proto,
                                      optional_opam_deps=["tls", "ledgerwallet-tezos"],
-                                     postinst_steps=postinst_steps_common + '''
-mkdir -p /var/lib/tezos/endorser'''))
+                                     postinst_steps=daemon_postinst))
 
 packages.append(TezosSaplingParamsPackage())

@@ -70,6 +70,10 @@ packages = [
                      "A client to decode and encode JSON")
 ]
 
+postinst_steps_common = '''
+useradd --home-dir /var/lib/tezos tezos || true
+'''
+
 
 def mk_node_unit(suffix, env, desc):
     service_file = ServiceFile(Unit(after=["network.target"], requires=[],
@@ -82,14 +86,17 @@ def mk_node_unit(suffix, env, desc):
 
 
 node_units = []
+node_postinst_steps = ""
 common_node_env = ["NODE_RPC_ADDR=127.0.0.1:8732", "CERT_PATH=", "KEY_PATH="]
 for network in networks:
     env = [f"DATA_DIR=/var/lib/tezos/node-{network}", f"NETWORK={network}"] + common_node_env
     node_units.append(mk_node_unit(suffix=network, env=env, desc=f"Tezos node {network}"))
+    node_postinst_steps += f"mkdir -p /var/lib/tezos/node-{network}\n"
 
 node_units.append(mk_node_unit(suffix="custom", env=["DATA_DIR=/var/lib/tezos/node-custom",
                                                      "CUSTOM_NODE_CONFIG="] + common_node_env,
                                desc="Tezos node with custom config"))
+node_postinst_steps += "mkdir -p /var/lib/tezos/node-custom\n"
 
 packages.append(OpamBasedPackage("tezos-node",
                                  "Entry point for initializing, configuring and running a Tezos node",
@@ -102,7 +109,8 @@ packages.append(OpamBasedPackage("tezos-node",
                                      "tezos-embedded-protocol-005-PsBABY5H",
                                      "tezos-embedded-protocol-005-PsBabyM1",
                                      "tezos-embedded-protocol-006-PsCARTHA"],
-                                 requires_sapling_params=True))
+                                 requires_sapling_params=True,
+                                 postinst_steps=node_postinst_steps))
 
 active_protocols = json.load(open(f"{os.path.dirname( __file__)}/../../protocols.json", "r"))["active"]
 
@@ -118,6 +126,8 @@ default_testnets = {
     "007-PsDELPH1": "delphinet",
     "008-PtEdoTez": "edonet"
 }
+
+daemon_postinst = postinst_steps_common + "\nmkdir -p /var/lib/tezos/client\n"
 
 for proto in active_protocols:
     service_file_baker = ServiceFile(Unit(after=["network.target"],
@@ -144,18 +154,21 @@ for proto in active_protocols:
                                                   config_file="tezos-baker.conf")],
                                      proto,
                                      optional_opam_deps=["tls", "ledgerwallet-tezos"],
-                                     requires_sapling_params=True))
+                                     requires_sapling_params=True,
+                                     postinst_steps=daemon_postinst))
     packages.append(OpamBasedPackage(f"tezos-accuser-{proto}", "Daemon for accusing",
                                      [SystemdUnit(service_file=service_file_accuser,
                                                   startup_script="tezos-accuser-start",
                                                   config_file="tezos-accuser.conf")],
                                      proto,
-                                     optional_opam_deps=["tls", "ledgerwallet-tezos"]))
+                                     optional_opam_deps=["tls", "ledgerwallet-tezos"],
+                                     postinst_steps=daemon_postinst))
     packages.append(OpamBasedPackage(f"tezos-endorser-{proto}", "Daemon for endorsing",
                                      [SystemdUnit(service_file=service_file_endorser,
                                                   startup_script="tezos-endorser-start",
                                                   config_file="tezos-endorser.conf")],
                                      proto,
-                                     optional_opam_deps=["tls", "ledgerwallet-tezos"]))
+                                     optional_opam_deps=["tls", "ledgerwallet-tezos"],
+                                     postinst_steps=daemon_postinst))
 
 packages.append(TezosSaplingParamsPackage())

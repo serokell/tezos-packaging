@@ -47,10 +47,10 @@ done
 "$virtualisation_engine" build -t tezos-"$target_os" -f docker/package/Dockerfile-"$target_os" .
 set +e
 if [[ -z ${source_archive-} ]]; then
-    container_id="$("$virtualisation_engine" create --env TEZOS_VERSION="$TEZOS_VERSION" --env OPAMSOLVERTIMEOUT=120 -t tezos-"$target_os" "${args[@]}")"
+    container_id="$("$virtualisation_engine" create --env TEZOS_VERSION="$TEZOS_VERSION" --env OPAMSOLVERTIMEOUT=240 -t tezos-"$target_os" "${args[@]}")"
 else
     container_id="$("$virtualisation_engine" create -v "$PWD/$source_archive:/tezos-packaging/docker/$source_archive_name" \
-     --env TEZOS_VERSION="$TEZOS_VERSION" --env OPAMSOLVERTIMEOUT=120 -t tezos-"$target_os" "${args[@]}")"
+     --env TEZOS_VERSION="$TEZOS_VERSION" --env OPAMSOLVERTIMEOUT=240 -t tezos-"$target_os" "${args[@]}")"
 fi
 "$virtualisation_engine" start -a "$container_id"
 exit_code="$?"

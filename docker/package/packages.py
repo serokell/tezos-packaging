@@ -5,7 +5,7 @@ import os, shutil, sys, subprocess, json
 
 from .model import Service, ServiceFile, SystemdUnit, Unit, OpamBasedPackage, TezosSaplingParamsPackage
 
-networks = ["mainnet", "delphinet", "edonet"]
+networks = ["mainnet"]
 
 signer_units = [
     SystemdUnit(
@@ -154,11 +154,6 @@ daemon_decs = {
     "baker": "daemon for baking",
     "accuser": "daemon for accusing",
     "endorser": "daemon for endorsing"
-}
-
-default_testnets = {
-    "007-PsDELPH1": "delphinet",
-    "008-PtEdoTez": "edonet"
 }
 
 daemon_postinst = postinst_steps_common + "\nmkdir -p /var/lib/tezos/client\n"

@@ -11,6 +11,7 @@ class TezosAccuser008Ptedo2zk < Tezos
   bottle do
     root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosAccuser008Ptedo2zk.version}/"
     cellar :any
+    sha256 "13468d11576c613a8003522cfcc4a2249fac6cffbcb7d3ad4fa75b26db0443c0" => :mojave
   end
 
   def install

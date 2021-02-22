@@ -11,6 +11,7 @@ class TezosSandbox < Tezos
   bottle do
     root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosSandbox.version}/"
     cellar :any
+    sha256 "7fc301036da8c383feedae58d65fe5eabac199d5c58de9b024f5c58a62797301" => :mojave
   end
 
   def install

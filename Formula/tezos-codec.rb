@@ -11,6 +11,7 @@ class TezosCodec < Tezos
   bottle do
     root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosCodec.version}/"
     cellar :any
+    sha256 "f32315f7ce4cf3ac8f2ca34f1a211c992d89a69b8338275335921ad212d795a0" => :mojave
   end
 
   def install

@@ -11,6 +11,7 @@ class TezosNode < Tezos
   bottle do
     root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosNode.version}/"
     cellar :any
+    sha256 "8d8d844eeebb2ddc71ee49819df24d7d563d61a7a959c413ed487b2d79a51c22" => :mojave
   end
 
   def install

@@ -11,6 +11,7 @@ class TezosAdminClient < Tezos
   bottle do
     root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosAdminClient.version}/"
     cellar :any
+    sha256 "4aba498b66046f28522472e1ec59e89cbeec8dc1ac616595c5e5e4d097ccb2cc" => :mojave
   end
 
   def install

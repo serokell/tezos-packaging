@@ -12,6 +12,7 @@ class TezosAccuser008Ptedo2zk < Tezos
     root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosAccuser008Ptedo2zk.version}/"
     cellar :any
     sha256 "13468d11576c613a8003522cfcc4a2249fac6cffbcb7d3ad4fa75b26db0443c0" => :mojave
+    sha256 "a79420d56a90c7347886b6a4fb2bbbf3c49e58c3abb067f9aaac523144eea619" => :catalina
   end
 
   def install

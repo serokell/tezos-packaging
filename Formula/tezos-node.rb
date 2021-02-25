@@ -6,6 +6,7 @@ require File.join(File.dirname(__FILE__), "..", "FormulaAbstract", "tezos")
 
 class TezosNode < Tezos
   init
+  depends_on "tezos-sapling-params"
   desc "Entry point for initializing, configuring and running a Tezos node"
 
   bottle do

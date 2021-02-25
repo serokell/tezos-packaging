@@ -6,6 +6,7 @@ require File.join(File.dirname(__FILE__), "..", "FormulaAbstract", "tezos")
 
 class TezosClient < Tezos
   init
+  depends_on "tezos-sapling-params"
   desc "CLI client for interacting with tezos blockchain"
 
   bottle do

@@ -6,6 +6,7 @@ require File.join(File.dirname(__FILE__), "..", "FormulaAbstract", "tezos")
 
 class TezosBaker008Ptedo2zk < Tezos
   init
+  depends_on "tezos-sapling-params"
   desc "Daemon for baking"
 
   bottle do

@@ -2,10 +2,27 @@
 #
 # SPDX-License-Identifier: LicenseRef-MIT-TQ
 
-require File.join(File.dirname(__FILE__), "..", "FormulaAbstract", "tezos")
+class TezosCodec < Formula
+  @all_bins = []
 
-class TezosCodec < Tezos
-  init
+  class << self
+    attr_accessor :all_bins
+  end
+  homepage "https://gitlab.com/tezos/tezos"
+
+  url "https://gitlab.com/tezos/tezos.git", :tag => "v8.2", :shallow => false
+
+  version "v8.2-3"
+
+  build_dependencies = %w[pkg-config autoconf rsync wget opam rust]
+  build_dependencies.each do |dependency|
+    depends_on dependency => :build
+  end
+
+  dependencies = %w[gmp hidapi libev libffi]
+  dependencies.each do |dependency|
+    depends_on dependency
+  end
   desc "A client to decode and encode JSON"
 
   bottle do
@@ -13,6 +30,22 @@ class TezosCodec < Tezos
     cellar :any
     sha256 "f32315f7ce4cf3ac8f2ca34f1a211c992d89a69b8338275335921ad212d795a0" => :mojave
     sha256 "3afdaf5c3aeb83a730b9cb17e10886ccdce4b76327eb6d1b04e3391f37f0b8da" => :catalina
+  end
+
+  def make_deps
+    ENV.deparallelize
+
+    system "opam", "init", "--bare", "--debug", "--auto-setup", "--disable-sandboxing"
+
+    ENV["RUST_VERSION"] = "1.49.0"
+    system "make", "build-deps"
+  end
+
+  def install_template(dune_path, exec_path, name)
+    bin.mkpath
+    self.class.all_bins << name
+    system ["eval $(opam env)", "dune build #{dune_path}", "cp #{exec_path} #{name}"].join(" && ")
+    bin.install name
   end
 
   def install

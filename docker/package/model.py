@@ -276,6 +276,9 @@ override_dh_systemd_start:
         postinst_contents = f'''#!/bin/sh
 
 set -e
+
+#DEBHELPER#
+
 {self.postinst_steps}
 '''
         with open(out, 'w') as f:

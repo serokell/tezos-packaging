@@ -132,7 +132,7 @@ rm -f /var/lib/tezos/node-edo2net/config.json
 cat > /var/lib/tezos/node-edo2net/config.json <<- EOM
 {edo2net_config}
 EOM
-chown tezos:tezos /var/lib/tezos/node-edo2net/config.json
+chown -R tezos:tezos /var/lib/tezos/node-edo2net
 '''
 
 packages.append(OpamBasedPackage("tezos-node",
@@ -159,7 +159,7 @@ daemon_decs = {
     "endorser": "daemon for endorsing"
 }
 
-daemon_postinst = postinst_steps_common + "\nmkdir -p /var/lib/tezos/client\n"
+daemon_postinst = postinst_steps_common + "\nmkdir -p /var/lib/tezos/.tezos-client\nchown -R tezos:tezos /var/lib/tezos/.tezos-client\n"
 
 for proto in active_protocols:
     service_file_baker = ServiceFile(Unit(after=["network.target"],

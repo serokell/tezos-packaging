@@ -121,4 +121,7 @@ class TezosBaker008Ptedo2zk < Formula
       </plist>
     EOS
   end
+  def post_install
+    mkdir "#{var}/lib/tezos/client"
+  end
 end

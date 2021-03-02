@@ -77,4 +77,7 @@ class TezosSignerUnix < Formula
       </plist>
     EOS
   end
+  def post_install
+    mkdir "#{var}/lib/tezos/signer-unix"
+  end
 end

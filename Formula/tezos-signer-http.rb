@@ -80,4 +80,7 @@ class TezosSignerHttp < Formula
       </plist>
     EOS
   end
+  def post_install
+    mkdir "#{var}/lib/tezos/signer-http"
+  end
 end

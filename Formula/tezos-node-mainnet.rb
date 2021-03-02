@@ -82,4 +82,8 @@ class TezosNodeMainnet < Formula
       </plist>
     EOS
   end
+  def post_install
+    mkdir_p "#{var}/lib/tezos/node-mainnet"
+    system "tezos-node", "config", "init", "--data-dir" "#{var}/lib/tezos/node-mainnet", "--network", "mainnet"
+  end
 end

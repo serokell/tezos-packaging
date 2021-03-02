@@ -85,7 +85,7 @@ class TezosNodeEdo2net < Formula
           <key>EnvironmentVariables</key>
             <dict>
               <key>DATA_DIR</key>
-              <string>#{ENV["HOME"]}/tezos/node-edo2net</string>
+              <string>#{var}/lib/tezos/node-edo2net</string>
               <key>NODE_RPC_ADDR</key>
               <string>127.0.0.1:8732</string>
               <key>CERT_PATH</key>

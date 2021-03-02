@@ -67,7 +67,7 @@ class TezosSignerHttps < Formula
               <key>KEY_PATH</key>
               <string></string>
               <key>DATA_DIR</key>
-              <string>#{ENV["HOME"]}/tezos/signer-https</string>
+              <string>#{var}/lib/tezos/signer-https</string>
               <key>PIDFILE</key>
               <string></string>
               <key>MAGIC_BYTES</key>

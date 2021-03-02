@@ -107,7 +107,7 @@ class TezosEndorser008Ptedo2zk < Formula
           <key>EnvironmentVariables</key>
             <dict>
               <key>DATA_DIR</key>
-              <string>#{ENV["HOME"]}/tezos/client</string>
+              <string>#{var}/lib/tezos/client</string>
               <key>NODE_RPC_ENDPOINT</key>
               <string>http://localhost:8732</string>
               <key>ENDORSER_ACCOUNT</key>

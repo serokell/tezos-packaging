@@ -104,7 +104,7 @@ class TezosBaker008Ptedo2zk < Formula
           <key>EnvironmentVariables</key>
             <dict>
               <key>DATA_DIR</key>
-              <string>#{ENV["HOME"]}/tezos/client</string>
+              <string>#{var}/lib/tezos/client</string>
               <key>NODE_DATA_DIR</key>
               <string></string>
               <key>NODE_RPC_ENDPOINT</key>

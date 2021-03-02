@@ -65,7 +65,7 @@ class TezosNodeMainnet < Formula
           <key>EnvironmentVariables</key>
             <dict>
               <key>DATA_DIR</key>
-              <string>#{ENV["HOME"]}/tezos/node-mainnet</string>
+              <string>#{var}/lib/tezos/node-mainnet</string>
               <key>NODE_RPC_ADDR</key>
               <string>127.0.0.1:8732</string>
               <key>CERT_PATH</key>

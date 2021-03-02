@@ -65,7 +65,7 @@ class TezosSignerTcp < Formula
               <key>TIMEOUT</key>
               <string>1</string>
               <key>DATA_DIR</key>
-              <string>#{ENV["HOME"]}/tezos/signer-tcp</string>
+              <string>#{var}/lib/tezos/signer-tcp</string>
               <key>PIDFILE</key>
               <string></string>
               <key>MAGIC_BYTES</key>

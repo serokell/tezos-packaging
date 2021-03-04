@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: LicenseRef-MIT-TQ
 
 env:
-  SET_VERSION: "export TEZOS_VERSION=\"$(cat nix/nix/sources.json | jq -r '.tezos.ref' | cut -d'/' -f3)\""
+  SET_VERSION: "export TEZOS_VERSION=\"$(cat nix/nix/sources.json | jq -r '.tezos.ref' )\""
 
 steps:
  - label: reuse lint

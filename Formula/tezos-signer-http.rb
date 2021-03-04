@@ -63,7 +63,7 @@ class TezosSignerHttp < Formula
               <key>PORT</key>
               <string>8080</string>
               <key>DATA_DIR</key>
-              <string>#{ENV["HOME"]}/tezos/signer-http</string>
+              <string>#{var}/lib/tezos/signer-http</string>
               <key>PIDFILE</key>
               <string></string>
               <key>MAGIC_BYTES</key>
@@ -79,5 +79,8 @@ class TezosSignerHttp < Formula
         </dict>
       </plist>
     EOS
+  end
+  def post_install
+    mkdir "#{var}/lib/tezos/signer-http"
   end
 end

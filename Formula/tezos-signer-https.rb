@@ -67,7 +67,7 @@ class TezosSignerHttps < Formula
               <key>KEY_PATH</key>
               <string></string>
               <key>DATA_DIR</key>
-              <string>#{ENV["HOME"]}/tezos/signer-https</string>
+              <string>#{var}/lib/tezos/signer-https</string>
               <key>PIDFILE</key>
               <string></string>
               <key>MAGIC_BYTES</key>
@@ -83,5 +83,8 @@ class TezosSignerHttps < Formula
         </dict>
       </plist>
     EOS
+  end
+  def post_install
+    mkdir "#{var}/lib/tezos/signer-https"
   end
 end

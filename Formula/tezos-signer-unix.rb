@@ -60,7 +60,7 @@ class TezosSignerUnix < Formula
             <dict>
               <key>SOCKET</key>
               <string></string>
-              <string>#{ENV["HOME"]}/tezos/signer-unix</string>
+              <string>#{var}/lib/tezos/signer-unix</string>
               <key>PIDFILE</key>
               <string></string>
               <key>MAGIC_BYTES</key>
@@ -76,5 +76,8 @@ class TezosSignerUnix < Formula
         </dict>
       </plist>
     EOS
+  end
+  def post_install
+    mkdir "#{var}/lib/tezos/signer-unix"
   end
 end

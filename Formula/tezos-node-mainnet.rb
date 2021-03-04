@@ -65,7 +65,7 @@ class TezosNodeMainnet < Formula
           <key>EnvironmentVariables</key>
             <dict>
               <key>DATA_DIR</key>
-              <string>#{ENV["HOME"]}/tezos/node-mainnet</string>
+              <string>#{var}/lib/tezos/node-mainnet</string>
               <key>NODE_RPC_ADDR</key>
               <string>127.0.0.1:8732</string>
               <key>CERT_PATH</key>
@@ -81,5 +81,9 @@ class TezosNodeMainnet < Formula
         </dict>
       </plist>
     EOS
+  end
+  def post_install
+    mkdir_p "#{var}/lib/tezos/node-mainnet"
+    system "tezos-node", "config", "init", "--data-dir" "#{var}/lib/tezos/node-mainnet", "--network", "mainnet"
   end
 end

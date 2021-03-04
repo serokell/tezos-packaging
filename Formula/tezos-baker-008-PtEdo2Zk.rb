@@ -104,7 +104,7 @@ class TezosBaker008Ptedo2zk < Formula
           <key>EnvironmentVariables</key>
             <dict>
               <key>DATA_DIR</key>
-              <string>#{ENV["HOME"]}/tezos/client</string>
+              <string>#{var}/lib/tezos/client</string>
               <key>NODE_DATA_DIR</key>
               <string></string>
               <key>NODE_RPC_ENDPOINT</key>
@@ -120,5 +120,8 @@ class TezosBaker008Ptedo2zk < Formula
         </dict>
       </plist>
     EOS
+  end
+  def post_install
+    mkdir "#{var}/lib/tezos/client"
   end
 end

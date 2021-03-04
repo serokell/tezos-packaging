@@ -11,8 +11,7 @@ class TezosNodeEdo2net < Formula
 
   desc "Meta formula that provides backround tezos-node service that runs on edo2net"
 
-  def install
-    edo2net_config =
+  @@edo2net_config =
       <<~EOS
 {
 "p2p": {},
@@ -31,7 +30,8 @@ class TezosNodeEdo2net < Formula
         [ "edonet.tezos.co.il", "188.40.128.216:29732", "edo2net.kaml.fr",
           "edonet2.smartpy.io", "51.79.165.131", "edonetb.boot.tezostaquito.io" ] }
 }
-    EOS
+  EOS
+  def install
     startup_contents =
       <<~EOS
       #!/usr/bin/env bash
@@ -46,7 +46,7 @@ class TezosNodeEdo2net < Formula
       if [[ ! -f "$config_file" ]]; then
           echo "Configuring the node..."
           cat > "$config_file" <<-EOM
-      #{edo2net_config}
+      #{@@edo2net_config}
       EOM
           "$node" config update \
                   --data-dir "$DATA_DIR" \
@@ -85,7 +85,7 @@ class TezosNodeEdo2net < Formula
           <key>EnvironmentVariables</key>
             <dict>
               <key>DATA_DIR</key>
-              <string>#{ENV["HOME"]}/tezos/node-edo2net</string>
+              <string>#{var}/lib/tezos/node-edo2net</string>
               <key>NODE_RPC_ADDR</key>
               <string>127.0.0.1:8732</string>
               <key>CERT_PATH</key>
@@ -101,5 +101,9 @@ class TezosNodeEdo2net < Formula
         </dict>
       </plist>
     EOS
+  end
+  def post_install
+    mkdir "#{var}/lib/tezos/node-edo2net"
+    File.write("#{var}/lib/tezos/node-edo2net/config.json", @@edo2net_config)
   end
 end

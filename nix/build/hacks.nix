@@ -61,11 +61,13 @@ rec {
     buildInputs = o.buildInputs ++ [ alcotest-lwt ];
     propagatedBuildInputs = buildInputs;
   });
+  irmin-mem = osuper.irmin.versions."2.2.0";
   pcre = osuper.pcre.overrideAttrs (o: rec {
     buildInputs = o.buildInputs ++ [ odoc ];
     propagatedBuildInputs = buildInputs;
   });
 
+  ff = osuper.ff.versions."0.4.0";
   bls12-381 = osuper.bls12-381.overrideAttrs (o:
     rec {
       buildInputs = o.buildInputs ++ [ rustc-bls12-381 ];
@@ -73,6 +75,8 @@ rec {
         cp ${rustc-bls12-381.src}/include/* src/
       '' + o.buildPhase;
   });
+
+  gmp = self.gmp;
 
   tezos-sapling = osuper.tezos-sapling.overrideAttrs (o:
     let extern-C-patch = ./librustzcash-extern-C.patch; in
@@ -102,6 +106,7 @@ rec {
   conf-rust = self.cargo;
   conf-libpcre = self.pcre;
   conf-perl = self.perl;
+  conf-m4 = self.m4;
   ctypes-foreign = oself.ctypes;
 
   # FIXME X11 in nixpkgs musl

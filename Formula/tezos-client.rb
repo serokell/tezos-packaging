@@ -14,7 +14,7 @@ class TezosClient < Formula
 
   version "v8.2-3"
 
-  build_dependencies = %w[pkg-config autoconf rsync wget opam rust]
+  build_dependencies = %w[pkg-config autoconf rsync wget opam rustup-init]
   build_dependencies.each do |dependency|
     depends_on dependency => :build
   end
@@ -32,11 +32,10 @@ class TezosClient < Formula
 
   def make_deps
     ENV.deparallelize
-
+    ENV["CARGO_HOME"]="./.cargo"
+    system "rustup-init", "--default-toolchain", "1.44.0", "-y"
     system "opam", "init", "--bare", "--debug", "--auto-setup", "--disable-sandboxing"
-
-    ENV["RUST_VERSION"] = "1.49.0"
-    system "make", "build-deps"
+    system ["source .cargo/env",  "make build-deps"].join(" && ")
   end
 
   def install_template(dune_path, exec_path, name)

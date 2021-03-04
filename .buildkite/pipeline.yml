@@ -52,7 +52,7 @@ steps:
  - label: check brew formulas
    commands:
      # Check all formulas except 'tezos.rb' because it's a base class for all other formulas
-     - find ./Formula -type f ! -name "tezos.rb" -name "*.rb" -exec brew info {} +
+     - find ./Formula -type f -name "*.rb" -exec ruby -c {} +
      # All formulas share the same source URL inherited by the Tezos class, so it's fine
      # to fetch sources for only one formula
      - brew fetch -s ./Formula/tezos-client.rb

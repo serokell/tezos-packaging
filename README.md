@@ -118,7 +118,7 @@ dependencies are compiled from scratch. Once the bottles are built, the correspo
 formulas should be updated. Also, bottles should be uploaded to the release artifacts.
 
 <a name="systemd"></a>
-## Systemd units for `tezos-node` and daemons
+## Background services for `tezos-node` and daemons
 
 ### Systemd units on Ubuntu or Fedora
 
@@ -146,7 +146,37 @@ data directory.
 `tezos-{accuser, endorser}` have configurable node address, so that they can be used with both
 remote and local node.
 
-### Systemd units on other systems
+### Launchd services on macOS
+
+`tezos-accuser-<proto>`, `tezos-baker-<proto>`, `tezos-endorser-<proto>` formulas
+provide backround services for running the corresponding daemons.
+
+Since `tezos-node` and `tezos-signer` need multiple services they are provided
+in dedicated meta-formulas. These formulas don't install any binaries and only add
+background services.
+
+Formulas with `tezos-node` background services:
+* `tezos-node-mainnet`
+* `tezos-node-edo2net`
+
+Formulas with `tezos-signer` background services:
+* `tezos-signer-http`
+* `tezos-signer-https`
+* `tesos-signer-tcp`
+* `tezos-signer-unix`
+
+To start the service: `brew services start <formula>`.
+
+To stop the service: `brew services stop <formula>`.
+
+All of the brew services have various configurable env variables. These variables
+can be changed in the corresponding `/usr/local/Cellar/tezos-signer-tcp/<version>/homebrew.mxcl.<formula>.plist`.
+Once the configuration is updated, you should restart the service:
+`brew services restart <formula>`.
+
+Note, that all services are run as a user agents, thus they're stopped after the logout.
+
+### Systemd units on other Linux systems
 
 If you're not using Ubuntu or Fedora you can still construct systemd units for binaries
 from scratch.

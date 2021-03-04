@@ -2,23 +2,123 @@
 #
 # SPDX-License-Identifier: LicenseRef-MIT-TQ
 
-require File.join(File.dirname(__FILE__), "..", "FormulaAbstract", "tezos")
+class TezosBaker008Ptedo2zk < Formula
+  @all_bins = []
 
-class TezosBaker008Ptedo2zk < Tezos
-  init
+  class << self
+    attr_accessor :all_bins
+  end
+  homepage "https://gitlab.com/tezos/tezos"
+
+  url "https://gitlab.com/tezos/tezos.git", :tag => "v8.2", :shallow => false
+
+  version "v8.2-3"
+
+  build_dependencies = %w[pkg-config autoconf rsync wget opam rust]
+  build_dependencies.each do |dependency|
+    depends_on dependency => :build
+  end
+
+  dependencies = %w[gmp hidapi libev libffi tezos-sapling-params]
+  dependencies.each do |dependency|
+    depends_on dependency
+  end
   desc "Daemon for baking"
 
   bottle do
     root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosBaker008Ptedo2zk.version}/"
     cellar :any
-    sha256 "610e59b9bfa629fd9dbe296e22ae8009d072101dc350ce61196e0334f8068597" => :mojave
-    sha256 "fa90547bfd8c21c88ba3c26cb931774a0157fcbd169e853935bc322bb5fed064" => :catalina
+  end
+
+  def make_deps
+    ENV.deparallelize
+
+    system "opam", "init", "--bare", "--debug", "--auto-setup", "--disable-sandboxing"
+
+    ENV["RUST_VERSION"] = "1.49.0"
+    system "make", "build-deps"
+  end
+
+  def install_template(dune_path, exec_path, name)
+    bin.mkpath
+    self.class.all_bins << name
+    system ["eval $(opam env)", "dune build #{dune_path}", "cp #{exec_path} #{name}"].join(" && ")
+    bin.install name
   end
 
   def install
+    startup_contents =
+      <<~EOS
+      #!/usr/bin/env bash
+
+      set -euo pipefail
+
+      baker="#{bin}/tezos-baker-008-PtEdo2Zk"
+
+      baker_dir="$DATA_DIR"
+
+      baker_config="$baker_dir/config"
+      mkdir -p "$baker_dir"
+
+      if [ ! -f "$baker_config" ]; then
+          "$baker" --base-dir "$baker_dir" \
+                  --endpoint "$NODE_RPC_ENDPOINT" \
+                  config init --output "$baker_config" >/dev/null 2>&1
+      else
+          "$baker" --base-dir "$baker_dir" \
+                  --endpoint "$NODE_RPC_ENDPOINT" \
+                  config update >/dev/null 2>&1
+      fi
+
+      launch_baker() {
+          exec "$baker" \
+              --base-dir "$baker_dir" --endpoint "$NODE_RPC_ENDPOINT" \
+              run with local node "$NODE_DATA_DIR" "$@"
+      }
+
+      if [[ -z "$BAKER_ACCOUNT" ]]; then
+          launch_baker
+      else
+          launch_baker "$BAKER_ACCOUNT"
+      fi
+    EOS
+    File.write("tezos-baker-008-PtEdo2Zk-start", startup_contents)
+    bin.install "tezos-baker-008-PtEdo2Zk-start"
     make_deps
     install_template "src/proto_008_PtEdo2Zk/bin_baker/main_baker_008_PtEdo2Zk.exe",
                      "_build/default/src/proto_008_PtEdo2Zk/bin_baker/main_baker_008_PtEdo2Zk.exe",
                      "tezos-baker-008-PtEdo2Zk"
+  end
+  plist_options manual: "tezos-baker-008-PtEdo2Zk run with local node"
+  def plist
+    <<~EOS
+      <?xml version="1.0" encoding="UTF-8"?>
+      <!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN"
+      "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+      <plist version="1.0">
+        <dict>
+          <key>Label</key>
+          <string>#{plist_name}</string>
+          <key>Program</key>
+          <string>#{opt_bin}/tezos-baker-008-PtEdo2Zk-start</string>
+          <key>EnvironmentVariables</key>
+            <dict>
+              <key>DATA_DIR</key>
+              <string>#{ENV["HOME"]}/tezos/client</string>
+              <key>NODE_DATA_DIR</key>
+              <string></string>
+              <key>NODE_RPC_ENDPOINT</key>
+              <string>http://localhost:8732</string>
+              <key>BAKER_ACCOUNT</key>
+              <string></string>
+          </dict>
+          <key>RunAtLoad</key><true/>
+          <key>StandardOutPath</key>
+          <string>#{var}/log/#{name}.log</string>
+          <key>StandardErrorPath</key>
+          <string>#{var}/log/#{name}.log</string>
+        </dict>
+      </plist>
+    EOS
   end
 end

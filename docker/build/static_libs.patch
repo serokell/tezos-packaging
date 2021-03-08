@@ -231,3 +231,48 @@ index 81ebe6075..43e57a2d0 100644
  
  (rule
   (alias runtest_lint)
+diff --git a/src/proto_009_PsrsRVg1/bin_accuser/dune b/src/proto_009_PsrsRVg1/bin_accuser/dune
+index 78fedf8b8..d728861c1 100644
+--- a/src/proto_009_PsrsRVg1/bin_accuser/dune
++++ b/src/proto_009_PsrsRVg1/bin_accuser/dune
+@@ -10,7 +10,9 @@
+                    -open Tezos_client_commands
+                    -open Tezos_baking_009_PsrsRVg1_commands
+                    -open Tezos_stdlib_unix
+-                   -open Tezos_client_base_unix)))
++                   -open Tezos_client_base_unix
++                   -ccopt -static
++                   -cclib "-lusb-1.0 -lhidapi-libusb -ludev")))
+ 
+ (rule
+  (alias runtest_lint)
+diff --git a/src/proto_009_PsrsRVg1/bin_baker/dune b/src/proto_009_PsrsRVg1/bin_baker/dune
+index db78335da..93a0cd285 100644
+--- a/src/proto_009_PsrsRVg1/bin_baker/dune
++++ b/src/proto_009_PsrsRVg1/bin_baker/dune
+@@ -10,7 +10,9 @@
+                    -open Tezos_client_commands
+                    -open Tezos_baking_009_PsrsRVg1_commands
+                    -open Tezos_stdlib_unix
+-                   -open Tezos_client_base_unix)))
++                   -open Tezos_client_base_unix
++                   -ccopt -static
++                   -cclib "-lusb-1.0 -lhidapi-libusb -ludev")))
+ 
+ (rule
+  (alias runtest_lint)
+diff --git a/src/proto_009_PsrsRVg1/bin_endorser/dune b/src/proto_009_PsrsRVg1/bin_endorser/dune
+index 05c237579..16fd9d36a 100644
+--- a/src/proto_009_PsrsRVg1/bin_endorser/dune
++++ b/src/proto_009_PsrsRVg1/bin_endorser/dune
+@@ -10,7 +10,9 @@
+                    -open Tezos_client_commands
+                    -open Tezos_baking_009_PsrsRVg1_commands
+                    -open Tezos_stdlib_unix
+-                   -open Tezos_client_base_unix)))
++                   -open Tezos_client_base_unix
++                   -ccopt -static
++                   -cclib "-lusb-1.0 -lhidapi-libusb -ludev")))
+ 
+ (rule
+  (alias runtest_lint)

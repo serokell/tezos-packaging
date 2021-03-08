@@ -44,6 +44,6 @@ fi
 "$virtualisation_engine" build -t alpine-tezos -f "$docker_file" --build-arg TEZOS_VERSION="$TEZOS_VERSION" .
 container_id="$("$virtualisation_engine" create alpine-tezos)"
 for b in "${binaries[@]}"; do
-    "$virtualisation_engine" cp "$container_id:/tezos/$b" "$b"
+    "$virtualisation_engine" cp "$container_id:/home/tezos/tezos/$b" "$b"
 done
 "$virtualisation_engine" rm -v "$container_id"

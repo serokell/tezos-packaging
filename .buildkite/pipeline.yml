@@ -123,4 +123,4 @@ steps:
    - buildkite-agent artifact download "docker/*" arm-binaries --step "build arm via docker"
    - ls binaries
    - ./scripts/autorelease.sh
-   branches: master
+   if: build.branch == "master" || build.branch == "rvem/falphanet-release"

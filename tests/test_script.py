@@ -87,7 +87,7 @@ with subtest("run node with daemons on delphinet"):
     test_node_with_daemons_scenario("delphinet")
 
 with subtest("run node with daemons on mainnet"):
-    test_node_with_daemons_scenario("mainnet")
+    test_node_with_daemons_scenario("falphanet")
 
 with subtest("run node with daemons using tls"):
     test_node_with_daemons_scenario("delphinet", use_tls=True)

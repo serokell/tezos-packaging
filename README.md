@@ -35,6 +35,7 @@ different networks, you can read more about this in [this article](https://tezos
 * [Brew tap for macOS](#macos)
 * [Systemd services for Tezos binaries](#systemd)
 * [Building instructions](#building)
+* [Setting up baking instance on Ubuntu](#baking-on-ubuntu)
 
 <a name="static-linux"></a>
 ## Obtain binaries from github release
@@ -238,6 +239,12 @@ Each signer service has dedicated config file in e.g. `/etc/default/tezos-signer
 This repository provides two distinct ways for building and packaging tezos binaries:
 * [Docker-based](./docker/README.md)
 * [Nix-based](./nix/README.md)
+
+<a name="baking-on-ubuntu"></a>
+## Setting up baking instance on Ubuntu
+
+Read [the article](./docs/baking.md) to find out an easy way to set up
+baking instance on Ubuntu using packages provided by our launchpad PPA.
 
 ## For Contributors
 

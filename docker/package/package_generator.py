@@ -96,6 +96,7 @@ for package in packages:
                     shutil.copy(f"{os.path.dirname(__file__)}/scripts/{systemd_unit.startup_script}", f"debian/{systemd_unit.startup_script}")
                 package.gen_install("debian/install")
                 package.gen_postinst("debian/postinst")
+                package.gen_postrm("debian/postrm")
                 package.gen_control_file(common_deps, "debian/control")
                 subprocess.run(["wget", "-q", "-O", "debian/copyright", f"https://gitlab.com/tezos/tezos/-/raw/v{version}/LICENSE"], check=True)
                 subprocess.run("rm debian/*.ex debian/*.EX debian/README*", shell=True, check=True)

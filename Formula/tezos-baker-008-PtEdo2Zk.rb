@@ -28,6 +28,8 @@ class TezosBaker008Ptedo2zk < Formula
   bottle do
     root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosBaker008Ptedo2zk.version}/"
     cellar :any
+    sha256 "774db0d3db3ac06dc6eb7216b0be9cbde36adf37c6706894b44b232d067bbb5e" => :mojave
+    sha256 "d02f82402146a961b3a055aa8e59d4e87d44d086bd6d3ad6bebb47b98a3d0e76" => :catalina
   end
 
   def make_deps

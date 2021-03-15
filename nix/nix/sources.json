@@ -47,6 +47,18 @@
         "url": "https://github.com/ocaml/opam-repository/archive/d90747963ba246b00526d08d26241e5654f418bf.tar.gz",
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
     },
+    "serokell-nix": {
+        "branch": "master",
+        "description": "Serokell Nix infrastructure library",
+        "homepage": "",
+        "owner": "serokell",
+        "repo": "serokell.nix",
+        "rev": "c8d39be5ea3b5cac5da952f28d37095ef385b89f",
+        "sha256": "0db2hgh2fgpr8hn7rpg1fixjsvl20clj6ld893825rn56a2aq76v",
+        "type": "tarball",
+        "url": "https://github.com/serokell/serokell.nix/archive/c8d39be5ea3b5cac5da952f28d37095ef385b89f.tar.gz",
+        "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
+    },
     "tezos": {
         "ref": "refs/tags/v9.1",
         "repo": "https://gitlab.com/tezos/tezos",

@@ -108,7 +108,7 @@ Standards-Version: 3.9.6
 Homepage: https://gitlab.com/tezos/tezos/
 
 Package: {self.name.lower()}
-Architecture: amd64
+Architecture: amd64 arm64
 Depends: ${{shlibs:Depends}}, ${{misc:Depends}}, {"tezos-sapling-params" if self.requires_sapling_params else ""}
 Description: {self.desc}
 '''
@@ -199,7 +199,7 @@ Release: {release}
 Epoch: {fedora_epoch}
 Summary: {self.desc}
 License: MIT
-BuildArch: x86_64
+BuildArch: x86_64 aarch64
 Source0: {self.name}-{version}.tar.gz
 Source1: https://gitlab.com/tezos/tezos/tree/v{version}/
 BuildRequires: {build_requires} {systemd_deps}
@@ -308,7 +308,7 @@ Standards-Version: 3.9.6
 Homepage: https://gitlab.com/tezos/tezos/
 
 Package: {self.name.lower()}
-Architecture: amd64
+Architecture: amd64 arm64
 Depends: ${{shlibs:Depends}}, ${{misc:Depends}}
 Description: {self.desc}
 '''
@@ -324,7 +324,7 @@ Release: {release}
 Epoch: {fedora_epoch}
 Summary: {self.desc}
 License: MIT
-BuildArch: x86_64
+BuildArch: x86_64 aarch64
 Source0: {self.name}-{version}.tar.gz
 BuildRequires: wget
 %description

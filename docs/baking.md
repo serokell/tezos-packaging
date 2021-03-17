@@ -86,7 +86,6 @@ In order to run a baker locally, you'll need a fully-synced local `tezos-node`.
 
 The fastest way to bootstrap the node is to import a snapshot.
 Snapshots can be downloaded from the following websites:
-* [Tulip Snapshots](https://snapshots.tulip.tools/#/)
 * [Tezos Giganode Snapshots](https://snapshots-tezos.giganode.io/)
 * [XTZ-Shots](https://xtz-shots.io/)
 

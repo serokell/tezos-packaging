@@ -96,31 +96,14 @@ the smallest and the fastest mode that is sufficient for baking (you can read mo
 
 All commands within the service are run under the `tezos` user.
 
+The `tezos-node` package provides `tezos-node-<network>` aliases that are equivalent to
+`tezos-node --data-dir <DATA_DIR from the tezos-node-<network>.service>`.
+These aliases can be used instead of providing `--data-dir` option to the `tezos-node`
+invocations manually.
+
 In order to import the snapshot, run the following command:
 ```
-sudo -u tezos tezos-node snapshot import --data-dir /var/lib/tezos/node-<network>/ <path to the snapshot file>
-```
-
-#### Troubleshooting node snapshot import
-
-Snapshot import requires that the `tezos-node` data directory doesn't contain the `context` and `store` folders.
-Remove them if you're getting an error about their presence.
-
-In case you're getting an error similar to:
-```
-tezos-node: Error:
-              Invalid block BLjutMj47caB
-                Failed to validate the economic-protocol content of the block: Error:
-                                                                                Invalid signature for block BLjutMj47caB. Expected: tz1Na5QB98cDA.
-```
-
-you should init/update config in the data directory to match the desired network
-before importing the snapshot. To do that, run one of the following commands
-(depending on whether the config in the given data directory was initialized previously):
-```
-sudo -u tezos tezos-node config init --data-dir /var/lib/tezos/node-<network> --network <network>
-#or
-sudo -u tezos tezos-node config update --data-dir /var/lib/tezos/node-<network> --network <network>
+sudo -u tezos tezos-node-<network> snapshot import <path to the snapshot file>
 ```
 
 ### Starting the node

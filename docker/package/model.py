@@ -68,6 +68,10 @@ class AbstractPackage:
     def gen_postinst(self, out):
         pass
 
+    @abstractmethod
+    def gen_postrm(self, out):
+        pass
+
 
 meta = json.load(open(f"{os.path.dirname(__file__)}/../../meta.json", "r"))
 version = os.environ["TEZOS_VERSION"][1:]
@@ -79,7 +83,7 @@ fedora_epoch = 1
 class OpamBasedPackage(AbstractPackage):
     def __init__(self, name: str, desc: str, systemd_units: List[SystemdUnit]=[],
                  target_proto: str=None, optional_opam_deps: List[str]=[],
-                 requires_sapling_params: bool=False, postinst_steps: str=""):
+                 requires_sapling_params: bool=False, postinst_steps: str="", postrm_steps: str=""):
         self.name = name
         self.desc = desc
         self.systemd_units = systemd_units
@@ -87,6 +91,7 @@ class OpamBasedPackage(AbstractPackage):
         self.optional_opam_deps = optional_opam_deps
         self.requires_sapling_params = requires_sapling_params
         self.postinst_steps = postinst_steps
+        self.postrm_steps = postrm_steps
 
     def fetch_sources(self, out_dir):
         opam_package = "tezos-client" if self.name == "tezos-admin-client" else self.name
@@ -184,6 +189,7 @@ mkdir -p %{{buildroot}}/%{{_unitdir}}
 
 %postun
 {systemd_units_postun}
+{self.postrm_steps}
 '''
         else:
             systemd_deps = ""
@@ -284,6 +290,17 @@ set -e
         with open(out, 'w') as f:
             f.write(postinst_contents)
 
+    def gen_postrm(self, out):
+        postrm_contents = f'''#!/bin/sh
+
+set -e
+
+#DEBHELPER#
+
+{self.postrm_steps}
+'''
+        with open(out, 'w') as f:
+            f.write(postrm_contents)
 
 class TezosSaplingParamsPackage(AbstractPackage):
     def __init__(self):

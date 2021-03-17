@@ -108,6 +108,7 @@ edo2net_config = '''{
 
 node_units = []
 node_postinst_steps = postinst_steps_common
+node_postrm_steps = ""
 common_node_env = ["NODE_RPC_ADDR=127.0.0.1:8732", "CERT_PATH=", "KEY_PATH="]
 for network in networks:
     env = [f"DATA_DIR=/var/lib/tezos/node-{network}", f"NETWORK={network}"] + common_node_env
@@ -115,7 +116,15 @@ for network in networks:
     node_postinst_steps += f'''mkdir -p /var/lib/tezos/node-{network}
 [ ! -f /var/lib/tezos/node-{network}/config.json ] && tezos-node config init --data-dir /var/lib/tezos/node-{network} --network {network}
 chown -R tezos:tezos /var/lib/tezos/node-{network}
+
+cat > /usr/bin/tezos-node-{network} <<- 'EOM'
+#! /usr/bin/env bash
+
+TEZOS_NODE_DIR="$(cat $(systemctl show -p FragmentPath tezos-node-{network}.service | cut -d'=' -f2) | grep 'DATA_DIR' | cut -d '=' -f3 | cut -d '"' -f1)" tezos-node "$@"
+EOM
+chmod +x /usr/bin/tezos-node-{network}
 '''
+    node_postrm_steps += f"rm -f /usr/bin/tezos-node-{network}\n"
 
 # Add custom config service
 node_units.append(mk_node_unit(suffix="custom", env=["DATA_DIR=/var/lib/tezos/node-custom",
@@ -133,7 +142,14 @@ cat > /var/lib/tezos/node-edo2net/config.json <<- EOM
 {edo2net_config}
 EOM
 chown -R tezos:tezos /var/lib/tezos/node-edo2net
+cat > /usr/bin/tezos-node-edo2net <<- 'EOM'
+#! /usr/bin/env bash
+
+TEZOS_NODE_DIR="$(cat $(systemctl show -p FragmentPath tezos-node-edo2net.service | cut -d'=' -f2) | grep 'DATA_DIR' | cut -d '=' -f3 | cut -d '"' -f1)" tezos-node "$@"
+EOM
+chmod +x /usr/bin/tezos-node-edo2net
 '''
+node_postrm_steps += f"rm -f /usr/bin/tezos-node-edo2net\n"
 
 packages.append(OpamBasedPackage("tezos-node",
                                  "Entry point for initializing, configuring and running a Tezos node",
@@ -147,7 +163,8 @@ packages.append(OpamBasedPackage("tezos-node",
                                      "tezos-embedded-protocol-005-PsBabyM1",
                                      "tezos-embedded-protocol-006-PsCARTHA"],
                                  requires_sapling_params=True,
-                                 postinst_steps=node_postinst_steps))
+                                 postinst_steps=node_postinst_steps,
+                                 postrm_steps=node_postrm_steps))
 
 active_protocols = json.load(open(f"{os.path.dirname( __file__)}/../../protocols.json", "r"))["active"]
 

@@ -205,17 +205,22 @@ file, they can be found in [`scripts`](./docker/package/scripts) and
 It's possible to run multiple same services, e.g. two `tezos-node`s that run different
 networks.
 
-`tezos-node` packages provide three services out of the box:
-`tezos-node-delphinet` and `tezos-node-mainnet` that run
-`delphinet` and `mainnet` networks respectively.
+`tezos-node` packages provide multiple services out of the box:
+`tezos-node-edo2net` and `tezos-node-mainnet` that run
+`edo2net` and `mainnet` networks respectively.
 
 In order to start it run:
 ```
 systemctl start tezos-node-<network>
 ```
 
+Also, there are `tezos-node-<network>` binary aliases that are equivalent to
+```
+TEZOS_NODE_DIR="<DATA_DIR from tezos-node-<network>.service>" tezos-node
+```
+
 In addition to node services where the config is predefined to a specific network
-(e.g. `tezos-node-mainnet` or `tezos-node-delphinet`), it's possible to run `tezos-node-custom`
+(e.g. `tezos-node-mainnet` or `tezos-node-edo2net`), it's possible to run `tezos-node-custom`
 service and provide a path to the custom node config file via the
 `CUSTOM_NODE_CONFIG` variable in the `tezos-node-custom.service` file.
 

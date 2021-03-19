@@ -27,6 +27,7 @@ let
     src = builtins.fetchTarball {
       url = "https://github.com/zcash/librustzcash/archive/0.1.0.tar.gz";
     };
+    cargoBuildType = "";
     cargoSha256 = "1wzyrcmcbrna6rjzw19c4lq30didzk4w6fs6wmvxp0xfg4qqdlax";
   };
   zcash-params = import ./zcash.nix {};
@@ -40,6 +41,7 @@ rec {
     hardeningDisable = o.hardeningDisable ++
                        self.stdenv.lib.optional self.stdenv.hostPlatform.isMusl "pie";
   });
+  dune = self.ocamlPackages.dune_2;
   # FIXME opam-nix needs to do this
   ocamlfind = findlib;
 
@@ -56,6 +58,7 @@ rec {
   hacl-star = osuper.hacl-star.overrideAttrs (_: rec {
     sourceRoot = ".";
   });
+  index = osuper.index.versions."1.2.1";
   irmin = osuper.irmin.versions."2.2.0";
   irmin-pack = osuper.irmin-pack.versions."2.2.0".overrideAttrs (o : rec {
     buildInputs = o.buildInputs ++ [ alcotest-lwt ];
@@ -84,12 +87,14 @@ rec {
       '' + o.buildPhase;
     }
   );
-  zarith = osuper.zarith.overrideAttrs(_ : {
+  zarith = osuper.zarith.overrideAttrs(o : {
     version = "1.10";
+    buildInputs = o.buildInputs ++ [self.perl];
     src = self.fetchurl {
       url = "https://github.com/ocaml/Zarith/archive/release-1.10.tar.gz";
       sha256 = "1qxrl0v2mk9wghc1iix3n0vfz2jbg6k5wpn1z7p02m2sqskb0zhb";
     };
+    patchPhase = "patchShebangs ./z_pp.pl";
   });
 
   # FIXME opam-nix needs to handle "external" (native) dependencies correctly
@@ -102,10 +107,28 @@ rec {
   conf-rust = self.cargo;
   conf-libpcre = self.pcre;
   conf-perl = self.perl;
-  ctypes-foreign = oself.ctypes;
+  ctypes-foreign = ctypes;
 
   # FIXME X11 in nixpkgs musl
   lablgtk = null;
+
+  ctypes = osuper.ctypes.versions."0.17.1".overrideAttrs (o: rec{
+    pname = "ctypes";
+    buildInputs = o.buildInputs ++ [ self.libffi ];
+    src = self.fetchurl {
+      url = "https://github.com/ocamllabs/ocaml-ctypes/archive/0.17.1.tar.gz";
+      sha256 = "sha256-QWc8Lrk8qZ7T3hg77z5rQ2xnoNkCsRC+XaFYqtkip+k=";
+    };
+    installPhase = ''
+      runHook preInstall
+      mkdir -p $OCAMLFIND_DESTDIR
+      "make" "install"
+      if [[ -d $OCAMLFIND_DESTDIR/${pname} ]]; then mv $OCAMLFIND_DESTDIR/${pname} $lib; ln -s $lib $OCAMLFIND_DESTDIR/${pname}; else touch $lib; fi
+      if [[ -d $out/bin ]]; then mv $out/bin $bin; ln -s $bin $out/bin; else touch $bin; fi
+      if [[ -d $out/share ]]; then mv $out/share $share; ln -s $share $out/share; else touch $share; fi
+      runHook postInstall
+    '';
+  });
 
   # FIXME recursive dependencies WTF
   bigstring = osuper.bigstring.overrideAttrs (_: { doCheck = false; });

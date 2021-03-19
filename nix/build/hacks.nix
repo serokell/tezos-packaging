@@ -10,7 +10,7 @@ let
   rustc-bls12-381 = self.rustPlatform.buildRustPackage rec {
     pname = "rustc-bls12-381";
     version = "0.7.2";
-    RUSTFLAGS = "-C target-feature=-crt-static -C lto=off";
+    RUSTFLAGS = "-C lto=off";
     src = builtins.fetchTarball {
       url = "https://gitlab.com/dannywillems/rustc-bls12-381/-/archive/0.7.2/rustc-bls12-381-0.7.2.tar.gz";
     };
@@ -21,14 +21,13 @@ let
     ];
   };
   librustzcash = self.rustPlatform.buildRustPackage rec {
-    pname = "librustzcash";
-    version = "0.1.0";
-    RUSTFLAGS = "-C target-feature=-crt-static -C lto=off";
+    name = "librustzcash";
+    #version = "0.1.0";
+    RUSTFLAGS = "-C lto=off";
     src = builtins.fetchTarball {
-      url = "https://github.com/zcash/librustzcash/archive/0.1.0.tar.gz";
+      url = "https://github.com/zcash/zcash/archive/8c778c9c0d9f3c91650f02d0becaacac24e61108.tar.gz";
     };
-    cargoBuildType = "";
-    cargoSha256 = "1wzyrcmcbrna6rjzw19c4lq30didzk4w6fs6wmvxp0xfg4qqdlax";
+    cargoSha256 = "sha256-12bi6cSC9Z/b+yPsLYFy0toMLOCyfhusHwITYDdMCqo=";
   };
   zcash-params = import ./zcash.nix {};
   zcash-post-fixup = pkg: ''
@@ -82,8 +81,7 @@ rec {
     rec {
       buildInputs = o.buildInputs ++ [ librustzcash rustc-bls12-381 self.gcc self.git ];
       buildPhase = ''
-        cp ${librustzcash.src}/librustzcash/include/librustzcash.h .
-        patch librustzcash.h ${extern-C-patch}
+        cp ${librustzcash.src}/src/rust/include/librustzcash.h .
       '' + o.buildPhase;
     }
   );

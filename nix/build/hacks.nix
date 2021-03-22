@@ -20,15 +20,27 @@ let
       ./bls12-381-add-Cargo.lock.patch
     ];
   };
-  librustzcash = self.rustPlatform.buildRustPackage rec {
+  sources = import ../nix/sources.nix;
+  naersk = self.callPackage sources.naersk {};
+  inherit (import "${sources.crate2nix}/tools.nix" { pkgs = self; }) generatedCargoNix;
+  librustzcash = (self.callPackage (generatedCargoNix rec {
     name = "librustzcash";
-    #version = "0.1.0";
-    RUSTFLAGS = "-C lto=off";
     src = builtins.fetchTarball {
-      url = "https://github.com/zcash/zcash/archive/8c778c9c0d9f3c91650f02d0becaacac24e61108.tar.gz";
+      url =
+        "https://github.com/zcash/zcash/archive/8c778c9c0d9f3c91650f02d0becaacac24e61108.tar.gz";
     };
-    cargoSha256 = "sha256-12bi6cSC9Z/b+yPsLYFy0toMLOCyfhusHwITYDdMCqo=";
-  };
+  }) {
+    defaultCrateOverrides = self.defaultCrateOverrides // {
+      librustzcash = oa: {
+        postBuild = "build_lib src/rust/src/rustzcash.rs";
+        postInstall = ''
+          mkdir -p $out/lib
+          cp -r $lib/lib/*.a $out/lib/librustzcash.a
+        '';
+        extraRustcOpts = ["-C lto=off"];
+      };
+    };
+  }).rootCrate.build;
   zcash-params = import ./zcash.nix {};
   zcash-post-fixup = pkg: ''
     mv $bin/${pkg.name} $bin/${pkg.name}-wrapped
@@ -163,6 +175,8 @@ rec {
       buildInputs = o.buildInputs ++ [ librustzcash ];
       XDG_DATA_DIRS = "${zcash-params}:$XDG_DATA_DIRS";
     });
+
+  inherit librustzcash;
 
   # FIXME apply this patch upstream
   tezos-stdlib-unix = osuper.tezos-stdlib-unix.overrideAttrs

@@ -20,15 +20,27 @@ let
       ./bls12-381-add-Cargo.lock.patch
     ];
   };
-  librustzcash = self.rustPlatform.buildRustPackage rec {
-    pname = "librustzcash";
-    version = "0.1.0";
-    RUSTFLAGS = "-C target-feature=-crt-static -C lto=off";
-    src = builtins.fetchTarball {
-      url = "https://github.com/zcash/librustzcash/archive/0.1.0.tar.gz";
+  sources = import ../nix/sources.nix;
+  inherit (import "${sources.crate2nix}/tools.nix" { pkgs = self; }) generatedCargoNix;
+  librustzcash = (self.callPackage (generatedCargoNix rec {
+    name = "librustzcash";
+    src = self.fetchzip {
+      url =
+        "https://github.com/zcash/zcash/archive/8c778c9c0d9f3c91650f02d0becaacac24e61108.tar.gz";
+      sha256 = "sha256-EHX8MHQZG3dTnHV2J2vFbDlurV8pNYggxTYLOyUT/yY=";
     };
-    cargoSha256 = "1wzyrcmcbrna6rjzw19c4lq30didzk4w6fs6wmvxp0xfg4qqdlax";
-  };
+  }) {
+    defaultCrateOverrides = self.defaultCrateOverrides // {
+      librustzcash = oa: {
+        postBuild = "build_lib src/rust/src/rustzcash.rs";
+        postInstall = ''
+          mkdir -p $out/lib
+          cp -r $lib/lib/*.a $out/lib/librustzcash.a
+        '';
+        extraRustcOpts = ["-C lto=off"];
+      };
+    };
+  }).rootCrate.build;
   zcash-params = import ./zcash.nix {};
   zcash-post-fixup = pkg: ''
     mv $bin/${pkg.name} $bin/${pkg.name}-wrapped
@@ -36,10 +48,8 @@ let
   '';
 in
 rec {
-  ocaml = self.ocaml-ng.ocamlPackages_4_09.ocaml.overrideAttrs (o: o // {
-    hardeningDisable = o.hardeningDisable ++
-                       self.stdenv.lib.optional self.stdenv.hostPlatform.isMusl "pie";
-  });
+  ocaml = self.ocaml-ng.ocamlPackages_4_10.ocaml;
+  dune = self.ocamlPackages.dune_2;
   # FIXME opam-nix needs to do this
   ocamlfind = findlib;
 
@@ -56,16 +66,16 @@ rec {
   hacl-star = osuper.hacl-star.overrideAttrs (_: rec {
     sourceRoot = ".";
   });
-  irmin = osuper.irmin.versions."2.2.0";
-  irmin-pack = osuper.irmin-pack.versions."2.2.0".overrideAttrs (o : rec {
-    buildInputs = o.buildInputs ++ [ alcotest-lwt ];
-    propagatedBuildInputs = buildInputs;
-  });
+  index = osuper.index.versions."1.3.0";
+  irmin = osuper.irmin.versions."2.5.1";
+  irmin-pack = osuper.irmin-pack.versions."2.5.1";
+  irmin-layers = osuper.irmin-layers.versions."2.5.1";
   pcre = osuper.pcre.overrideAttrs (o: rec {
     buildInputs = o.buildInputs ++ [ odoc ];
     propagatedBuildInputs = buildInputs;
   });
 
+  ff = osuper.ff.versions."0.4.0";
   bls12-381 = osuper.bls12-381.overrideAttrs (o:
     rec {
       buildInputs = o.buildInputs ++ [ rustc-bls12-381 ];
@@ -75,21 +85,21 @@ rec {
   });
 
   tezos-sapling = osuper.tezos-sapling.overrideAttrs (o:
-    let extern-C-patch = ./librustzcash-extern-C.patch; in
     rec {
       buildInputs = o.buildInputs ++ [ librustzcash rustc-bls12-381 self.gcc self.git ];
       buildPhase = ''
-        cp ${librustzcash.src}/librustzcash/include/librustzcash.h .
-        patch librustzcash.h ${extern-C-patch}
+        cp ${librustzcash.src}/src/rust/include/librustzcash.h .
       '' + o.buildPhase;
     }
   );
-  zarith = osuper.zarith.overrideAttrs(_ : {
+  zarith = osuper.zarith.overrideAttrs(o : {
     version = "1.10";
+    buildInputs = o.buildInputs ++ [self.perl];
     src = self.fetchurl {
       url = "https://github.com/ocaml/Zarith/archive/release-1.10.tar.gz";
       sha256 = "1qxrl0v2mk9wghc1iix3n0vfz2jbg6k5wpn1z7p02m2sqskb0zhb";
     };
+    patchPhase = "patchShebangs ./z_pp.pl";
   });
 
   # FIXME opam-nix needs to handle "external" (native) dependencies correctly
@@ -102,7 +112,27 @@ rec {
   conf-rust = self.cargo;
   conf-libpcre = self.pcre;
   conf-perl = self.perl;
-  ctypes-foreign = oself.ctypes;
+  conf-m4 = self.m4;
+  ctypes-foreign = ctypes;
+  gmp = self.gmp;
+
+  ctypes = osuper.ctypes.versions."0.17.1".overrideAttrs (o: rec{
+    pname = "ctypes";
+    buildInputs = o.buildInputs ++ [ self.libffi ];
+    src = self.fetchurl {
+      url = "https://github.com/ocamllabs/ocaml-ctypes/archive/0.17.1.tar.gz";
+      sha256 = "sha256-QWc8Lrk8qZ7T3hg77z5rQ2xnoNkCsRC+XaFYqtkip+k=";
+    };
+    installPhase = ''
+      runHook preInstall
+      mkdir -p $OCAMLFIND_DESTDIR
+      "make" "install"
+      if [[ -d $OCAMLFIND_DESTDIR/${pname} ]]; then mv $OCAMLFIND_DESTDIR/${pname} $lib; ln -s $lib $OCAMLFIND_DESTDIR/${pname}; else touch $lib; fi
+      if [[ -d $out/bin ]]; then mv $out/bin $bin; ln -s $bin $out/bin; else touch $bin; fi
+      if [[ -d $out/share ]]; then mv $out/share $share; ln -s $share $out/share; else touch $share; fi
+      runHook postInstall
+    '';
+  });
 
   # FIXME X11 in nixpkgs musl
   lablgtk = null;
@@ -142,6 +172,16 @@ rec {
       buildInputs = o.buildInputs ++ [ librustzcash ];
       XDG_DATA_DIRS = "${zcash-params}:$XDG_DATA_DIRS";
     });
+  tezos-protocol-009-PsFLorBA-parameters = osuper.tezos-protocol-009-PsFLorBA-parameters.overrideAttrs
+    (o: rec {
+      buildInputs = o.buildInputs ++ [ librustzcash ];
+      XDG_DATA_DIRS = "${zcash-params}:$XDG_DATA_DIRS";
+    });
+  tezos-protocol-009-PsFLoren-parameters = osuper.tezos-protocol-009-PsFLoren-parameters.overrideAttrs
+    (o: rec {
+      buildInputs = o.buildInputs ++ [ librustzcash ];
+      XDG_DATA_DIRS = "${zcash-params}:$XDG_DATA_DIRS";
+    });
 
   # FIXME apply this patch upstream
   tezos-stdlib-unix = osuper.tezos-stdlib-unix.overrideAttrs
@@ -154,21 +194,6 @@ rec {
       postFixup = zcash-post-fixup o;
     });
 
-  tezos-accuser-007-PsDELPH1 = osuper.tezos-accuser-007-PsDELPH1.overrideAttrs
-    (o: {
-      buildInputs = o.buildInputs ++ [ librustzcash self.makeWrapper ];
-      postFixup = zcash-post-fixup o;
-    });
-  tezos-baker-007-PsDELPH1 = osuper.tezos-baker-007-PsDELPH1.overrideAttrs
-    (o: {
-      buildInputs = o.buildInputs ++ [ librustzcash self.makeWrapper ];
-      postFixup = zcash-post-fixup o;
-    });
-  tezos-endorser-007-PsDELPH1 = osuper.tezos-endorser-007-PsDELPH1.overrideAttrs
-    (o: {
-      buildInputs = o.buildInputs ++ [ librustzcash self.makeWrapper ];
-      postFixup = zcash-post-fixup o;
-    });
   tezos-accuser-008-PtEdo2Zk = osuper.tezos-accuser-008-PtEdo2Zk.overrideAttrs
     (o: {
       buildInputs = o.buildInputs ++ [ librustzcash self.makeWrapper ];
@@ -180,6 +205,21 @@ rec {
       postFixup = zcash-post-fixup o;
     });
   tezos-endorser-008-PtEdo2Zk = osuper.tezos-endorser-008-PtEdo2Zk.overrideAttrs
+    (o: {
+      buildInputs = o.buildInputs ++ [ librustzcash self.makeWrapper ];
+      postFixup = zcash-post-fixup o;
+    });
+  tezos-accuser-009-PsFLoren = osuper.tezos-accuser-009-PsFLoren.overrideAttrs
+    (o: {
+      buildInputs = o.buildInputs ++ [ librustzcash self.makeWrapper ];
+      postFixup = zcash-post-fixup o;
+    });
+  tezos-baker-009-PsFLoren = osuper.tezos-baker-009-PsFLoren.overrideAttrs
+    (o: {
+      buildInputs = o.buildInputs ++ [ librustzcash self.makeWrapper ];
+      postFixup = zcash-post-fixup o;
+    });
+  tezos-endorser-009-PsFLoren = osuper.tezos-endorser-009-PsFLoren.overrideAttrs
     (o: {
       buildInputs = o.buildInputs ++ [ librustzcash self.makeWrapper ];
       postFixup = zcash-post-fixup o;

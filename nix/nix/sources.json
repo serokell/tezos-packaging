@@ -1,14 +1,26 @@
 {
+    "crate2nix": {
+        "branch": "master",
+        "description": "nix build file generator for rust crates",
+        "homepage": "",
+        "owner": "kolloch",
+        "repo": "crate2nix",
+        "rev": "be7de80a3a94f169f8e666d63031af3122b61f6e",
+        "sha256": "1yggdxkxgnpq23kzgcij8ljahvmvj5cs88vy9sa2wsmqsjpiv2h6",
+        "type": "tarball",
+        "url": "https://github.com/kolloch/crate2nix/archive/be7de80a3a94f169f8e666d63031af3122b61f6e.tar.gz",
+        "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
+    },
     "nixpkgs": {
         "branch": "master",
         "description": "Pinned Nixpkgs tree (master follows nixos-unstable-small, only tags have stable history)",
         "homepage": "",
-        "owner": "serokell",
+        "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "66a26e65eb7f9b6cb3f773052da0cd3ac52f015c",
-        "sha256": "09ab1wywcwhqlwy566y00h6q8c7x64qvdk2b82jvadixbanx46wh",
+        "rev": "fcab19deb78fbb5ea24e19b133cf34358176396a",
+        "sha256": "1x78z784sqrkhjx82ca9zchsxhwyyx60yb7wx8gji48nrbw36ijq",
         "type": "tarball",
-        "url": "https://github.com/serokell/nixpkgs/archive/66a26e65eb7f9b6cb3f773052da0cd3ac52f015c.tar.gz",
+        "url": "https://github.com/NixOS/nixpkgs/archive/fcab19deb78fbb5ea24e19b133cf34358176396a.tar.gz",
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
     },
     "opam-nix": {
@@ -29,16 +41,16 @@
         "homepage": "https://opam.ocaml.org",
         "owner": "ocaml",
         "repo": "opam-repository",
-        "rev": "ca8560e5f86de88fe8d1a1050a1e125b55b587e7",
-        "sha256": "18xxs1gadsc4a361mjv7pgjb43d2dn9z0ahk1c4pjpj6lajhbxw9",
+        "rev": "e565d865022b13bf63826b0a39f9276043c3ca6b",
+        "sha256": "1xfy4q47hq7lirk6pyir2gbwc3fqd1gywy9qdl0sbx962lyjl7sw",
         "type": "tarball",
-        "url": "https://github.com/ocaml/opam-repository/archive/ca8560e5f86de88fe8d1a1050a1e125b55b587e7.tar.gz",
+        "url": "https://github.com/ocaml/opam-repository/archive/e565d865022b13bf63826b0a39f9276043c3ca6b.tar.gz",
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
     },
     "tezos": {
-        "ref": "refs/tags/v8.2",
+        "ref": "refs/tags/v9.0-rc1",
         "repo": "https://gitlab.com/tezos/tezos",
-        "rev": "6102c808a21b32e732ab9bb1825761cd056f3e86",
+        "rev": "69e08d4b7ac903d2e96fdbf0c4ae4099c28b5f75",
         "type": "git"
     }
 }

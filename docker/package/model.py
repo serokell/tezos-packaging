@@ -17,9 +17,11 @@ class Service:
         self.user = user
 
 class Unit:
-    def __init__(self, after: List[str], description: str, requires: List[str]=[]):
+    def __init__(self, after: List[str], description: str, requires: List[str]=[],
+                 part_of: List[str]=[]):
         self.after = after
         self.requires = requires
+        self.part_of = part_of
         self.description = description
 
 class Install:
@@ -406,6 +408,7 @@ install: tezos-sapling-params
 def print_service_file(service_file: ServiceFile, out):
     after = "".join(map(lambda x: f"After={x}\n", service_file.unit.after))
     requires = "".join(map(lambda x: f"Requires={x}\n", service_file.unit.requires))
+    part_of = "".join(map(lambda x: f"PartOf={x}\n", service_file.unit.part_of))
     environment = "".join(map(lambda x: f"Environment=\"{x}\"\n", service_file.service.environment))
     environment_file = "" if service_file.service.environment_file is None else f"EnvironmentFile={service_file.service.environment_file}"
     wanted_by = "".join(map(lambda x: f"WantedBy=\"{x}\"\n", service_file.install.wanted_by))
@@ -413,7 +416,7 @@ def print_service_file(service_file: ServiceFile, out):
 #
 # SPDX-License-Identifier: LicenseRef-MIT-TQ
 [Unit]
-{after}{requires}Description={service_file.unit.description}
+{after}{requires}{part_of}Description={service_file.unit.description}
 [Service]
 {environment_file}
 {environment}ExecStart={service_file.service.exec_start}

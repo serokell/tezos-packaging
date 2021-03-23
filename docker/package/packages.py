@@ -80,13 +80,14 @@ useradd --home-dir /var/lib/tezos tezos || true
 
 
 def mk_node_unit(suffix, env, desc):
-    service_file = ServiceFile(Unit(after=["network.target"], requires=[],
-                                    description=desc),
+    service_file = ServiceFile(Unit(after=["network.target", f"tezos-baking-{suffix}.service"],
+                                    requires=[], description=desc,
+                                    part_of=[f"tezos-baking-{suffix}.service"]),
                                Service(environment=env,
                                        exec_start="/usr/bin/tezos-node-start",
                                        state_directory="tezos", user="tezos"
                                ),
-                               Install(wanted_by=["multi-user.target"]))
+                               Install(wanted_by=["multi-user.target", f"tezos-baking-{suffix}.service"]))
     return SystemdUnit(suffix=suffix, service_file=service_file, startup_script="tezos-node-start")
 
 node_units = []
@@ -106,8 +107,12 @@ cat > /usr/bin/tezos-node-{network} <<- 'EOM'
 TEZOS_NODE_DIR="$(cat $(systemctl show -p FragmentPath tezos-node-{network}.service | cut -d'=' -f2) | grep 'DATA_DIR' | cut -d '=' -f3 | cut -d '"' -f1)" tezos-node "$@"
 EOM
 chmod +x /usr/bin/tezos-node-{network}
+systemctl enable tezos-node-{network}.service > /dev/null || true
 '''
-    node_postrm_steps += f"rm -f /usr/bin/tezos-node-{network}\n"
+    node_postrm_steps += f'''
+rm -f /usr/bin/tezos-node-{network}
+systemctl disable tezos-node-{network}.service > /dev/null || true
+'''
 
 # Add custom config service
 node_units.append(mk_node_unit(suffix="custom", env=["DATA_DIR=/var/lib/tezos/node-custom",

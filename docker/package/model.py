@@ -36,11 +36,12 @@ class ServiceFile:
 
 class SystemdUnit:
     def __init__(self, service_file:ServiceFile, startup_script:str, suffix:str=None,
-                 config_file: str=None):
+                 config_file: str=None, instances :List[str]=[]):
         self.suffix = suffix
         self.service_file = service_file
         self.startup_script = startup_script
         self.config_file = config_file
+        self.instances = instances
 
 class AbstractPackage:
     @abstractmethod
@@ -266,8 +267,16 @@ install: {self.name}
     def gen_rules(self, out):
         override_dh_install_init = "override_dh_installinit:\n"
         for systemd_unit in self.systemd_units:
-            if systemd_unit.suffix is not None:
-                override_dh_install_init += f"	dh_installinit --name={self.name}-{systemd_unit.suffix}\n"
+            if len(systemd_unit.instances) == 0:
+                if systemd_unit.suffix is not None:
+                    override_dh_install_init += f"	dh_installinit --name={self.name.lower()}-{systemd_unit.suffix}\n"
+                else:
+                    override_dh_install_init += f"	dh_installinit --name={self.name.lower()}\n"
+            else:
+                if systemd_unit.suffix is not None:
+                    override_dh_install_init += f"	dh_installinit --name={self.name.lower()}-{systemd_unit.suffix}@\n"
+                else:
+                    override_dh_install_init += f"	dh_installinit --name={self.name.lower()}@\n"
         rules_contents = f'''#!/usr/bin/make -f
 
 %:
@@ -294,6 +303,7 @@ set -e
 
 {self.postinst_steps}
 '''
+        postinst_contents = postinst_contents.replace(self.name, self.name.lower())
         with open(out, 'w') as f:
             f.write(postinst_contents)
 
@@ -306,6 +316,7 @@ set -e
 
 {self.postrm_steps}
 '''
+        postrm_contents = postrm_contents.replace(self.name, self.name.lower())
         with open(out, 'w') as f:
             f.write(postrm_contents)
 

@@ -22,10 +22,15 @@ class Unit:
         self.requires = requires
         self.description = description
 
+class Install:
+    def __init__(self, wanted_by: List[str]=[]):
+        self.wanted_by = wanted_by
+
 class ServiceFile:
-    def __init__(self, unit: Unit, service:Service):
+    def __init__(self, unit: Unit, service:Service, install: Install):
         self.unit = unit
         self.service = service
+        self.install = install
 
 class SystemdUnit:
     def __init__(self, service_file:ServiceFile, startup_script:str, suffix:str=None,
@@ -403,6 +408,7 @@ def print_service_file(service_file: ServiceFile, out):
     requires = "".join(map(lambda x: f"Requires={x}\n", service_file.unit.requires))
     environment = "".join(map(lambda x: f"Environment=\"{x}\"\n", service_file.service.environment))
     environment_file = "" if service_file.service.environment_file is None else f"EnvironmentFile={service_file.service.environment_file}"
+    wanted_by = "".join(map(lambda x: f"WantedBy=\"{x}\"\n", service_file.install.wanted_by))
     file_contents = f'''# SPDX-FileCopyrightText: 2020 TQ Tezos <https://tqtezos.com/>
 #
 # SPDX-License-Identifier: LicenseRef-MIT-TQ
@@ -415,7 +421,7 @@ StateDirectory={service_file.service.state_directory}
 User={service_file.service.user}
 Group={service_file.service.user}
 [Install]
-WantedBy=multi-user.target
+{wanted_by}
 '''
     with open(out, 'w') as f:
         f.write(file_contents)

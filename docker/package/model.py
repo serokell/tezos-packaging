@@ -91,6 +91,95 @@ ubuntu_epoch = 2
 fedora_epoch = 1
 
 
+def gen_spec_systemd_part(package):
+    systemd_units = package.systemd_units
+    startup_scripts = list(set(map(lambda x: x.startup_script, package.systemd_units)))
+    config_files = list(filter(lambda x: x is not None, map(lambda x: x.config_file,
+                                                                package.systemd_units)))
+    install_unit_files = ""
+    systemd_unit_files = ""
+    enable_units = ""
+    systemd_units_post = ""
+    systemd_units_preun = ""
+    systemd_units_postun = ""
+    if len(config_files) > 0:
+        install_default = f"mkdir -p %{{buildroot}}/%{{_sysconfdir}}/default\n"
+    else:
+        install_default = ""
+    default_files = ""
+    for systemd_unit in package.systemd_units:
+        if systemd_unit.suffix is None:
+            service_name = "%{name}"
+        else:
+            service_name = f"%{{name}}-{systemd_unit.suffix}"
+        if len(systemd_unit.instances) > 0:
+            service_name = f"{service_name}@"
+        install_unit_files += f"install -m 644 {service_name}.service %{{buildroot}}/%{{_unitdir}}\n"
+        systemd_unit_files += f"%{{_unitdir}}/{service_name}.service\n"
+        if len(systemd_unit.instances) == 0:
+            enable_units += f"systemctl enable {service_name}.service\n"
+        systemd_units_post += f"%systemd_post {service_name}.service\n"
+        systemd_units_preun += f"%systemd_preun {service_name}.service\n"
+        systemd_units_postun += f"%systemd_postun_with_restart {service_name}.service\n"
+        if systemd_unit.config_file is not None:
+            install_default += f"install -m 644 {service_name}.default " + \
+                f"%{{buildroot}}/%{{_sysconfdir}}/default/{service_name}\n"
+            default_files += f"%{{_sysconfdir}}/default/{service_name}\n"
+    install_startup_scripts = ""
+    systemd_startup_files = ""
+    for startup_script in startup_scripts:
+        if startup_script is not None:
+            install_startup_scripts += f"install -m 0755 {startup_script} %{{buildroot}}/%{{_bindir}}\n"
+            systemd_startup_files += f"%{{_bindir}}/{startup_script}\n"
+    systemd_deps = "systemd systemd-rpm-macros"
+    systemd_install = f'''
+mkdir -p %{{buildroot}}/%{{_unitdir}}
+{install_unit_files}
+{install_default}
+{install_startup_scripts}
+'''
+    systemd_files = f'''
+{systemd_startup_files}
+{systemd_unit_files}
+{default_files}
+'''
+    systemd_macros= f'''
+%post
+{systemd_units_post}
+{enable_units}
+{package.postinst_steps}
+
+%preun
+{systemd_units_preun}
+
+%postun
+{systemd_units_postun}
+{package.postrm_steps}
+'''
+    return systemd_deps, systemd_install, systemd_files, systemd_macros
+
+def gen_systemd_rules_contents(package):
+    override_dh_install_init = "override_dh_installinit:\n"
+    for systemd_unit in package.systemd_units:
+        if len(systemd_unit.instances) == 0:
+            if systemd_unit.suffix is not None:
+                override_dh_install_init += f"	dh_installinit --name={package.name.lower()}-{systemd_unit.suffix}\n"
+            else:
+                override_dh_install_init += f"	dh_installinit --name={package.name.lower()}\n"
+        else:
+            if systemd_unit.suffix is not None:
+                override_dh_install_init += f"	dh_installinit --name={package.name.lower()}-{systemd_unit.suffix}@\n"
+            else:
+                override_dh_install_init += f"	dh_installinit --name={package.name.lower()}@\n"
+    rules_contents = f'''#!/usr/bin/make -f
+
+%:
+	dh $@ {"--with systemd" if len(package.systemd_units) > 0 else ""}
+override_dh_systemd_start:
+	dh_systemd_start --no-start
+{override_dh_install_init if len(package.systemd_units) > 1 else ""}'''
+    return rules_contents
+
 class OpamBasedPackage(AbstractPackage):
     def __init__(self, name: str, desc: str, systemd_units: List[SystemdUnit]=[],
                  target_proto: str=None, optional_opam_deps: List[str]=[],
@@ -137,71 +226,8 @@ Description: {self.desc}
                                                                 self.systemd_units)))
         requires = " ".join(run_deps)
         if len(self.systemd_units) > 0:
-            startup_scripts = list(set(map(lambda x: x.startup_script, self.systemd_units)))
-            install_unit_files = ""
-            systemd_unit_files = ""
-            enable_units = ""
-            systemd_units_post = ""
-            systemd_units_preun = ""
-            systemd_units_postun = ""
-            if len(config_files) > 0:
-                install_default = f"mkdir -p %{{buildroot}}/%{{_sysconfdir}}/default\n"
-            else:
-                install_default = ""
-            default_files = ""
-            for systemd_unit in self.systemd_units:
-                if systemd_unit.suffix is None:
-                    install_unit_files += f"install -m 644 %{{name}}.service %{{buildroot}}/%{{_unitdir}}\n"
-                    systemd_unit_files += f"%{{_unitdir}}/%{{name}}.service\n"
-                    enable_units += f"systemctl enable %{{name}}.service\n"
-                    systemd_units_post += f"%systemd_post %{{name}}.service\n"
-                    systemd_units_preun += f"%systemd_preun %{{name}}.service\n"
-                    systemd_units_postun += f"%systemd_postun_with_restart %{{name}}.service\n"
-                    if systemd_unit.config_file is not None:
-                        install_default += f"install -m 644 %{{name}}.default " + \
-                            f"%{{buildroot}}/%{{_sysconfdir}}/default/%{{name}}\n"
-                        default_files += f"%{{_sysconfdir}}/default/%{{name}}\n"
-                else:
-                    install_unit_files += f"install -m 644 %{{name}}-{systemd_unit.suffix}.service %{{buildroot}}/%{{_unitdir}}\n"
-                    systemd_unit_files += f"%{{_unitdir}}/%{{name}}-{systemd_unit.suffix}.service\n"
-                    enable_units += f"systemctl enable %{{name}}-{systemd_unit.suffix}.service\n"
-                    systemd_units_post += f"%systemd_post %{{name}}-{systemd_unit.suffix}.service\n"
-                    systemd_units_preun += f"%systemd_preun %{{name}}-{systemd_unit.suffix}.service\n"
-                    systemd_units_postun += f"%systemd_postun_with_restart %{{name}}-{systemd_unit.suffix}.service\n"
-                    if systemd_unit.config_file is not None:
-                        install_default += f"install -m 644 %{{name}}-{systemd_unit.suffix}.default " + \
-                            f"%{{buildroot}}/%{{_sysconfdir}}/default/%{{name}}-{systemd_unit.suffix}\n"
-                        default_files += f"%{{_sysconfdir}}/default/%{{name}}-{systemd_unit.suffix}\n"
-            install_startup_scripts = ""
-            systemd_startup_files = ""
-            for startup_script in startup_scripts:
-                install_startup_scripts += f"install -m 0755 {startup_script} %{{buildroot}}/%{{_bindir}}\n"
-                systemd_startup_files += f"%{{_bindir}}/{startup_script}\n"
-            systemd_deps = "systemd systemd-rpm-macros"
-            systemd_install = f'''
-mkdir -p %{{buildroot}}/%{{_unitdir}}
-{install_unit_files}
-{install_default}
-{install_startup_scripts}
-'''
-            systemd_files = f'''
-{systemd_startup_files}
-{systemd_unit_files}
-{default_files}
-'''
-            systemd_macros= f'''
-%post
-{systemd_units_post}
-{enable_units}
-{self.postinst_steps}
-
-%preun
-{systemd_units_preun}
-
-%postun
-{systemd_units_postun}
-{self.postrm_steps}
-'''
+            systemd_deps, systemd_install, systemd_files, systemd_macros = \
+                gen_spec_systemd_part(self)
         else:
             systemd_deps = ""
             systemd_install = ""
@@ -268,25 +294,7 @@ install: {self.name}
             f.write(changelog_contents)
 
     def gen_rules(self, out):
-        override_dh_install_init = "override_dh_installinit:\n"
-        for systemd_unit in self.systemd_units:
-            if len(systemd_unit.instances) == 0:
-                if systemd_unit.suffix is not None:
-                    override_dh_install_init += f"	dh_installinit --name={self.name.lower()}-{systemd_unit.suffix}\n"
-                else:
-                    override_dh_install_init += f"	dh_installinit --name={self.name.lower()}\n"
-            else:
-                if systemd_unit.suffix is not None:
-                    override_dh_install_init += f"	dh_installinit --name={self.name.lower()}-{systemd_unit.suffix}@\n"
-                else:
-                    override_dh_install_init += f"	dh_installinit --name={self.name.lower()}@\n"
-        rules_contents = f'''#!/usr/bin/make -f
-
-%:
-	dh $@ {"--with systemd" if len(self.systemd_units) > 0 else ""}
-override_dh_systemd_start:
-	dh_systemd_start --no-start
-{override_dh_install_init if len(self.systemd_units) > 1 else ""}'''
+        rules_contents = gen_systemd_rules_contents(self)
         with open(out, 'w') as f:
             f.write(rules_contents)
 

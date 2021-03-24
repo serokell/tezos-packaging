@@ -3,9 +3,14 @@
 # SPDX-License-Identifier: LicenseRef-MIT-TQ
 import os, shutil, sys, subprocess, json
 
-from .model import Service, ServiceFile, SystemdUnit, Unit, OpamBasedPackage, TezosSaplingParamsPackage, Install
+from .model import Service, ServiceFile, SystemdUnit, Unit, Install, OpamBasedPackage, TezosSaplingParamsPackage, TezosBakingServicesPackage
 
 networks = ["mainnet", "edo2net", "florencenet"]
+networks_protos = {
+    "mainnet": ["008-PtEdo2Zk", "009-PsFLoren"],
+    "edo2net": ["008-PtEdo2Zk"],
+    "florencenet": ["009-PsFLoren"]
+}
 
 signer_units = [
     SystemdUnit(
@@ -147,9 +152,6 @@ daemon_decs = {
 
 daemon_postinst_common = postinst_steps_common + "\nmkdir -p /var/lib/tezos/.tezos-client\nchown -R tezos:tezos /var/lib/tezos/.tezos-client\n"
 
-# TODO remove once v9.0 is released use 'networks' instead
-daemons_instances = networks + ["edo2net"]
-
 def gen_daemon_specific_postinst(daemon_name):
     daemon_postinst = ""
     for instance in daemons_instances:
@@ -163,6 +165,8 @@ def gen_daemon_specific_postrm(daemon_name):
     return daemon_postrm
 
 for proto in active_protocols:
+    daemons_instances = \
+        [network for network, protos in networks_protos.items() if proto in protos]
     service_file_baker = ServiceFile(Unit(after=["network.target"],
                                           description="Tezos baker"),
                                      Service(environment_file=f"/etc/default/tezos-baker-{proto}",
@@ -253,3 +257,7 @@ for proto in active_protocols:
                                      postrm_steps=gen_daemon_specific_postrm(f"tezos-endorser-{proto}")))
 
 packages.append(TezosSaplingParamsPackage())
+packages.append(TezosBakingServicesPackage(
+    target_networks=networks,
+    network_protos=networks_protos
+    ))

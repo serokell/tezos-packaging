@@ -4,7 +4,7 @@
 
 import os, shutil, sys, subprocess, json
 from abc import ABCMeta, abstractmethod
-from typing import List
+from typing import List, Dict
 
 # There are more possible fields, but only these are used by tezos services
 class Service:
@@ -453,3 +453,113 @@ Group={service_file.service.user}
 '''
     with open(out, 'w') as f:
         f.write(file_contents)
+
+
+class TezosBakingServicesPackage(AbstractPackage):
+    def __init__(self, target_networks: List[str], network_protos: Dict[str, List[str]]):
+        self.name = "tezos-baking"
+        self.desc = \
+            "Package that provides systemd services that orchestrate other services from Tezos packages"
+        self.target_protos = set()
+        for network in target_networks:
+            for proto in network_protos[network]:
+                self.target_protos.add(proto)
+        self.systemd_units = []
+        for network in target_networks:
+            self.systemd_units.append(
+                SystemdUnit(
+                    service_file=ServiceFile(
+                        Unit(after=["network.target"],
+                             description=f"Tezos baking instance for {network}"),
+                        Service(exec_start="true", user="tezos", state_directory="tezos",
+                                remain_after_exit=True, type_="oneshot"),
+                        Install(wanted_by=["multi-user.target"])
+                    ),
+                    suffix=network
+                )
+            )
+        self.postinst_steps = ""
+        self.postrm_steps = ""
+    def fetch_sources(self, out_dir):
+        os.makedirs(out_dir)
+
+    def gen_control_file(self, deps, out):
+        run_deps = ", ".join(["tezos-client", "tezos-node"] + \
+            sum([[f"tezos-{daemon}-{proto.lower()}" for daemon in ["baker", "endorser"]] for proto in self.target_protos],
+                []))
+        file_contents = f'''
+Source: {self.name}
+Section: utils
+Priority: optional
+Maintainer: {meta['maintainer']}
+Build-Depends: debhelper (>=9), dh-systemd (>= 1.5), autotools-dev
+Standards-Version: 3.9.6
+Homepage: https://gitlab.com/tezos/tezos/
+
+Package: {self.name.lower()}
+Architecture: amd64 arm64
+Depends: ${{shlibs:Depends}}, ${{misc:Depends}}, {run_deps}
+Description: {self.desc}
+'''
+        with open(out, 'w') as f:
+            f.write(file_contents)
+
+    def gen_spec_file(self, build_deps, run_deps, out):
+        run_deps = ", ".join(["tezos-client", "tezos-node"] + \
+            sum([[f"tezos-{daemon}-{proto}" for daemon in ["baker", "endorser"]] for proto in self.target_protos],
+                []))
+        systemd_deps, systemd_install, systemd_files, systemd_macros = \
+                gen_spec_systemd_part(self)
+        file_contents = f'''
+%define debug_package %{{nil}}
+Name:    {self.name}
+Version: {version}
+Release: {release}
+Epoch: {fedora_epoch}
+Summary: {self.desc}
+License: MIT
+BuildArch: x86_64 aarch64
+Source0: {self.name}-{version}.tar.gz
+Source1: https://gitlab.com/tezos/tezos/tree/v{version}/
+BuildRequires: {systemd_deps}
+Requires: {run_deps}
+%description
+{self.desc}
+Maintainer: {meta['maintainer']}
+%prep
+%setup -q
+%build
+%install
+{systemd_install}
+%files
+%license LICENSE
+{systemd_files}
+{systemd_macros}
+'''
+        with open(out, 'w') as f:
+            f.write(file_contents)
+
+    def gen_makefile(self, out):
+        file_contents = '''
+.PHONY: install
+
+tezos-baking:
+
+install: tezos-baking
+'''
+        with open(out, 'w') as f:
+            f.write(file_contents)
+
+    def gen_changelog(self, ubuntu_version, maintainer, date, out):
+        changelog_contents = f'''{self.name.lower()} ({ubuntu_epoch}:{version}-0ubuntu{release}~{ubuntu_version}) {ubuntu_version}; urgency=medium
+
+  * Publish {version}-{release} version of {self.name}
+
+ -- {maintainer} {date}'''
+        with open(out, 'w') as f:
+            f.write(changelog_contents)
+
+    def gen_rules(self, out):
+        rules_contents = gen_systemd_rules_contents(self)
+        with open(out, 'w') as f:
+            f.write(rules_contents)

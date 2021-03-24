@@ -9,12 +9,15 @@ from typing import List
 # There are more possible fields, but only these are used by tezos services
 class Service:
     def __init__(self, exec_start: str, state_directory:str, user: str,
-                 environment_file: str=None, environment: List[str]=[]):
+                 environment_file: str=None, environment: List[str]=[],
+                 remain_after_exit: bool=False, type_: str=None):
         self.environment_file = environment_file
         self.environment = environment
         self.exec_start = exec_start
         self.state_directory = state_directory
         self.user = user
+        self.remain_after_exit = remain_after_exit
+        self.type_ = type_;
 
 class Unit:
     def __init__(self, after: List[str], description: str, requires: List[str]=[],
@@ -434,6 +437,8 @@ def print_service_file(service_file: ServiceFile, out):
 StateDirectory={service_file.service.state_directory}
 User={service_file.service.user}
 Group={service_file.service.user}
+{"RemainAfterExit=yes" if service_file.service.remain_after_exit else ""}
+{f"Type={service_file.service.type_}" if service_file.service.type_ is not None else ""}
 [Install]
 {wanted_by}
 '''

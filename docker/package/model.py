@@ -38,7 +38,7 @@ class ServiceFile:
         self.install = install
 
 class SystemdUnit:
-    def __init__(self, service_file:ServiceFile, startup_script:str, suffix:str=None,
+    def __init__(self, service_file:ServiceFile, startup_script:str=None, suffix:str=None,
                  config_file: str=None, instances :List[str]=[]):
         self.suffix = suffix
         self.service_file = service_file
@@ -291,7 +291,8 @@ override_dh_systemd_start:
             f.write(rules_contents)
 
     def gen_install(self, out):
-        startup_scripts = list(set(map(lambda x: x.startup_script, self.systemd_units)))
+        startup_scripts = \
+            list(set(filter(lambda x: x is not None, map(lambda x: x.startup_script, self.systemd_units))))
         install_contents = "\n".join(map(lambda x: f"debian/{x} usr/bin",
                                          startup_scripts))
         with open(out, 'w') as f:

@@ -30,17 +30,40 @@ rec {
       example = "008-PtEdo2Zk";
     };
 
+    rpcPort = mkOption {
+      type = types.int;
+      default = 8732;
+      example = 8732;
+      description = ''
+        Tezos node RPC port.
+      '';
+    };
+
   };
 
-  genDaemonConfig = instancesCfg: service-name: service-pkgs:
+  genDaemonConfig = instancesCfg: service-name: service-pkgs: service-script:
     mkIf (instancesCfg != {}) {
       users = mkMerge (flip mapAttrsToList instancesCfg (node-name: node-cfg: genUsers node-name ));
-      systemd = mkMerge (flip mapAttrsToList instancesCfg (node-name: node-cfg: {
-        services."tezos-${node-name}-tezos-${service-name}" = genSystemdService node-name node-cfg service-name // {
-          script = ''
-            ${service-pkgs.${node-cfg.baseProtocol}} -d "$STATE_DIRECTORY"
-          '';
-        };
+      systemd = mkMerge (flip mapAttrsToList instancesCfg (node-name: node-cfg:
+        let tezos-service = service-pkgs."${node-cfg.baseProtocol}";
+        in {
+          services."tezos-${node-name}-tezos-${service-name}" = genSystemdService node-name node-cfg service-name // {
+            preStart =
+              ''
+                service_data_dir="$STATE_DIRECTORY/client/data"
+                mkdir -p "$service_data_dir"
+
+                # Generate or update service config file
+                if [[ ! -f "$service_data_dir/config" ]]; then
+                  ${tezos-service} -d "$service_data_dir" -E "http://localhost:${toString node-cfg.rpcPort}" \
+                  config init --output "$service_data_dir/config" >/dev/null 2>&1
+                else
+                  ${tezos-service} -d "$service_data_dir" -E "http://localhost:${toString node-cfg.rpcPort}" \
+                  config update >/dev/null 2>&1
+                fi
+              '';
+            script = service-script node-cfg;
+          };
       }));
     };
 

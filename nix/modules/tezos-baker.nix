@@ -33,5 +33,11 @@ in {
       default = {};
     };
   };
-  config = common.genDaemonConfig cfg.instances "baker" tezos-baker-pkgs;
+  config =
+    let baker-script = node-cfg: ''
+        ${tezos-baker-pkgs.${node-cfg.baseProtocol}} -d "$STATE_DIRECTORY/client/data" \
+        -E "http://localhost:${toString node-cfg.rpcPort}" \
+        run with local node "$STATE_DIRECTORY/node/data" "$@"
+      '';
+    in common.genDaemonConfig cfg.instances "baker" tezos-baker-pkgs baker-script;
 }

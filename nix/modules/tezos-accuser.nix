@@ -33,5 +33,10 @@ in {
       default = {};
     };
   };
-  config = common.genDaemonConfig cfg.instances "accuser" tezos-accuser-pkgs;
+  config =
+    let accuser-script = node-cfg: ''
+        ${tezos-accuser-pkgs.${node-cfg.baseProtocol}} -d "$STATE_DIRECTORY/client/data" \
+        -E "http://localhost:${toString node-cfg.rpcPort}" run "$@"
+      '';
+    in common.genDaemonConfig cfg.instances "accuser" tezos-accuser-pkgs accuser-script;
 }

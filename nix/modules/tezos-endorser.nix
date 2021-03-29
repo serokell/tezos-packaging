@@ -33,5 +33,10 @@ in {
       default = {};
     };
   };
-  config = common.genDaemonConfig cfg.instances "endorser" tezos-endorser-pkgs;
+  config =
+    let endorser-script = node-cfg: ''
+        ${tezos-endorser-pkgs.${node-cfg.baseProtocol}} -d "$STATE_DIRECTORY/client/data" \
+        -E "http://localhost:${toString node-cfg.rpcPort}" run "$@"
+      '';
+    in common.genDaemonConfig cfg.instances "endorser" tezos-endorser-pkgs endorser-script;
 }

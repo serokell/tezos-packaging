@@ -109,7 +109,8 @@ in {
               ''
           );
         script = ''
-          ${node-cfg.package}/bin/tezos-node run --data-dir "$STATE_DIRECTORY/node/data"
+          ${node-cfg.package}/bin/tezos-node run --data-dir "$STATE_DIRECTORY/node/data" \
+          --connections 50 --bootstrap-threshold=1
         '';
       };
     }));

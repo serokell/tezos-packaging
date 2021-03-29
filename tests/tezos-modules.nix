@@ -56,12 +56,14 @@ in import "${nixpkgs}/nixos/tests/make-test-python.nix" ({ ... }:
     for s in services:
         machine.wait_for_unit(f"tezos-edonet-{s}.service")
 
-    machine.wait_for_open_port(8732)
-    machine.wait_until_succeeds(
-        "curl --silent http://localhost:8732/chains/main/blocks/head/header | grep level"
-    )
+    with subtest("check tezos-node rpc response"):
+        machine.wait_for_open_port(8732)
+        machine.wait_until_succeeds(
+            "curl --silent http://localhost:8732/chains/main/blocks/head/header | grep level"
+        )
 
-    for s in services:
-        output = machine.succeed(f"systemctl status tezos-edonet-{s}.service | grep Active")
+    with subtest("service status sanity check"):
+        for s in services:
+            machine.succeed(f"systemctl status tezos-edonet-{s}.service")
   '';
 })

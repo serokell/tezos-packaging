@@ -16,11 +16,14 @@ brew bottle --force-core-tap ./Formula/tezos-sapling-params.rb
 
 # we don't bottle meta-formulas that contains only services
 build_bottle ./Formula/tezos-accuser-008-PtEdo2Zk.rb
+build_bottle ./Formula/tezos-accuser-009-PsFLoren.rb
 build_bottle ./Formula/tezos-admin-client.rb
 build_bottle ./Formula/tezos-baker-008-PtEdo2Zk.rb
+build_bottle ./Formula/tezos-baker-009-PsFLoren.rb
 build_bottle ./Formula/tezos-client.rb
 build_bottle ./Formula/tezos-codec.rb
 build_bottle ./Formula/tezos-endorser-008-PtEdo2Zk.rb
+build_bottle ./Formula/tezos-endorser-009-PsFLoren.rb
 build_bottle ./Formula/tezos-node.rb
 build_bottle ./Formula/tezos-sandbox.rb
 build_bottle ./Formula/tezos-signer.rb

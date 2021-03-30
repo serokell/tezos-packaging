@@ -4,33 +4,13 @@
 
 class TezosNodeEdo2net < Formula
   url "file:///dev/null"
-  version "v8.2-3"
+  version "v9.0-rc1-1"
 
   bottle :unneeded
   depends_on "tezos-node"
 
   desc "Meta formula that provides backround tezos-node service that runs on edo2net"
 
-  @@edo2net_config =
-      <<~EOS
-{
-"p2p": {},
-"network":
-    { "genesis":
-        { "timestamp": "2021-02-11T14:00:00Z",
-          "block": "BLockGenesisGenesisGenesisGenesisGenesisdae8bZxCCxh",
-          "protocol": "PtYuensgYBb3G3x1hLLbCmcav8ue8Kyd2khADcL5LsT5R1hcXex" },
-      "genesis_parameters":
-        { "values":
-            { "genesis_pubkey":
-                "edpkugeDwmwuwyyD3Q5enapgEYDxZLtEUFFSrvVwXASQMVEqsvTqWu" } },
-      "chain_name": "TEZOS_EDO2NET_2021-02-11T14:00:00Z",
-      "sandboxed_chain_name": "SANDBOXED_TEZOS",
-      "default_bootstrap_peers":
-        [ "edonet.tezos.co.il", "188.40.128.216:29732", "edo2net.kaml.fr",
-          "edonet2.smartpy.io", "51.79.165.131", "edonetb.boot.tezostaquito.io" ] }
-}
-  EOS
   def install
     startup_contents =
       <<~EOS
@@ -45,18 +25,17 @@ class TezosNodeEdo2net < Formula
       mkdir -p "$DATA_DIR"
       if [[ ! -f "$config_file" ]]; then
           echo "Configuring the node..."
-          cat > "$config_file" <<-EOM
-      #{@@edo2net_config}
-      EOM
-          "$node" config update \
+          "$node" config init \
                   --data-dir "$DATA_DIR" \
                   --rpc-addr "$NODE_RPC_ADDR" \
+                  --network=edo2net \
                   "$@"
       else
           echo "Updating the node configuration..."
           "$node" config update \
                   --data-dir "$DATA_DIR" \
                   --rpc-addr "$NODE_RPC_ADDR" \
+                  --network=edo2net \
                   "$@"
       fi
 
@@ -70,6 +49,7 @@ class TezosNodeEdo2net < Formula
     EOS
     File.write("tezos-node-edo2net-start", startup_contents)
     bin.install "tezos-node-edo2net-start"
+    print "Installing tezos-node-edo2net service"
   end
   def plist
     <<~EOS
@@ -103,7 +83,7 @@ class TezosNodeEdo2net < Formula
     EOS
   end
   def post_install
-    mkdir "#{var}/lib/tezos/node-edo2net"
-    File.write("#{var}/lib/tezos/node-edo2net/config.json", @@edo2net_config)
+    mkdir_p "#{var}/lib/tezos/node-edo2net"
+    system "tezos-node", "config", "init", "--data-dir" "#{var}/lib/tezos/node-edo2net", "--network", "edo2net"
   end
 end

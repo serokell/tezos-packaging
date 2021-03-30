@@ -2,6 +2,7 @@
 #
 # SPDX-License-Identifier: LicenseRef-MIT-TQ
 
+# TODO: once there is a new release of opam-repository this should be updated
 class TezosSaplingParams < Formula
   url "https://gitlab.com/tezos/opam-repository.git", :tag => "v8.2"
   homepage "https://github.com/serokell/tezos-packaging"

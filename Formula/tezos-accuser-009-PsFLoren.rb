@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: LicenseRef-MIT-TQ
 
-class TezosEndorser008Ptedo2zk < Formula
+class TezosAccuser009Psfloren < Formula
   @all_bins = []
 
   class << self
@@ -23,13 +23,12 @@ class TezosEndorser008Ptedo2zk < Formula
   dependencies.each do |dependency|
     depends_on dependency
   end
-
-  desc "Daemon for endorsing"
+  desc "Daemon for accusing"
 
   bottle do
-    root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosEndorser008Ptedo2zk.version}/"
-    sha256 "7ae758d10d32bc6d6927d61d542319e4cf4ea6ff9830cc5df8775f68af734075" => :mojave
-    sha256 "c348900c80ad6c6058d34867bb66145b9381e3ec300b76f68452b1513b206a57" => :catalina
+    root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosAccuser009Psfloren.version}/"
+    sha256 "c5032a8a82e9b751219e182d9db6c48370b6fcb63b5af83a081033208024f16a" => :mojave
+    sha256 "7661c435a07898a7dcefedb2c8427903fb79cf810a9fed987d9f257901173356" => :catalina
     cellar :any
   end
 
@@ -48,7 +47,6 @@ class TezosEndorser008Ptedo2zk < Formula
     bin.install name
   end
 
-
   def install
     startup_contents =
       <<~EOS
@@ -56,44 +54,36 @@ class TezosEndorser008Ptedo2zk < Formula
 
       set -euo pipefail
 
-      endorser="#{bin}/tezos-endorser-008-PtEdo2Zk"
+      accuser="#{bin}/tezos-accuser-009-PsFLoren"
 
-      endorser_dir="$DATA_DIR"
+      accuser_dir="$DATA_DIR"
 
-      endorser_config="$endorser_dir/config"
-      mkdir -p "$endorser_dir"
+      accuser_config="$accuser_dir/config"
+      mkdir -p "$accuser_dir"
 
-      if [ ! -f "$endorser_config" ]; then
-          "$endorser" --base-dir "$endorser_dir" \
-                      --endpoint "$NODE_RPC_ENDPOINT" \
-                      config init --output "$endorser_config" >/dev/null 2>&1
+      if [ ! -f "$accuser_config" ]; then
+          "$accuser" --base-dir "$accuser_dir" \
+                    --endpoint "$NODE_RPC_ENDPOINT" \
+                    config init --output "$accuser_config" >/dev/null 2>&1
       else
-          "$endorser" --base-dir "$endorser_dir" \
-                      --endpoint "$NODE_RPC_ENDPOINT" \
-                      config update >/dev/null 2>&1
+          "$accuser" --base-dir "$accuser_dir" \
+                    --endpoint "$NODE_RPC_ENDPOINT" \
+                    config update >/dev/null 2>&1
       fi
 
-      launch_endorser() {
-          exec "$endorser" --base-dir "$endorser_dir" \
-              --endpoint "$NODE_RPC_ENDPOINT" \
-              run "$@"
-      }
-
-      if [[ -z "$ENDORSER_ACCOUNT" ]]; then
-          launch_endorser
-      else
-          launch_endorser "$ENDORSER_ACCOUNT"
-      fi
+      exec "$accuser" --base-dir "$accuser_dir" \
+          --endpoint "$NODE_RPC_ENDPOINT" \
+          run
     EOS
-    File.write("tezos-endorser-008-PtEdo2Zk-start", startup_contents)
-    bin.install "tezos-endorser-008-PtEdo2Zk-start"
+    File.write("tezos-accuser-009-PsFLoren-start", startup_contents)
+    bin.install "tezos-accuser-009-PsFLoren-start"
     make_deps
-    install_template "src/proto_008_PtEdo2Zk/bin_endorser/main_endorser_008_PtEdo2Zk.exe",
-                     "_build/default/src/proto_008_PtEdo2Zk/bin_endorser/main_endorser_008_PtEdo2Zk.exe",
-                     "tezos-endorser-008-PtEdo2Zk"
+    install_template "src/proto_009_PsFLoren/bin_accuser/main_accuser_009_PsFLoren.exe",
+                     "_build/default/src/proto_009_PsFLoren/bin_accuser/main_accuser_009_PsFLoren.exe",
+                     "tezos-accuser-009-PsFLoren"
   end
 
-  plist_options manual: "tezos-endorser-008-PtEdo2Zk run"
+  plist_options manual: "tezos-accuser-009-PsFLoren run"
   def plist
     <<~EOS
       <?xml version="1.0" encoding="UTF-8"?>
@@ -104,15 +94,13 @@ class TezosEndorser008Ptedo2zk < Formula
           <key>Label</key>
           <string>#{plist_name}</string>
           <key>Program</key>
-          <string>#{opt_bin}/tezos-endorser-008-PtEdo2Zk-start</string>
+          <string>#{opt_bin}/tezos-accuser-009-PsFLoren-start</string>
           <key>EnvironmentVariables</key>
             <dict>
               <key>DATA_DIR</key>
               <string>#{var}/lib/tezos/client</string>
               <key>NODE_RPC_ENDPOINT</key>
               <string>http://localhost:8732</string>
-              <key>ENDORSER_ACCOUNT</key>
-              <string></string>
           </dict>
           <key>RunAtLoad</key><true/>
           <key>StandardOutPath</key>

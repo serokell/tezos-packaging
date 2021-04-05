@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: LicenseRef-MIT-TQ
 
-class TezosEndorser008Ptedo2zk < Formula
+class TezosEndorser009Psfloren < Formula
   @all_bins = []
 
   class << self
@@ -27,9 +27,9 @@ class TezosEndorser008Ptedo2zk < Formula
   desc "Daemon for endorsing"
 
   bottle do
-    root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosEndorser008Ptedo2zk.version}/"
-    sha256 "7ae758d10d32bc6d6927d61d542319e4cf4ea6ff9830cc5df8775f68af734075" => :mojave
-    sha256 "c348900c80ad6c6058d34867bb66145b9381e3ec300b76f68452b1513b206a57" => :catalina
+    root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosEndorser009Psfloren.version}/"
+    sha256 "3b285494c195727804eaf3d310e93fdaa232f00a34087e7dbf5e1e3ccc244a75" => :mojave
+    sha256 "99d3ecf7668e29bf11e3fcf527ab8efa6e166ac148ea711afefa04c7d2158f37" => :catalina
     cellar :any
   end
 
@@ -56,7 +56,7 @@ class TezosEndorser008Ptedo2zk < Formula
 
       set -euo pipefail
 
-      endorser="#{bin}/tezos-endorser-008-PtEdo2Zk"
+      endorser="#{bin}/tezos-endorser-009-PsFLoren"
 
       endorser_dir="$DATA_DIR"
 
@@ -85,15 +85,15 @@ class TezosEndorser008Ptedo2zk < Formula
           launch_endorser "$ENDORSER_ACCOUNT"
       fi
     EOS
-    File.write("tezos-endorser-008-PtEdo2Zk-start", startup_contents)
-    bin.install "tezos-endorser-008-PtEdo2Zk-start"
+    File.write("tezos-endorser-009-PsFLoren-start", startup_contents)
+    bin.install "tezos-endorser-009-PsFLoren-start"
     make_deps
-    install_template "src/proto_008_PtEdo2Zk/bin_endorser/main_endorser_008_PtEdo2Zk.exe",
-                     "_build/default/src/proto_008_PtEdo2Zk/bin_endorser/main_endorser_008_PtEdo2Zk.exe",
-                     "tezos-endorser-008-PtEdo2Zk"
+    install_template "src/proto_009_PsFLoren/bin_endorser/main_endorser_009_PsFLoren.exe",
+                     "_build/default/src/proto_009_PsFLoren/bin_endorser/main_endorser_009_PsFLoren.exe",
+                     "tezos-endorser-009-PsFLoren"
   end
 
-  plist_options manual: "tezos-endorser-008-PtEdo2Zk run"
+  plist_options manual: "tezos-endorser-009-PsFLoren run"
   def plist
     <<~EOS
       <?xml version="1.0" encoding="UTF-8"?>
@@ -104,7 +104,7 @@ class TezosEndorser008Ptedo2zk < Formula
           <key>Label</key>
           <string>#{plist_name}</string>
           <key>Program</key>
-          <string>#{opt_bin}/tezos-endorser-008-PtEdo2Zk-start</string>
+          <string>#{opt_bin}/tezos-endorser-009-PsFLoren-start</string>
           <key>EnvironmentVariables</key>
             <dict>
               <key>DATA_DIR</key>

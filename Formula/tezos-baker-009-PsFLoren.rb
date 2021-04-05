@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: LicenseRef-MIT-TQ
 
-class TezosEndorser008Ptedo2zk < Formula
+class TezosBaker009Psfloren < Formula
   @all_bins = []
 
   class << self
@@ -19,17 +19,16 @@ class TezosEndorser008Ptedo2zk < Formula
     depends_on dependency => :build
   end
 
-  dependencies = %w[gmp hidapi libev libffi]
+  dependencies = %w[gmp hidapi libev libffi tezos-sapling-params]
   dependencies.each do |dependency|
     depends_on dependency
   end
-
-  desc "Daemon for endorsing"
+  desc "Daemon for baking"
 
   bottle do
-    root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosEndorser008Ptedo2zk.version}/"
-    sha256 "7ae758d10d32bc6d6927d61d542319e4cf4ea6ff9830cc5df8775f68af734075" => :mojave
-    sha256 "c348900c80ad6c6058d34867bb66145b9381e3ec300b76f68452b1513b206a57" => :catalina
+    root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosBaker009Psfloren.version}/"
+    sha256 "7dbfd791a9d85aaa06eefa2511b3a73bb0a50c8cb7935a062d53db5bb182dcf5" => :mojave
+    sha256 "6b67a4808de5a33b10e568b4f95aa4b00b643175710695471a32c0487117af10" => :catalina
     cellar :any
   end
 
@@ -48,7 +47,6 @@ class TezosEndorser008Ptedo2zk < Formula
     bin.install name
   end
 
-
   def install
     startup_contents =
       <<~EOS
@@ -56,44 +54,43 @@ class TezosEndorser008Ptedo2zk < Formula
 
       set -euo pipefail
 
-      endorser="#{bin}/tezos-endorser-008-PtEdo2Zk"
+      baker="#{bin}/tezos-baker-009-PsFLoren"
 
-      endorser_dir="$DATA_DIR"
+      baker_dir="$DATA_DIR"
 
-      endorser_config="$endorser_dir/config"
-      mkdir -p "$endorser_dir"
+      baker_config="$baker_dir/config"
+      mkdir -p "$baker_dir"
 
-      if [ ! -f "$endorser_config" ]; then
-          "$endorser" --base-dir "$endorser_dir" \
-                      --endpoint "$NODE_RPC_ENDPOINT" \
-                      config init --output "$endorser_config" >/dev/null 2>&1
+      if [ ! -f "$baker_config" ]; then
+          "$baker" --base-dir "$baker_dir" \
+                  --endpoint "$NODE_RPC_ENDPOINT" \
+                  config init --output "$baker_config" >/dev/null 2>&1
       else
-          "$endorser" --base-dir "$endorser_dir" \
-                      --endpoint "$NODE_RPC_ENDPOINT" \
-                      config update >/dev/null 2>&1
+          "$baker" --base-dir "$baker_dir" \
+                  --endpoint "$NODE_RPC_ENDPOINT" \
+                  config update >/dev/null 2>&1
       fi
 
-      launch_endorser() {
-          exec "$endorser" --base-dir "$endorser_dir" \
-              --endpoint "$NODE_RPC_ENDPOINT" \
-              run "$@"
+      launch_baker() {
+          exec "$baker" \
+              --base-dir "$baker_dir" --endpoint "$NODE_RPC_ENDPOINT" \
+              run with local node "$NODE_DATA_DIR" "$@"
       }
 
-      if [[ -z "$ENDORSER_ACCOUNT" ]]; then
-          launch_endorser
+      if [[ -z "$BAKER_ACCOUNT" ]]; then
+          launch_baker
       else
-          launch_endorser "$ENDORSER_ACCOUNT"
+          launch_baker "$BAKER_ACCOUNT"
       fi
     EOS
-    File.write("tezos-endorser-008-PtEdo2Zk-start", startup_contents)
-    bin.install "tezos-endorser-008-PtEdo2Zk-start"
+    File.write("tezos-baker-009-PsFLoren-start", startup_contents)
+    bin.install "tezos-baker-009-PsFLoren-start"
     make_deps
-    install_template "src/proto_008_PtEdo2Zk/bin_endorser/main_endorser_008_PtEdo2Zk.exe",
-                     "_build/default/src/proto_008_PtEdo2Zk/bin_endorser/main_endorser_008_PtEdo2Zk.exe",
-                     "tezos-endorser-008-PtEdo2Zk"
+    install_template "src/proto_009_PsFLoren/bin_baker/main_baker_009_PsFLoren.exe",
+                     "_build/default/src/proto_009_PsFLoren/bin_baker/main_baker_009_PsFLoren.exe",
+                     "tezos-baker-009-PsFLoren"
   end
-
-  plist_options manual: "tezos-endorser-008-PtEdo2Zk run"
+  plist_options manual: "tezos-baker-009-PsFLoren run with local node"
   def plist
     <<~EOS
       <?xml version="1.0" encoding="UTF-8"?>
@@ -104,14 +101,16 @@ class TezosEndorser008Ptedo2zk < Formula
           <key>Label</key>
           <string>#{plist_name}</string>
           <key>Program</key>
-          <string>#{opt_bin}/tezos-endorser-008-PtEdo2Zk-start</string>
+          <string>#{opt_bin}/tezos-baker-009-PsFLoren-start</string>
           <key>EnvironmentVariables</key>
             <dict>
               <key>DATA_DIR</key>
               <string>#{var}/lib/tezos/client</string>
+              <key>NODE_DATA_DIR</key>
+              <string></string>
               <key>NODE_RPC_ENDPOINT</key>
               <string>http://localhost:8732</string>
-              <key>ENDORSER_ACCOUNT</key>
+              <key>BAKER_ACCOUNT</key>
               <string></string>
           </dict>
           <key>RunAtLoad</key><true/>

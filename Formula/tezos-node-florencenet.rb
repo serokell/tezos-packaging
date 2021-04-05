@@ -2,14 +2,14 @@
 #
 # SPDX-License-Identifier: LicenseRef-MIT-TQ
 
-class TezosNodeEdo2net < Formula
+class TezosNodeFlorencenet < Formula
   url "file:///dev/null"
   version "v9.0-rc1-1"
 
   bottle :unneeded
   depends_on "tezos-node"
 
-  desc "Meta formula that provides backround tezos-node service that runs on edo2net"
+  desc "Meta formula that provides backround tezos-node service that runs on florencenet"
 
   def install
     startup_contents =
@@ -28,14 +28,14 @@ class TezosNodeEdo2net < Formula
           "$node" config init \
                   --data-dir "$DATA_DIR" \
                   --rpc-addr "$NODE_RPC_ADDR" \
-                  --network=edo2net \
+                  --network=florencenet \
                   "$@"
       else
           echo "Updating the node configuration..."
           "$node" config update \
                   --data-dir "$DATA_DIR" \
                   --rpc-addr "$NODE_RPC_ADDR" \
-                  --network=edo2net \
+                  --network=florencenet \
                   "$@"
       fi
 
@@ -47,9 +47,9 @@ class TezosNodeEdo2net < Formula
               --rpc-tls="$CERT_PATH","$KEY_PATH"
       fi
     EOS
-    File.write("tezos-node-edo2net-start", startup_contents)
-    bin.install "tezos-node-edo2net-start"
-    print "Installing tezos-node-edo2net service"
+    File.write("tezos-node-florencenet-start", startup_contents)
+    bin.install "tezos-node-florencenet-start"
+    print "Installing tezos-node-florencenet service"
   end
   def plist
     <<~EOS
@@ -61,11 +61,11 @@ class TezosNodeEdo2net < Formula
           <key>Label</key>
           <string>#{plist_name}</string>
           <key>Program</key>
-          <string>#{opt_bin}/tezos-node-edo2net-start</string>
+          <string>#{opt_bin}/tezos-node-florencenet-start</string>
           <key>EnvironmentVariables</key>
             <dict>
               <key>DATA_DIR</key>
-              <string>#{var}/lib/tezos/node-edo2net</string>
+              <string>#{var}/lib/tezos/node-florencenet</string>
               <key>NODE_RPC_ADDR</key>
               <string>127.0.0.1:8732</string>
               <key>CERT_PATH</key>
@@ -83,7 +83,7 @@ class TezosNodeEdo2net < Formula
     EOS
   end
   def post_install
-    mkdir_p "#{var}/lib/tezos/node-edo2net"
-    system "tezos-node", "config", "init", "--data-dir" "#{var}/lib/tezos/node-edo2net", "--network", "edo2net"
+    mkdir_p "#{var}/lib/tezos/node-florencenet"
+    system "tezos-node", "config", "init", "--data-dir" "#{var}/lib/tezos/node-florencenet", "--network", "florencenet"
   end
 end

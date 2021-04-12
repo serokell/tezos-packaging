@@ -13,8 +13,8 @@ class TezosSaplingParams < Formula
 
   bottle do
     root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosSaplingParams.version}/"
-    sha256 "93d730b5569ea10d66ce85423acc975355ac23fe698fda0445f3799fb20a1e01" => :mojave
-    sha256 "2921c9a5bec843fbd3806660ae4911d43ff2fac7adc2ccaee674e7bfc27d3771" => :catalina
+    sha256 "4e89932b0626cffe80214ba45342280c340b34c58ebbf7c3e0185a6d4662732d" => :mojave
+    sha256 "5f7a5687d67051eafcfb7cb5ac542143a325a135403daeca6595602bfd400441" => :catalina
     cellar :any
   end
 

@@ -9,11 +9,13 @@ from typing import List, Dict
 # There are more possible fields, but only these are used by tezos services
 class Service:
     def __init__(self, exec_start: str, state_directory:str, user: str,
+                 exec_start_pre: str=None,
                  environment_file: str=None, environment: List[str]=[],
                  remain_after_exit: bool=False, type_: str=None):
         self.environment_file = environment_file
         self.environment = environment
         self.exec_start = exec_start
+        self.exec_start_pre = exec_start_pre
         self.state_directory = state_directory
         self.user = user
         self.remain_after_exit = remain_after_exit
@@ -38,11 +40,13 @@ class ServiceFile:
         self.install = install
 
 class SystemdUnit:
-    def __init__(self, service_file:ServiceFile, startup_script:str=None, suffix:str=None,
+    def __init__(self, service_file:ServiceFile, startup_script:str=None,
+                 prestart_script:str=None, suffix:str=None,
                  config_file: str=None, instances :List[str]=[]):
         self.suffix = suffix
         self.service_file = service_file
         self.startup_script = startup_script
+        self.prestart_script = prestart_script
         self.config_file = config_file
         self.instances = instances
 
@@ -93,7 +97,8 @@ fedora_epoch = 1
 
 def gen_spec_systemd_part(package):
     systemd_units = package.systemd_units
-    startup_scripts = list(set(map(lambda x: x.startup_script, package.systemd_units)))
+    startup_scripts = list(set(map(lambda x: x.startup_script, package.systemd_units))) + \
+        list(set(map(lambda x: x.prestart_script, package.systemd_units)))
     config_files = list(filter(lambda x: x is not None, map(lambda x: x.config_file,
                                                                 package.systemd_units)))
     install_unit_files = ""
@@ -301,8 +306,10 @@ install: {self.name}
     def gen_install(self, out):
         startup_scripts = \
             list(set(filter(lambda x: x is not None, map(lambda x: x.startup_script, self.systemd_units))))
+        prestart_scripts = \
+            list(set(filter(lambda x: x is not None, map(lambda x: x.prestart_script, self.systemd_units))))
         install_contents = "\n".join(map(lambda x: f"debian/{x} usr/bin",
-                                         startup_scripts))
+                                         startup_scripts + prestart_scripts))
         with open(out, 'w') as f:
             f.write(install_contents)
 
@@ -442,7 +449,9 @@ def print_service_file(service_file: ServiceFile, out):
 {after}{requires}{part_of}Description={service_file.unit.description}
 [Service]
 {environment_file}
-{environment}ExecStart={service_file.service.exec_start}
+{environment}
+{f"ExecStartPre={service_file.service.exec_start_pre}" if service_file.service.exec_start_pre is not None else ""}
+ExecStart={service_file.service.exec_start}
 StateDirectory={service_file.service.state_directory}
 User={service_file.service.user}
 Group={service_file.service.user}

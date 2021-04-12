@@ -101,6 +101,8 @@ for package in packages:
                                         f"debian/{package.name.lower()}-{systemd_unit.suffix}.default")
                     if systemd_unit.startup_script is not None:
                         shutil.copy(f"{os.path.dirname(__file__)}/scripts/{systemd_unit.startup_script}", f"debian/{systemd_unit.startup_script}")
+                    if systemd_unit.prestart_script is not None:
+                        shutil.copy(f"{os.path.dirname(__file__)}/scripts/{systemd_unit.prestart_script}", f"debian/{systemd_unit.prestart_script}")
                 package.gen_install("debian/install")
                 package.gen_postinst("debian/postinst")
                 package.gen_postrm("debian/postrm")
@@ -134,6 +136,9 @@ for package in packages:
                                     f"{dir}/{package.name}-{systemd_unit.suffix}.default")
                 if systemd_unit.startup_script is not None:
                     shutil.copy(f"{os.path.dirname(__file__)}/scripts/{systemd_unit.startup_script}", f"{dir}/{systemd_unit.startup_script}")
+                if systemd_unit.prestart_script is not None:
+                    print("copy prestart")
+                    shutil.copy(f"{os.path.dirname(__file__)}/scripts/{systemd_unit.prestart_script}", f"{dir}/{systemd_unit.prestart_script}")
             subprocess.run(["tar", "-czf", f"{dir}.tar.gz", dir], check=True)
             os.makedirs(f"{home}/rpmbuild/SPECS", exist_ok=True)
             os.makedirs(f"{home}/rpmbuild/SOURCES", exist_ok=True)

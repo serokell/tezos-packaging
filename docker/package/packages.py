@@ -90,10 +90,12 @@ def mk_node_unit(suffix, env, desc):
                                     part_of=[f"tezos-baking-{suffix}.service"]),
                                Service(environment=env,
                                        exec_start="/usr/bin/tezos-node-start",
+                                       exec_start_pre="/usr/bin/tezos-node-prestart",
                                        state_directory="tezos", user="tezos"
                                ),
                                Install(wanted_by=["multi-user.target", f"tezos-baking-{suffix}.service"]))
-    return SystemdUnit(suffix=suffix, service_file=service_file, startup_script="tezos-node-start")
+    return SystemdUnit(suffix=suffix, service_file=service_file, startup_script="tezos-node-start",
+                       prestart_script="tezos-node-prestart")
 
 node_units = []
 node_postinst_steps = postinst_steps_common

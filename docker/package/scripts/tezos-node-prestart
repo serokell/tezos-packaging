@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+
+# SPDX-FileCopyrightText: 2021 TQ Tezos <https://tqtezos.com/>
+#
+# SPDX-License-Identifier: LicenseRef-MIT-TQ
+
+set -euo pipefail
+
+node="/usr/bin/tezos-node"
+
+if [[ ! -f "$DATA_DIR/identity.json" ]]; then
+    "$node" identity generate --data-dir "$DATA_DIR"
+fi

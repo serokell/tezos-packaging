@@ -99,6 +99,7 @@ in {
       };
       in {
       services."tezos-${node-name}-tezos-signer" = common.genSystemdService node-name node-cfg "signer" // {
+        after = [ "network.target" ];
         script = ''
           ${tezos-signers.${node-cfg.networkProtocol}}
         '';

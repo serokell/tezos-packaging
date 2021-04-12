@@ -47,9 +47,12 @@ rec {
       systemd = mkMerge (flip mapAttrsToList instancesCfg (node-name: node-cfg:
         let tezos-service = service-pkgs."${node-cfg.baseProtocol}";
         in {
-          services."tezos-${node-name}-tezos-${service-name}" = genSystemdService node-name node-cfg service-name // {
+          services."tezos-${node-name}-tezos-${service-name}" = genSystemdService node-name node-cfg service-name // rec {
+            bindsTo = [ "network.target" "tezos-${node-name}-tezos-node.service" ];
+            after = bindsTo;
             preStart =
               ''
+                sleep 10 # to allow tezos-node.service to successfully start
                 service_data_dir="$STATE_DIRECTORY/client/data"
                 mkdir -p "$service_data_dir"
 
@@ -74,7 +77,6 @@ rec {
 
   genSystemdService = node-name: node-cfg: service-name: {
     wantedBy = [ "multi-user.target" ];
-    after = [ "network.target" ];
     description = "Tezos ${service-name}";
     environment = {
       TEZOS_LOG = "* -> ${node-cfg.logVerbosity}";

@@ -86,6 +86,7 @@ in {
     users = mkMerge (flip mapAttrsToList cfg.instances (node-name: node-cfg: common.genUsers node-name ));
     systemd = mkMerge (flip mapAttrsToList cfg.instances (node-name: node-cfg: {
       services."tezos-${node-name}-tezos-node" = common.genSystemdService node-name node-cfg "node" // {
+        after = [ "network.target" ];
         preStart =
           ''
             node_data_dir="$STATE_DIRECTORY/node/data"

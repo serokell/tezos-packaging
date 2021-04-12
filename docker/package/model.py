@@ -484,7 +484,8 @@ class TezosBakingServicesPackage(AbstractPackage):
                                 remain_after_exit=True, type_="oneshot"),
                         Install(wanted_by=["multi-user.target"])
                     ),
-                    suffix=network
+                    suffix=network,
+                    config_file="tezos-baking.conf"
                 )
             )
         self.postinst_steps = ""

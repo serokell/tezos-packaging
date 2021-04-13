@@ -66,15 +66,23 @@ rec {
   hacl-star = osuper.hacl-star.overrideAttrs (_: rec {
     sourceRoot = ".";
   });
-  index = osuper.index.versions."1.3.0";
-  irmin = osuper.irmin.versions."2.5.1";
-  irmin-pack = osuper.irmin-pack.versions."2.5.1";
-  irmin-layers = osuper.irmin-layers.versions."2.5.1";
+  index = osuper.index.versions."1.2.1";
+  irmin = osuper.irmin.versions."2.2.0";
+  irmin-pack = osuper.irmin-pack.versions."2.2.0";
+  irmin-layers = osuper.irmin-layers.versions."2.2.0";
   pcre = osuper.pcre.overrideAttrs (o: rec {
     buildInputs = o.buildInputs ++ [ odoc ];
     propagatedBuildInputs = buildInputs;
   });
 
+  resto-directory = osuper.resto-directory.versions."0.5";
+  resto-cohttp = osuper.resto-cohttp.versions."0.5";
+  resto-cohttp-client = osuper.resto-cohttp-client.versions."0.5";
+  resto-cohttp-server = osuper.resto-cohttp-server.versions."0.5";
+  data-encoding = osuper.data-encoding.versions."0.2";
+  json-data-encoding = osuper.json-data-encoding.versions."0.8";
+  json-data-encoding-bson = osuper.json-data-encoding-bson.versions."0.8";
+  lwt-canceler = osuper.lwt-canceler.versions."0.2";
   ff = osuper.ff.versions."0.4.0";
   bls12-381 = osuper.bls12-381.overrideAttrs (o:
     rec {

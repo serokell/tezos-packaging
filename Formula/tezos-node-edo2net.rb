@@ -4,7 +4,7 @@
 
 class TezosNodeEdo2net < Formula
   url "file:///dev/null"
-  version "v9.0-rc1-1"
+  version "v8.3-1"
 
   bottle :unneeded
   depends_on "tezos-node"

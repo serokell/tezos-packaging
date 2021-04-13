@@ -98,10 +98,22 @@ Run `./tezos-client` or add it to your PATH to be able to run it anywhere.
 <a name="macos"></a>
 ## Brew tap for macOS
 
-If you're using macOS and `brew`, you can install Tezos binaries from the tap
-provided by this repository. In order to do that run the following:
+If you're using macOS and `brew`, you can install Tezos binaries from the taps provided
+by this repository. There are two taps: one for the latest stable release of Tezos and
+one for the latest release candidate of Tezos.
+
+In order to use latest stable version run the following:
 ```
-brew tap serokell/tezos-packaging https://github.com/serokell/tezos-packaging.git
+brew tap serokell/tezos-packaging-stable https://github.com/serokell/tezos-packaging-stable.git
+```
+
+In order to use latest release candidate version run the following:
+```
+brew tap serokell/tezos-packaging-rc https://github.com/serokell/tezos-packaging-rc.git
+```
+
+Once the desired tap is selected, you can install the chosen package, e.g.:
+```
 brew install tezos-client
 ```
 

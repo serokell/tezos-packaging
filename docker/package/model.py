@@ -9,13 +9,14 @@ from typing import List, Dict
 # There are more possible fields, but only these are used by tezos services
 class Service:
     def __init__(self, exec_start: str, state_directory:str, user: str,
-                 exec_start_pre: str=None,
+                 exec_start_pre: str=None, timeout_start_sec: str=None,
                  environment_file: str=None, environment: List[str]=[],
                  remain_after_exit: bool=False, type_: str=None):
         self.environment_file = environment_file
         self.environment = environment
         self.exec_start = exec_start
         self.exec_start_pre = exec_start_pre
+        self.timeout_start_sec = timeout_start_sec
         self.state_directory = state_directory
         self.user = user
         self.remain_after_exit = remain_after_exit
@@ -451,6 +452,7 @@ def print_service_file(service_file: ServiceFile, out):
 {environment_file}
 {environment}
 {f"ExecStartPre={service_file.service.exec_start_pre}" if service_file.service.exec_start_pre is not None else ""}
+{f"TimeoutStartSec={service_file.service.timeout_start_sec}" if service_file.service.timeout_start_sec is not None else ""}
 ExecStart={service_file.service.exec_start}
 StateDirectory={service_file.service.state_directory}
 User={service_file.service.user}

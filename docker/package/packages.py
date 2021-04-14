@@ -91,6 +91,7 @@ def mk_node_unit(suffix, env, desc):
                                Service(environment=env,
                                        exec_start="/usr/bin/tezos-node-start",
                                        exec_start_pre="/usr/bin/tezos-node-prestart",
+                                       timeout_start_sec="450s",
                                        state_directory="tezos", user="tezos"
                                ),
                                Install(wanted_by=["multi-user.target", f"tezos-baking-{suffix}.service"]))

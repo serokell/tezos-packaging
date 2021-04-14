@@ -30,8 +30,8 @@ launch_endorser() {
          run "$@"
 }
 
-if [[ -z "$ENDORSER_ACCOUNT" ]]; then
+if [[ -z "$BAKER_ADDRESS_ALIAS" ]]; then
     launch_endorser "$@"
 else
-    launch_endorser "$ENDORSER_ACCOUNT" "$@"
+    launch_endorser "$BAKER_ADDRESS_ALIAS" "$@"
 fi

@@ -185,11 +185,11 @@ rec {
       buildInputs = o.buildInputs ++ [ librustzcash ];
       XDG_DATA_DIRS = "${zcash-params}:$XDG_DATA_DIRS";
     });
-  # tezos-protocol-009-PsFLoren-parameters = osuper.tezos-protocol-009-PsFLoren-parameters.overrideAttrs
-  #   (o: rec {
-  #     buildInputs = o.buildInputs ++ [ librustzcash ];
-  #     XDG_DATA_DIRS = "${zcash-params}:$XDG_DATA_DIRS";
-  #   });
+  tezos-protocol-009-PsFLoren-parameters = osuper.tezos-protocol-009-PsFLoren-parameters.overrideAttrs
+    (o: rec {
+      buildInputs = o.buildInputs ++ [ librustzcash ];
+      XDG_DATA_DIRS = "${zcash-params}:$XDG_DATA_DIRS";
+    });
 
   # FIXME apply this patch upstream
   tezos-stdlib-unix = osuper.tezos-stdlib-unix.overrideAttrs
@@ -217,21 +217,21 @@ rec {
       buildInputs = o.buildInputs ++ [ librustzcash self.makeWrapper ];
       postFixup = zcash-post-fixup o;
     });
-  # tezos-accuser-009-PsFLoren = osuper.tezos-accuser-009-PsFLoren.overrideAttrs
-  #   (o: {
-  #     buildInputs = o.buildInputs ++ [ librustzcash self.makeWrapper ];
-  #     postFixup = zcash-post-fixup o;
-  #   });
-  # tezos-baker-009-PsFLoren = osuper.tezos-baker-009-PsFLoren.overrideAttrs
-  #   (o: {
-  #     buildInputs = o.buildInputs ++ [ librustzcash self.makeWrapper ];
-  #     postFixup = zcash-post-fixup o;
-  #   });
-  # tezos-endorser-009-PsFLoren = osuper.tezos-endorser-009-PsFLoren.overrideAttrs
-  #   (o: {
-  #     buildInputs = o.buildInputs ++ [ librustzcash self.makeWrapper ];
-  #     postFixup = zcash-post-fixup o;
-  #   });
+  tezos-accuser-009-PsFLoren = osuper.tezos-accuser-009-PsFLoren.overrideAttrs
+    (o: {
+      buildInputs = o.buildInputs ++ [ librustzcash self.makeWrapper ];
+      postFixup = zcash-post-fixup o;
+    });
+  tezos-baker-009-PsFLoren = osuper.tezos-baker-009-PsFLoren.overrideAttrs
+    (o: {
+      buildInputs = o.buildInputs ++ [ librustzcash self.makeWrapper ];
+      postFixup = zcash-post-fixup o;
+    });
+  tezos-endorser-009-PsFLoren = osuper.tezos-endorser-009-PsFLoren.overrideAttrs
+    (o: {
+      buildInputs = o.buildInputs ++ [ librustzcash self.makeWrapper ];
+      postFixup = zcash-post-fixup o;
+    });
   tezos-codec = osuper.tezos-codec.overrideAttrs
     (o: {
       buildInputs = o.buildInputs ++ [ rustc-bls12-381 librustzcash self.makeWrapper ];

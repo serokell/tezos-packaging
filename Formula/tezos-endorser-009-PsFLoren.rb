@@ -28,6 +28,8 @@ class TezosEndorser009Psfloren < Formula
 
   bottle do
     root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosEndorser009Psfloren.version}/"
+    sha256 cellar: :any, mojave: "fb10bcd7e93b44b7c747e1f248dd6c631515f1e8a1594017559f957392bc209e"
+    sha256 cellar: :any, catalina: "6de80666f752103e0c0ecb4da2a8401b185bd49d7ab503766b1b64f8e8ee561a"
   end
 
   def make_deps

@@ -9,7 +9,7 @@ class TezosNodeEdo2net < Formula
   bottle :unneeded
   depends_on "tezos-node"
 
-  desc "Meta formula that provides backround tezos-node service that runs on edo2net"
+  desc "Meta formula that provides background tezos-node service that runs on edo2net"
 
   def install
     startup_contents =

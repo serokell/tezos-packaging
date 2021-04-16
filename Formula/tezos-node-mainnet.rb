@@ -9,7 +9,7 @@ class TezosNodeMainnet < Formula
   bottle :unneeded
   depends_on "tezos-node"
 
-  desc "Meta formula that provides backround tezos-node service that runs on mainnet"
+  desc "Meta formula that provides background tezos-node service that runs on mainnet"
 
   def install
     startup_contents =

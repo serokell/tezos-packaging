@@ -185,7 +185,7 @@ for proto in active_protocols:
                     Service(environment_file="/etc/default/tezos-baking-%i",
                             environment=[f"PROTOCOL={proto}", "NODE_DATA_DIR=/var/lib/tezos/node-%i"],
                             exec_start="/usr/bin/tezos-baker-start",
-                            state_directory="tezos", user="tezos"),
+                            state_directory="tezos", user="tezos", restart="on-failure"),
                     Install(wanted_by=["multi-user.target", "tezos-baking-%i.service"]))
     service_file_accuser = ServiceFile(Unit(after=["network.target"],
                                             description="Tezos accuser"),
@@ -202,7 +202,7 @@ for proto in active_protocols:
                     Service(environment_file="/etc/default/tezos-baking-%i",
                             environment=[f"PROTOCOL={proto}"],
                             exec_start="/usr/bin/tezos-accuser-start",
-                            state_directory="tezos", user="tezos"),
+                            state_directory="tezos", user="tezos", restart="on-failure"),
                     Install(wanted_by=["multi-user.target", "tezos-baking-%i.service"]))
     service_file_endorser = ServiceFile(Unit(after=["network.target"],
                                              description="Tezos endorser"),
@@ -219,7 +219,7 @@ for proto in active_protocols:
                     Service(environment_file="/etc/default/tezos-baking-%i",
                             environment=[f"PROTOCOL={proto}"],
                             exec_start="/usr/bin/tezos-endorser-start",
-                            state_directory="tezos", user="tezos"),
+                            state_directory="tezos", user="tezos", restart="on-failure"),
                     Install(wanted_by=["multi-user.target", "tezos-baking-%i.service"]))
     packages.append(OpamBasedPackage(f"tezos-baker-{proto}", "Daemon for baking",
                                      [SystemdUnit(service_file=service_file_baker,

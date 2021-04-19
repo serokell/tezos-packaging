@@ -17,7 +17,7 @@ let
     --net-addr ":${toString netPort}" \
     --network "${network}"
   '';
-  common = import ./common.nix { inherit lib; };
+  common = import ./common.nix { inherit lib; inherit pkgs; };
   instanceOptions = types.submodule ( {...} : {
     options = common.sharedOptions // {
       enable = mkEnableOption "Tezos node service";

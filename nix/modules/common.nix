@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: LicenseRef-MIT-TQ
 
-{ lib, ... }:
+{ lib, pkgs, ... }:
 
 with lib;
 rec {
@@ -22,10 +22,10 @@ rec {
   daemonOptions = sharedOptions // {
 
     baseProtocol = mkOption {
-      type = types.enum [ "007-PsDELPH1" "008-PtEdo2Zk" "009-PsFLoren"];
+      type = types.enum [ "008-PtEdo2Zk" "009-PsFLoren"];
       description = ''
         Base protocol version,
-        only '007-PsDELPH1', '008-PtEdo2Zk', and '009-PsFLoren' are supported.
+        only '008-PtEdo2Zk' and '009-PsFLoren' are supported.
       '';
       example = "008-PtEdo2Zk";
     };
@@ -50,9 +50,14 @@ rec {
           services."tezos-${node-name}-tezos-${service-name}" = genSystemdService node-name node-cfg service-name // rec {
             bindsTo = [ "network.target" "tezos-${node-name}-tezos-node.service" ];
             after = bindsTo;
+            path = with pkgs; [ curl ];
             preStart =
               ''
-                sleep 10 # to allow tezos-node.service to successfully start
+                while ! _="$(curl --silent http://localhost:${toString node-cfg.rpcPort}/chains/main/blocks/head/)"; do
+                  echo "Trying to connect to tezos-node"
+                  sleep 1s
+                done
+
                 service_data_dir="$STATE_DIRECTORY/client/data"
                 mkdir -p "$service_data_dir"
 

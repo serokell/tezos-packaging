@@ -307,9 +307,9 @@ install: {self.name}
 
     def gen_install(self, out):
         startup_scripts = \
-            list(set(filter(lambda x: x is not None, map(lambda x: x.startup_script, self.systemd_units))))
+            list({x.startup_script for x in self.systemd_units if x.startup_script is not None})
         prestart_scripts = \
-            list(set(filter(lambda x: x is not None, map(lambda x: x.prestart_script, self.systemd_units))))
+            list({x.prestart_script for x in self.systemd_units if x.prestart_script is not None})
         install_contents = "\n".join(map(lambda x: f"debian/{x} usr/bin",
                                          startup_scripts + prestart_scripts))
         with open(out, 'w') as f:
@@ -485,11 +485,14 @@ class TezosBakingServicesPackage(AbstractPackage):
                         Unit(after=["network.target"],
                              description=f"Tezos baking instance for {network}"),
                         Service(exec_start="true", user="tezos", state_directory="tezos",
+                                environment_file=f"/etc/default/tezos-baking-{network}",
+                                exec_start_pre="/usr/bin/tezos-baking-prestart",
                                 remain_after_exit=True, type_="oneshot"),
                         Install(wanted_by=["multi-user.target"])
                     ),
                     suffix=network,
-                    config_file="tezos-baking.conf"
+                    config_file="tezos-baking.conf",
+                    prestart_script="tezos-baking-prestart"
                 )
             )
         self.postinst_steps = ""
@@ -577,3 +580,13 @@ install: tezos-baking
         rules_contents = gen_systemd_rules_contents(self)
         with open(out, 'w') as f:
             f.write(rules_contents)
+
+    def gen_install(self, out):
+        startup_scripts = \
+            list({x.startup_script for x in self.systemd_units if x.startup_script is not None})
+        prestart_scripts = \
+            list({x.prestart_script for x in self.systemd_units if x.prestart_script is not None})
+        install_contents = "\n".join(map(lambda x: f"debian/{x} usr/bin",
+                                         startup_scripts + prestart_scripts))
+        with open(out, 'w') as f:
+            f.write(install_contents)

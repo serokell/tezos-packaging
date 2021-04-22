@@ -5,7 +5,7 @@ import os, shutil, sys, subprocess, json
 
 from .model import Service, ServiceFile, SystemdUnit, Unit, OpamBasedPackage, TezosSaplingParamsPackage
 
-networks = ["mainnet"]
+networks = ["mainnet", "edo2net", "florencenet"]
 
 signer_units = [
     SystemdUnit(
@@ -84,28 +84,6 @@ def mk_node_unit(suffix, env, desc):
                                ))
     return SystemdUnit(suffix=suffix, service_file=service_file, startup_script="tezos-node-start")
 
-
-# v8.2 tezos-node doesn't have predefined config for edo2net, so we're providing
-# this config to the service manually
-edo2net_config = '''{
-"p2p": {},
-"network":
-    { "genesis":
-        { "timestamp": "2021-02-11T14:00:00Z",
-          "block": "BLockGenesisGenesisGenesisGenesisGenesisdae8bZxCCxh",
-          "protocol": "PtYuensgYBb3G3x1hLLbCmcav8ue8Kyd2khADcL5LsT5R1hcXex" },
-      "genesis_parameters":
-        { "values":
-            { "genesis_pubkey":
-                "edpkugeDwmwuwyyD3Q5enapgEYDxZLtEUFFSrvVwXASQMVEqsvTqWu" } },
-      "chain_name": "TEZOS_EDO2NET_2021-02-11T14:00:00Z",
-      "sandboxed_chain_name": "SANDBOXED_TEZOS",
-      "default_bootstrap_peers":
-        [ "edonet.tezos.co.il", "188.40.128.216:29732", "edo2net.kaml.fr",
-          "edonet2.smartpy.io", "51.79.165.131", "edonetb.boot.tezostaquito.io" ] }
-}
-'''
-
 node_units = []
 node_postinst_steps = postinst_steps_common
 node_postrm_steps = ""
@@ -131,25 +109,6 @@ node_units.append(mk_node_unit(suffix="custom", env=["DATA_DIR=/var/lib/tezos/no
                                                      "CUSTOM_NODE_CONFIG="] + common_node_env,
                                desc="Tezos node with custom config"))
 node_postinst_steps += "mkdir -p /var/lib/tezos/node-custom\n"
-
-# Add edo2net service
-node_units.append(mk_node_unit(suffix="edo2net", env=common_node_env + ["DATA_DIR=/var/lib/tezos/node-edo2net"],
-                               desc="Tezos node edo2net"))
-
-node_postinst_steps += f'''mkdir -p /var/lib/tezos/node-edo2net
-rm -f /var/lib/tezos/node-edo2net/config.json
-cat > /var/lib/tezos/node-edo2net/config.json <<- EOM
-{edo2net_config}
-EOM
-chown -R tezos:tezos /var/lib/tezos/node-edo2net
-cat > /usr/bin/tezos-node-edo2net <<- 'EOM'
-#! /usr/bin/env bash
-
-TEZOS_NODE_DIR="$(cat $(systemctl show -p FragmentPath tezos-node-edo2net.service | cut -d'=' -f2) | grep 'DATA_DIR' | cut -d '=' -f3 | cut -d '"' -f1)" tezos-node "$@"
-EOM
-chmod +x /usr/bin/tezos-node-edo2net
-'''
-node_postrm_steps += f"rm -f /usr/bin/tezos-node-edo2net\n"
 
 packages.append(OpamBasedPackage("tezos-node",
                                  "Entry point for initializing, configuring and running a Tezos node",

@@ -94,7 +94,7 @@ def mk_node_unit(suffix, env, desc):
                                     part_of=[f"tezos-baking-{suffix}.service"]),
                                Service(environment=env,
                                        exec_start="/usr/bin/tezos-node-start",
-                                       exec_start_pre="/usr/bin/tezos-node-prestart",
+                                       exec_start_pre=["/usr/bin/tezos-node-prestart"],
                                        timeout_start_sec="450s",
                                        state_directory="tezos", user="tezos"
                                ),
@@ -181,8 +181,11 @@ for proto in active_protocols:
                                           description="Tezos baker"),
                                      Service(environment_file=f"/etc/default/tezos-baker-{proto}",
                                              environment=[f"PROTOCOL={proto}", "NODE_DATA_DIR="],
+                                             exec_start_pre=["+/usr/bin/setfacl -m u:tezos:rwx /run/systemd/ask-password"],
                                              exec_start=baker_startup_script,
-                                             state_directory="tezos", user="tezos"),
+                                             exec_stop_post=["+/usr/bin/setfacl -x u:tezos /run/systemd/ask-password"],
+                                             state_directory="tezos", user="tezos", type_="forking",
+                                             keyring_mode="shared"),
                                      Install(wanted_by=["multi-user.target"]))
     service_file_baker_instantiated = \
         ServiceFile(Unit(after=["network.target", "tezos-node-%i.service", "tezos-baking-%i.service"],
@@ -192,7 +195,8 @@ for proto in active_protocols:
                     Service(environment_file="/etc/default/tezos-baking-%i",
                             environment=[f"PROTOCOL={proto}", "NODE_DATA_DIR=/var/lib/tezos/node-%i"],
                             exec_start=baker_startup_script,
-                            state_directory="tezos", user="tezos", restart="on-failure"),
+                            state_directory="tezos", user="tezos", restart="on-failure",
+                            type_="forking", keyring_mode="shared"),
                     Install(wanted_by=["multi-user.target", "tezos-baking-%i.service"]))
     service_file_accuser = ServiceFile(Unit(after=["network.target"],
                                             description="Tezos accuser"),
@@ -215,8 +219,11 @@ for proto in active_protocols:
                                              description="Tezos endorser"),
                                         Service(environment_file=f"/etc/default/tezos-endorser-{proto}",
                                                 environment=[f"PROTOCOL={proto}"],
+                                                exec_start_pre=["+/usr/bin/setfacl -m u:tezos:rwx /run/systemd/ask-password"],
                                                 exec_start=endorser_startup_script,
-                                                state_directory="tezos", user="tezos"),
+                                                exec_stop_post=["+/usr/bin/setfacl -x u:tezos /run/systemd/ask-password"],
+                                                state_directory="tezos", user="tezos", type_="forking",
+                                                keyring_mode="shared"),
                                         Install(wanted_by=["multi-user.target"]))
     service_file_endorser_instantiated = \
         ServiceFile(Unit(after=["network.target", "tezos-node-%i.service", "tezos-baking-%i.service"],
@@ -226,7 +233,8 @@ for proto in active_protocols:
                     Service(environment_file="/etc/default/tezos-baking-%i",
                             environment=[f"PROTOCOL={proto}"],
                             exec_start=endorser_startup_script,
-                            state_directory="tezos", user="tezos", restart="on-failure"),
+                            state_directory="tezos", user="tezos", restart="on-failure",
+                            type_="forking", keyring_mode="shared"),
                     Install(wanted_by=["multi-user.target", "tezos-baking-%i.service"]))
     packages.append(OpamBasedPackage(f"tezos-baker-{proto}", "Daemon for baking",
                                      [SystemdUnit(service_file=service_file_baker,

@@ -15,7 +15,7 @@ in import "${nixpkgs}/nixos/tests/make-test-python.nix" ({ ... }:
       libev
     ];
     environment.sessionVariables.LD_LIBRARY_PATH =
-      [ "${pkgs.ocamlPackages.hacl-star-raw}/lib/ocaml/4.09.1/site-lib/hacl-star-raw" ];
+      [ "${pkgs.ocamlPackages.hacl-star-raw}/lib/ocaml/4.10.0/site-lib/hacl-star-raw" ];
   };
 
   testScript = ''

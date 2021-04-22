@@ -96,7 +96,7 @@ class OpamBasedPackage(AbstractPackage):
     def fetch_sources(self, out_dir):
         opam_package = "tezos-client" if self.name == "tezos-admin-client" else self.name
         subprocess.run(["opam", "exec", "--", "opam-bundle", f"{opam_package}={version}"] + self.optional_opam_deps +
-                       ["--ocaml=4.09.1", "--yes", "--opam=2.0.5"], check=True)
+                       ["--ocaml=4.10.2", "--yes", "--opam=2.0.8"], check=True)
         subprocess.run(["tar", "-zxf", f"{opam_package}-bundle.tar.gz"], check=True)
         os.rename(f"{opam_package}-bundle", out_dir)
 

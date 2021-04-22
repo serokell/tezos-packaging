@@ -15,8 +15,8 @@ COPY protocols.json /tezos-packaging/protocols.json
 WORKDIR /tezos-packaging/docker
 ENV OPAMROOT "/tezos-packaging/docker/opamroot"
 RUN opam init --bare --yes --disable-sandboxing
-RUN opam switch create ocaml-base-compiler.4.09.1
-RUN opam switch set ocaml-base-compiler.4.09.1
+RUN opam switch create ocaml-base-compiler.4.10.2
+RUN opam switch set ocaml-base-compiler.4.10.2
 RUN opam install opam-bundle=0.4 --yes
 COPY docker/package/*.py /tezos-packaging/docker/package/
 COPY docker/package/defaults /tezos-packaging/docker/package/defaults

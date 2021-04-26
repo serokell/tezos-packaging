@@ -43,12 +43,15 @@ class ServiceFile:
 
 class SystemdUnit:
     def __init__(self, service_file:ServiceFile, startup_script:str=None,
-                 prestart_script:str=None, suffix:str=None,
-                 config_file: str=None, instances :List[str]=[]):
+                 startup_script_source:str=None,
+                 prestart_script:str=None, prestart_script_source:str=None,
+                 suffix:str=None, config_file: str=None, instances :List[str]=[]):
         self.suffix = suffix
         self.service_file = service_file
         self.startup_script = startup_script
+        self.startup_script_source = startup_script_source
         self.prestart_script = prestart_script
+        self.prestart_script_source = prestart_script_source
         self.config_file = config_file
         self.instances = instances
 

@@ -100,9 +100,19 @@ for package in packages:
                             shutil.copy(f"{os.path.dirname(__file__)}/defaults/{systemd_unit.config_file}",
                                         f"debian/{package.name.lower()}-{systemd_unit.suffix}.default")
                     if systemd_unit.startup_script is not None:
-                        shutil.copy(f"{os.path.dirname(__file__)}/scripts/{systemd_unit.startup_script}", f"debian/{systemd_unit.startup_script}")
+                        dest = f"debian/{systemd_unit.startup_script}"
+                        if systemd_unit.startup_script_source is not None:
+                            source = f"{os.path.dirname(__file__)}/scripts/{systemd_unit.startup_script_source}"
+                        else:
+                            source = f"{os.path.dirname(__file__)}/scripts/{systemd_unit.startup_script}"
+                        shutil.copy(source, dest)
                     if systemd_unit.prestart_script is not None:
-                        shutil.copy(f"{os.path.dirname(__file__)}/scripts/{systemd_unit.prestart_script}", f"debian/{systemd_unit.prestart_script}")
+                        dest = f"debian/{systemd_unit.prestart_script}"
+                        if systemd_unit.prestart_script_source is not None:
+                            source = f"{os.path.dirname(__file__)}/scripts/{systemd_unit.prestart_script_source}"
+                        else:
+                            source = f"{os.path.dirname(__file__)}/scripts/{systemd_unit.prestart_script}"
+                        shutil.copy(source, dest)
                 package.gen_install("debian/install")
                 package.gen_postinst("debian/postinst")
                 package.gen_postrm("debian/postrm")
@@ -135,10 +145,19 @@ for package in packages:
                         shutil.copy(f"{os.path.dirname(__file__)}/defaults/{systemd_unit.config_file}",
                                     f"{dir}/{package.name}-{systemd_unit.suffix}.default")
                 if systemd_unit.startup_script is not None:
-                    shutil.copy(f"{os.path.dirname(__file__)}/scripts/{systemd_unit.startup_script}", f"{dir}/{systemd_unit.startup_script}")
+                    dest = f"{dir}/{systemd_unit.startup_script}"
+                    if systemd_unit.startup_script_source is not None:
+                        source = f"{os.path.dirname(__file__)}/scripts/{systemd_unit.startup_script_source}"
+                    else:
+                        source = f"{os.path.dirname(__file__)}/scripts/{systemd_unit.startup_script}"
+                    shutil.copy(source, dest)
                 if systemd_unit.prestart_script is not None:
-                    print("copy prestart")
-                    shutil.copy(f"{os.path.dirname(__file__)}/scripts/{systemd_unit.prestart_script}", f"{dir}/{systemd_unit.prestart_script}")
+                    dest = f"{dir}/{systemd_unit.prestart_script}"
+                    if systemd_unit.prestart_script_source is not None:
+                        source = f"{os.path.dirname(__file__)}/scripts/{systemd_unit.prestart_script_source}"
+                    else:
+                        source = f"{os.path.dirname(__file__)}/scripts/{systemd_unit.prestart_script}"
+                    shutil.copy(source, dest)
             subprocess.run(["tar", "-czf", f"{dir}.tar.gz", dir], check=True)
             os.makedirs(f"{home}/rpmbuild/SPECS", exist_ok=True)
             os.makedirs(f"{home}/rpmbuild/SOURCES", exist_ok=True)

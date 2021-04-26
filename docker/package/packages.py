@@ -170,11 +170,14 @@ def gen_daemon_specific_postrm(daemon_name):
 for proto in active_protocols:
     daemons_instances = \
         [network for network, protos in networks_protos.items() if proto in protos]
+    baker_startup_script = f"/usr/bin/tezos-baker-{proto.lower()}-start"
+    endorser_startup_script = f"/usr/bin/tezos-endorser-{proto.lower()}-start"
+    accuser_startup_script = f"/usr/bin/tezos-accuser-{proto.lower()}-start"
     service_file_baker = ServiceFile(Unit(after=["network.target"],
                                           description="Tezos baker"),
                                      Service(environment_file=f"/etc/default/tezos-baker-{proto}",
                                              environment=[f"PROTOCOL={proto}", "NODE_DATA_DIR="],
-                                             exec_start="/usr/bin/tezos-baker-start",
+                                             exec_start=baker_startup_script,
                                              state_directory="tezos", user="tezos"),
                                      Install(wanted_by=["multi-user.target"]))
     service_file_baker_instantiated = \
@@ -184,14 +187,14 @@ for proto in active_protocols:
                          description="Instantiated tezos baker daemon service"),
                     Service(environment_file="/etc/default/tezos-baking-%i",
                             environment=[f"PROTOCOL={proto}", "NODE_DATA_DIR=/var/lib/tezos/node-%i"],
-                            exec_start="/usr/bin/tezos-baker-start",
+                            exec_start=baker_startup_script,
                             state_directory="tezos", user="tezos", restart="on-failure"),
                     Install(wanted_by=["multi-user.target", "tezos-baking-%i.service"]))
     service_file_accuser = ServiceFile(Unit(after=["network.target"],
                                             description="Tezos accuser"),
                                        Service(environment_file=f"/etc/default/tezos-accuser-{proto}",
                                                environment=[f"PROTOCOL={proto}"],
-                                               exec_start="/usr/bin/tezos-accuser-start",
+                                               exec_start=accuser_startup_script,
                                                state_directory="tezos", user="tezos"),
                                        Install(wanted_by=["multi-user.target"]))
     service_file_accuser_instantiated = \
@@ -201,14 +204,14 @@ for proto in active_protocols:
                          description="Instantiated tezos accuser daemon service"),
                     Service(environment_file="/etc/default/tezos-baking-%i",
                             environment=[f"PROTOCOL={proto}"],
-                            exec_start="/usr/bin/tezos-accuser-start",
+                            exec_start=accuser_startup_script,
                             state_directory="tezos", user="tezos", restart="on-failure"),
                     Install(wanted_by=["multi-user.target", "tezos-baking-%i.service"]))
     service_file_endorser = ServiceFile(Unit(after=["network.target"],
                                              description="Tezos endorser"),
                                         Service(environment_file=f"/etc/default/tezos-endorser-{proto}",
                                                 environment=[f"PROTOCOL={proto}"],
-                                                exec_start="/usr/bin/tezos-endorser-start",
+                                                exec_start=endorser_startup_script,
                                                 state_directory="tezos", user="tezos"),
                                         Install(wanted_by=["multi-user.target"]))
     service_file_endorser_instantiated = \
@@ -218,15 +221,17 @@ for proto in active_protocols:
                          description="Instantiated tezos endorser daemon service"),
                     Service(environment_file="/etc/default/tezos-baking-%i",
                             environment=[f"PROTOCOL={proto}"],
-                            exec_start="/usr/bin/tezos-endorser-start",
+                            exec_start=endorser_startup_script,
                             state_directory="tezos", user="tezos", restart="on-failure"),
                     Install(wanted_by=["multi-user.target", "tezos-baking-%i.service"]))
     packages.append(OpamBasedPackage(f"tezos-baker-{proto}", "Daemon for baking",
                                      [SystemdUnit(service_file=service_file_baker,
-                                                  startup_script="tezos-baker-start",
+                                                  startup_script=baker_startup_script.split('/')[-1],
+                                                  startup_script_source="tezos-baker-start",
                                                   config_file="tezos-baker.conf"),
                                       SystemdUnit(service_file=service_file_baker_instantiated,
-                                                  startup_script="tezos-baker-start",
+                                                  startup_script=baker_startup_script.split('/')[-1],
+                                                  startup_script_source="tezos-baker-start",
                                                   instances=daemons_instances)],
                                      proto,
                                      optional_opam_deps=["tls", "ledgerwallet-tezos"],
@@ -236,10 +241,12 @@ for proto in active_protocols:
                                      postrm_steps=gen_daemon_specific_postrm(f"tezos-baker-{proto}")))
     packages.append(OpamBasedPackage(f"tezos-accuser-{proto}", "Daemon for accusing",
                                      [SystemdUnit(service_file=service_file_accuser,
-                                                  startup_script="tezos-accuser-start",
+                                                  startup_script=accuser_startup_script.split('/')[-1],
+                                                  startup_script_source="tezos-accuser-start",
                                                   config_file="tezos-accuser.conf"),
                                       SystemdUnit(service_file=service_file_accuser_instantiated,
-                                                  startup_script="tezos-accuser-start",
+                                                  startup_script=accuser_startup_script.split('/')[-1],
+                                                  startup_script_source="tezos-accuser-start",
                                                   instances=daemons_instances)],
                                      proto,
                                      optional_opam_deps=["tls", "ledgerwallet-tezos"],
@@ -248,10 +255,12 @@ for proto in active_protocols:
                                      postrm_steps=gen_daemon_specific_postrm(f"tezos-accuser-{proto}")))
     packages.append(OpamBasedPackage(f"tezos-endorser-{proto}", "Daemon for endorsing",
                                      [SystemdUnit(service_file=service_file_endorser,
-                                                  startup_script="tezos-endorser-start",
+                                                  startup_script=endorser_startup_script.split('/')[-1],
+                                                  startup_script_source="tezos-endorser-start",
                                                   config_file="tezos-endorser.conf"),
                                       SystemdUnit(service_file=service_file_endorser_instantiated,
-                                                  startup_script="tezos-endorser-start",
+                                                  startup_script=endorser_startup_script.split('/')[-1],
+                                                  startup_script_source="tezos-endorser-start",
                                                   instances=daemons_instances)],
                                      proto,
                                      optional_opam_deps=["tls", "ledgerwallet-tezos"],

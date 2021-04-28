@@ -39,6 +39,7 @@ networks.
 
 To install them, run the following commands:
 
+<a name="ubuntu"></a>
 #### On Ubuntu
 ```
 # Add PPA with Tezos binaries
@@ -48,6 +49,7 @@ sudo apt-get update
 sudo apt-get install tezos-baking
 ```
 
+<a name="pios"></a>
 #### On Raspberry Pi OS
 ```
 # Intall software properties commons
@@ -194,7 +196,6 @@ To stop the baking instance run:
 sudo systemctl stop tezos-baking-<network>.service
 ```
 
-
 ## Advanced baking instance setup
 
 ### Using different data directories and node RPC address
@@ -218,3 +219,26 @@ In case you want to use a different alias for the baking account:
     and [registering](#registration) the baker key.
 2. update the `BAKER_ADDRESS_ALIAS` by editing the
     `/etc/default/tezos-baking-<network>` file.
+
+## Running baking instance on edo2net
+
+TL;DR, in order to run a baking instance on edo2net you should do the following:
+
+1) Install `tezos-baking` package following either [Ubuntu](#ubuntu) or [RaspberryPi OS](#pios)
+instructions.
+
+2) Run following commands:
+```
+snapshot_file=/tmp/tezos-edo2net.rolling
+wget https://edo2net.xtz-shots.io/rolling -O "$snapshot_file"
+sudo -u tezos tezos-node-edo2net snapshot import "$snapshot_file"
+
+sudo systemctl start tezos-node-edo2net
+
+sudo -u tezos tezos-client bootstrapped
+sudo -u tezos tezos-client import secret key baker <secret-key>
+sudo -u tezos tezos-client register key baker as delegate
+
+sudo systemctl start tezos-baking-edo2net
+sudo systemctl enable tezos-baking-edo2net
+```

@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+
+# SPDX-FileCopyrightText: 2021 TQ Tezos <https://tqtezos.com/>
+#
+# SPDX-License-Identifier: LicenseRef-MIT-TQ
+
+set -euo pipefail
+
+tezos_client="/usr/bin/tezos-client"
+
+config="$DATA_DIR/config"
+
+mkdir -p "$DATA_DIR"
+
+"$tezos_client" --base-dir "$DATA_DIR" \
+                --endpoint "$NODE_RPC_ENDPOINT" \
+                config "$([[ -f $config ]] && echo "update" || echo "init")"

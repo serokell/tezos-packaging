@@ -3,9 +3,14 @@
 # SPDX-License-Identifier: LicenseRef-MIT-TQ
 import os, shutil, sys, subprocess, json
 
-from .model import Service, ServiceFile, SystemdUnit, Unit, OpamBasedPackage, TezosSaplingParamsPackage
+from .model import Service, ServiceFile, SystemdUnit, Unit, Install, OpamBasedPackage, TezosSaplingParamsPackage, TezosBakingServicesPackage
 
 networks = ["mainnet", "edo2net", "florencenet"]
+networks_protos = {
+    "mainnet": ["008-PtEdo2Zk", "009-PsFLoren"],
+    "edo2net": ["008-PtEdo2Zk"],
+    "florencenet": ["009-PsFLoren"]
+}
 
 signer_units = [
     SystemdUnit(
@@ -15,7 +20,8 @@ signer_units = [
                             environment=["ADDRESS=127.0.0.1", "PORT=8000", "TIMEOUT=1"],
                             exec_start="/usr/bin/tezos-signer-start launch socket signer " \
                             + " --address ${ADDRESS} --port ${PORT} --timeout ${TIMEOUT}",
-                            state_directory="tezos", user="tezos")),
+                            state_directory="tezos", user="tezos"),
+                    Install(wanted_by=["multi-user.target"])),
         suffix="tcp",
         startup_script="tezos-signer-start",
         config_file="tezos-signer.conf"),
@@ -26,7 +32,8 @@ signer_units = [
                             environment=["SOCKET="],
                             exec_start="/usr/bin/tezos-signer-start launch local signer " \
                             + "--socket ${SOCKET}",
-                            state_directory="tezos", user="tezos")),
+                            state_directory="tezos", user="tezos"),
+                    Install(wanted_by=["multi-user.target"])),
         suffix="unix",
         startup_script="tezos-signer-start",
         config_file="tezos-signer.conf"),
@@ -37,7 +44,8 @@ signer_units = [
                             environment=["CERT_PATH=", "KEY_PATH=", "ADDRESS=127.0.0.1", "PORT=8080"],
                             exec_start="/usr/bin/tezos-signer-start launch http signer " \
                             + "--address ${ADDRESS} --port ${PORT}",
-                            state_directory="tezos", user="tezos")),
+                            state_directory="tezos", user="tezos"),
+                    Install(wanted_by=["multi-user.target"])),
         suffix="http",
         startup_script="tezos-signer-start",
         config_file="tezos-signer.conf"),
@@ -48,7 +56,8 @@ signer_units = [
                             environment=["CERT_PATH=", "KEY_PATH=", "ADDRESS=127.0.0.1", "PORT=8080"],
                             exec_start="/usr/bin/tezos-signer-start launch https signer " \
                             + "${CERT_PATH} ${KEY_PATH} --address ${ADDRESS} --port ${PORT}",
-                            state_directory="tezos", user="tezos")),
+                            state_directory="tezos", user="tezos"),
+                    Install(wanted_by=["multi-user.target"])),
         suffix="https",
         startup_script="tezos-signer-start",
         config_file="tezos-signer.conf")
@@ -76,13 +85,18 @@ useradd --home-dir /var/lib/tezos tezos || true
 
 
 def mk_node_unit(suffix, env, desc):
-    service_file = ServiceFile(Unit(after=["network.target"], requires=[],
-                                    description=desc),
+    service_file = ServiceFile(Unit(after=["network.target", f"tezos-baking-{suffix}.service"],
+                                    requires=[], description=desc,
+                                    part_of=[f"tezos-baking-{suffix}.service"]),
                                Service(environment=env,
                                        exec_start="/usr/bin/tezos-node-start",
+                                       exec_start_pre="/usr/bin/tezos-node-prestart",
+                                       timeout_start_sec="450s",
                                        state_directory="tezos", user="tezos"
-                               ))
-    return SystemdUnit(suffix=suffix, service_file=service_file, startup_script="tezos-node-start")
+                               ),
+                               Install(wanted_by=["multi-user.target", f"tezos-baking-{suffix}.service"]))
+    return SystemdUnit(suffix=suffix, service_file=service_file, startup_script="tezos-node-start",
+                       prestart_script="tezos-node-prestart")
 
 node_units = []
 node_postinst_steps = postinst_steps_common
@@ -101,8 +115,12 @@ cat > /usr/bin/tezos-node-{network} <<- 'EOM'
 TEZOS_NODE_DIR="$(cat $(systemctl show -p FragmentPath tezos-node-{network}.service | cut -d'=' -f2) | grep 'DATA_DIR' | cut -d '=' -f3 | cut -d '"' -f1)" tezos-node "$@"
 EOM
 chmod +x /usr/bin/tezos-node-{network}
+systemctl enable tezos-node-{network}.service > /dev/null || true
 '''
-    node_postrm_steps += f"rm -f /usr/bin/tezos-node-{network}\n"
+    node_postrm_steps += f'''
+rm -f /usr/bin/tezos-node-{network}
+systemctl disable tezos-node-{network}.service > /dev/null || true
+'''
 
 # Add custom config service
 node_units.append(mk_node_unit(suffix="custom", env=["DATA_DIR=/var/lib/tezos/node-custom",
@@ -135,48 +153,123 @@ daemon_decs = {
     "endorser": "daemon for endorsing"
 }
 
-daemon_postinst = postinst_steps_common + "\nmkdir -p /var/lib/tezos/.tezos-client\nchown -R tezos:tezos /var/lib/tezos/.tezos-client\n"
+daemon_postinst_common = postinst_steps_common + "\nmkdir -p /var/lib/tezos/.tezos-client\nchown -R tezos:tezos /var/lib/tezos/.tezos-client\n"
+
+def gen_daemon_specific_postinst(daemon_name):
+    daemon_postinst = ""
+    for instance in daemons_instances:
+        daemon_postinst += f"systemctl enable {daemon_name}@{instance}.service > /dev/null || true\n"
+    return daemon_postinst
+
+def gen_daemon_specific_postrm(daemon_name):
+    daemon_postrm = ""
+    for instance in daemons_instances:
+        daemon_postrm += f"systemctl disable {daemon_name}@{instance}.service > /dev/null || true\n"
+    return daemon_postrm
 
 for proto in active_protocols:
+    daemons_instances = \
+        [network for network, protos in networks_protos.items() if proto in protos]
+    baker_startup_script = f"/usr/bin/tezos-baker-{proto.lower()}-start"
+    endorser_startup_script = f"/usr/bin/tezos-endorser-{proto.lower()}-start"
+    accuser_startup_script = f"/usr/bin/tezos-accuser-{proto.lower()}-start"
     service_file_baker = ServiceFile(Unit(after=["network.target"],
                                           description="Tezos baker"),
                                      Service(environment_file=f"/etc/default/tezos-baker-{proto}",
-                                             environment=[f"PROTOCOL={proto}"],
-                                             exec_start="/usr/bin/tezos-baker-start",
-                                             state_directory="tezos", user="tezos"))
+                                             environment=[f"PROTOCOL={proto}", "NODE_DATA_DIR="],
+                                             exec_start=baker_startup_script,
+                                             state_directory="tezos", user="tezos"),
+                                     Install(wanted_by=["multi-user.target"]))
+    service_file_baker_instantiated = \
+        ServiceFile(Unit(after=["network.target", "tezos-node-%i.service", "tezos-baking-%i.service"],
+                         requires=["tezos-node-%i.service"],
+                         part_of=["tezos-baking-%i.service"],
+                         description="Instantiated tezos baker daemon service"),
+                    Service(environment_file="/etc/default/tezos-baking-%i",
+                            environment=[f"PROTOCOL={proto}", "NODE_DATA_DIR=/var/lib/tezos/node-%i"],
+                            exec_start=baker_startup_script,
+                            state_directory="tezos", user="tezos", restart="on-failure"),
+                    Install(wanted_by=["multi-user.target", "tezos-baking-%i.service"]))
     service_file_accuser = ServiceFile(Unit(after=["network.target"],
                                             description="Tezos accuser"),
                                        Service(environment_file=f"/etc/default/tezos-accuser-{proto}",
                                                environment=[f"PROTOCOL={proto}"],
-                                               exec_start="/usr/bin/tezos-accuser-start",
-                                               state_directory="tezos", user="tezos"))
+                                               exec_start=accuser_startup_script,
+                                               state_directory="tezos", user="tezos"),
+                                       Install(wanted_by=["multi-user.target"]))
+    service_file_accuser_instantiated = \
+        ServiceFile(Unit(after=["network.target", "tezos-node-%i.service", "tezos-baking-%i.service"],
+                         requires=["tezos-node-%i.service"],
+                         part_of=["tezos-baking-%i.service"],
+                         description="Instantiated tezos accuser daemon service"),
+                    Service(environment_file="/etc/default/tezos-baking-%i",
+                            environment=[f"PROTOCOL={proto}"],
+                            exec_start=accuser_startup_script,
+                            state_directory="tezos", user="tezos", restart="on-failure"),
+                    Install(wanted_by=["multi-user.target", "tezos-baking-%i.service"]))
     service_file_endorser = ServiceFile(Unit(after=["network.target"],
                                              description="Tezos endorser"),
                                         Service(environment_file=f"/etc/default/tezos-endorser-{proto}",
                                                 environment=[f"PROTOCOL={proto}"],
-                                                exec_start="/usr/bin/tezos-endorser-start",
-                                                state_directory="tezos", user="tezos"))
+                                                exec_start=endorser_startup_script,
+                                                state_directory="tezos", user="tezos"),
+                                        Install(wanted_by=["multi-user.target"]))
+    service_file_endorser_instantiated = \
+        ServiceFile(Unit(after=["network.target", "tezos-node-%i.service", "tezos-baking-%i.service"],
+                         requires=["tezos-node-%i.service"],
+                         part_of=["tezos-baking-%i.service"],
+                         description="Instantiated tezos endorser daemon service"),
+                    Service(environment_file="/etc/default/tezos-baking-%i",
+                            environment=[f"PROTOCOL={proto}"],
+                            exec_start=endorser_startup_script,
+                            state_directory="tezos", user="tezos", restart="on-failure"),
+                    Install(wanted_by=["multi-user.target", "tezos-baking-%i.service"]))
     packages.append(OpamBasedPackage(f"tezos-baker-{proto}", "Daemon for baking",
                                      [SystemdUnit(service_file=service_file_baker,
-                                                  startup_script="tezos-baker-start",
-                                                  config_file="tezos-baker.conf")],
+                                                  startup_script=baker_startup_script.split('/')[-1],
+                                                  startup_script_source="tezos-baker-start",
+                                                  config_file="tezos-baker.conf"),
+                                      SystemdUnit(service_file=service_file_baker_instantiated,
+                                                  startup_script=baker_startup_script.split('/')[-1],
+                                                  startup_script_source="tezos-baker-start",
+                                                  instances=daemons_instances)],
                                      proto,
                                      optional_opam_deps=["tls", "ledgerwallet-tezos"],
                                      requires_sapling_params=True,
-                                     postinst_steps=daemon_postinst))
+                                     postinst_steps= \
+                                        daemon_postinst_common + gen_daemon_specific_postinst(f"tezos-baker-{proto}"),
+                                     postrm_steps=gen_daemon_specific_postrm(f"tezos-baker-{proto}")))
     packages.append(OpamBasedPackage(f"tezos-accuser-{proto}", "Daemon for accusing",
                                      [SystemdUnit(service_file=service_file_accuser,
-                                                  startup_script="tezos-accuser-start",
-                                                  config_file="tezos-accuser.conf")],
+                                                  startup_script=accuser_startup_script.split('/')[-1],
+                                                  startup_script_source="tezos-accuser-start",
+                                                  config_file="tezos-accuser.conf"),
+                                      SystemdUnit(service_file=service_file_accuser_instantiated,
+                                                  startup_script=accuser_startup_script.split('/')[-1],
+                                                  startup_script_source="tezos-accuser-start",
+                                                  instances=daemons_instances)],
                                      proto,
                                      optional_opam_deps=["tls", "ledgerwallet-tezos"],
-                                     postinst_steps=daemon_postinst))
+                                     postinst_steps= \
+                                        daemon_postinst_common + gen_daemon_specific_postinst(f"tezos-accuser-{proto}"),
+                                     postrm_steps=gen_daemon_specific_postrm(f"tezos-accuser-{proto}")))
     packages.append(OpamBasedPackage(f"tezos-endorser-{proto}", "Daemon for endorsing",
                                      [SystemdUnit(service_file=service_file_endorser,
-                                                  startup_script="tezos-endorser-start",
-                                                  config_file="tezos-endorser.conf")],
+                                                  startup_script=endorser_startup_script.split('/')[-1],
+                                                  startup_script_source="tezos-endorser-start",
+                                                  config_file="tezos-endorser.conf"),
+                                      SystemdUnit(service_file=service_file_endorser_instantiated,
+                                                  startup_script=endorser_startup_script.split('/')[-1],
+                                                  startup_script_source="tezos-endorser-start",
+                                                  instances=daemons_instances)],
                                      proto,
                                      optional_opam_deps=["tls", "ledgerwallet-tezos"],
-                                     postinst_steps=daemon_postinst))
+                                     postinst_steps= \
+                                        daemon_postinst_common + gen_daemon_specific_postinst(f"tezos-endorser-{proto}"),
+                                     postrm_steps=gen_daemon_specific_postrm(f"tezos-endorser-{proto}")))
 
 packages.append(TezosSaplingParamsPackage())
+packages.append(TezosBakingServicesPackage(
+    target_networks=networks,
+    network_protos=networks_protos
+    ))

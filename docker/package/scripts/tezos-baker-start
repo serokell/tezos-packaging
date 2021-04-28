@@ -30,8 +30,8 @@ launch_baker() {
          run with local node "$NODE_DATA_DIR" "$@"
 }
 
-if [[ -z "$BAKER_ACCOUNT" ]]; then
+if [[ -z "$BAKER_ADDRESS_ALIAS" ]]; then
     launch_baker "$@"
 else
-    launch_baker "$BAKER_ACCOUNT" "$@"
+    launch_baker "$BAKER_ADDRESS_ALIAS" "$@"
 fi

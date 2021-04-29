@@ -59,6 +59,10 @@ steps:
    agents:
      queue: "x86_64-darwin"
 
+ - label: lint python code
+   commands:
+    - nix run -f . pkgs.python39Packages.black -c black --check --diff --color .
+
  # binaries built by docker are tested on the another machine,
  # so we should wait for docker build to finish
  - wait

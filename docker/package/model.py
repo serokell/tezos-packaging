@@ -2,17 +2,18 @@
 #
 # SPDX-License-Identifier: LicenseRef-MIT-TQ
 
-import os, shutil, sys, subprocess, json
-from abc import ABCMeta, abstractmethod
+import os, subprocess
+from abc import abstractmethod
 from typing import List, Dict
 
+
+from .meta import PackagesMeta
 from .systemd import (
     Install,
     Service,
     ServiceFile,
     SystemdUnit,
     Unit,
-    print_service_file,
 )
 
 
@@ -52,13 +53,6 @@ class AbstractPackage:
     @abstractmethod
     def gen_postrm(self, out):
         pass
-
-
-meta = json.load(open(f"{os.path.dirname(__file__)}/../../meta.json", "r"))
-version = os.environ["TEZOS_VERSION"][1:]
-release = f"{meta['release']}"
-ubuntu_epoch = 2
-fedora_epoch = 1
 
 
 def gen_spec_systemd_part(package):
@@ -167,11 +161,22 @@ override_dh_systemd_start:
     return rules_contents
 
 
+def gen_changelog_common(p, ubuntu_version, maintainer, date, out):
+    changelog_contents = f"""{p.name.lower()} ({p.meta.ubuntu_epoch}:{p.meta.version}-0ubuntu{p.meta.release}~{ubuntu_version}) {ubuntu_version}; urgency=medium
+
+  * Publish {p.meta.version}-{p.meta.release} version of {p.name}
+
+ -- {maintainer} {date}"""
+    with open(out, "w") as f:
+        f.write(changelog_contents)
+
+
 class OpamBasedPackage(AbstractPackage):
     def __init__(
         self,
         name: str,
         desc: str,
+        meta: PackagesMeta,
         systemd_units: List[SystemdUnit] = [],
         target_proto: str = None,
         optional_opam_deps: List[str] = [],
@@ -187,13 +192,14 @@ class OpamBasedPackage(AbstractPackage):
         self.requires_sapling_params = requires_sapling_params
         self.postinst_steps = postinst_steps
         self.postrm_steps = postrm_steps
+        self.meta = meta
 
     def fetch_sources(self, out_dir):
         opam_package = (
             "tezos-client" if self.name == "tezos-admin-client" else self.name
         )
         subprocess.run(
-            ["opam", "exec", "--", "opam-bundle", f"{opam_package}={version}"]
+            ["opam", "exec", "--", "opam-bundle", f"{opam_package}={self.meta.version}"]
             + self.optional_opam_deps
             + ["--ocaml=4.10.2", "--yes", "--opam=2.0.8"],
             check=True,
@@ -207,7 +213,7 @@ class OpamBasedPackage(AbstractPackage):
 Source: {self.name.lower()}
 Section: utils
 Priority: optional
-Maintainer: {meta['maintainer']}
+Maintainer: {self.meta.maintainer}
 Build-Depends: debhelper (>=9), dh-systemd (>= 1.5), autotools-dev, {str_build_deps}
 Standards-Version: 3.9.6
 Homepage: https://gitlab.com/tezos/tezos/
@@ -222,12 +228,6 @@ Description: {self.desc}
 
     def gen_spec_file(self, build_deps, run_deps, out):
         build_requires = " ".join(build_deps)
-        config_files = list(
-            filter(
-                lambda x: x is not None,
-                map(lambda x: x.config_file, self.systemd_units),
-            )
-        )
         requires = " ".join(run_deps)
         if len(self.systemd_units) > 0:
             (
@@ -245,19 +245,19 @@ Description: {self.desc}
         file_contents = f"""
 %define debug_package %{{nil}}
 Name:    {self.name}
-Version: {version}
-Release: {release}
-Epoch: {fedora_epoch}
+Version: {self.meta.version}
+Release: {self.meta.release}
+Epoch: {self.meta.fedora_epoch}
 Summary: {self.desc}
 License: MIT
 BuildArch: x86_64 aarch64
-Source0: {self.name}-{version}.tar.gz
-Source1: https://gitlab.com/tezos/tezos/tree/v{version}/
+Source0: {self.name}-{self.meta.version}.tar.gz
+Source1: https://gitlab.com/tezos/tezos/tree/v{self.meta.version}/
 BuildRequires: {build_requires} {systemd_deps}
 Requires: {requires}, {"tezos-sapling-params" if self.requires_sapling_params else ""}
 %description
 {self.desc}
-Maintainer: {meta['maintainer']}
+Maintainer: {self.meta.maintainer}
 %prep
 %setup -q
 %build
@@ -293,13 +293,7 @@ install: {self.name}
             f.write(makefile_contents)
 
     def gen_changelog(self, ubuntu_version, maintainer, date, out):
-        changelog_contents = f"""{self.name.lower()} ({ubuntu_epoch}:{version}-0ubuntu{release}~{ubuntu_version}) {ubuntu_version}; urgency=medium
-
-  * Publish {version}-{release} version of {self.name}
-
- -- {maintainer} {date}"""
-        with open(out, "w") as f:
-            f.write(changelog_contents)
+        gen_changelog_common(self, ubuntu_version, maintainer, date, out)
 
     def gen_rules(self, out):
         rules_contents = gen_systemd_rules_contents(self)
@@ -355,11 +349,12 @@ set -e
 
 
 class TezosSaplingParamsPackage(AbstractPackage):
-    def __init__(self):
+    def __init__(self, meta: PackagesMeta):
         self.name = "tezos-sapling-params"
         self.desc = "Sapling params required in the runtime by the Tezos binaries"
         self.systemd_units = []
         self.targetProto = None
+        self.meta = meta
 
     def fetch_sources(self, out_dir):
         os.makedirs(out_dir)
@@ -368,7 +363,7 @@ class TezosSaplingParamsPackage(AbstractPackage):
                 "wget",
                 "-P",
                 out_dir,
-                f"https://gitlab.com/tezos/opam-repository/-/raw/v{version}/zcash-params/sapling-spend.params",
+                f"https://gitlab.com/tezos/opam-repository/-/raw/v{self.meta.version}/zcash-params/sapling-spend.params",
             ]
         )
         subprocess.run(
@@ -376,7 +371,7 @@ class TezosSaplingParamsPackage(AbstractPackage):
                 "wget",
                 "-P",
                 out_dir,
-                f"https://gitlab.com/tezos/opam-repository/-/raw/v{version}/zcash-params/sapling-output.params",
+                f"https://gitlab.com/tezos/opam-repository/-/raw/v{self.meta.version}/zcash-params/sapling-output.params",
             ]
         )
 
@@ -385,7 +380,7 @@ class TezosSaplingParamsPackage(AbstractPackage):
 Source: {self.name}
 Section: utils
 Priority: optional
-Maintainer: {meta['maintainer']}
+Maintainer: {self.meta.maintainer}
 Build-Depends: debhelper (>=9), dh-systemd (>= 1.5), autotools-dev, wget
 Standards-Version: 3.9.6
 Homepage: https://gitlab.com/tezos/tezos/
@@ -402,17 +397,17 @@ Description: {self.desc}
         file_contents = f"""
 %define debug_package %{{nil}}
 Name:    {self.name}
-Version: {version}
-Release: {release}
-Epoch: {fedora_epoch}
+Version: {self.meta.version}
+Release: {self.meta.release}
+Epoch: {self.meta.fedora_epoch}
 Summary: {self.desc}
 License: MIT
 BuildArch: x86_64 aarch64
-Source0: {self.name}-{version}.tar.gz
+Source0: {self.name}-{self.meta.version}.tar.gz
 BuildRequires: wget
 %description
 {self.desc}
-Maintainer: {meta['maintainer']}
+Maintainer: {self.meta.maintainer}
 %prep
 %setup -q
 %build
@@ -446,13 +441,7 @@ install: tezos-sapling-params
             f.write(file_contents)
 
     def gen_changelog(self, ubuntu_version, maintainer, date, out):
-        changelog_contents = f"""{self.name.lower()} ({ubuntu_epoch}:{version}-0ubuntu{release}~{ubuntu_version}) {ubuntu_version}; urgency=medium
-
-  * Publish {version}-{release} version of {self.name}
-
- -- {maintainer} {date}"""
-        with open(out, "w") as f:
-            f.write(changelog_contents)
+        gen_changelog_common(self, ubuntu_version, maintainer, date, out)
 
     def gen_rules(self, out):
         rules_contents = """#!/usr/bin/make -f
@@ -466,10 +455,14 @@ install: tezos-sapling-params
 
 class TezosBakingServicesPackage(AbstractPackage):
     def __init__(
-        self, target_networks: List[str], network_protos: Dict[str, List[str]]
+        self,
+        target_networks: List[str],
+        network_protos: Dict[str, List[str]],
+        meta: PackagesMeta,
     ):
         self.name = "tezos-baking"
         self.desc = "Package that provides systemd services that orchestrate other services from Tezos packages"
+        self.meta = meta
         self.target_protos = set()
         for network in target_networks:
             for proto in network_protos[network]:
@@ -523,7 +516,7 @@ class TezosBakingServicesPackage(AbstractPackage):
 Source: {self.name}
 Section: utils
 Priority: optional
-Maintainer: {meta['maintainer']}
+Maintainer: {self.meta.maintainer}
 Build-Depends: debhelper (>=9), dh-systemd (>= 1.5), autotools-dev
 Standards-Version: 3.9.6
 Homepage: https://gitlab.com/tezos/tezos/
@@ -556,19 +549,19 @@ Description: {self.desc}
         file_contents = f"""
 %define debug_package %{{nil}}
 Name:    {self.name}
-Version: {version}
-Release: {release}
-Epoch: {fedora_epoch}
+Version: {self.meta.version}
+Release: {self.meta.release}
+Epoch: {self.meta.fedora_epoch}
 Summary: {self.desc}
 License: MIT
 BuildArch: x86_64 aarch64
-Source0: {self.name}-{version}.tar.gz
-Source1: https://gitlab.com/tezos/tezos/tree/v{version}/
+Source0: {self.name}-{self.meta.version}.tar.gz
+Source1: https://gitlab.com/tezos/tezos/tree/v{self.meta.version}/
 BuildRequires: {systemd_deps}
 Requires: {run_deps}
 %description
 {self.desc}
-Maintainer: {meta['maintainer']}
+Maintainer: {self.meta.maintainer}
 %prep
 %setup -q
 %build
@@ -594,13 +587,7 @@ install: tezos-baking
             f.write(file_contents)
 
     def gen_changelog(self, ubuntu_version, maintainer, date, out):
-        changelog_contents = f"""{self.name.lower()} ({ubuntu_epoch}:{version}-0ubuntu{release}~{ubuntu_version}) {ubuntu_version}; urgency=medium
-
-  * Publish {version}-{release} version of {self.name}
-
- -- {maintainer} {date}"""
-        with open(out, "w") as f:
-            f.write(changelog_contents)
+        gen_changelog_common(self, ubuntu_version, maintainer, date, out)
 
     def gen_rules(self, out):
         rules_contents = gen_systemd_rules_contents(self)

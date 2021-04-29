@@ -1,18 +1,17 @@
 # SPDX-FileCopyrightText: 2020 TQ Tezos <https://tqtezos.com/>
 #
 # SPDX-License-Identifier: LicenseRef-MIT-TQ
-import os, shutil, sys, subprocess, json
+import os, json
+
+from .meta import packages_meta
 
 from .model import (
-    Service,
-    ServiceFile,
-    SystemdUnit,
-    Unit,
-    Install,
     OpamBasedPackage,
     TezosSaplingParamsPackage,
     TezosBakingServicesPackage,
 )
+
+from .systemd import Service, ServiceFile, SystemdUnit, Unit, Install
 
 networks = ["mainnet", "florencenet"]
 networks_protos = {"mainnet": ["009-PsFLoren"], "florencenet": ["009-PsFLoren"]}
@@ -118,6 +117,7 @@ packages = [
     OpamBasedPackage(
         "tezos-client",
         "CLI client for interacting with tezos blockchain",
+        meta=packages_meta,
         optional_opam_deps=["tls", "ledgerwallet-tezos"],
         additional_native_deps=["tezos-sapling-params", "udev"],
         postinst_steps=ledger_udev_postinst,
@@ -125,17 +125,21 @@ packages = [
     OpamBasedPackage(
         "tezos-admin-client",
         "Administration tool for the node",
+        meta=packages_meta,
         optional_opam_deps=["tls"],
     ),
     OpamBasedPackage(
         "tezos-signer",
         "A client to remotely sign operations or blocks",
+        meta=packages_meta,
         optional_opam_deps=["tls", "ledgerwallet-tezos"],
         additional_native_deps=["udev"],
         systemd_units=signer_units,
         postinst_steps=ledger_udev_postinst,
     ),
-    OpamBasedPackage("tezos-codec", "A client to decode and encode JSON"),
+    OpamBasedPackage(
+        "tezos-codec", "A client to decode and encode JSON", meta=packages_meta
+    ),
 ]
 
 postinst_steps_common = """
@@ -211,7 +215,8 @@ packages.append(
     OpamBasedPackage(
         "tezos-node",
         "Entry point for initializing, configuring and running a Tezos node",
-        node_units,
+        meta=packages_meta,
+        systemd_units=node_units,
         optional_opam_deps=[
             "tezos-embedded-protocol-001-PtCJ7pwo",
             "tezos-embedded-protocol-002-PsYLVpVv",
@@ -368,7 +373,8 @@ for proto in active_protocols:
         OpamBasedPackage(
             f"tezos-baker-{proto}",
             "Daemon for baking",
-            [
+            meta=packages_meta,
+            systemd_units=[
                 SystemdUnit(
                     service_file=service_file_baker,
                     startup_script=baker_startup_script.split("/")[-1],
@@ -382,7 +388,7 @@ for proto in active_protocols:
                     instances=daemons_instances,
                 ),
             ],
-            proto,
+            target_proto=proto,
             optional_opam_deps=["tls", "ledgerwallet-tezos"],
             postinst_steps=daemon_postinst_common + ledger_udev_postinst,
             additional_native_deps=[
@@ -397,7 +403,8 @@ for proto in active_protocols:
         OpamBasedPackage(
             f"tezos-accuser-{proto}",
             "Daemon for accusing",
-            [
+            meta=packages_meta,
+            systemd_units=[
                 SystemdUnit(
                     service_file=service_file_accuser,
                     startup_script=accuser_startup_script.split("/")[-1],
@@ -411,7 +418,7 @@ for proto in active_protocols:
                     instances=daemons_instances,
                 ),
             ],
-            proto,
+            target_proto=proto,
             optional_opam_deps=["tls", "ledgerwallet-tezos"],
             additional_native_deps=["udev"],
             postinst_steps=daemon_postinst_common + ledger_udev_postinst,
@@ -421,7 +428,8 @@ for proto in active_protocols:
         OpamBasedPackage(
             f"tezos-endorser-{proto}",
             "Daemon for endorsing",
-            [
+            meta=packages_meta,
+            systemd_units=[
                 SystemdUnit(
                     service_file=service_file_endorser,
                     startup_script=endorser_startup_script.split("/")[-1],
@@ -435,14 +443,16 @@ for proto in active_protocols:
                     instances=daemons_instances,
                 ),
             ],
-            proto,
+            target_proto=proto,
             optional_opam_deps=["tls", "ledgerwallet-tezos"],
             postinst_steps=daemon_postinst_common + ledger_udev_postinst,
             additional_native_deps=["tezos-client", "acl", "udev"],
         )
     )
 
-packages.append(TezosSaplingParamsPackage())
+packages.append(TezosSaplingParamsPackage(meta=packages_meta))
 packages.append(
-    TezosBakingServicesPackage(target_networks=networks, network_protos=networks_protos)
+    TezosBakingServicesPackage(
+        target_networks=networks, network_protos=networks_protos, meta=packages_meta
+    )
 )

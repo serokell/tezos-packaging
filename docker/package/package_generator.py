@@ -5,7 +5,8 @@
 import os, shutil, sys, subprocess, json, argparse
 from distutils.dir_util import copy_tree
 
-from .model import OpamBasedPackage, print_service_file
+from .model import OpamBasedPackage
+from .systemd import print_service_file
 from .packages import packages
 
 is_ubuntu = None

@@ -7,10 +7,10 @@ let
   release-binaries = import ./nix/build/release-binaries.nix;
   version = replaceStrings ["refs/tags/"] [""] commonMeta.branchName;
   release-notes = writeTextDir "release-notes.md" ''
-    This release contains assets based on [${version} release](https://gitlab.com/tezos/tezos/tree/${version}).
+    This release contains assets based on the [${version} release](https://gitlab.com/tezos/tezos/tree/${version}).
 
-    Binaries that target arm64 architecture has `-arm64` suffix in the name.
-    Other binaries target x86_64.
+    Binaries that target arm64 architecture have the `-arm64` suffix in their name.
+    All the other binaries target x86_64.
 
     Release artifacts are signed with the following key: 0x7EAF9B150ACE940CF8C008A0BF847A85AC7BF43E.
     You can check it on http://keys.gnupg.net/.

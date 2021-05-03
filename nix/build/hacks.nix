@@ -66,10 +66,10 @@ rec {
   hacl-star = osuper.hacl-star.overrideAttrs (_: rec {
     sourceRoot = ".";
   });
-  index = osuper.index.versions."1.3.0";
-  irmin = osuper.irmin.versions."2.5.3";
-  irmin-pack = osuper.irmin-pack.versions."2.5.3";
-  irmin-layers = osuper.irmin-layers.versions."2.5.3";
+  index = osuper.index.versions."1.3.1";
+  irmin = osuper.irmin.versions."2.5.4";
+  irmin-pack = osuper.irmin-pack.versions."2.5.4";
+  irmin-layers = osuper.irmin-layers.versions."2.5.4";
   pcre = osuper.pcre.overrideAttrs (o: rec {
     buildInputs = o.buildInputs ++ [ odoc ];
     propagatedBuildInputs = buildInputs;

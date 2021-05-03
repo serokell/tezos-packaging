@@ -63,18 +63,22 @@ signer_units = [
         config_file="tezos-signer.conf")
 ]
 
+ledger_udev_postinst = open(f"{os.path.dirname( __file__)}/scripts/udev-rules", 'r').read()
+
 packages = [
     OpamBasedPackage("tezos-client",
                      "CLI client for interacting with tezos blockchain",
                      optional_opam_deps=["tls", "ledgerwallet-tezos"],
-                     requires_sapling_params=True),
+                     requires_sapling_params=True,
+                     postinst_steps=ledger_udev_postinst),
     OpamBasedPackage("tezos-admin-client",
                      "Administration tool for the node",
                      optional_opam_deps=["tls"]),
     OpamBasedPackage("tezos-signer",
                      "A client to remotely sign operations or blocks",
                      optional_opam_deps=["tls", "ledgerwallet-tezos"],
-                     systemd_units=signer_units),
+                     systemd_units=signer_units,
+                     postinst_steps=ledger_udev_postinst),
     OpamBasedPackage("tezos-codec",
                      "A client to decode and encode JSON")
 ]
@@ -237,7 +241,8 @@ for proto in active_protocols:
                                      optional_opam_deps=["tls", "ledgerwallet-tezos"],
                                      requires_sapling_params=True,
                                      postinst_steps= \
-                                        daemon_postinst_common + gen_daemon_specific_postinst(f"tezos-baker-{proto}"),
+                                        daemon_postinst_common + gen_daemon_specific_postinst(f"tezos-baker-{proto}") \
+                                            + ledger_udev_postinst,
                                      postrm_steps=gen_daemon_specific_postrm(f"tezos-baker-{proto}")))
     packages.append(OpamBasedPackage(f"tezos-accuser-{proto}", "Daemon for accusing",
                                      [SystemdUnit(service_file=service_file_accuser,
@@ -251,7 +256,8 @@ for proto in active_protocols:
                                      proto,
                                      optional_opam_deps=["tls", "ledgerwallet-tezos"],
                                      postinst_steps= \
-                                        daemon_postinst_common + gen_daemon_specific_postinst(f"tezos-accuser-{proto}"),
+                                        daemon_postinst_common + gen_daemon_specific_postinst(f"tezos-accuser-{proto}") \
+                                            + ledger_udev_postinst,
                                      postrm_steps=gen_daemon_specific_postrm(f"tezos-accuser-{proto}")))
     packages.append(OpamBasedPackage(f"tezos-endorser-{proto}", "Daemon for endorsing",
                                      [SystemdUnit(service_file=service_file_endorser,
@@ -265,7 +271,8 @@ for proto in active_protocols:
                                      proto,
                                      optional_opam_deps=["tls", "ledgerwallet-tezos"],
                                      postinst_steps= \
-                                        daemon_postinst_common + gen_daemon_specific_postinst(f"tezos-endorser-{proto}"),
+                                        daemon_postinst_common + gen_daemon_specific_postinst(f"tezos-endorser-{proto}") \
+                                            + ledger_udev_postinst,
                                      postrm_steps=gen_daemon_specific_postrm(f"tezos-endorser-{proto}")))
 
 packages.append(TezosSaplingParamsPackage())

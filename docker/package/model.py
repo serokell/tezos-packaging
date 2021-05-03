@@ -235,14 +235,8 @@ Description: {self.desc}
         config_files = list(filter(lambda x: x is not None, map(lambda x: x.config_file,
                                                                 self.systemd_units)))
         requires = " ".join(run_deps)
-        if len(self.systemd_units) > 0:
-            systemd_deps, systemd_install, systemd_files, systemd_macros = \
-                gen_spec_systemd_part(self)
-        else:
-            systemd_deps = ""
-            systemd_install = ""
-            systemd_files = ""
-            systemd_macros = ""
+        systemd_deps, systemd_install, systemd_files, systemd_macros = \
+            gen_spec_systemd_part(self)
 
         file_contents = f'''
 %define debug_package %{{nil}}
@@ -529,7 +523,7 @@ Description: {self.desc}
             sum([[f"tezos-{daemon}-{proto}" for daemon in ["baker", "endorser"]] for proto in self.target_protos],
                 []))
         systemd_deps, systemd_install, systemd_files, systemd_macros = \
-                gen_spec_systemd_part(self)
+            gen_spec_systemd_part(self)
         file_contents = f'''
 %define debug_package %{{nil}}
 Name:    {self.name}

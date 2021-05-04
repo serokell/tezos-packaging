@@ -62,13 +62,11 @@ class AbstractPackage:
 
 def gen_spec_systemd_part(package):
     systemd_units = package.systemd_units
-    startup_scripts = list(
-        set(map(lambda x: x.startup_script, systemd_units))
-    ) + list(set(map(lambda x: x.prestart_script, systemd_units)))
+    startup_scripts = list(set(map(lambda x: x.startup_script, systemd_units))) + list(
+        set(map(lambda x: x.prestart_script, systemd_units))
+    )
     config_files = list(
-        filter(
-            lambda x: x is not None, map(lambda x: x.config_file, systemd_units)
-        )
+        filter(lambda x: x is not None, map(lambda x: x.config_file, systemd_units))
     )
     install_unit_files = ""
     systemd_unit_files = ""
@@ -153,8 +151,7 @@ def gen_systemd_rules_contents(package):
                 unit_name = f"{package_name}-{systemd_unit.suffix}@"
             else:
                 unit_name = f"{package_name}@"
-        override_dh_install_init += \
-            f"	dh_installinit --name={unit_name}@\n"
+        override_dh_install_init += f"	dh_installinit --name={unit_name}@\n"
     rules_contents = f"""#!/usr/bin/make -f
 
 %:

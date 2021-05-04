@@ -198,15 +198,16 @@ override_dh_systemd_start:
 class OpamBasedPackage(AbstractPackage):
     def __init__(self, name: str, desc: str, systemd_units: List[SystemdUnit]=[],
                  target_proto: str=None, optional_opam_deps: List[str]=[],
-                 requires_sapling_params: bool=False, postinst_steps: str="", postrm_steps: str=""):
+                 postinst_steps: str="", postrm_steps: str="",
+                 additional_native_deps: List[str]=[]):
         self.name = name
         self.desc = desc
         self.systemd_units = systemd_units
         self.target_proto = target_proto
         self.optional_opam_deps = optional_opam_deps
-        self.requires_sapling_params = requires_sapling_params
         self.postinst_steps = postinst_steps
         self.postrm_steps = postrm_steps
+        self.additional_native_deps = additional_native_deps
 
     def fetch_sources(self, out_dir):
         opam_package = "tezos-client" if self.name == "tezos-admin-client" else self.name
@@ -218,6 +219,7 @@ class OpamBasedPackage(AbstractPackage):
 
     def gen_control_file(self, deps, out):
         str_build_deps = ", ".join(deps)
+        str_additional_native_deps = ", ".join(self.additional_native_deps)
         file_contents = f'''
 Source: {self.name.lower()}
 Section: utils
@@ -229,7 +231,7 @@ Homepage: https://gitlab.com/tezos/tezos/
 
 Package: {self.name.lower()}
 Architecture: amd64 arm64
-Depends: ${{shlibs:Depends}}, ${{misc:Depends}}, {"tezos-sapling-params" if self.requires_sapling_params else ""}
+Depends: ${{shlibs:Depends}}, ${{misc:Depends}}, {str_additional_native_deps}
 Description: {self.desc}
 '''
         with open(out, 'w') as f:
@@ -240,6 +242,7 @@ Description: {self.desc}
         config_files = list(filter(lambda x: x is not None, map(lambda x: x.config_file,
                                                                 self.systemd_units)))
         requires = " ".join(run_deps)
+        str_additional_native_deps = ", ".join(self.additional_native_deps)
         systemd_deps, systemd_install, systemd_files, systemd_macros = \
             gen_spec_systemd_part(self)
 
@@ -255,7 +258,7 @@ BuildArch: x86_64 aarch64
 Source0: {self.name}-{version}.tar.gz
 Source1: https://gitlab.com/tezos/tezos/tree/v{version}/
 BuildRequires: {build_requires} {systemd_deps}
-Requires: {requires}, {"tezos-sapling-params" if self.requires_sapling_params else ""}
+Requires: {requires}, {str_additional_native_deps}
 %description
 {self.desc}
 Maintainer: {meta['maintainer']}
@@ -518,7 +521,7 @@ class TezosBakingServicesPackage(AbstractPackage):
         os.makedirs(out_dir)
 
     def gen_control_file(self, deps, out):
-        run_deps = ", ".join(["tezos-client", "tezos-node"] + \
+        run_deps = ", ".join(["acl", "tezos-client", "tezos-node"] + \
             sum([[f"tezos-{daemon}-{proto.lower()}" for daemon in ["baker", "endorser"]] for proto in self.target_protos],
                 []))
         file_contents = f'''
@@ -539,7 +542,7 @@ Description: {self.desc}
             f.write(file_contents)
 
     def gen_spec_file(self, build_deps, run_deps, out):
-        run_deps = ", ".join(["tezos-client", "tezos-node"] + \
+        run_deps = ", ".join(["acl", "tezos-client", "tezos-node"] + \
             sum([[f"tezos-{daemon}-{proto}" for daemon in ["baker", "endorser"]] for proto in self.target_protos],
                 []))
         systemd_deps, systemd_install, systemd_files, systemd_macros = \

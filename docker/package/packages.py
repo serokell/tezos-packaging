@@ -69,7 +69,7 @@ packages = [
     OpamBasedPackage("tezos-client",
                      "CLI client for interacting with tezos blockchain",
                      optional_opam_deps=["tls", "ledgerwallet-tezos"],
-                     requires_sapling_params=True,
+                     additional_native_deps=["tezos-sapling-params"],
                      postinst_steps=ledger_udev_postinst),
     OpamBasedPackage("tezos-admin-client",
                      "Administration tool for the node",
@@ -143,9 +143,9 @@ packages.append(OpamBasedPackage("tezos-node",
                                      "tezos-embedded-protocol-005-PsBABY5H",
                                      "tezos-embedded-protocol-005-PsBabyM1",
                                      "tezos-embedded-protocol-006-PsCARTHA"],
-                                 requires_sapling_params=True,
                                  postinst_steps=node_postinst_steps,
-                                 postrm_steps=node_postrm_steps))
+                                 postrm_steps=node_postrm_steps,
+                                 additional_native_deps=["tezos-sapling-params"]))
 
 active_protocols = json.load(open(f"{os.path.dirname( __file__)}/../../protocols.json", "r"))["active"]
 
@@ -247,11 +247,11 @@ for proto in active_protocols:
                                                   instances=daemons_instances)],
                                      proto,
                                      optional_opam_deps=["tls", "ledgerwallet-tezos"],
-                                     requires_sapling_params=True,
                                      postinst_steps= \
                                         daemon_postinst_common + gen_daemon_specific_postinst(f"tezos-baker-{proto}") \
                                             + ledger_udev_postinst,
-                                     postrm_steps=gen_daemon_specific_postrm(f"tezos-baker-{proto}")))
+                                     postrm_steps=gen_daemon_specific_postrm(f"tezos-baker-{proto}"),
+                                     additional_native_deps=["tezos-sapling-params", "acl"]))
     packages.append(OpamBasedPackage(f"tezos-accuser-{proto}", "Daemon for accusing",
                                      [SystemdUnit(service_file=service_file_accuser,
                                                   startup_script=accuser_startup_script.split('/')[-1],
@@ -281,7 +281,8 @@ for proto in active_protocols:
                                      postinst_steps= \
                                         daemon_postinst_common + gen_daemon_specific_postinst(f"tezos-endorser-{proto}") \
                                             + ledger_udev_postinst,
-                                     postrm_steps=gen_daemon_specific_postrm(f"tezos-endorser-{proto}")))
+                                     postrm_steps=gen_daemon_specific_postrm(f"tezos-endorser-{proto}"),
+                                     additional_native_deps=["acl"]))
 
 packages.append(TezosSaplingParamsPackage())
 packages.append(TezosBakingServicesPackage(

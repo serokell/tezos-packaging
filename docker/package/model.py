@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: LicenseRef-MIT-TQ
 
 import os, subprocess
+import shutil
 from abc import abstractmethod
 from typing import List, Dict
 
@@ -60,15 +61,19 @@ class AbstractPackage:
     def gen_postrm(self, out):
         pass
 
+    @abstractmethod
+    def gen_license(self, out):
+        pass
+
 
 def gen_spec_systemd_part(package):
     systemd_units = package.systemd_units
     startup_scripts = list(
-        set(map(lambda x: x.startup_script, package.systemd_units))
-    ) + list(set(map(lambda x: x.prestart_script, package.systemd_units)))
+        set(map(lambda x: x.startup_script, systemd_units))
+    ) + list(set(map(lambda x: x.prestart_script, systemd_units)))
     config_files = list(
         filter(
-            lambda x: x is not None, map(lambda x: x.config_file, package.systemd_units)
+            lambda x: x is not None, map(lambda x: x.config_file, systemd_units)
         )
     )
     install_unit_files = ""
@@ -138,21 +143,19 @@ mkdir -p %{{buildroot}}/%{{_unitdir}}
 
 def gen_systemd_rules_contents(package):
     override_dh_install_init = "override_dh_installinit:\n"
+    package_name = package.name.lower()
     for systemd_unit in package.systemd_units:
         if len(systemd_unit.instances) == 0:
             if systemd_unit.suffix is not None:
-                override_dh_install_init += f"	dh_installinit --name={package.name.lower()}-{systemd_unit.suffix}\n"
+                unit_name = f"{package_name}-{systemd_unit.suffix}"
             else:
-                override_dh_install_init += (
-                    f"	dh_installinit --name={package.name.lower()}\n"
-                )
+                unit_name = f"{package_name}"
         else:
             if systemd_unit.suffix is not None:
-                override_dh_install_init += f"	dh_installinit --name={package.name.lower()}-{systemd_unit.suffix}@\n"
+                unit_name = f"{package_name}-{systemd_unit.suffix}@"
             else:
-                override_dh_install_init += (
-                    f"	dh_installinit --name={package.name.lower()}@\n"
-                )
+                unit_name = f"{package_name}@"
+        override_dh_install_init += f"	dh_installinit --name={unit_name}\n"
     rules_contents = f"""#!/usr/bin/make -f
 
 %:
@@ -332,6 +335,18 @@ set -e
         with open(out, "w") as f:
             f.write(postrm_contents)
 
+    def gen_license(self, out):
+        subprocess.run(
+            [
+                "wget",
+                "-q",
+                "-O",
+                out,
+                f"https://gitlab.com/tezos/tezos/-/raw/v{self.meta.version}/LICENSE",
+            ],
+            check=True,
+        )
+
 
 class TezosSaplingParamsPackage(AbstractPackage):
     def __init__(self, meta: PackagesMeta):
@@ -433,6 +448,9 @@ install: tezos-sapling-params
 """
         with open(out, "w") as f:
             f.write(rules_contents)
+
+    def gen_license(self, out):
+        shutil.copy(f"{os.path.dirname(__file__)}/../../LICENSE", out)
 
 
 class TezosBakingServicesPackage(AbstractPackage):
@@ -606,3 +624,6 @@ install: tezos-baking
         )
         with open(out, "w") as f:
             f.write(install_contents)
+
+    def gen_license(self, out):
+        shutil.copy(f"{os.path.dirname(__file__)}/../../LICENSE", out)

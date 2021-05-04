@@ -21,4 +21,5 @@ RUN opam install opam-bundle=0.4 --yes
 COPY docker/package/*.py /tezos-packaging/docker/package/
 COPY docker/package/defaults /tezos-packaging/docker/package/defaults
 COPY docker/package/scripts /tezos-packaging/docker/package/scripts
+COPY LICENSE /tezos-packaging/LICENSE
 ENTRYPOINT ["python3", "-m", "package.package_generator"]

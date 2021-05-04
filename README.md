@@ -161,6 +161,10 @@ formulas should be updated. Also, bottles should be uploaded to the release arti
 `tezos-endorser-<proto>`, and `tezos-signer` packages have systemd files included to the
 Ubuntu and Fedora packages.
 
+As an addition, `tezos-baking` package provides `tezos-baking-<network>` services that orchestrate
+systemd units for `tezos-node`, `tezos-baker-<proto>`, and `tezos-endorser-<proto>`.
+Configuration files for these services are located in `/etc/default/tezos-baking-<network>`.
+
 Once you've installed the packages with systemd unit, you can run the service
 with the binary from the package using the following command:
 ```

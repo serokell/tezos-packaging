@@ -20,29 +20,36 @@ and an arm64 processor; for example a Raspberry Pi 4B.
 
 You will also need to run the 64bit version of the [Raspberry Pi OS](https://www.raspberrypi.org/software/),
 that you can use by following the [installation instructions](https://www.raspberrypi.org/documentation/installation/installing-images/)
-with an image downloasd from the [official 64bit repository](https://downloads.raspberrypi.org/raspios_arm64/images/).
+with an image downloaded from the [official 64bit repository](https://downloads.raspberrypi.org/raspios_arm64/images/).
 
 ### Installing required packages
 
 In order to run a baking instance, you'll need the following Tezos binaries:
 `tezos-client`, `tezos-node`, `tezos-baker-<proto>`, `tezos-endorser-<proto>`.
 
-The currently used proto is `008-PtEdo2Zk` (used on `mainnet` and `edo2net`).
+The currently supported protocols are `008-PtEdo2Zk` (used on `mainnet` and `edo2net`)
+and `009-PsFLoren` (used on `florencenet`).
 Also, note that the corresponding packages have protocol
 suffix in lowercase, e.g. the list of available baker packages can be found
 [here](https://launchpad.net/~serokell/+archive/ubuntu/tezos/+packages?field.name_filter=tezos-baker&field.status_filter=published).
 
+The most convenient way to orchestrate all these binaries is to use the `tezos-baking`
+package, which provides predefined services for running baking instances on different
+networks.
+
 To install them, run the following commands:
 
+<a name="ubuntu"></a>
 #### On Ubuntu
 ```
 # Add PPA with Tezos binaries
 sudo add-apt-repository ppa:serokell/tezos
 sudo apt-get update
 # Install packages
-sudo apt-get install tezos-client tezos-node tezos-baker-<proto> tezos-endorser-<proto>
+sudo apt-get install tezos-baking
 ```
 
+<a name="pios"></a>
 #### On Raspberry Pi OS
 ```
 # Intall software properties commons
@@ -52,39 +59,28 @@ sudo add-apt-repository 'deb http://ppa.launchpad.net/serokell/tezos/ubuntu bion
 sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 37B8819B7D0D183812DCA9A8CE5A4D8933AE7CBB
 sudo apt-get update
 # Install packages
-sudo apt-get install tezos-client tezos-node tezos-baker-<proto> tezos-endorser-<proto>
+sudo apt-get install tezos-baking
 ```
 
 Packages for `tezos-node`, `tezos-baker-<proto>` and `tezos-endorser-<proto>` provide
-systemd units for running the corresponding binaries in the background.
+systemd units for running the corresponding binaries in the background, these units
+are orchestrated by the `tezos-baking-<network>` units.
 
-## Setting up the tezos-node
+## Setting up baking service
 
-The easiest way to set up a node running on the `mainnet` or one of the
-testnets (e.g. `edo2net`) is to use one of the predefined
-`tezos-node-<network>.services` systemd services provided in the `tezos-node`
-package.
+By default `tezos-baking-<network>.service` will be using:
+* `/var/lib/.tezos-client` as the `tezos-client` data directory
+* `/var/lib/tezos/node-<network>` as the `tezos-node` data directory
+* `http://localhost:8732` as the `tezos-node` RPC address.
 
-However, by default, these services will start to bootstrap the node from scratch,
+## Bootstrapping the node
+
+A fully-synced local `tezos-node` is required for running a baking instance.
+
+By default, service with `tezos-node` will start to bootstrap from scratch,
 which will take a significant amount of time.
 In order to avoid this, we suggest bootstrapping from a snapshot instead.
 
-### Setting up node service
-
-`tezos-node-<network>.service` has `/var/lib/tezos/node-<network>` as a data directory
-and `http://localhost:8732` as its RPC address by default.
-
-In case you want to use a different data directory or RPC address,
-you should update the service configuration. To edit the service configuration, run:
-```
-sudo systemctl edit --full tezos-node-<network>.service
-```
-
-### Bootstrapping the node
-
-In order to run a baker locally, you'll need a fully-synced local `tezos-node`.
-
-The fastest way to bootstrap the node is to import a snapshot.
 Snapshots can be downloaded from the following websites:
 * [Tezos Giganode Snapshots](https://snapshots-tezos.giganode.io/)
 * [XTZ-Shots](https://xtz-shots.io/)
@@ -105,125 +101,144 @@ In order to import the snapshot, run the following command:
 sudo -u tezos tezos-node-<network> snapshot import <path to the snapshot file>
 ```
 
-### Starting the node
+## Setting up baker and endorser key
 
-After the snapshot import, you can finally start the node by running:
+Note that account activation from JSON file and baker registering require
+running a fully-bootstrapped `tezos-node`. In order to start node service do the following:
 ```
 sudo systemctl start tezos-node-<network>.service
 ```
 
-Note that even after the snapshot import the node can still be out of sync. It may require
-some additional time to completely bootstrap. In order to check whether the node is bootstrapped,
+Even after the snapshot import the node can still be out of sync and may require
+some additional time to completely bootstrap.
+
+In order to check whether the node is bootstrapped and wait in case it isn't,
 you can use `tezos-client`:
 ```
 sudo -u tezos tezos-client bootstrapped
 ```
 
-To stop the node, run:
-```
-sudo systemctl stop tezos-node-<network>.service
-```
+By default `tezos-baking-<network>.service` will use the `baker` alias for the
+key that will be used for baking and endorsing.
 
-If you want the service to start automatically at boot, use `enable`:
-```
-sudo systemctl enable tezos-node-edo2net.service
-```
-and to disable it from doing so, instead use:
-```
-sudo systemctl disable tezos-node-edo2net.service
-```
-
-You can check node logs via `journalctl`:
-```
-journalctl -u tezos-node-<network>.service
-```
-
-## Setting up baker and endorser daemons
-
-### Setting up daemon data directories
-
-Data directories for baker and endorser daemons are defined in the
-`/etc/default/tezos-baker-<proto>` and `/etc/default/tezos-endorser-<proto>`.
-By default, both these daemons have `/var/lib/tezos/.tezos-client` set as a `DATA_DIR`.
-
-Additionally, you need to specify `NODE_DATA_DIR` in the `/etc/default/tezos-baker-<proto>`
-to point at the desired node data directory, e.g. `/var/lib/tezos/node-<network>`.
-
-
+<a name="import"></a>
 ### Importing the baker key
 
 Import your baker secret key to the data directory. There are multiple ways to import
 the key:
 
-1) You have faucet JSON file from https://faucet.tzalpha.net/.
+1) The secret key is stored on a ledger.
 
-In order to activate account run:
+Open the Tezos Wallet app on your ledger and run the following
+to import the key:
 ```
-sudo -u tezos tezos-client activate account <alias> <path-to-downloaded-json>
+sudo -u tezos tezos-client import secret key baker <ledger-url>
+```
+Apart from importing the key, you'll also need to set it up for baking. Open Tezos Baking app
+on your ledger and run the following:
+```
+sudo -u tezos tezos-client setup ledger to bake for baker
 ```
 
 2) You know either the unencrypted or password-encrypted secret key for your address.
 
 In order to import such a key, run:
 ```
-sudo -u tezos tezos-client import secret key <alias> <secret-key>
-```
-3) The secret key is stored on a ledger.
-
-Open the Tezoz Wallet app on your ledger and run the following
-to import the key:
-```
-sudo -u tezos tezos-client import secret key <alias> <ledger-url>
-```
-Apart from importing the key, you'll also need to set it up for baking. Open Tezos Baking app
-on your ledger and run the following:
-```
-sudo -u tezos tezos-client setup ledger to bake for <alias>
+sudo -u tezos tezos-client import secret key baker <secret-key>
 ```
 
+3) You have a faucet JSON file from https://faucet.tzalpha.net/.
+
+In order to activate the account run:
+```
+sudo -u tezos tezos-client activate account baker with <path-to-downloaded-json>
+```
+
+<a name="registration"></a>
 ### Registering the baker
 Once the key is imported, you'll need to register your baker, in order to do that run the following
 command:
 ```
-sudo -u tezos tezos-client register key <alias> as delegate
+sudo -u tezos tezos-client register key baker as delegate
 ```
 
 Check a blockchain explorer (e.g. https://tzkt.io/ or https://tzstats.com/) to see the baker status and
 baking rights of your account.
 
-### Updating baker and endorser daemons configuration
-Apart from that, you'll need to update the `BAKER_ACCOUNT` and `ENDORSER_ACCOUNT` (in
-`/etc/default/tezos-baker-<proto>` and `/etc/default/tezos-endorser-<proto>` respectively) in
-accordance to the **alias** of the imported key.
+## Starting baking instance
 
-### Starting daemons
-
-Once the key is imported and the configs are updated, you can start the baker and endorser daemons:
+Once the key is imported and the baker registered, you can start your baking instance:
 ```
-sudo systemctl start tezos-baker-<proto>.service
-sudo systemctl start tezos-endorser-<proto>.service
+sudo systemctl start tezos-baking-<network>.service
 ```
 
-If the node isn't bootstrapped yet, the baker and endorser daemons will wait for it to bootstrap.
+This service will trigger the following services to start:
+* `tezos-node-<network>.service`
+* `tezos-baker-<proto>@<network>.service`
+* `tezos-endorser-<proto>@network.service`
 
-Note that if you're baking with the ledger key, you should have the Tezos Baking app open.
-
-Once the services are started, you can check their logs via `journalctl`:
+Once services have started, you can check their logs via `journalctl`:
 ```
-journalctl -u tezos-baker-<proto>.service
-journalctl -u tezos-endorser-<proto>.service
+journalctl -f _UID=$(id tezos -u)
 ```
+This command will show logs for all services that are using the `tezos` user.
 
-If everything was set up correctly, you shouldn't see any errors in the logs.
-
-Logs for successfully started baker service should begin with:
+You'll see the following messages in the logs in case everything has started
+successfully:
 ```
-Node is bootstrapped.
 Baker started.
+
+Endorser started.
 ```
 
-Logs for successfully started endorser service should begin with:
+To stop the baking instance run:
 ```
-Node is bootstrapped.
-Endorser started.
+sudo systemctl stop tezos-baking-<network>.service
+```
+
+## Advanced baking instance setup
+
+### Using different data directories and node RPC address
+
+In case you want to use a different `tezos-client` data directory or RPC address,
+you should edit the `/etc/default/tezos-baking-<network>` file, e.g.:
+```
+sudo vim /etc/default/tezos-baking-<network>
+```
+
+In case you want to use a different `tezos-node` data directory, you
+should instead edit the service configuration, using:
+```
+sudo systemctl edit --full tezos-node-<network>.service
+```
+
+### Using different account alias for baking
+
+In case you want to use a different alias for the baking account:
+1. replace `baker` with he desired alias in the sections about [importing](#import)
+    and [registering](#registration) the baker key.
+2. update the `BAKER_ADDRESS_ALIAS` by editing the
+    `/etc/default/tezos-baking-<network>` file.
+
+## Running baking instance on edo2net
+
+TL;DR, in order to run a baking instance on edo2net you should do the following:
+
+1) Install `tezos-baking` package following either [Ubuntu](#ubuntu) or [RaspberryPi OS](#pios)
+instructions.
+
+2) Run following commands:
+```
+snapshot_file=/tmp/tezos-edo2net.rolling
+wget https://edo2net.xtz-shots.io/rolling -O "$snapshot_file"
+sudo -u tezos tezos-node-edo2net snapshot import "$snapshot_file"
+
+sudo systemctl start tezos-node-edo2net
+
+sudo -u tezos tezos-client bootstrapped
+sudo -u tezos tezos-client import secret key baker <secret-key>
+sudo -u tezos tezos-client register key baker as delegate
+
+sudo systemctl start tezos-baking-edo2net
+sudo systemctl enable tezos-baking-edo2net
 ```

@@ -2,11 +2,9 @@
 #
 # SPDX-License-Identifier: LicenseRef-MIT-TQ
 
-import os, shutil, sys, subprocess, json, argparse
-from distutils.dir_util import copy_tree
+import os, shutil, argparse
 
-from .model import OpamBasedPackage
-from .systemd import print_service_file
+from .fedora import build_fedora_package
 from .packages import packages
 from .ubuntu import build_ubuntu_package
 
@@ -74,66 +72,7 @@ for package in packages:
                 package, ubuntu_versions, common_deps, is_source, source_archive
             )
         else:
-            dir = f"{package.name}-{version}"
-            if source_archive is not None:
-                raise Exception(
-                    "Sources archive provision isn't supported for Fedora packages"
-                )
-            for systemd_unit in package.systemd_units:
-                if systemd_unit.suffix is None:
-                    out_name = (
-                        f"{dir}/{package.name}@.service"
-                        if len(systemd_unit.instances) > 0
-                        else f"{dir}/{package.name}.service"
-                    )
-                    print_service_file(systemd_unit.service_file, out_name)
-                    if systemd_unit.config_file is not None:
-                        shutil.copy(
-                            f"{os.path.dirname(__file__)}/defaults/{systemd_unit.config_file}",
-                            f"{dir}/{package.name}.default",
-                        )
-                else:
-                    out_name = (
-                        f"{dir}/{package.name}-{systemd_unit.suffix}@.service"
-                        if len(systemd_unit.instances) > 0
-                        else f"{dir}/{package.name}-{systemd_unit.suffix}.service"
-                    )
-                    print_service_file(systemd_unit.service_file, out_name)
-                    if systemd_unit.config_file is not None:
-                        shutil.copy(
-                            f"{os.path.dirname(__file__)}/defaults/{systemd_unit.config_file}",
-                            f"{dir}/{package.name}-{systemd_unit.suffix}.default",
-                        )
-                if systemd_unit.startup_script is not None:
-                    dest = f"{dir}/{systemd_unit.startup_script}"
-                    if systemd_unit.startup_script_source is not None:
-                        source = f"{os.path.dirname(__file__)}/scripts/{systemd_unit.startup_script_source}"
-                    else:
-                        source = f"{os.path.dirname(__file__)}/scripts/{systemd_unit.startup_script}"
-                    shutil.copy(source, dest)
-                if systemd_unit.prestart_script is not None:
-                    dest = f"{dir}/{systemd_unit.prestart_script}"
-                    if systemd_unit.prestart_script_source is not None:
-                        source = f"{os.path.dirname(__file__)}/scripts/{systemd_unit.prestart_script_source}"
-                    else:
-                        source = f"{os.path.dirname(__file__)}/scripts/{systemd_unit.prestart_script}"
-                    shutil.copy(source, dest)
-            subprocess.run(["tar", "-czf", f"{dir}.tar.gz", dir], check=True)
-            os.makedirs(f"{home}/rpmbuild/SPECS", exist_ok=True)
-            os.makedirs(f"{home}/rpmbuild/SOURCES", exist_ok=True)
-            package.gen_spec_file(
-                common_deps, run_deps, f"{home}/rpmbuild/SPECS/{package.name}.spec"
-            )
-            os.rename(f"{dir}.tar.gz", f"{home}/rpmbuild/SOURCES/{dir}.tar.gz")
-            subprocess.run(
-                [
-                    "rpmbuild",
-                    "-bs" if is_source else "-bb",
-                    f"{home}/rpmbuild/SPECS/{package.name}.spec",
-                ],
-                check=True,
-            )
-            subprocess.run(f"rm -rf {dir}", shell=True, check=True)
+            build_fedora_package(package, build_deps, run_deps, is_source)
 
 os.mkdir("out")
 if not is_source:

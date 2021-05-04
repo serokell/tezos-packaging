@@ -251,7 +251,7 @@ for proto in active_protocols:
                                         daemon_postinst_common + gen_daemon_specific_postinst(f"tezos-baker-{proto}") \
                                             + ledger_udev_postinst,
                                      postrm_steps=gen_daemon_specific_postrm(f"tezos-baker-{proto}"),
-                                     additional_native_deps=["tezos-sapling-params", "acl"]))
+                                     additional_native_deps=["tezos-sapling-params", "tezos-client", "acl"]))
     packages.append(OpamBasedPackage(f"tezos-accuser-{proto}", "Daemon for accusing",
                                      [SystemdUnit(service_file=service_file_accuser,
                                                   startup_script=accuser_startup_script.split('/')[-1],
@@ -282,7 +282,7 @@ for proto in active_protocols:
                                         daemon_postinst_common + gen_daemon_specific_postinst(f"tezos-endorser-{proto}") \
                                             + ledger_udev_postinst,
                                      postrm_steps=gen_daemon_specific_postrm(f"tezos-endorser-{proto}"),
-                                     additional_native_deps=["acl"]))
+                                     additional_native_deps=["tezos-client", "acl"]))
 
 packages.append(TezosSaplingParamsPackage())
 packages.append(TezosBakingServicesPackage(

@@ -8,6 +8,7 @@ from distutils.dir_util import copy_tree
 from .model import OpamBasedPackage
 from .systemd import print_service_file
 from .packages import packages
+from .ubuntu import build_ubuntu_package
 
 is_ubuntu = None
 is_source = None
@@ -44,9 +45,6 @@ else:
 package_to_build = args.package
 source_archive = args.sources
 
-date = subprocess.check_output(["date", "-R"]).decode().strip()
-meta = json.load(open(f"{os.path.dirname(__file__)}/../../meta.json", "r"))
-
 if is_ubuntu:
     run_deps = ["libev-dev", "libgmp-dev", "libhidapi-dev", "libffi-dev"]
 else:
@@ -64,9 +62,6 @@ build_deps = [
 ]
 common_deps = run_deps + build_deps
 
-version = os.environ["TEZOS_VERSION"][1:]
-release = f"{meta['release']}"
-
 ubuntu_versions = ["bionic", "focal", "groovy"]  # 18.04  # 20.04  # 20.10
 
 pwd = os.getcwd()
@@ -75,105 +70,11 @@ home = os.environ["HOME"]
 for package in packages:
     if package_to_build is None or package.name == package_to_build:
         if is_ubuntu:
-            dir = f"{package.name.lower()}-{version}"
+            build_ubuntu_package(
+                package, ubuntu_versions, common_deps, is_source, source_archive
+            )
         else:
             dir = f"{package.name}-{version}"
-        if source_archive is None:
-            package.fetch_sources(dir)
-            package.gen_makefile(f"{dir}/Makefile")
-            if not is_ubuntu:
-                subprocess.run(
-                    [
-                        "wget",
-                        "-q",
-                        "-O",
-                        f"{dir}/LICENSE",
-                        f"https://gitlab.com/tezos/tezos/-/raw/v{version}/LICENSE",
-                    ],
-                    check=True,
-                )
-        if is_ubuntu:
-            if source_archive is None:
-                subprocess.run(["tar", "-czf", f"{dir}.tar.gz", dir], check=True)
-            else:
-                shutil.copy(
-                    f"{os.path.dirname(__file__)}/../{source_archive}", f"{dir}.tar.gz"
-                )
-                subprocess.run(["tar", "-xzf", f"{dir}.tar.gz"], check=True)
-            for ubuntu_version in ubuntu_versions:
-                os.chdir(dir)
-                subprocess.run(["rm", "-r", "debian"])
-                subprocess.run(["dh_make", "-syf" f"../{dir}.tar.gz"], check=True)
-                for systemd_unit in package.systemd_units:
-                    if systemd_unit.service_file.service.environment_file is not None:
-                        systemd_unit.service_file.service.environment_file = (
-                            systemd_unit.service_file.service.environment_file.lower()
-                        )
-                    if systemd_unit.suffix is None:
-                        if systemd_unit.config_file is not None:
-                            shutil.copy(
-                                f"{os.path.dirname(__file__)}/defaults/{systemd_unit.config_file}",
-                                f"debian/{package.name.lower()}.default",
-                            )
-                        out_name = (
-                            f"debian/{package.name.lower()}@.service"
-                            if len(systemd_unit.instances) > 0
-                            else f"debian/{package.name.lower()}.service"
-                        )
-                        print_service_file(systemd_unit.service_file, out_name)
-                    else:
-                        out_name = (
-                            f"debian/{package.name.lower()}-{systemd_unit.suffix}@.service"
-                            if len(systemd_unit.instances) > 0
-                            else f"debian/{package.name.lower()}-{systemd_unit.suffix}.service"
-                        )
-                        print_service_file(systemd_unit.service_file, out_name)
-                        if systemd_unit.config_file is not None:
-                            shutil.copy(
-                                f"{os.path.dirname(__file__)}/defaults/{systemd_unit.config_file}",
-                                f"debian/{package.name.lower()}-{systemd_unit.suffix}.default",
-                            )
-                    if systemd_unit.startup_script is not None:
-                        dest = f"debian/{systemd_unit.startup_script}"
-                        if systemd_unit.startup_script_source is not None:
-                            source = f"{os.path.dirname(__file__)}/scripts/{systemd_unit.startup_script_source}"
-                        else:
-                            source = f"{os.path.dirname(__file__)}/scripts/{systemd_unit.startup_script}"
-                        shutil.copy(source, dest)
-                    if systemd_unit.prestart_script is not None:
-                        dest = f"debian/{systemd_unit.prestart_script}"
-                        if systemd_unit.prestart_script_source is not None:
-                            source = f"{os.path.dirname(__file__)}/scripts/{systemd_unit.prestart_script_source}"
-                        else:
-                            source = f"{os.path.dirname(__file__)}/scripts/{systemd_unit.prestart_script}"
-                        shutil.copy(source, dest)
-                package.gen_install("debian/install")
-                package.gen_postinst("debian/postinst")
-                package.gen_postrm("debian/postrm")
-                package.gen_control_file(common_deps, "debian/control")
-                subprocess.run(
-                    [
-                        "wget",
-                        "-q",
-                        "-O",
-                        "debian/copyright",
-                        f"https://gitlab.com/tezos/tezos/-/raw/v{version}/LICENSE",
-                    ],
-                    check=True,
-                )
-                subprocess.run(
-                    "rm debian/*.ex debian/*.EX debian/README*", shell=True, check=True
-                )
-                package.gen_changelog(
-                    ubuntu_version, meta["maintainer"], date, "debian/changelog"
-                )
-                package.gen_rules("debian/rules")
-                subprocess.run(
-                    ["dpkg-buildpackage", "-S" if is_source else "-b", "-us", "-uc"],
-                    check=True,
-                )
-                os.chdir("..")
-        else:
             if source_archive is not None:
                 raise Exception(
                     "Sources archive provision isn't supported for Fedora packages"
@@ -232,7 +133,7 @@ for package in packages:
                 ],
                 check=True,
             )
-        subprocess.run(f"rm -rf {dir}", shell=True, check=True)
+            subprocess.run(f"rm -rf {dir}", shell=True, check=True)
 
 os.mkdir("out")
 if not is_source:

@@ -242,6 +242,9 @@ and then log in:
 multipass shell tezos
 ```
 
+> Note that on Windows and MacOS this VM will not have access to USB and
+> thus is not suitable for using with Ledger Nano S.
+
 </details>
 
 1) Install `tezos-baking` package following either [Ubuntu](#ubuntu)

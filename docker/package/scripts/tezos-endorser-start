@@ -8,6 +8,7 @@ set -euo pipefail
 
 # $PROTOCOL should be defined in the system unit environment
 endorser="/usr/bin/tezos-endorser-$PROTOCOL"
+tezos_client="/usr/bin/tezos-client"
 
 endorser_dir="$DATA_DIR"
 
@@ -25,9 +26,19 @@ else
 fi
 
 launch_endorser() {
-    exec "$endorser" --base-dir "$endorser_dir" \
-         --endpoint "$NODE_RPC_ENDPOINT" \
-         run "$@"
+    if [[ -n ${1-} ]]; then
+        key_type="$("$tezos_client" show address "$BAKER_ADDRESS_ALIAS" -S | grep "Secret Key:" | cut -d':' -f2-2 | xargs)"
+    fi
+    if [[ ${key_type:-} == "encrypted" ]]; then
+        password="$(systemd-ask-password --keyname="tezos-$BAKER_ADDRESS_ALIAS" --accept-cached \
+            "Enter password for $BAKER_ADDRESS_ALIAS key:")"
+        "$endorser" --base-dir "$endorser_dir" --endpoint "$NODE_RPC_ENDPOINT" \
+             run "$@" <<< "$password" &
+    else
+        "$endorser" --base-dir "$endorser_dir" \
+             --endpoint "$NODE_RPC_ENDPOINT" \
+             run "$@" &
+    fi
 }
 
 if [[ -z "$BAKER_ADDRESS_ALIAS" ]]; then

@@ -63,18 +63,22 @@ signer_units = [
         config_file="tezos-signer.conf")
 ]
 
+ledger_udev_postinst = open(f"{os.path.dirname( __file__)}/scripts/udev-rules", 'r').read()
+
 packages = [
     OpamBasedPackage("tezos-client",
                      "CLI client for interacting with tezos blockchain",
                      optional_opam_deps=["tls", "ledgerwallet-tezos"],
-                     requires_sapling_params=True),
+                     additional_native_deps=["tezos-sapling-params"],
+                     postinst_steps=ledger_udev_postinst),
     OpamBasedPackage("tezos-admin-client",
                      "Administration tool for the node",
                      optional_opam_deps=["tls"]),
     OpamBasedPackage("tezos-signer",
                      "A client to remotely sign operations or blocks",
                      optional_opam_deps=["tls", "ledgerwallet-tezos"],
-                     systemd_units=signer_units),
+                     systemd_units=signer_units,
+                     postinst_steps=ledger_udev_postinst),
     OpamBasedPackage("tezos-codec",
                      "A client to decode and encode JSON")
 ]
@@ -90,7 +94,7 @@ def mk_node_unit(suffix, env, desc):
                                     part_of=[f"tezos-baking-{suffix}.service"]),
                                Service(environment=env,
                                        exec_start="/usr/bin/tezos-node-start",
-                                       exec_start_pre="/usr/bin/tezos-node-prestart",
+                                       exec_start_pre=["/usr/bin/tezos-node-prestart"],
                                        timeout_start_sec="450s",
                                        state_directory="tezos", user="tezos"
                                ),
@@ -139,9 +143,9 @@ packages.append(OpamBasedPackage("tezos-node",
                                      "tezos-embedded-protocol-005-PsBABY5H",
                                      "tezos-embedded-protocol-005-PsBabyM1",
                                      "tezos-embedded-protocol-006-PsCARTHA"],
-                                 requires_sapling_params=True,
                                  postinst_steps=node_postinst_steps,
-                                 postrm_steps=node_postrm_steps))
+                                 postrm_steps=node_postrm_steps,
+                                 additional_native_deps=["tezos-sapling-params"]))
 
 active_protocols = json.load(open(f"{os.path.dirname( __file__)}/../../protocols.json", "r"))["active"]
 
@@ -177,8 +181,11 @@ for proto in active_protocols:
                                           description="Tezos baker"),
                                      Service(environment_file=f"/etc/default/tezos-baker-{proto}",
                                              environment=[f"PROTOCOL={proto}", "NODE_DATA_DIR="],
+                                             exec_start_pre=["+/usr/bin/setfacl -m u:tezos:rwx /run/systemd/ask-password"],
                                              exec_start=baker_startup_script,
-                                             state_directory="tezos", user="tezos"),
+                                             exec_stop_post=["+/usr/bin/setfacl -x u:tezos /run/systemd/ask-password"],
+                                             state_directory="tezos", user="tezos", type_="forking",
+                                             keyring_mode="shared"),
                                      Install(wanted_by=["multi-user.target"]))
     service_file_baker_instantiated = \
         ServiceFile(Unit(after=["network.target", "tezos-node-%i.service", "tezos-baking-%i.service"],
@@ -188,7 +195,8 @@ for proto in active_protocols:
                     Service(environment_file="/etc/default/tezos-baking-%i",
                             environment=[f"PROTOCOL={proto}", "NODE_DATA_DIR=/var/lib/tezos/node-%i"],
                             exec_start=baker_startup_script,
-                            state_directory="tezos", user="tezos", restart="on-failure"),
+                            state_directory="tezos", user="tezos", restart="on-failure",
+                            type_="forking", keyring_mode="shared"),
                     Install(wanted_by=["multi-user.target", "tezos-baking-%i.service"]))
     service_file_accuser = ServiceFile(Unit(after=["network.target"],
                                             description="Tezos accuser"),
@@ -211,8 +219,11 @@ for proto in active_protocols:
                                              description="Tezos endorser"),
                                         Service(environment_file=f"/etc/default/tezos-endorser-{proto}",
                                                 environment=[f"PROTOCOL={proto}"],
+                                                exec_start_pre=["+/usr/bin/setfacl -m u:tezos:rwx /run/systemd/ask-password"],
                                                 exec_start=endorser_startup_script,
-                                                state_directory="tezos", user="tezos"),
+                                                exec_stop_post=["+/usr/bin/setfacl -x u:tezos /run/systemd/ask-password"],
+                                                state_directory="tezos", user="tezos", type_="forking",
+                                                keyring_mode="shared"),
                                         Install(wanted_by=["multi-user.target"]))
     service_file_endorser_instantiated = \
         ServiceFile(Unit(after=["network.target", "tezos-node-%i.service", "tezos-baking-%i.service"],
@@ -222,7 +233,8 @@ for proto in active_protocols:
                     Service(environment_file="/etc/default/tezos-baking-%i",
                             environment=[f"PROTOCOL={proto}"],
                             exec_start=endorser_startup_script,
-                            state_directory="tezos", user="tezos", restart="on-failure"),
+                            state_directory="tezos", user="tezos", restart="on-failure",
+                            type_="forking", keyring_mode="shared"),
                     Install(wanted_by=["multi-user.target", "tezos-baking-%i.service"]))
     packages.append(OpamBasedPackage(f"tezos-baker-{proto}", "Daemon for baking",
                                      [SystemdUnit(service_file=service_file_baker,
@@ -235,10 +247,11 @@ for proto in active_protocols:
                                                   instances=daemons_instances)],
                                      proto,
                                      optional_opam_deps=["tls", "ledgerwallet-tezos"],
-                                     requires_sapling_params=True,
                                      postinst_steps= \
-                                        daemon_postinst_common + gen_daemon_specific_postinst(f"tezos-baker-{proto}"),
-                                     postrm_steps=gen_daemon_specific_postrm(f"tezos-baker-{proto}")))
+                                        daemon_postinst_common + gen_daemon_specific_postinst(f"tezos-baker-{proto}") \
+                                            + ledger_udev_postinst,
+                                     postrm_steps=gen_daemon_specific_postrm(f"tezos-baker-{proto}"),
+                                     additional_native_deps=["tezos-sapling-params", "tezos-client", "acl"]))
     packages.append(OpamBasedPackage(f"tezos-accuser-{proto}", "Daemon for accusing",
                                      [SystemdUnit(service_file=service_file_accuser,
                                                   startup_script=accuser_startup_script.split('/')[-1],
@@ -251,7 +264,8 @@ for proto in active_protocols:
                                      proto,
                                      optional_opam_deps=["tls", "ledgerwallet-tezos"],
                                      postinst_steps= \
-                                        daemon_postinst_common + gen_daemon_specific_postinst(f"tezos-accuser-{proto}"),
+                                        daemon_postinst_common + gen_daemon_specific_postinst(f"tezos-accuser-{proto}") \
+                                            + ledger_udev_postinst,
                                      postrm_steps=gen_daemon_specific_postrm(f"tezos-accuser-{proto}")))
     packages.append(OpamBasedPackage(f"tezos-endorser-{proto}", "Daemon for endorsing",
                                      [SystemdUnit(service_file=service_file_endorser,
@@ -265,8 +279,10 @@ for proto in active_protocols:
                                      proto,
                                      optional_opam_deps=["tls", "ledgerwallet-tezos"],
                                      postinst_steps= \
-                                        daemon_postinst_common + gen_daemon_specific_postinst(f"tezos-endorser-{proto}"),
-                                     postrm_steps=gen_daemon_specific_postrm(f"tezos-endorser-{proto}")))
+                                        daemon_postinst_common + gen_daemon_specific_postinst(f"tezos-endorser-{proto}") \
+                                            + ledger_udev_postinst,
+                                     postrm_steps=gen_daemon_specific_postrm(f"tezos-endorser-{proto}"),
+                                     additional_native_deps=["tezos-client", "acl"]))
 
 packages.append(TezosSaplingParamsPackage())
 packages.append(TezosBakingServicesPackage(

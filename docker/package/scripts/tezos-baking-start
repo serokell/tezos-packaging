@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+
+# SPDX-FileCopyrightText: 2021 TQ Tezos <https://tqtezos.com/>
+#
+# SPDX-License-Identifier: LicenseRef-MIT-TQ
+
+set -euo pipefail
+
+tezos_client="/usr/bin/tezos-client"
+
+key_type="$("$tezos_client" show address "$BAKER_ADDRESS_ALIAS" -S | grep "Secret Key:" | cut -d':' -f2-2 | xargs)"
+
+if [[ $key_type == "encrypted" ]]; then
+    systemd-ask-password --keyname="tezos-$BAKER_ADDRESS_ALIAS" --no-output \
+        "Enter password for $BAKER_ADDRESS_ALIAS key:"
+fi

@@ -267,8 +267,7 @@ sudo -u tezos tezos-node-$tznet snapshot import $snapshot_file
 sudo systemctl start tezos-node-$tznet
 ```
 
-If all you want is to run Tezos node, enable the service and stop
-here.
+If all you want is to run the Tezos node, enable the service and stop here:
 
 ```
 sudo systemctl enable tezos-node-$tznet

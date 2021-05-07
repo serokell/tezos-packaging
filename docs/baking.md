@@ -37,26 +37,26 @@ The most convenient way to orchestrate all these binaries is to use the `tezos-b
 package, which provides predefined services for running baking instances on different
 networks.
 
-First, add package repository:
+#### Add the package repository
 
-<a name="ubuntu"></a>
-#### On Ubuntu
+On Ubuntu:
+
 ```
 # Add PPA with Tezos binaries
 sudo add-apt-repository ppa:serokell/tezos
 ```
 
-<a name="pios"></a>
-#### On Raspberry Pi OS
+On Raspberry Pi OS:
+
 ```
-# Intall software properties commons
+# Install software properties commons
 sudo apt-get install software-properties-common
 # Add PPA with Tezos binaries
 sudo add-apt-repository 'deb http://ppa.launchpad.net/serokell/tezos/ubuntu bionic main'
 sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 37B8819B7D0D183812DCA9A8CE5A4D8933AE7CBB
 ```
 
-Update and install packages:
+#### Install packages
 
 ```
 sudo apt-get update

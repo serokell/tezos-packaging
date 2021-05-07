@@ -9,19 +9,24 @@ from typing import List, Dict
 # There are more possible fields, but only these are used by tezos services
 class Service:
     def __init__(self, exec_start: str, state_directory:str, user: str,
-                 exec_start_pre: str=None, timeout_start_sec: str=None,
-                 environment_file: str=None, environment: List[str]=[],
-                 remain_after_exit: bool=False, type_: str=None, restart: str=None):
+                 exec_start_pre: str=None, exec_start_post: str=None,
+                 exec_stop_post: str=None,
+                 timeout_start_sec: str=None, environment_file: str=None, environment: List[str]=[],
+                 remain_after_exit: bool=False, type_: str=None, restart: str=None,
+                 keyring_mode: str=None):
         self.environment_file = environment_file
         self.environment = environment
         self.exec_start = exec_start
         self.exec_start_pre = exec_start_pre
+        self.exec_start_post = exec_start_post
+        self.exec_stop_post = exec_stop_post
         self.timeout_start_sec = timeout_start_sec
         self.state_directory = state_directory
         self.user = user
         self.remain_after_exit = remain_after_exit
         self.type_ = type_
         self.restart = restart
+        self.keyring_mode = keyring_mode
 
 class Unit:
     def __init__(self, after: List[str], description: str, requires: List[str]=[],
@@ -193,15 +198,16 @@ override_dh_systemd_start:
 class OpamBasedPackage(AbstractPackage):
     def __init__(self, name: str, desc: str, systemd_units: List[SystemdUnit]=[],
                  target_proto: str=None, optional_opam_deps: List[str]=[],
-                 requires_sapling_params: bool=False, postinst_steps: str="", postrm_steps: str=""):
+                 postinst_steps: str="", postrm_steps: str="",
+                 additional_native_deps: List[str]=[]):
         self.name = name
         self.desc = desc
         self.systemd_units = systemd_units
         self.target_proto = target_proto
         self.optional_opam_deps = optional_opam_deps
-        self.requires_sapling_params = requires_sapling_params
         self.postinst_steps = postinst_steps
         self.postrm_steps = postrm_steps
+        self.additional_native_deps = additional_native_deps
 
     def fetch_sources(self, out_dir):
         opam_package = "tezos-client" if self.name == "tezos-admin-client" else self.name
@@ -213,6 +219,7 @@ class OpamBasedPackage(AbstractPackage):
 
     def gen_control_file(self, deps, out):
         str_build_deps = ", ".join(deps)
+        str_additional_native_deps = ", ".join(self.additional_native_deps)
         file_contents = f'''
 Source: {self.name.lower()}
 Section: utils
@@ -224,7 +231,7 @@ Homepage: https://gitlab.com/tezos/tezos/
 
 Package: {self.name.lower()}
 Architecture: amd64 arm64
-Depends: ${{shlibs:Depends}}, ${{misc:Depends}}, {"tezos-sapling-params" if self.requires_sapling_params else ""}
+Depends: ${{shlibs:Depends}}, ${{misc:Depends}}, {str_additional_native_deps}
 Description: {self.desc}
 '''
         with open(out, 'w') as f:
@@ -235,6 +242,7 @@ Description: {self.desc}
         config_files = list(filter(lambda x: x is not None, map(lambda x: x.config_file,
                                                                 self.systemd_units)))
         requires = " ".join(run_deps)
+        str_additional_native_deps = ", ".join(self.additional_native_deps)
         systemd_deps, systemd_install, systemd_files, systemd_macros = \
             gen_spec_systemd_part(self)
 
@@ -250,7 +258,7 @@ BuildArch: x86_64 aarch64
 Source0: {self.name}-{version}.tar.gz
 Source1: https://gitlab.com/tezos/tezos/tree/v{version}/
 BuildRequires: {build_requires} {systemd_deps}
-Requires: {requires}, {"tezos-sapling-params" if self.requires_sapling_params else ""}
+Requires: {requires}, {str_additional_native_deps}
 %description
 {self.desc}
 Maintainer: {meta['maintainer']}
@@ -441,6 +449,15 @@ def print_service_file(service_file: ServiceFile, out):
     environment = "".join(map(lambda x: f"Environment=\"{x}\"\n", service_file.service.environment))
     environment_file = "" if service_file.service.environment_file is None else f"EnvironmentFile={service_file.service.environment_file}"
     wanted_by = "".join(map(lambda x: f"WantedBy=\"{x}\"\n", service_file.install.wanted_by))
+    exec_start_pres = \
+        "\n".join(f"ExecStartPre={x}" for x in service_file.service.exec_start_pre) \
+            if service_file.service.exec_start_pre is not None else ""
+    exec_start_posts = \
+        "\n".join(f"ExecStartPost={x}" for x in service_file.service.exec_start_post) \
+            if service_file.service.exec_start_post is not None else ""
+    exec_stop_posts = \
+        "\n".join(f"ExecStopPost={x}" for x in service_file.service.exec_stop_post) \
+            if service_file.service.exec_stop_post is not None else ""
     file_contents = f'''# SPDX-FileCopyrightText: 2020 TQ Tezos <https://tqtezos.com/>
 #
 # SPDX-License-Identifier: LicenseRef-MIT-TQ
@@ -449,15 +466,18 @@ def print_service_file(service_file: ServiceFile, out):
 [Service]
 {environment_file}
 {environment}
-{f"ExecStartPre={service_file.service.exec_start_pre}" if service_file.service.exec_start_pre is not None else ""}
+{exec_start_pres}
 {f"TimeoutStartSec={service_file.service.timeout_start_sec}" if service_file.service.timeout_start_sec is not None else ""}
 ExecStart={service_file.service.exec_start}
+{exec_start_posts}
+{exec_stop_posts}
 StateDirectory={service_file.service.state_directory}
 User={service_file.service.user}
 Group={service_file.service.user}
 {"RemainAfterExit=yes" if service_file.service.remain_after_exit else ""}
 {f"Type={service_file.service.type_}" if service_file.service.type_ is not None else ""}
 {f"Restart={service_file.service.restart}" if service_file.service.restart is not None else ""}
+{f"KeyringMode={service_file.service.keyring_mode}" if service_file.service.keyring_mode is not None else ""}
 [Install]
 {wanted_by}
 '''
@@ -481,14 +501,17 @@ class TezosBakingServicesPackage(AbstractPackage):
                     service_file=ServiceFile(
                         Unit(after=["network.target"],
                              description=f"Tezos baking instance for {network}"),
-                        Service(exec_start="true", user="tezos", state_directory="tezos",
+                        Service(exec_start="/usr/bin/tezos-baking-start", user="tezos", state_directory="tezos",
                                 environment_file=f"/etc/default/tezos-baking-{network}",
-                                exec_start_pre="/usr/bin/tezos-baking-prestart",
-                                remain_after_exit=True, type_="oneshot"),
+                                exec_start_pre=["+/usr/bin/setfacl -m u:tezos:rwx /run/systemd/ask-password",
+                                                "/usr/bin/tezos-baking-prestart"],
+                                exec_stop_post=["+/usr/bin/setfacl -x u:tezos /run/systemd/ask-password"],
+                                remain_after_exit=True, type_="oneshot", keyring_mode="shared"),
                         Install(wanted_by=["multi-user.target"])
                     ),
                     suffix=network,
                     config_file="tezos-baking.conf",
+                    startup_script="tezos-baking-start",
                     prestart_script="tezos-baking-prestart"
                 )
             )
@@ -498,7 +521,7 @@ class TezosBakingServicesPackage(AbstractPackage):
         os.makedirs(out_dir)
 
     def gen_control_file(self, deps, out):
-        run_deps = ", ".join(["tezos-client", "tezos-node"] + \
+        run_deps = ", ".join(["acl", "tezos-client", "tezos-node"] + \
             sum([[f"tezos-{daemon}-{proto.lower()}" for daemon in ["baker", "endorser"]] for proto in self.target_protos],
                 []))
         file_contents = f'''
@@ -519,7 +542,7 @@ Description: {self.desc}
             f.write(file_contents)
 
     def gen_spec_file(self, build_deps, run_deps, out):
-        run_deps = ", ".join(["tezos-client", "tezos-node"] + \
+        run_deps = ", ".join(["acl", "tezos-client", "tezos-node"] + \
             sum([[f"tezos-{daemon}-{proto}" for daemon in ["baker", "endorser"]] for proto in self.target_protos],
                 []))
         systemd_deps, systemd_install, systemd_files, systemd_macros = \

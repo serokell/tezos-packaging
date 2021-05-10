@@ -22,7 +22,7 @@ You will also need to run the 64bit version of the [Raspberry Pi OS](https://www
 that you can use by following the [installation instructions](https://www.raspberrypi.org/documentation/installation/installing-images/)
 with an image downloaded from the [official 64bit repository](https://downloads.raspberrypi.org/raspios_arm64/images/).
 
-### Installing required packages
+### Installation
 
 In order to run a baking instance, you'll need the following Tezos binaries:
 `tezos-client`, `tezos-node`, `tezos-baker-<proto>`, `tezos-endorser-<proto>`.
@@ -247,8 +247,7 @@ multipass shell tezos
 
 </details>
 
-1) Install `tezos-baking` package following either [Ubuntu](#ubuntu)
-or [RaspberryPi OS](#pios) instructions.
+1) Install `tezos-baking` package following [these instructions](#installation).
 
 2) Choose one of supported Tezos networks - `mainnet`, `florencenet` or
 `edo2net` by setting environment variable:

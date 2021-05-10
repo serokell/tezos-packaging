@@ -247,7 +247,7 @@ multipass shell tezos
 
 </details>
 
-1) Install `tezos-baking` package following [these instructions](#installation).
+1) Install `tezos-baking` package following [these instructions](#add-repository).
 
 2) Choose one of supported Tezos networks - `mainnet`, `florencenet` or
 `edo2net` by setting environment variable:

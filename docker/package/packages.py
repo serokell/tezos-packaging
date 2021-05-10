@@ -98,7 +98,7 @@ def mk_node_unit(suffix, env, desc):
                                        timeout_start_sec="450s",
                                        state_directory="tezos", user="tezos"
                                ),
-                               Install(wanted_by=["multi-user.target", f"tezos-baking-{suffix}.service"]))
+                               Install(wanted_by=["multi-user.target"]))
     return SystemdUnit(suffix=suffix, service_file=service_file, startup_script="tezos-node-start",
                        prestart_script="tezos-node-prestart")
 
@@ -119,11 +119,9 @@ cat > /usr/bin/tezos-node-{network} <<- 'EOM'
 TEZOS_NODE_DIR="$(cat $(systemctl show -p FragmentPath tezos-node-{network}.service | cut -d'=' -f2) | grep 'DATA_DIR' | cut -d '=' -f3 | cut -d '"' -f1)" tezos-node "$@"
 EOM
 chmod +x /usr/bin/tezos-node-{network}
-systemctl enable tezos-node-{network}.service > /dev/null || true
 '''
     node_postrm_steps += f'''
 rm -f /usr/bin/tezos-node-{network}
-systemctl disable tezos-node-{network}.service > /dev/null || true
 '''
 
 # Add custom config service
@@ -159,18 +157,6 @@ daemon_decs = {
 
 daemon_postinst_common = postinst_steps_common + "\nmkdir -p /var/lib/tezos/.tezos-client\nchown -R tezos:tezos /var/lib/tezos/.tezos-client\n"
 
-def gen_daemon_specific_postinst(daemon_name):
-    daemon_postinst = ""
-    for instance in daemons_instances:
-        daemon_postinst += f"systemctl enable {daemon_name}@{instance}.service > /dev/null || true\n"
-    return daemon_postinst
-
-def gen_daemon_specific_postrm(daemon_name):
-    daemon_postrm = ""
-    for instance in daemons_instances:
-        daemon_postrm += f"systemctl disable {daemon_name}@{instance}.service > /dev/null || true\n"
-    return daemon_postrm
-
 for proto in active_protocols:
     daemons_instances = \
         [network for network, protos in networks_protos.items() if proto in protos]
@@ -197,7 +183,7 @@ for proto in active_protocols:
                             exec_start=baker_startup_script,
                             state_directory="tezos", user="tezos", restart="on-failure",
                             type_="forking", keyring_mode="shared"),
-                    Install(wanted_by=["multi-user.target", "tezos-baking-%i.service"]))
+                    Install(wanted_by=["multi-user.target"]))
     service_file_accuser = ServiceFile(Unit(after=["network.target"],
                                             description="Tezos accuser"),
                                        Service(environment_file=f"/etc/default/tezos-accuser-{proto}",
@@ -214,7 +200,7 @@ for proto in active_protocols:
                             environment=[f"PROTOCOL={proto}"],
                             exec_start=accuser_startup_script,
                             state_directory="tezos", user="tezos", restart="on-failure"),
-                    Install(wanted_by=["multi-user.target", "tezos-baking-%i.service"]))
+                    Install(wanted_by=["multi-user.target"]))
     service_file_endorser = ServiceFile(Unit(after=["network.target"],
                                              description="Tezos endorser"),
                                         Service(environment_file=f"/etc/default/tezos-endorser-{proto}",
@@ -235,7 +221,7 @@ for proto in active_protocols:
                             exec_start=endorser_startup_script,
                             state_directory="tezos", user="tezos", restart="on-failure",
                             type_="forking", keyring_mode="shared"),
-                    Install(wanted_by=["multi-user.target", "tezos-baking-%i.service"]))
+                    Install(wanted_by=["multi-user.target"]))
     packages.append(OpamBasedPackage(f"tezos-baker-{proto}", "Daemon for baking",
                                      [SystemdUnit(service_file=service_file_baker,
                                                   startup_script=baker_startup_script.split('/')[-1],
@@ -247,10 +233,7 @@ for proto in active_protocols:
                                                   instances=daemons_instances)],
                                      proto,
                                      optional_opam_deps=["tls", "ledgerwallet-tezos"],
-                                     postinst_steps= \
-                                        daemon_postinst_common + gen_daemon_specific_postinst(f"tezos-baker-{proto}") \
-                                            + ledger_udev_postinst,
-                                     postrm_steps=gen_daemon_specific_postrm(f"tezos-baker-{proto}"),
+                                     postinst_steps= daemon_postinst_common + ledger_udev_postinst,
                                      additional_native_deps=["tezos-sapling-params", "tezos-client", "acl"]))
     packages.append(OpamBasedPackage(f"tezos-accuser-{proto}", "Daemon for accusing",
                                      [SystemdUnit(service_file=service_file_accuser,
@@ -263,10 +246,7 @@ for proto in active_protocols:
                                                   instances=daemons_instances)],
                                      proto,
                                      optional_opam_deps=["tls", "ledgerwallet-tezos"],
-                                     postinst_steps= \
-                                        daemon_postinst_common + gen_daemon_specific_postinst(f"tezos-accuser-{proto}") \
-                                            + ledger_udev_postinst,
-                                     postrm_steps=gen_daemon_specific_postrm(f"tezos-accuser-{proto}")))
+                                     postinst_steps= daemon_postinst_common + ledger_udev_postinst))
     packages.append(OpamBasedPackage(f"tezos-endorser-{proto}", "Daemon for endorsing",
                                      [SystemdUnit(service_file=service_file_endorser,
                                                   startup_script=endorser_startup_script.split('/')[-1],
@@ -278,10 +258,7 @@ for proto in active_protocols:
                                                   instances=daemons_instances)],
                                      proto,
                                      optional_opam_deps=["tls", "ledgerwallet-tezos"],
-                                     postinst_steps= \
-                                        daemon_postinst_common + gen_daemon_specific_postinst(f"tezos-endorser-{proto}") \
-                                            + ledger_udev_postinst,
-                                     postrm_steps=gen_daemon_specific_postrm(f"tezos-endorser-{proto}"),
+                                     postinst_steps= daemon_postinst_common + ledger_udev_postinst,
                                      additional_native_deps=["tezos-client", "acl"]))
 
 packages.append(TezosSaplingParamsPackage())

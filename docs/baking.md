@@ -37,7 +37,7 @@ The most convenient way to orchestrate all these binaries is to use the `tezos-b
 package, which provides predefined services for running baking instances on different
 networks.
 
-#### Add the package repository
+#### Add repository
 
 On Ubuntu:
 

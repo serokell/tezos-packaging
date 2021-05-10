@@ -283,7 +283,7 @@ Update service configuration:
 sudo systemctl edit tezos-node-$tznet
 ```
 
-An editor will open with service override configuration,
+An editor will open with service override configuration file.
 Add the following:
 
 ```

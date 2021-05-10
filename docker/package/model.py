@@ -113,7 +113,6 @@ def gen_spec_systemd_part(package):
                                                                 package.systemd_units)))
     install_unit_files = ""
     systemd_unit_files = ""
-    enable_units = ""
     systemd_units_post = ""
     systemd_units_preun = ""
     systemd_units_postun = ""
@@ -131,8 +130,6 @@ def gen_spec_systemd_part(package):
             service_name = f"{service_name}@"
         install_unit_files += f"install -m 644 {service_name}.service %{{buildroot}}/%{{_unitdir}}\n"
         systemd_unit_files += f"%{{_unitdir}}/{service_name}.service\n"
-        if len(systemd_unit.instances) == 0:
-            enable_units += f"systemctl enable {service_name}.service\n"
         systemd_units_post += f"%systemd_post {service_name}.service\n"
         systemd_units_preun += f"%systemd_preun {service_name}.service\n"
         systemd_units_postun += f"%systemd_postun_with_restart {service_name}.service\n"
@@ -161,7 +158,6 @@ mkdir -p %{{buildroot}}/%{{_unitdir}}
     systemd_macros= f'''
 %post
 {systemd_units_post}
-{enable_units}
 {package.postinst_steps}
 
 %preun
@@ -496,10 +492,14 @@ class TezosBakingServicesPackage(AbstractPackage):
                 self.target_protos.add(proto)
         self.systemd_units = []
         for network in target_networks:
+            requires = [f"tezos-node-{network}.service"]
+            for proto in network_protos[network]:
+                requires.append(f"tezos-baker-{proto.lower()}@{network}.service")
+                requires.append(f"tezos-endorser-{proto.lower()}@{network}.service")
             self.systemd_units.append(
                 SystemdUnit(
                     service_file=ServiceFile(
-                        Unit(after=["network.target"],
+                        Unit(after=["network.target"], requires=requires,
                              description=f"Tezos baking instance for {network}"),
                         Service(exec_start="/usr/bin/tezos-baking-start", user="tezos", state_directory="tezos",
                                 environment_file=f"/etc/default/tezos-baking-{network}",

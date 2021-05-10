@@ -5,6 +5,8 @@
    -->
 # Baking with tezos-packaging on Ubuntu and Raspberry Pi OS
 
+[⏩ Quick Start](#quick-start)
+
 Tezos-packaging provides an easy way to install and set up the infrastructure for
 interacting with the Tezos blockchain.
 

@@ -12,3 +12,4 @@ COPY ./build/static_libs.patch /static.patch
 ARG TEZOS_VERSION
 COPY ./build/build-tezos.sh /build-tezos.sh
 RUN /build-tezos.sh ${TEZOS_VERSION}
+

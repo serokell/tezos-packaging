@@ -5,6 +5,8 @@
    -->
 # Baking with tezos-packaging on Ubuntu and Raspberry Pi OS
 
+[⏩ Quick Start](#quick-start)
+
 Tezos-packaging provides an easy way to install and set up the infrastructure for
 interacting with the Tezos blockchain.
 
@@ -22,13 +24,13 @@ You will also need to run the 64bit version of the [Raspberry Pi OS](https://www
 that you can use by following the [installation instructions](https://www.raspberrypi.org/documentation/installation/installing-images/)
 with an image downloaded from the [official 64bit repository](https://downloads.raspberrypi.org/raspios_arm64/images/).
 
-### Installing required packages
+### Installation
 
 In order to run a baking instance, you'll need the following Tezos binaries:
 `tezos-client`, `tezos-node`, `tezos-baker-<proto>`, `tezos-endorser-<proto>`.
 
-The currently supported protocols are `008-PtEdo2Zk` (used on `mainnet` and `edo2net`)
-and `009-PsFLoren` (used on `florencenet`).
+The currently supported protocols are `008-PtEdo2Zk` (used on `edo2net`)
+and `009-PsFLoren` (used on `florencenet` and `mainnet`).
 Also, note that the corresponding packages have protocol
 suffix in lowercase, e.g. the list of available baker packages can be found
 [here](https://launchpad.net/~serokell/+archive/ubuntu/tezos/+packages?field.name_filter=tezos-baker&field.status_filter=published).
@@ -37,28 +39,29 @@ The most convenient way to orchestrate all these binaries is to use the `tezos-b
 package, which provides predefined services for running baking instances on different
 networks.
 
-To install them, run the following commands:
+#### Add repository
 
-<a name="ubuntu"></a>
-#### On Ubuntu
+On Ubuntu:
+
 ```
 # Add PPA with Tezos binaries
 sudo add-apt-repository ppa:serokell/tezos
-sudo apt-get update
-# Install packages
-sudo apt-get install tezos-baking
 ```
 
-<a name="pios"></a>
-#### On Raspberry Pi OS
+On Raspberry Pi OS:
+
 ```
-# Intall software properties commons
+# Install software properties commons
 sudo apt-get install software-properties-common
 # Add PPA with Tezos binaries
 sudo add-apt-repository 'deb http://ppa.launchpad.net/serokell/tezos/ubuntu bionic main'
 sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 37B8819B7D0D183812DCA9A8CE5A4D8933AE7CBB
+```
+
+#### Install packages
+
+```
 sudo apt-get update
-# Install packages
 sudo apt-get install tezos-baking
 ```
 
@@ -220,25 +223,94 @@ In case you want to use a different alias for the baking account:
 2. update the `BAKER_ADDRESS_ALIAS` by editing the
     `/etc/default/tezos-baking-<network>` file.
 
-## Running baking instance on edo2net
+## Quick Start
 
-TL;DR, in order to run a baking instance on edo2net you should do the following:
+<details>
+ <summary>
+   <em>Optional</em> Create new Ubuntu virtual machine...
+ </summary>
 
-1) Install `tezos-baking` package following either [Ubuntu](#ubuntu) or [RaspberryPi OS](#pios)
-instructions.
+A quick way to spin up a fresh Ubuntu virtual machine is
+to use [Multipass](https://multipass.run/) (reduce disk if this is
+to be used with a test network or a mainnet node in rolling history mode):
 
-2) Run following commands:
 ```
-snapshot_file=/tmp/tezos-edo2net.rolling
-wget https://edo2net.xtz-shots.io/rolling -O "$snapshot_file"
-sudo -u tezos tezos-node-edo2net snapshot import "$snapshot_file"
+multipass launch --cpus 2 --disk 100G --mem 4G --name tezos
+```
 
-sudo systemctl start tezos-node-edo2net
+and then log in:
 
-sudo -u tezos tezos-client bootstrapped
-sudo -u tezos tezos-client import secret key baker <secret-key>
+```
+multipass shell tezos
+```
+
+> Note that on Windows and MacOS this VM will not have access to USB and
+> thus is not suitable for using with Ledger Nano S.
+
+</details>
+
+1) Install `tezos-baking` package following [these instructions](#add-repository).
+
+2) Choose one of supported Tezos networks - `mainnet`, `florencenet` or
+`edo2net` by setting environment variable:
+
+```
+tznet=florencenet
+```
+
+3) Initialize Tezos node from a snapshot and start node service:
+
+```
+snapshot_file=/tmp/tezos-$tznet.rolling
+snapshot_url=https://$tznet.xtz-shots.io/rolling
+wget $snapshot_url -O $snapshot_file
+sudo -u tezos tezos-node-$tznet snapshot import $snapshot_file
+sudo systemctl start tezos-node-$tznet
+```
+
+If all you want is to run the Tezos node, enable the service and stop here:
+
+```
+sudo systemctl enable tezos-node-$tznet
+```
+
+<details>
+ <summary>
+  <em>Optional</em> Allow RPC access from virtual machine's host...
+ </summary>
+
+Update service configuration:
+
+```
+sudo systemctl edit tezos-node-$tznet
+```
+
+An editor will open with service override configuration file.
+Add the following:
+
+```
+[Service]
+Environment="NODE_RPC_ADDR=0.0.0.0:8732"
+```
+
+Save and close the editor, restart the service:
+
+```
+sudo systemctl restart tezos-node-$tznet
+```
+
+</details>
+
+4) Set up baking:
+
+```bash
+secret_key="..." #encrypted or plain secret key, ledger uri or remote signer URL
+sudo -u tezos tezos-client import secret key baker $secret_key
+sudo systemctl start tezos-baking-$tznet
+sudo systemctl enable tezos-baking-$tznet
+
+#register your baker after node syncs with the network
+sudo -u tezos tezos-client bootstrapped && \
 sudo -u tezos tezos-client register key baker as delegate
 
-sudo systemctl start tezos-baking-edo2net
-sudo systemctl enable tezos-baking-edo2net
 ```

@@ -53,3 +53,4 @@ class TezosClient < Formula
                      "tezos-client"
   end
 end
+

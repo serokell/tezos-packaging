@@ -67,7 +67,7 @@ in
         "cd docker"
         "./docker-static-build.sh"
         "upx tezos-*"
-        "for f in ./tezos-*; do mv mv \"\$f\" \"\$f-arm64\"; done"
+        "for f in ./tezos-*; do mv \"\$f\" \"\$f-arm64\"; done"
       ];
       artifact_paths = [
         "./docker/tezos-*"

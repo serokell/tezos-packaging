@@ -66,7 +66,7 @@ in
         "eval \"$SET_VERSION\""
         "cd docker"
         "./docker-static-build.sh"
-        "nix run -f.. pkgs.upx -c upx tezos-*"
+        "upx tezos-*"
         "for f in ./tezos-*; do mv mv \"\$f\" \"\$f-arm64\"; done"
       ];
       artifact_paths = [

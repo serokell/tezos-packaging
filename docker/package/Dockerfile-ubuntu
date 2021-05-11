@@ -22,3 +22,4 @@ COPY docker/package/*.py /tezos-packaging/docker/package/
 COPY docker/package/defaults /tezos-packaging/docker/package/defaults
 COPY docker/package/scripts /tezos-packaging/docker/package/scripts
 ENTRYPOINT ["python3", "-m", "package.package_generator"]
+

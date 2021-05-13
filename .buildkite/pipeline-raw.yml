@@ -148,7 +148,7 @@ steps:
    - buildkite-agent artifact download "docker/*" arm-binaries --step "build-arm-via-docker"
    - ls binaries
    - ./scripts/autorelease.sh
-   branches: master
+   branches: rvem/#195-path-filtering-in-ci-steps-nixless-test
    depends_on:
     - "build-via-docker"
     - "build-arm-via-docker"

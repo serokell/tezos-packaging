@@ -21,6 +21,13 @@ def check_step(step, diff):
                     return True
         return False
 
+def skip_steps(steps, diff):
+    for step in steps:
+        if type(step) != str:
+            if not check_step(step, diff):
+                step["skip"] = "true"
+    return steps
+
 def remove_only_changes(steps):
     for step in steps:
         if type(step) != str:
@@ -36,7 +43,7 @@ args = parser.parse_args()
 splitted_diff = args.git_diff.strip().split('\n')
 
 pipeline = load(open(args.pipeline, 'r'), Loader=FullLoader)
-res = list(map(lambda x: check_step(x, splitted_diff), pipeline["steps"]))
-pipeline["steps"] = remove_only_changes([x for x in pipeline["steps"] if check_step(x, splitted_diff)])
+#res = list(map(lambda x: check_step(x, splitted_diff), pipeline["steps"]))
+pipeline["steps"] = remove_only_changes(skip_steps(pipeline["steps"], splitted_diff))
 with open(args.output, 'w') as f:
     dump(pipeline, f)

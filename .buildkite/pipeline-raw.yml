@@ -39,16 +39,7 @@ steps:
    - docker/docker-static-build.sh
    - meta.json
    - protocols.json
-   # test docker-build binaries depends on this step
-   - tests/tezos-binaries.nix
-   - tests/test_script.py
-   - nix/.*
-   # create auto-release depends on this step
-   - scripts/autorelease.sh
-   - scripts/shell.nix
-   - nix/.*
-   - default.nix
-   - release.nix
+   - nix/nix/sources.json
  # arm builer is an ubuntu machine without nix
  - label: build-arm-via-docker
    commands:
@@ -93,11 +84,6 @@ steps:
    - tests/tezos-binaries.nix
    - tests/test_script.py
    - nix/.*
-   # this step depends on build-via-docker step
-   - docker/build/.*
-   - docker/docker-static-build.sh
-   - meta.json
-   - protocols.json
 
  - label: test deb source packages via docker
    commands:
@@ -166,15 +152,3 @@ steps:
    depends_on:
     - "build-via-docker"
     - "build-arm-via-docker"
-   only_changes:
-   - scripts/autorelease.sh
-   - scripts/shell.nix
-   # files from 'nix/' directory are used in the autorelease script
-   - nix/.*
-   - default.nix
-   - release.nix
-   # this step depend on build-{arm-}via-docker
-   - docker/build/.*
-   - docker/docker-static-build.sh
-   - meta.json
-   - protocols.json

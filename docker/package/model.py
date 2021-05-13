@@ -35,7 +35,6 @@ class AbstractPackage:
     def gen_makefile(self, out):
         pass
 
-    @abstractmethod
     def gen_changelog(self, ubuntu_version, maintainer, date, out):
         changelog_contents = f"""{self.name.lower()} ({self.meta.ubuntu_epoch}:{self.meta.version}-0ubuntu{self.meta.release}~{ubuntu_version}) {ubuntu_version}; urgency=medium
 
@@ -49,9 +48,27 @@ class AbstractPackage:
     def gen_rules(self, out):
         pass
 
-    @abstractmethod
     def gen_install(self, out):
-        pass
+        startup_scripts = list(
+            {
+                x.startup_script
+                for x in self.systemd_units
+                if x.startup_script is not None
+            }
+        )
+        prestart_scripts = list(
+            {
+                x.prestart_script
+                for x in self.systemd_units
+                if x.prestart_script is not None
+            }
+        )
+        if len(startup_scripts + prestart_scripts) > 0:
+            install_contents = "\n".join(
+                [f"debian/{x} usr/bin" for x in startup_scripts + prestart_scripts]
+            )
+            with open(out, "w") as f:
+                f.write(install_contents)
 
     @abstractmethod
     def gen_postinst(self, out):
@@ -68,12 +85,10 @@ class AbstractPackage:
 
 def gen_spec_systemd_part(package):
     systemd_units = package.systemd_units
-    startup_scripts = list(set(map(lambda x: x.startup_script, systemd_units))) + list(
-        set(map(lambda x: x.prestart_script, systemd_units))
+    startup_scripts = list({x.startup_script for x in systemd_units}) + list(
+        {x.prestart_script for x in systemd_units}
     )
-    config_files = list(
-        filter(lambda x: x is not None, map(lambda x: x.config_file, systemd_units))
-    )
+    config_files = [x.config_file for x in systemd_units if x.config_file is not None]
     install_unit_files = ""
     systemd_unit_files = ""
     systemd_units_post = ""
@@ -285,27 +300,6 @@ install: {self.name}
         rules_contents = gen_systemd_rules_contents(self)
         with open(out, "w") as f:
             f.write(rules_contents)
-
-    def gen_install(self, out):
-        startup_scripts = list(
-            {
-                x.startup_script
-                for x in self.systemd_units
-                if x.startup_script is not None
-            }
-        )
-        prestart_scripts = list(
-            {
-                x.prestart_script
-                for x in self.systemd_units
-                if x.prestart_script is not None
-            }
-        )
-        install_contents = "\n".join(
-            map(lambda x: f"debian/{x} usr/bin", startup_scripts + prestart_scripts)
-        )
-        with open(out, "w") as f:
-            f.write(install_contents)
 
     def gen_postinst(self, out):
         postinst_contents = f"""#!/bin/sh
@@ -601,27 +595,6 @@ install: tezos-baking
         rules_contents = gen_systemd_rules_contents(self)
         with open(out, "w") as f:
             f.write(rules_contents)
-
-    def gen_install(self, out):
-        startup_scripts = list(
-            {
-                x.startup_script
-                for x in self.systemd_units
-                if x.startup_script is not None
-            }
-        )
-        prestart_scripts = list(
-            {
-                x.prestart_script
-                for x in self.systemd_units
-                if x.prestart_script is not None
-            }
-        )
-        install_contents = "\n".join(
-            map(lambda x: f"debian/{x} usr/bin", startup_scripts + prestart_scripts)
-        )
-        with open(out, "w") as f:
-            f.write(install_contents)
 
     def gen_license(self, out):
         shutil.copy(f"{os.path.dirname(__file__)}/../../LICENSE", out)

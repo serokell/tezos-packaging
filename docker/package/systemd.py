@@ -85,20 +85,18 @@ class SystemdUnit:
 
 
 def print_service_file(service_file: ServiceFile, out):
-    after = "".join(map(lambda x: f"After={x}\n", service_file.unit.after))
-    requires = "".join(map(lambda x: f"Requires={x}\n", service_file.unit.requires))
-    part_of = "".join(map(lambda x: f"PartOf={x}\n", service_file.unit.part_of))
+    after = "".join(f"After={x}\n" for x in service_file.unit.after)
+    requires = "".join(f"Requires={x}\n" for x in service_file.unit.requires)
+    part_of = "".join(f"PartOf={x}\n" for x in service_file.unit.part_of)
     environment = "".join(
-        map(lambda x: f'Environment="{x}"\n', service_file.service.environment)
+        f'Environment="{x}"\n' for x in service_file.service.environment
     )
     environment_file = (
         ""
         if service_file.service.environment_file is None
         else f"EnvironmentFile={service_file.service.environment_file}"
     )
-    wanted_by = "".join(
-        map(lambda x: f'WantedBy="{x}"\n', service_file.install.wanted_by)
-    )
+    wanted_by = "".join(f"WantedBy={x}\n" for x in service_file.install.wanted_by)
     exec_start_pres = (
         "\n".join(f"ExecStartPre={x}" for x in service_file.service.exec_start_pre)
         if service_file.service.exec_start_pre is not None

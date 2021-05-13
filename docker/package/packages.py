@@ -7,7 +7,7 @@ from .model import Service, ServiceFile, SystemdUnit, Unit, Install, OpamBasedPa
 
 networks = ["mainnet", "edo2net", "florencenet"]
 networks_protos = {
-    "mainnet": ["008-PtEdo2Zk", "009-PsFLoren"],
+    "mainnet": ["009-PsFLoren"],
     "edo2net": ["008-PtEdo2Zk"],
     "florencenet": ["009-PsFLoren"]
 }

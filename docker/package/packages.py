@@ -5,10 +5,9 @@ import os, shutil, sys, subprocess, json
 
 from .model import Service, ServiceFile, SystemdUnit, Unit, Install, OpamBasedPackage, TezosSaplingParamsPackage, TezosBakingServicesPackage
 
-networks = ["mainnet", "edo2net", "florencenet"]
+networks = ["mainnet", "florencenet"]
 networks_protos = {
     "mainnet": ["009-PsFLoren"],
-    "edo2net": ["008-PtEdo2Zk"],
     "florencenet": ["009-PsFLoren"]
 }
 

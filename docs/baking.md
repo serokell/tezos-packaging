@@ -29,8 +29,7 @@ with an image downloaded from the [official 64bit repository](https://downloads.
 In order to run a baking instance, you'll need the following Tezos binaries:
 `tezos-client`, `tezos-node`, `tezos-baker-<proto>`, `tezos-endorser-<proto>`.
 
-The currently supported protocols are `008-PtEdo2Zk` (used on `edo2net`)
-and `009-PsFLoren` (used on `florencenet` and `mainnet`).
+The currently supported protocol is `009-PsFLoren` (used on `florencenet` and `mainnet`).
 Also, note that the corresponding packages have protocol
 suffix in lowercase, e.g. the list of available baker packages can be found
 [here](https://launchpad.net/~serokell/+archive/ubuntu/tezos/+packages?field.name_filter=tezos-baker&field.status_filter=published).
@@ -251,8 +250,8 @@ multipass shell tezos
 
 1) Install `tezos-baking` package following [these instructions](#add-repository).
 
-2) Choose one of supported Tezos networks - `mainnet`, `florencenet` or
-`edo2net` by setting environment variable:
+2) Choose one of supported Tezos networks - `mainnet` or `florencenet` -
+by setting environment variable:
 
 ```
 tznet=florencenet

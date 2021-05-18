@@ -197,21 +197,6 @@ rec {
       postFixup = zcash-post-fixup o;
     });
 
-  tezos-accuser-008-PtEdo2Zk = osuper.tezos-accuser-008-PtEdo2Zk.overrideAttrs
-    (o: {
-      buildInputs = o.buildInputs ++ [ librustzcash self.makeWrapper ];
-      postFixup = zcash-post-fixup o;
-    });
-  tezos-baker-008-PtEdo2Zk = osuper.tezos-baker-008-PtEdo2Zk.overrideAttrs
-    (o: {
-      buildInputs = o.buildInputs ++ [ librustzcash self.makeWrapper ];
-      postFixup = zcash-post-fixup o;
-    });
-  tezos-endorser-008-PtEdo2Zk = osuper.tezos-endorser-008-PtEdo2Zk.overrideAttrs
-    (o: {
-      buildInputs = o.buildInputs ++ [ librustzcash self.makeWrapper ];
-      postFixup = zcash-post-fixup o;
-    });
   tezos-accuser-009-PsFLoren = osuper.tezos-accuser-009-PsFLoren.overrideAttrs
     (o: {
       buildInputs = o.buildInputs ++ [ librustzcash self.makeWrapper ];

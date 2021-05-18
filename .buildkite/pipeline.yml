@@ -84,7 +84,7 @@ steps:
    - eval "$SET_VERSION"
    # Building all binary packages will take significant amount of time, so we build only one
    # in order to ensure package generation sanity
-   - ./docker/docker-tezos-packages.sh --os ubuntu --type binary --package tezos-baker-008-PtEdo2Zk
+   - ./docker/docker-tezos-packages.sh --os ubuntu --type binary --package tezos-baker-009-PsFLoren
    - rm -rf out
    # It takes much time to build binary package, so we do it only on master
    branches: "master"
@@ -106,7 +106,7 @@ steps:
    - eval "$SET_VERSION"
    # Building all binary packages will take significant amount of time, so we build only one
    # in order to ensure package generation sanity
-   - ./docker/docker-tezos-packages.sh --os fedora --type binary --package tezos-baker-008-PtEdo2Zk
+   - ./docker/docker-tezos-packages.sh --os fedora --type binary --package tezos-baker-009-PsFLoren
    - rm -rf out
    # It takes much time to build binary package, so we do it only on master
    branches: "master"

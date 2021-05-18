@@ -13,6 +13,11 @@ steps:
  - label: crossref-verify
    command: "nix run -f https://github.com/serokell/crossref-verifier/archive/68a1f9d25b6e7835fea8299b18a3e6c61dbb2a5c.tar.gz -c crossref-verify"
    soft_fail: true
+ - label: pipeline-filtering
+   command: nix-shell .buildkite/shell.nix --run 'nix run -f . pkgs.bats -c ./tests/buildkite/filter-pipeline.bats'
+   only_changes:
+   - .buildkite/filter-pipeline.py
+   - tests/buildkite/.*
 
  - label: build via nix
    commands:

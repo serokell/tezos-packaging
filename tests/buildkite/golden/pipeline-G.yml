@@ -1,0 +1,29 @@
+steps:
+- label: A
+- depends_on:
+  - A
+  label: B
+- depends_on:
+  - A
+  label: C
+- depends_on:
+  - B
+  label: D
+- depends_on:
+  - C
+  label: E
+- depends_on:
+  - D
+  label: F
+  skip: skipped due to lack of changes
+- depends_on:
+  - E
+  - D
+  label: G
+- depends_on:
+  - E
+  label: H
+  skip: skipped due to lack of changes
+- depends_on:
+  - A
+  label: X

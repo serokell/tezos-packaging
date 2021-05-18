@@ -59,6 +59,10 @@ steps:
    agents:
      queue: "x86_64-darwin"
 
+ - label: test nixos modules
+   commands:
+   - nix-build tests/tezos-modules.nix --no-out-link
+
  # binaries built by docker are tested on the another machine,
  # so we should wait for docker build to finish
  - wait

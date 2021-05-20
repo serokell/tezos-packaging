@@ -1,0 +1,47 @@
+# SPDX-FileCopyrightText: 2021 TQ Tezos <https://tqtezos.com/>
+#
+# SPDX-License-Identifier: LicenseRef-MIT-TQ
+
+steps:
+  - label: A
+    only_changes:
+    - A
+  - label: B
+    depends_on:
+    - A
+    only_changes:
+    - B
+  - label: C
+    depends_on:
+    - A
+    only_changes:
+    - C
+  - label: D
+    depends_on:
+    - B
+    only_changes:
+    - B
+  - label: E
+    depends_on:
+    - C
+    only_changes:
+    - E
+  - label: F
+    depends_on:
+    - D
+    only_changes:
+    - F
+  - label: G
+    depends_on:
+    - E
+    - D
+    only_changes:
+    - G
+  - label: H
+    depends_on:
+    - E
+    only_changes:
+    - H
+  - label: X
+    depends_on:
+    - A

@@ -112,7 +112,7 @@ for step in steps:
         dfs(label, depends_on_dict_rev, visited_rev)
 
 for name in visited:
-   dfs(name, depends_on_dict_rev, visited_rev)
+    dfs(name, depends_on_dict_rev, visited_rev)
 
 for step in steps:
     label = step["label"]

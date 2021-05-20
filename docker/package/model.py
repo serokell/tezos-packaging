@@ -104,7 +104,7 @@ def gen_spec_systemd_part(package):
             service_name = "%{name}"
         else:
             service_name = f"%{{name}}-{systemd_unit.suffix}"
-        if len(systemd_unit.instances) > 0:
+        if systemd_unit.instances is not None:
             service_name = f"{service_name}@"
         install_unit_files += (
             f"install -m 644 {service_name}.service %{{buildroot}}/%{{_unitdir}}\n"
@@ -158,7 +158,7 @@ def gen_systemd_rules_contents(package):
     override_dh_install_init = "override_dh_installinit:\n"
     package_name = package.name.lower()
     for systemd_unit in package.systemd_units:
-        if len(systemd_unit.instances) == 0:
+        if systemd_unit.instances is None:
             if systemd_unit.suffix is not None:
                 unit_name = f"{package_name}-{systemd_unit.suffix}"
             else:

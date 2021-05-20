@@ -44,7 +44,7 @@ def build_ubuntu_package(
                 unit_name = f"{pkg_name}-{systemd_unit.suffix}"
             out_path = (
                 f"debian/{unit_name}@.service"
-                if len(systemd_unit.instances) > 0
+                if systemd_unit.instances is not None
                 else f"debian/{unit_name}.service"
             )
             print_service_file(systemd_unit.service_file, out_path)

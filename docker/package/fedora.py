@@ -33,7 +33,7 @@ def build_fedora_package(
             unit_name = f"{pkg.name}-{systemd_unit.suffix}"
         out_path = (
             f"{dir}/{unit_name}@.service"
-            if len(systemd_unit.instances) > 0
+            if systemd_unit.instances is not None
             else f"{dir}/{unit_name}.service"
         )
         print_service_file(systemd_unit.service_file, out_path)

@@ -70,6 +70,8 @@ def build_ubuntu_package(
                     else f"{cwd}/scripts/{systemd_unit.prestart_script_source}"
                 )
                 shutil.copy(source_path, dest_path)
+        with open("debian/compat", "w") as f:
+            f.write("9")
         pkg.gen_install("debian/install")
         pkg.gen_rules("debian/rules")
         pkg.gen_postinst("debian/postinst")

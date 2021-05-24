@@ -6,10 +6,11 @@
 # that are fixing https://github.com/LedgerHQ/udev-rules/issues/5, so that provided rules work on the Raspberry Pi OS
 # Ubuntu 18.04
 
-# Don't add udev rules in case the package is installed inside either docker or podman container.
+# Don't add udev rules in case the package is installed inside either docker or podman container
+# or WSL (since it doesn't fully support udev and libusb at the moment).
 # Otherwise, post-installation script will fail due to inability to non-zero exit code of the
 # 'udevadm control --reload-rules' call
-if [ ! -f /.dockerenv ] && [ ! -f /.containerenv ]; then
+if [ ! -f /.dockerenv ] && [ ! -f /.containerenv ] && ! grep -qEi "(Microsoft|WSL)" /proc/sys/kernel/osrelease ; then
     cat <<EOF > /etc/udev/rules.d/20-hw1.rules
 # HW.1 / Nano
 SUBSYSTEMS=="usb", ATTRS{idVendor}=="2581", ATTRS{idProduct}=="1b7c|2b7c|3b7c|4b7c", TAG+="uaccess", TAG+="udev-acl", MODE="0660", GROUP="plugdev"

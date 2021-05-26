@@ -74,20 +74,20 @@ def build_tree(steps):
     depends_on_dict = {}
     depends_on_dict_rev = {}
     for step in steps:
-        label = step["label"]
+        key = step["key"]
         depends_on = step.get("depends_on", None)
         if depends_on is not None:
             if type(depends_on) == str:
-                depends_on_dict.setdefault(depends_on, []).append(label)
-                depends_on_dict_rev.setdefault(label, []).append(depends_on)
+                depends_on_dict.setdefault(depends_on, []).append(key)
+                depends_on_dict_rev.setdefault(key, []).append(depends_on)
             else:
                 for dependency in depends_on:
                     if type(dependency) == str:
                         dependency_name = dependency
                     else:
                         dependency_name = dependency["step"]
-                    depends_on_dict.setdefault(dependency_name, []).append(label)
-                    depends_on_dict_rev.setdefault(label, []).append(dependency_name)
+                    depends_on_dict.setdefault(dependency_name, []).append(key)
+                    depends_on_dict_rev.setdefault(key, []).append(dependency_name)
     return depends_on_dict, depends_on_dict_rev
 
 
@@ -107,16 +107,16 @@ steps = [x for x in pipeline["steps"] if type(x) != str]
 depends_on_dict, depends_on_dict_rev = build_tree(steps)
 for step in steps:
     if check_step(step, splitted_diff):
-        label = step["label"]
-        dfs(label, depends_on_dict, visited)
-        dfs(label, depends_on_dict_rev, visited_rev)
+        key = step["key"]
+        dfs(key, depends_on_dict, visited)
+        dfs(key, depends_on_dict_rev, visited_rev)
 
 for name in visited:
     dfs(name, depends_on_dict_rev, visited_rev)
 
 for step in steps:
-    label = step["label"]
-    if (label not in visited) and (label not in visited_rev):
+    key = step["key"]
+    if (key not in visited) and (key not in visited_rev):
         step["skip"] = "skipped due to lack of changes"
 
 with open(args.output, "w") as f:

@@ -25,7 +25,7 @@ steps:
    commands:
    - nix-build ./nix -A binaries -o binaries
    branches: "!master"
- - key: test nix-built binaries
+ - key: test-nix-built binaries
    commands:
    - nix-build tests/tezos-nix-binaries.nix --no-out-link
    branches: "!master"

@@ -80,6 +80,9 @@ steps:
    commands:
    - nix-build tests/tezos-modules.nix --no-out-link
 
+ # build-arm-via-docker and build-via-docker artifacts are used in the subsequent steps
+ - wait
+
  - label: test docker-built binaries
    commands:
    - buildkite-agent artifact download "docker/*" . --step "build-via-docker"

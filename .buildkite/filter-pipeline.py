@@ -103,7 +103,7 @@ pipeline = load(open(args.pipeline, "r"), Loader=FullLoader)
 visited = set()
 visited_rev = set()
 
-steps = pipeline["steps"]
+steps = [x for x in pipeline["steps"] if type(x) != str]
 depends_on_dict, depends_on_dict_rev = build_tree(steps)
 for step in steps:
     if check_step(step, splitted_diff):

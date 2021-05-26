@@ -4,44 +4,53 @@
 
 steps:
   - label: A
+    key: A
     only_changes:
     - A
   - label: B
+    key: B
     depends_on:
     - A
     only_changes:
     - B
   - label: C
+    key: C
     depends_on:
     - A
     only_changes:
     - C
   - label: D
+    key: D
     depends_on:
     - B
     only_changes:
     - B
   - label: E
+    key: E
     depends_on:
     - C
     only_changes:
     - E
   - label: F
+    key: F
     depends_on:
     - D
     only_changes:
     - F
   - label: G
+    key: G
     depends_on:
     - E
     - D
     only_changes:
     - G
   - label: H
+    key: H
     depends_on:
     - E
     only_changes:
     - H
   - label: X
+    key: X
     depends_on:
     - A

@@ -6,14 +6,14 @@ env:
   SET_VERSION: "export TEZOS_VERSION=\"$(cat nix/nix/sources.json | jq -r '.tezos.ref' | cut -d'/' -f3)\""
 
 steps:
- - key: reuse lint
+ - key: reuse-lint
    command: nix run -f . pkgs.reuse -c reuse lint
- - key: check trailing whitespace
+ - key: check-trailing-whitespace
    command: .buildkite/check-trailing-whitespace.sh
  - key: crossref-verify
    command: "nix run -f https://github.com/serokell/crossref-verifier/archive/68a1f9d25b6e7835fea8299b18a3e6c61dbb2a5c.tar.gz -c crossref-verify"
    soft_fail: true
- - key: lint python code
+ - key: lint-python-code
    command: nix run -f . pkgs.python39Packages.black -c black --check --diff --color .
  - key: pipeline-filtering
    command: nix-shell .buildkite/shell.nix --run 'nix run -f . pkgs.bats -c ./tests/buildkite/filter-pipeline.bats'
@@ -21,7 +21,7 @@ steps:
    - .buildkite/filter-pipeline.py
    - tests/buildkite/.*
 
- - key: build via nix
+ - key: build-via-nix
    commands:
    - nix-build ./nix -A binaries -o binaries
    branches: "!master"
@@ -64,7 +64,7 @@ steps:
      queue: "arm64-build"
    only_changes: *static_binaries_changes_regexes
 
- - key: check brew formulas
+ - key: check-brew-formulas
    commands:
      # Check all formulas except 'tezos.rb' because it's a base class for all other formulas
      - find ./Formula -type f -name "*.rb" -exec ruby -c {} +
@@ -76,14 +76,14 @@ steps:
    only_changes:
    - Formula/.*.rb
 
- - key: test nixos modules
+ - key: test-nixos-modules
    commands:
    - nix-build tests/tezos-modules.nix --no-out-link
 
  # build-arm-via-docker and build-via-docker artifacts are used in the subsequent steps
  - wait
 
- - key: test docker-built binaries
+ - key: test-docker-built-binaries
    commands:
    - buildkite-agent artifact download "docker/*" . --step "build-via-docker"
    - chmod +x ./docker/*
@@ -97,7 +97,7 @@ steps:
    # files from nix/ are massively used in tests ifrastructure
    - nix/.*
 
- - key: test deb source packages via docker
+ - key: test-deb-source-packages-via-docker
    commands:
    - eval "$SET_VERSION"
    - ./docker/docker-tezos-packages.sh --os ubuntu --type source
@@ -113,7 +113,7 @@ steps:
    - meta.json
    - protocols.json
    - nix/nix/sources.json
- - key: test deb binary packages via docker
+ - key: test-deb-binary-packages-via-docker
    commands:
    - eval "$SET_VERSION"
    # Building all binary packages will take significant amount of time, so we build only one
@@ -126,7 +126,7 @@ steps:
    agents:
      queue: "docker"
    only_changes: *native_packaging_changes_regexes
- - key: test rpm source packages via docker
+ - key: test-rpm-source-packages-via-docker
    commands:
    - eval "$SET_VERSION"
    - ./docker/docker-tezos-packages.sh --os fedora --type source
@@ -137,7 +137,7 @@ steps:
    agents:
      queue: "docker"
    only_changes: *native_packaging_changes_regexes
- - key: test rpm binary packages via docker
+ - key: test-rpm-binary-packages-via-docker
    commands:
    - eval "$SET_VERSION"
    # Building all binary packages will take significant amount of time, so we build only one
@@ -151,7 +151,7 @@ steps:
      queue: "docker"
    only_changes: *native_packaging_changes_regexes
 
- - key: create auto pre-release
+ - key: create-auto-pre-release
    commands:
    - mkdir binaries
    - mkdir arm-binaries

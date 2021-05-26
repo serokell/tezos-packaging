@@ -70,7 +70,19 @@ def dfs(name, depends_on_dict, visited):
             dfs(adjacent, depends_on_dict, visited)
 
 
-def build_tree(steps):
+# Buildkite uses 'key' attribute to determine dependencies of steps.
+# Existing code uses 'label's when analyzing dependency tree, so that
+# it's possible to analyze reverse dependencies as well.
+# This function builds a dict that maps 'key's to 'label's
+def build_key_to_label(steps):
+    key_to_label = {}
+    for step in steps:
+        if "key" in step and "label" in step:
+            key_to_label[step["key"]] = step["label"]
+    return key_to_label
+
+
+def build_tree(steps, key_to_label):
     depends_on_dict = {}
     depends_on_dict_rev = {}
     for step in steps:
@@ -78,16 +90,20 @@ def build_tree(steps):
         depends_on = step.get("depends_on", None)
         if depends_on is not None:
             if type(depends_on) == str:
-                depends_on_dict.setdefault(depends_on, []).append(label)
-                depends_on_dict_rev.setdefault(label, []).append(depends_on)
+                # use 'label' from step assosiated with the given 'key'
+                dependency_label = key_to_label[depends_on]
+                depends_on_dict.setdefault(dependency_label, []).append(label)
+                depends_on_dict_rev.setdefault(label, []).append(dependency_label)
             else:
                 for dependency in depends_on:
                     if type(dependency) == str:
                         dependency_name = dependency
                     else:
                         dependency_name = dependency["step"]
-                    depends_on_dict.setdefault(dependency_name, []).append(label)
-                    depends_on_dict_rev.setdefault(label, []).append(dependency_name)
+                    # use 'label' from step assosiated with the given 'key'
+                    dependency_label = key_to_label[dependency_name]
+                    depends_on_dict.setdefault(dependency_label, []).append(label)
+                    depends_on_dict_rev.setdefault(label, []).append(dependency_label)
     return depends_on_dict, depends_on_dict_rev
 
 
@@ -104,7 +120,8 @@ visited = set()
 visited_rev = set()
 
 steps = pipeline["steps"]
-depends_on_dict, depends_on_dict_rev = build_tree(steps)
+key_to_label = build_key_to_label(steps)
+depends_on_dict, depends_on_dict_rev = build_tree(steps, key_to_label)
 for step in steps:
     if check_step(step, splitted_diff):
         label = step["label"]

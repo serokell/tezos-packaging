@@ -1,29 +1,38 @@
 steps:
-- label: A
+- key: A
+  label: A
 - depends_on:
   - A
+  key: B
   label: B
 - depends_on:
   - A
+  key: C
   label: C
 - depends_on:
   - B
+  key: D
   label: D
 - depends_on:
   - C
+  key: E
   label: E
 - depends_on:
   - D
+  key: F
   label: F
   skip: skipped due to lack of changes
 - depends_on:
   - E
   - D
+  key: G
   label: G
 - depends_on:
   - E
+  key: H
   label: H
   skip: skipped due to lack of changes
 - depends_on:
   - A
+  key: X
   label: X

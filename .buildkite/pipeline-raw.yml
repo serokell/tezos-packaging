@@ -32,6 +32,8 @@ steps:
    # nix builds are usually cached, so we don't care about only_changes setting for it
 
  - label: build-via-docker
+   # this step is used as a dependency, so we're defining 'key' explicitely
+   key: build-via-docker
    commands:
    - eval "$SET_VERSION"
    - cd docker
@@ -49,6 +51,8 @@ steps:
    - nix/nix/sources.json
  # arm builer is an ubuntu machine without nix
  - label: build-arm-via-docker
+   # this step is used as a dependency, so we're defining 'key' explicitely
+   key: build-arm-via-docker
    commands:
    - eval "$SET_VERSION"
    - cd docker

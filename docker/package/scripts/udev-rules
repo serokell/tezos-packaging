@@ -28,4 +28,5 @@ EOF
 
     udevadm trigger
     udevadm control --reload-rules
+    usermod -a -G plugdev tezos || true
 fi

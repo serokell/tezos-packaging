@@ -9,7 +9,9 @@ with lib;
 let
   tezos-endorser-pkgs = {
     "009-PsFLoren" =
-      "${pkgs.ocamlPackages.tezos-baker-009-PsFLoren}/bin/tezos-baker-009-PsFLoren";
+      "${pkgs.ocamlPackages.tezos-endorser-009-PsFLoren}/bin/tezos-endorser-009-PsFLoren";
+    "010-PtGRANAD" =
+      "${pkgs.ocamlPackages.tezos-endorser-010-PtGRANAD}/bin/tezos-endorser-010-PtGRANAD";
   };
   common = import ./common.nix { inherit lib; inherit pkgs; };
   cfg = config.services.tezos-endorser;
@@ -18,11 +20,11 @@ let
 
       enable = mkEnableOption "Tezos endorser service";
 
-      bakerAccountAlias = mkOption {
+      endorserAccountAlias = mkOption {
         type = types.str;
         default = "";
         description = ''
-          Alias for the tezos-baker account.
+          Alias for the tezos-endorser account.
         '';
       };
 
@@ -41,7 +43,7 @@ in {
     let endorser-script = node-cfg: ''
         ${tezos-endorser-pkgs.${node-cfg.baseProtocol}} -d "$STATE_DIRECTORY/client/data" \
         -E "http://localhost:${toString node-cfg.rpcPort}" \
-        run with local node "$STATE_DIRECTORY/node/data" ${node-cfg.bakerAccountAlias}
+        run ${node-cfg.endorserAccountAlias}
       '';
     in common.genDaemonConfig cfg.instances "endorser" tezos-endorser-pkgs endorser-script;
 }

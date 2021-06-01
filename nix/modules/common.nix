@@ -22,10 +22,10 @@ rec {
   daemonOptions = sharedOptions // {
 
     baseProtocol = mkOption {
-      type = types.enum [ "009-PsFLoren"];
+      type = types.enum [ "009-PsFLoren" "010-PtGRANAD"];
       description = ''
         Base protocol version,
-        only '009-PsFLoren' is supported.
+        '009-PsFLoren' and '010-PtGRANAD' are supported.
       '';
       example = "009-PsFLoren";
     };

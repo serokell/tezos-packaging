@@ -60,7 +60,12 @@ build_deps = [
 ]
 common_deps = run_deps + build_deps
 
-ubuntu_versions = ["bionic", "focal", "groovy"]  # 18.04  # 20.04  # 20.10
+ubuntu_versions = [
+    "bionic",  # 18.04
+    "focal",  # 20.04
+    "groovy",  # 20.10
+    "hirsute",  # 21.04
+]
 
 pwd = os.getcwd()
 home = os.environ["HOME"]

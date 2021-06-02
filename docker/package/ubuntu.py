@@ -76,7 +76,7 @@ def build_ubuntu_package(
         pkg.gen_rules("debian/rules")
         pkg.gen_postinst("debian/postinst")
         pkg.gen_postrm("debian/postrm")
-        pkg.gen_control_file(build_deps, "debian/control")
+        pkg.gen_control_file(build_deps, ubuntu_version, "debian/control")
         pkg.gen_license("debian/copyright")
         subprocess.run(
             "rm debian/*.ex debian/*.EX debian/README*", shell=True, check=True

@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: LicenseRef-MIT-TQ
 
-class TezosAccuser009Psfloren < Formula
+class TezosAccuser010Ptgranad < Formula
   @all_bins = []
 
   class << self
@@ -26,7 +26,7 @@ class TezosAccuser009Psfloren < Formula
   desc "Daemon for accusing"
 
   bottle do
-    root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosAccuser009Psfloren.version}/"
+    root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosAccuser010Ptgranad.version}/"
   end
 
   def make_deps
@@ -51,7 +51,7 @@ class TezosAccuser009Psfloren < Formula
 
       set -euo pipefail
 
-      accuser="#{bin}/tezos-accuser-009-PsFLoren"
+      accuser="#{bin}/tezos-accuser-010-PtGRANAD"
 
       accuser_dir="$DATA_DIR"
 
@@ -72,15 +72,15 @@ class TezosAccuser009Psfloren < Formula
           --endpoint "$NODE_RPC_ENDPOINT" \
           run
     EOS
-    File.write("tezos-accuser-009-PsFLoren-start", startup_contents)
-    bin.install "tezos-accuser-009-PsFLoren-start"
+    File.write("tezos-accuser-010-PtGRANAD-start", startup_contents)
+    bin.install "tezos-accuser-010-PtGRANAD-start"
     make_deps
-    install_template "src/proto_009_PsFLoren/bin_accuser/main_accuser_009_PsFLoren.exe",
-                     "_build/default/src/proto_009_PsFLoren/bin_accuser/main_accuser_009_PsFLoren.exe",
-                     "tezos-accuser-009-PsFLoren"
+    install_template "src/proto_010_PtGRANAD/bin_accuser/main_accuser_010_PtGRANAD.exe",
+                     "_build/default/src/proto_010_PtGRANAD/bin_accuser/main_accuser_010_PtGRANAD.exe",
+                     "tezos-accuser-010-PtGRANAD"
   end
 
-  plist_options manual: "tezos-accuser-009-PsFLoren run"
+  plist_options manual: "tezos-accuser-010-PtGRANAD run"
   def plist
     <<~EOS
       <?xml version="1.0" encoding="UTF-8"?>
@@ -91,7 +91,7 @@ class TezosAccuser009Psfloren < Formula
           <key>Label</key>
           <string>#{plist_name}</string>
           <key>Program</key>
-          <string>#{opt_bin}/tezos-accuser-009-PsFLoren-start</string>
+          <string>#{opt_bin}/tezos-accuser-010-PtGRANAD-start</string>
           <key>EnvironmentVariables</key>
             <dict>
               <key>DATA_DIR</key>

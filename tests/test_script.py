@@ -86,6 +86,9 @@ def test_node_with_daemons_scenario(network, use_tls=False):
 with subtest("run node with daemons on florencenet"):
     test_node_with_daemons_scenario("florencenet")
 
+with subtest("run node with daemons on granadanet"):
+    test_node_with_daemons_scenario("granadanet")
+
 with subtest("run node with daemons on mainnet"):
     test_node_with_daemons_scenario("mainnet")
 

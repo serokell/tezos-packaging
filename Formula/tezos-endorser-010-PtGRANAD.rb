@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: LicenseRef-MIT-TQ
 
-class TezosAccuser009Psfloren < Formula
+class TezosEndorser010Ptgranad < Formula
   @all_bins = []
 
   class << self
@@ -23,10 +23,11 @@ class TezosAccuser009Psfloren < Formula
   dependencies.each do |dependency|
     depends_on dependency
   end
-  desc "Daemon for accusing"
+
+  desc "Daemon for endorsing"
 
   bottle do
-    root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosAccuser009Psfloren.version}/"
+    root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosEndorser010Ptgranad.version}/"
   end
 
   def make_deps
@@ -44,6 +45,7 @@ class TezosAccuser009Psfloren < Formula
     bin.install name
   end
 
+
   def install
     startup_contents =
       <<~EOS
@@ -51,36 +53,44 @@ class TezosAccuser009Psfloren < Formula
 
       set -euo pipefail
 
-      accuser="#{bin}/tezos-accuser-009-PsFLoren"
+      endorser="#{bin}/tezos-endorser-010-PtGRANAD"
 
-      accuser_dir="$DATA_DIR"
+      endorser_dir="$DATA_DIR"
 
-      accuser_config="$accuser_dir/config"
-      mkdir -p "$accuser_dir"
+      endorser_config="$endorser_dir/config"
+      mkdir -p "$endorser_dir"
 
-      if [ ! -f "$accuser_config" ]; then
-          "$accuser" --base-dir "$accuser_dir" \
-                    --endpoint "$NODE_RPC_ENDPOINT" \
-                    config init --output "$accuser_config" >/dev/null 2>&1
+      if [ ! -f "$endorser_config" ]; then
+          "$endorser" --base-dir "$endorser_dir" \
+                      --endpoint "$NODE_RPC_ENDPOINT" \
+                      config init --output "$endorser_config" >/dev/null 2>&1
       else
-          "$accuser" --base-dir "$accuser_dir" \
-                    --endpoint "$NODE_RPC_ENDPOINT" \
-                    config update >/dev/null 2>&1
+          "$endorser" --base-dir "$endorser_dir" \
+                      --endpoint "$NODE_RPC_ENDPOINT" \
+                      config update >/dev/null 2>&1
       fi
 
-      exec "$accuser" --base-dir "$accuser_dir" \
-          --endpoint "$NODE_RPC_ENDPOINT" \
-          run
+      launch_endorser() {
+          exec "$endorser" --base-dir "$endorser_dir" \
+              --endpoint "$NODE_RPC_ENDPOINT" \
+              run "$@"
+      }
+
+      if [[ -z "$ENDORSER_ACCOUNT" ]]; then
+          launch_endorser
+      else
+          launch_endorser "$ENDORSER_ACCOUNT"
+      fi
     EOS
-    File.write("tezos-accuser-009-PsFLoren-start", startup_contents)
-    bin.install "tezos-accuser-009-PsFLoren-start"
+    File.write("tezos-endorser-010-PtGRANAD-start", startup_contents)
+    bin.install "tezos-endorser-010-PtGRANAD-start"
     make_deps
-    install_template "src/proto_009_PsFLoren/bin_accuser/main_accuser_009_PsFLoren.exe",
-                     "_build/default/src/proto_009_PsFLoren/bin_accuser/main_accuser_009_PsFLoren.exe",
-                     "tezos-accuser-009-PsFLoren"
+    install_template "src/proto_010_PtGRANAD/bin_endorser/main_endorser_010_PtGRANAD.exe",
+                     "_build/default/src/proto_010_PtGRANAD/bin_endorser/main_endorser_010_PtGRANAD.exe",
+                     "tezos-endorser-010-PtGRANAD"
   end
 
-  plist_options manual: "tezos-accuser-009-PsFLoren run"
+  plist_options manual: "tezos-endorser-010-PtGRANAD run"
   def plist
     <<~EOS
       <?xml version="1.0" encoding="UTF-8"?>
@@ -91,13 +101,15 @@ class TezosAccuser009Psfloren < Formula
           <key>Label</key>
           <string>#{plist_name}</string>
           <key>Program</key>
-          <string>#{opt_bin}/tezos-accuser-009-PsFLoren-start</string>
+          <string>#{opt_bin}/tezos-endorser-010-PtGRANAD-start</string>
           <key>EnvironmentVariables</key>
             <dict>
               <key>DATA_DIR</key>
               <string>#{var}/lib/tezos/client</string>
               <key>NODE_RPC_ENDPOINT</key>
               <string>http://localhost:8732</string>
+              <key>ENDORSER_ACCOUNT</key>
+              <string></string>
           </dict>
           <key>RunAtLoad</key><true/>
           <key>StandardOutPath</key>

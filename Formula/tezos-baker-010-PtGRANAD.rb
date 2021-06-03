@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: LicenseRef-MIT-TQ
 
-class TezosAccuser009Psfloren < Formula
+class TezosBaker010Ptgranad < Formula
   @all_bins = []
 
   class << self
@@ -19,14 +19,14 @@ class TezosAccuser009Psfloren < Formula
     depends_on dependency => :build
   end
 
-  dependencies = %w[gmp hidapi libev libffi]
+  dependencies = %w[gmp hidapi libev libffi tezos-sapling-params]
   dependencies.each do |dependency|
     depends_on dependency
   end
-  desc "Daemon for accusing"
+  desc "Daemon for baking"
 
   bottle do
-    root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosAccuser009Psfloren.version}/"
+    root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosBaker010Ptgranad.version}/"
   end
 
   def make_deps
@@ -51,36 +51,43 @@ class TezosAccuser009Psfloren < Formula
 
       set -euo pipefail
 
-      accuser="#{bin}/tezos-accuser-009-PsFLoren"
+      baker="#{bin}/tezos-baker-010-PtGRANAD"
 
-      accuser_dir="$DATA_DIR"
+      baker_dir="$DATA_DIR"
 
-      accuser_config="$accuser_dir/config"
-      mkdir -p "$accuser_dir"
+      baker_config="$baker_dir/config"
+      mkdir -p "$baker_dir"
 
-      if [ ! -f "$accuser_config" ]; then
-          "$accuser" --base-dir "$accuser_dir" \
-                    --endpoint "$NODE_RPC_ENDPOINT" \
-                    config init --output "$accuser_config" >/dev/null 2>&1
+      if [ ! -f "$baker_config" ]; then
+          "$baker" --base-dir "$baker_dir" \
+                  --endpoint "$NODE_RPC_ENDPOINT" \
+                  config init --output "$baker_config" >/dev/null 2>&1
       else
-          "$accuser" --base-dir "$accuser_dir" \
-                    --endpoint "$NODE_RPC_ENDPOINT" \
-                    config update >/dev/null 2>&1
+          "$baker" --base-dir "$baker_dir" \
+                  --endpoint "$NODE_RPC_ENDPOINT" \
+                  config update >/dev/null 2>&1
       fi
 
-      exec "$accuser" --base-dir "$accuser_dir" \
-          --endpoint "$NODE_RPC_ENDPOINT" \
-          run
-    EOS
-    File.write("tezos-accuser-009-PsFLoren-start", startup_contents)
-    bin.install "tezos-accuser-009-PsFLoren-start"
-    make_deps
-    install_template "src/proto_009_PsFLoren/bin_accuser/main_accuser_009_PsFLoren.exe",
-                     "_build/default/src/proto_009_PsFLoren/bin_accuser/main_accuser_009_PsFLoren.exe",
-                     "tezos-accuser-009-PsFLoren"
-  end
+      launch_baker() {
+          exec "$baker" \
+              --base-dir "$baker_dir" --endpoint "$NODE_RPC_ENDPOINT" \
+              run with local node "$NODE_DATA_DIR" "$@"
+      }
 
-  plist_options manual: "tezos-accuser-009-PsFLoren run"
+      if [[ -z "$BAKER_ACCOUNT" ]]; then
+          launch_baker
+      else
+          launch_baker "$BAKER_ACCOUNT"
+      fi
+    EOS
+    File.write("tezos-baker-010-PtGRANAD-start", startup_contents)
+    bin.install "tezos-baker-010-PtGRANAD-start"
+    make_deps
+    install_template "src/proto_010_PtGRANAD/bin_baker/main_baker_010_PtGRANAD.exe",
+                     "_build/default/src/proto_010_PtGRANAD/bin_baker/main_baker_010_PtGRANAD.exe",
+                     "tezos-baker-010-PtGRANAD"
+  end
+  plist_options manual: "tezos-baker-010-PtGRANAD run with local node"
   def plist
     <<~EOS
       <?xml version="1.0" encoding="UTF-8"?>
@@ -91,13 +98,17 @@ class TezosAccuser009Psfloren < Formula
           <key>Label</key>
           <string>#{plist_name}</string>
           <key>Program</key>
-          <string>#{opt_bin}/tezos-accuser-009-PsFLoren-start</string>
+          <string>#{opt_bin}/tezos-baker-010-PtGRANAD-start</string>
           <key>EnvironmentVariables</key>
             <dict>
               <key>DATA_DIR</key>
               <string>#{var}/lib/tezos/client</string>
+              <key>NODE_DATA_DIR</key>
+              <string></string>
               <key>NODE_RPC_ENDPOINT</key>
               <string>http://localhost:8732</string>
+              <key>BAKER_ACCOUNT</key>
+              <string></string>
           </dict>
           <key>RunAtLoad</key><true/>
           <key>StandardOutPath</key>

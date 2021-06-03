@@ -9,7 +9,9 @@ with lib;
 let
   tezos-accuser-pkgs = {
     "009-PsFLoren" =
-      "${pkgs.ocamlPackages.tezos-baker-009-PsFLoren}/bin/tezos-baker-009-PsFLoren";
+      "${pkgs.ocamlPackages.tezos-accuser-009-PsFLoren}/bin/tezos-accuser-009-PsFLoren";
+    "010-PtGRANAD" =
+      "${pkgs.ocamlPackages.tezos-accuser-010-PtGRANAD}/bin/tezos-accuser-010-PtGRANAD";
   };
   cfg = config.services.tezos-accuser;
   common = import ./common.nix { inherit lib; inherit pkgs; };
@@ -33,7 +35,7 @@ in {
     let accuser-script = node-cfg: ''
         ${tezos-accuser-pkgs.${node-cfg.baseProtocol}} -d "$STATE_DIRECTORY/client/data" \
         -E "http://localhost:${toString node-cfg.rpcPort}" \
-        run with local node "$STATE_DIRECTORY/node/data" "$@"
+        run "$@"
       '';
     in common.genDaemonConfig cfg.instances "accuser" tezos-accuser-pkgs accuser-script;
 }

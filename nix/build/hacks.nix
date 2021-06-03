@@ -185,6 +185,11 @@ rec {
       buildInputs = o.buildInputs ++ [ librustzcash ];
       XDG_DATA_DIRS = "${zcash-params}:$XDG_DATA_DIRS";
     });
+  tezos-protocol-010-PtGRANAD-parameters = osuper.tezos-protocol-010-PtGRANAD-parameters.overrideAttrs
+    (o: rec {
+      buildInputs = o.buildInputs ++ [ librustzcash ];
+      XDG_DATA_DIRS = "${zcash-params}:$XDG_DATA_DIRS";
+    });
 
   # FIXME apply this patch upstream
   tezos-stdlib-unix = osuper.tezos-stdlib-unix.overrideAttrs
@@ -208,6 +213,21 @@ rec {
       postFixup = zcash-post-fixup o;
     });
   tezos-endorser-009-PsFLoren = osuper.tezos-endorser-009-PsFLoren.overrideAttrs
+    (o: {
+      buildInputs = o.buildInputs ++ [ librustzcash self.makeWrapper ];
+      postFixup = zcash-post-fixup o;
+    });
+  tezos-accuser-010-PtGRANAD = osuper.tezos-accuser-010-PtGRANAD.overrideAttrs
+    (o: {
+      buildInputs = o.buildInputs ++ [ librustzcash self.makeWrapper ];
+      postFixup = zcash-post-fixup o;
+    });
+  tezos-baker-010-PtGRANAD = osuper.tezos-baker-010-PtGRANAD.overrideAttrs
+    (o: {
+      buildInputs = o.buildInputs ++ [ librustzcash self.makeWrapper ];
+      postFixup = zcash-post-fixup o;
+    });
+  tezos-endorser-010-PtGRANAD = osuper.tezos-endorser-010-PtGRANAD.overrideAttrs
     (o: {
       buildInputs = o.buildInputs ++ [ librustzcash self.makeWrapper ];
       postFixup = zcash-post-fixup o;

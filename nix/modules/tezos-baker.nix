@@ -10,6 +10,8 @@ let
   tezos-baker-pkgs = {
     "009-PsFLoren" =
       "${pkgs.ocamlPackages.tezos-baker-009-PsFLoren}/bin/tezos-baker-009-PsFLoren";
+    "010-PtGRANAD" =
+      "${pkgs.ocamlPackages.tezos-baker-010-PtGRANAD}/bin/tezos-baker-010-PtGRANAD";
   };
   cfg = config.services.tezos-baker;
   common = import ./common.nix { inherit lib; inherit pkgs; };
@@ -18,11 +20,11 @@ let
 
       enable = mkEnableOption "Tezos baker service";
 
-      endorserAccountAlias = mkOption {
+      bakerAccountAlias = mkOption {
         type = types.str;
         default = "";
         description = ''
-          Alias for the tezos-endorser account.
+          Alias for the tezos-baker account.
         '';
       };
 
@@ -41,7 +43,7 @@ in {
     let baker-script = node-cfg: ''
         ${tezos-baker-pkgs.${node-cfg.baseProtocol}} -d "$STATE_DIRECTORY/client/data" \
         -E "http://localhost:${toString node-cfg.rpcPort}" \
-        run with local node "$STATE_DIRECTORY/node/data" ${node-cfg.endorserAccountAlias}
+        run with local node "$STATE_DIRECTORY/node/data" ${node-cfg.bakerAccountAlias}
       '';
     in common.genDaemonConfig cfg.instances "baker" tezos-baker-pkgs baker-script;
 }

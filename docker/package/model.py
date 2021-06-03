@@ -215,7 +215,7 @@ class OpamBasedPackage(AbstractPackage):
         subprocess.run(["tar", "-zxf", f"{opam_package}-bundle.tar.gz"], check=True)
         os.rename(f"{opam_package}-bundle", out_dir)
 
-    def gen_control_file(self, deps, out):
+    def gen_control_file(self, deps, ubuntu_version, out):
         str_build_deps = ", ".join(deps)
         str_additional_native_deps = ", ".join(self.additional_native_deps)
         file_contents = f"""
@@ -223,7 +223,7 @@ Source: {self.name.lower()}
 Section: utils
 Priority: optional
 Maintainer: {self.meta.maintainer}
-Build-Depends: debhelper (>=9), dh-systemd (>= 1.5), autotools-dev, {str_build_deps}
+Build-Depends: debhelper (>=9), {"dh-systemd (>= 1.5), " if ubuntu_version != "hirsute" else ""} autotools-dev, {str_build_deps}
 Standards-Version: 3.9.6
 Homepage: https://gitlab.com/tezos/tezos/
 
@@ -367,13 +367,13 @@ class TezosSaplingParamsPackage(AbstractPackage):
             ]
         )
 
-    def gen_control_file(self, deps, out):
+    def gen_control_file(self, deps, ubuntu_version, out):
         file_contents = f"""
 Source: {self.name}
 Section: utils
 Priority: optional
 Maintainer: {self.meta.maintainer}
-Build-Depends: debhelper (>=9), dh-systemd (>= 1.5), autotools-dev, wget
+Build-Depends: debhelper (>=9), {"dh-systemd (>= 1.5), " if ubuntu_version != "hirsute" else ""} autotools-dev, wget
 Standards-Version: 3.9.6
 Homepage: https://gitlab.com/tezos/tezos/
 
@@ -503,7 +503,7 @@ class TezosBakingServicesPackage(AbstractPackage):
     def fetch_sources(self, out_dir):
         os.makedirs(out_dir)
 
-    def gen_control_file(self, deps, out):
+    def gen_control_file(self, deps, ubuntu_version, out):
         run_deps = ", ".join(
             ["acl", "tezos-client", "tezos-node"]
             + sum(
@@ -522,7 +522,7 @@ Source: {self.name}
 Section: utils
 Priority: optional
 Maintainer: {self.meta.maintainer}
-Build-Depends: debhelper (>=9), dh-systemd (>= 1.5), autotools-dev
+Build-Depends: debhelper (>=9), {"dh-systemd (>= 1.5), " if ubuntu_version != "hirsute" else ""} autotools-dev
 Standards-Version: 3.9.6
 Homepage: https://gitlab.com/tezos/tezos/
 

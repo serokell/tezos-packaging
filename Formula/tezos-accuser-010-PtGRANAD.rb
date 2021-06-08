@@ -27,6 +27,8 @@ class TezosAccuser010Ptgranad < Formula
 
   bottle do
     root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosAccuser010Ptgranad.version}/"
+    sha256 cellar: :any, mojave: "ae671f1f843bbd2f6b2a384526f76e8a496bd076217cd85bc2b2726716531118"
+    sha256 cellar: :any, catalina: "fc41f5475855cc3032afc6ee7ba3ef969d2db41394d0bf4ef8a1cc5dc04ff1cd"
   end
 
   def make_deps

@@ -13,6 +13,9 @@ interacting with the Tezos blockchain.
 This article provides a step-by-step guide for setting up a baking instance for
 Tezos on Ubuntu or Raspberry Pi OS.
 
+However, a CLI wizard utility is provided for an easy, interactive setup.
+It is the recommended way at the moment to set up a baking instance.
+
 ## Prerequisites
 
 ### Raspberry Pi system
@@ -29,7 +32,8 @@ with an image downloaded from the [official 64bit repository](https://downloads.
 In order to run a baking instance, you'll need the following Tezos binaries:
 `tezos-client`, `tezos-node`, `tezos-baker-<proto>`, `tezos-endorser-<proto>`.
 
-The currently supported protocol is `009-PsFLoren` (used on `florencenet` and `mainnet`).
+The currently supported protocols are `009-PsFLoren` (used on `florencenet` and `mainnet`)
+and `010-PtGRANAD` (used on `granadanet`).
 Also, note that the corresponding packages have protocol
 suffix in lowercase, e.g. the list of available baker packages can be found
 [here](https://launchpad.net/~serokell/+archive/ubuntu/tezos/+packages?field.name_filter=tezos-baker&field.status_filter=published).
@@ -37,6 +41,10 @@ suffix in lowercase, e.g. the list of available baker packages can be found
 The most convenient way to orchestrate all these binaries is to use the `tezos-baking`
 package, which provides predefined services for running baking instances on different
 networks.
+
+This package also provides a `tezos-setup-wizard` CLI utility, designed to
+query all necessary configuration options and use the answers to automatically set up
+a baking instance.
 
 #### Add repository
 
@@ -67,6 +75,17 @@ sudo apt-get install tezos-baking
 Packages for `tezos-node`, `tezos-baker-<proto>` and `tezos-endorser-<proto>` provide
 systemd units for running the corresponding binaries in the background, these units
 are orchestrated by the `tezos-baking-<network>` units.
+
+## Using the wizard
+
+If at this point you want to set up the baking instance, or just a node, using the wizard, run:
+
+```
+tezos-setup-wizard
+```
+
+This wizard closely follows this guide, so for most setups it won't be necessary to follow
+the rest of this guide.
 
 ## Setting up baking service
 
@@ -131,13 +150,13 @@ the key:
 
 1) The secret key is stored on a ledger.
 
-Open the Tezos Wallet app on your ledger and run the following
+Open the Tezos Baking app on your ledger and run the following
 to import the key:
 ```
 sudo -u tezos tezos-client import secret key baker <ledger-url>
 ```
-Apart from importing the key, you'll also need to set it up for baking. Open Tezos Baking app
-on your ledger and run the following:
+Apart from importing the key, you'll also need to set it up for baking. Open the Tezos
+Baking app on your ledger and run the following:
 ```
 sudo -u tezos tezos-client setup ledger to bake for baker
 ```
@@ -158,8 +177,9 @@ sudo -u tezos tezos-client activate account baker with <path-to-downloaded-json>
 
 <a name="registration"></a>
 ### Registering the baker
-Once the key is imported, you'll need to register your baker, in order to do that run the following
-command:
+Once the key is imported, you'll need to register your baker. If you imported your key
+using a ledger, open a Tezos Wallet or Tezos Baking app on your ledger again. In any
+case, run the following command:
 ```
 sudo -u tezos tezos-client register key baker as delegate
 ```
@@ -250,28 +270,7 @@ multipass shell tezos
 
 1) Install `tezos-baking` package following [these instructions](#add-repository).
 
-2) Choose one of supported Tezos networks - `mainnet` or `florencenet` -
-by setting environment variable:
-
-```
-tznet=florencenet
-```
-
-3) Initialize Tezos node from a snapshot and start node service:
-
-```
-snapshot_file=/tmp/tezos-$tznet.rolling
-snapshot_url=https://$tznet.xtz-shots.io/rolling
-wget $snapshot_url -O $snapshot_file
-sudo -u tezos tezos-node-$tznet snapshot import $snapshot_file
-sudo systemctl start tezos-node-$tznet
-```
-
-If all you want is to run the Tezos node, enable the service and stop here:
-
-```
-sudo systemctl enable tezos-node-$tznet
-```
+2) Run `tezos-setup-wizard` and follow the instructions there.
 
 <details>
  <summary>
@@ -299,17 +298,3 @@ sudo systemctl restart tezos-node-$tznet
 ```
 
 </details>
-
-4) Set up baking:
-
-```bash
-secret_key="..." #encrypted or plain secret key, ledger uri or remote signer URL
-sudo -u tezos tezos-client import secret key baker $secret_key
-sudo systemctl start tezos-baking-$tznet
-sudo systemctl enable tezos-baking-$tznet
-
-#register your baker after node syncs with the network
-sudo -u tezos tezos-client bootstrapped && \
-sudo -u tezos tezos-client register key baker as delegate
-
-```

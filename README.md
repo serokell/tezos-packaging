@@ -20,10 +20,10 @@ This repo provides various form of distribution for tezos-related executables:
 * `tezos-sandbox`
 
 Daemon binaries (as well as packages for them) have suffix that defines their target protocol,
-e.g. `tezos-baker-007-PsDELPH1` can be used only on the chain with 007 protocol.
+e.g. `tezos-baker-010-PtGRANAD` can be used only on the chain with 010 protocol.
 
 Other binaries can be used with all protocols if they're new enough. E.g.
-007 protocol is supported only from `v7.4`. `tezos-node` can be set up to run
+010 protocol is supported only from `v9.2`. `tezos-node` can be set up to run
 different networks, you can read more about this in [this article](https://tezos.gitlab.io/user/multinetwork.html).
 
 ## Table of contents
@@ -60,7 +60,7 @@ sudo add-apt-repository ppa:serokell/tezos && sudo apt-get update
 sudo apt-get install tezos-client
 # dpkg-source prohibits uppercase in the packages names so the protocol
 # name is in lowercase
-sudo apt-get install tezos-baker-007-psdelph1
+sudo apt-get install tezos-baker-010-ptgranad
 ```
 Once you install such packages the commands `tezos-*` will be available.
 
@@ -95,11 +95,11 @@ E.g. in order to install `tezos-client` or `tezos-baker` run the following comma
 # use dnf
 sudo dnf copr enable @Serokell/Tezos
 sudo dnf install tezos-client
-sudo dnf install tezos-baker-007-PsDELPH1
+sudo dnf install tezos-baker-010-PtGRANAD
 
 # or use yum
 sudo yum copr enable @Serokell/Tezos
-sudo yum install tezos-baker-007-PsDELPH1
+sudo yum install tezos-baker-010-PtGRANAD
 ```
 Once you install such packages the commands `tezos-*` will be available.
 
@@ -222,13 +222,13 @@ from scratch.
 For this you'll need `.service` file to define systemd service. The easiest way
 to get one is to run [`gen_systemd_service_file.py`](gen_systemd_service_file.py).
 You should specify service name as an argument. Note that there are three
-predefined services for `tezos-node`: `tezos-node-{mainnet, delphinet}`.
+predefined services for `tezos-node`: `tezos-node-{mainnet, florencenet, granadanet}`.
 
 E.g.:
 ```
 ./gen_systemd_service_file.py tezos-node-mainnet
 # or
-./gen_systemd_service_file.py tezos-baker-007-PsDELPH1
+./gen_systemd_service_file.py tezos-baker-010-PtGRANAD
 ```
 After that you'll have `.service` file in the current directory.
 
@@ -243,8 +243,8 @@ It's possible to run multiple same services, e.g. two `tezos-node`s that run dif
 networks.
 
 `tezos-node` packages provide multiple services out of the box:
-`tezos-node-florencenet` and `tezos-node-mainnet` that run
-`florencenet` and `mainnet` networks respectively.
+`tezos-node-florencenet`, `tezos-node-granadanet`, and `tezos-node-mainnet` that run
+`florencenet`, `granadanet`, and `mainnet` networks respectively.
 
 In order to start it run:
 ```
@@ -288,6 +288,11 @@ This repository provides two distinct ways for building and packaging tezos bina
 Read [the article](./docs/baking.md) to find out an easy way to set up
 baking instance on Ubuntu using packages provided by our launchpad PPA.
 
+For ease of use, a CLI wizard is provided within the `tezos-baking` package, designed to query all
+necessary configuration options and use the answers to automatically set up a baking instance.
+
+To use it, install the `tezos-baking` package for Ubuntu and run `tezos-setup-wizard`.
+
 ## For Contributors
 
 Please see [CONTRIBUTING.md](.github/CONTRIBUTING.md) for more information.
@@ -297,4 +302,5 @@ Please see [CONTRIBUTING.md](.github/CONTRIBUTING.md) for more information.
 This repository is maintained with ❤️ by [Serokell](https://serokell.io/).
 The names and logo for Serokell are trademark of Serokell OÜ.
 
-We love open source software! See [our other projects](https://serokell.io/community?utm_source=github) or [hire us](https://serokell.io/hire-us?utm_source=github) to design, develop and grow your idea!
+We love open source software! See [our other projects](https://serokell.io/community?utm_source=github)
+or [hire us](https://serokell.io/hire-us?utm_source=github) to design, develop and grow your idea!

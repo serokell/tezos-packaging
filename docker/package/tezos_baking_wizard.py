@@ -132,6 +132,36 @@ def list_connected_ledgers():
     return [name.decode() for name in re.findall(ledger_regex, output.stdout)]
 
 
+def get_node_rpc_addr(network):
+    output = subprocess.run(
+        shlex.split("systemctl show tezos-node-" + network + ".service"),
+        capture_output=True,
+    ).stdout
+    config = re.search(b"Environment=(.*)(?:$|\n)", output)
+    if config is None:
+        print(
+            "tezos-node-" + network + ".service configuration not found, "
+            "defaulting to 'http://localhost:8732'"
+        )
+        return "http://localhost:8732"
+    config = config.group(1)
+    address = re.search(b"NODE_RPC_ADDR=(.*?)(?: |$|\n)", config)
+    if address is not None:
+        address = address.group(1).decode("utf-8")
+    else:
+        print("NODE_RPC_ADDR is undefined, defaulting to 'localhost:8732'")
+        address = "localhost:8732"
+
+    mode = "https://"
+    if (
+        re.search(b"KEY_PATH=(?: |$|\n)", config) is not None
+        or re.search(b"CERT_PATH=(?: |$|\n)", config) is not None
+    ):
+        mode = "http://"
+
+    return mode + address
+
+
 class Step:
     def __init__(
         self,
@@ -468,7 +498,15 @@ class Setup:
         self.import_snapshot()
 
         self.systemctl_start_action("node")
-        proc_call("sleep 5")
+
+        while True:
+            rpc_address = get_node_rpc_addr(self.config["network"])
+            try:
+                urllib.request.urlopen(rpc_address + "/version")
+                break
+            except urllib.error.URLError:
+                print("...Waiting for the node service to start...")
+                proc_call("sleep 1")
 
         proc_call("sudo -u tezos tezos-client bootstrapped")
 

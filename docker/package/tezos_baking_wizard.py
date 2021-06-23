@@ -54,7 +54,7 @@ systemd_enable = {
 
 ledger_regex = b"ledger:\/\/[\w\-]+\/[\w\-]+\/[\w']+\/[\w']+"
 secret_key_regex = b"(encrypted|unencrypted):(?:\w{54}|\w{88})"
-address_regex = b"tz1\w{33}"
+address_regex = b"tz[123]\w{33}"
 
 
 # Input validators

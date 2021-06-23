@@ -237,6 +237,27 @@ def get_node_rpc_addr(network):
     return mode + address
 
 
+def get_data_dir(network):
+    output = subprocess.run(
+        shlex.split("systemctl show tezos-node-" + network + ".service"),
+        capture_output=True,
+    ).stdout
+    config = re.search(b"Environment=(.*)(?:$|\n)", output)
+    if config is None:
+        print(
+            "tezos-node-" + network + ".service configuration not found, "
+            "defaulting to /var/lib/tezos/node-" + network
+        )
+        return "/var/lib/tezos/node-" + network
+    config = config.group(1)
+    data_dir = re.search(b"DATA_DIR=(.*?)(?: |$|\n)", config)
+    if data_dir is not None:
+        return data_dir.group(1).decode("utf-8")
+    else:
+        print("DATA_DIR is undefined, defaulting to /var/lib/tezos/node-" + network)
+        return "/var/lib/tezos/node-" + network
+
+
 class Step:
     def __init__(
         self,
@@ -431,7 +452,7 @@ class Setup:
     # Check if there is already some blockchain data in the tezos-node data directory,
     # and ask the user if it can be overwritten.
     def check_blockchain_data(self):
-        node_dir = "/var/lib/tezos/node-" + self.config["network"]
+        node_dir = get_data_dir(self.config["network"])
         node_dir_contents = os.listdir(node_dir)
         clean = ["config.json", "version.json"]
         diff = set(node_dir_contents) - set(clean)

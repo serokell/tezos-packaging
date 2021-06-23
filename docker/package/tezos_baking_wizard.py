@@ -258,6 +258,31 @@ def get_data_dir(network):
         return "/var/lib/tezos/node-" + network
 
 
+def ledger_urls_info(ledger_urls):
+    info = []
+    max_url_len = max(map(len, ledger_urls))
+    for ledger_url in ledger_urls:
+        output = subprocess.run(
+            shlex.split("sudo -u tezos tezos-client show ledger {}".format(ledger_url)),
+            capture_output=True,
+        ).stdout
+        addr = re.search(address_regex, output).group(0).decode()
+        balance = (
+            subprocess.run(
+                shlex.split("tezos-client get balance for {}".format(addr)),
+                capture_output=True,
+            )
+            .stdout.decode()
+            .strip()
+        )
+        info.append(
+            ("{:" + str(max_url_len + 1) + "} address: {}, balance: {}").format(
+                ledger_url + ",", addr, balance
+            )
+        )
+    return info
+
+
 class Step:
     def __init__(
         self,
@@ -401,22 +426,28 @@ json_filepath_query = Step(
     validator=Validator([required_field_validator, filepath_validator]),
 )
 
-ledger_url_query = Step(
-    id="ledger_url",
-    prompt="Provide the ledger URL for importing the baker secret key stored on a ledger.\n"
-    "You can choose one of the suggested options or provide your own ledger URL.",
-    help="Your ledger URL should look something like <ledger://<mnemonic>/ed25519/0'/1'>",
-    default=None,
-    options=list_connected_ledgers(),
-    validator=Validator(
-        [
-            required_field_validator,
-            or_validator(
-                enum_range_validator(list_connected_ledgers()), ledger_url_validator
-            ),
-        ]
-    ),
-)
+# We define this step as a function since the corresponding step requires
+# tezos-node to be running and bootstrapped in order to gather the data
+# about the ledger-stored addresses, so it's called right before invoking
+# after the node was boostrapped
+def get_ledger_url_query(connected_ledgers):
+    return Step(
+        id="ledger_url",
+        prompt="Provide the ledger URL for importing the baker secret key stored on a ledger.\n"
+        "You can choose one of the suggested options or provide your own ledger URL.",
+        help="Your ledger URL should look something like <ledger://<mnemonic>/ed25519/0'/1'>",
+        default=None,
+        options=ledger_urls_info(connected_ledgers),
+        validator=Validator(
+            [
+                required_field_validator,
+                or_validator(
+                    enum_range_validator(connected_ledgers),
+                    ledger_url_validator,
+                ),
+            ]
+        ),
+    )
 
 
 class Setup:
@@ -638,7 +669,8 @@ class Setup:
                         )
 
                     else:
-                        self.query_step(ledger_url_query)
+                        connected_ledgers = list_connected_ledgers()
+                        self.query_step(get_ledger_url_query(connected_ledgers))
 
                         print()
                         input(

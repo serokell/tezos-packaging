@@ -10,9 +10,9 @@ class TezosSandbox < Formula
   end
   homepage "https://gitlab.com/tezos/tezos"
 
-  url "https://gitlab.com/tezos/tezos.git", :tag => "v9.2", :shallow => false
+  url "https://gitlab.com/tezos/tezos.git", :tag => "v9.3", :shallow => false
 
-  version "v9.2-1"
+  version "v9.3-1"
 
   build_dependencies = %w[pkg-config autoconf rsync wget opam rustup-init]
   build_dependencies.each do |dependency|
@@ -27,8 +27,6 @@ class TezosSandbox < Formula
 
   bottle do
     root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosSandbox.version}/"
-    sha256 cellar: :any, mojave: "e0eb3aac39dd5c16def3c71db1318f19677d4d61128ee41c49c56c565018aaa5"
-    sha256 cellar: :any, catalina: "55a7a5f6df2068fa2e9bcae5496ebc740924d3196bc1f3fb31e1223887f61e71"
   end
 
   def make_deps

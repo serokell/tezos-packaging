@@ -41,10 +41,10 @@
         "homepage": "https://opam.ocaml.org",
         "owner": "ocaml",
         "repo": "opam-repository",
-        "rev": "514e2415e1dcbf911a76f9655bac39dd28c2572e",
-        "sha256": "0zfyix0pphzsfasnh6ym8mplfjis7h7gnxsw483ls4mbi9d7p9ld",
+        "rev": "71b47ea8e4435bed07e6beaee738cd49d5628acb",
+        "sha256": "0bvyw68mpgxaspqb8f2wg3pxmncx7j2dd0r69svpgshzbnp8q2rx",
         "type": "tarball",
-        "url": "https://github.com/ocaml/opam-repository/archive/514e2415e1dcbf911a76f9655bac39dd28c2572e.tar.gz",
+        "url": "https://github.com/ocaml/opam-repository/archive/71b47ea8e4435bed07e6beaee738cd49d5628acb.tar.gz",
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
     },
     "serokell-nix": {
@@ -60,9 +60,9 @@
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
     },
     "tezos": {
-        "ref": "refs/tags/v9.2",
+        "ref": "refs/tags/v9.3",
         "repo": "https://gitlab.com/tezos/tezos",
-        "rev": "bc2cc86f9769798df9f80da0df145597cff7401b",
+        "rev": "fcfb53bfd33f8fb22fc8eb30f1cbcde40389efb4",
         "type": "git"
     }
 }

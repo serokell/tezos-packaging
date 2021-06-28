@@ -28,6 +28,7 @@ Follows #
 - [ ] I removed old bottles hashes from the brew formulas in [Formula directory](../../tree/master/Formula).
 - [ ] I updated `url :tag` and `version`s in brew formulas..
 - [ ] I updated release number in [meta.json](../../tree/master/meta.json).
+- [ ] I removed native-packaging-related steps from CI in case opam-repository wasn't updated yet.
 
 #### In case the new Tezos release provides a new protocol and corresponding testnet
 
@@ -46,10 +47,12 @@ and checking unfinished points in the merged release PR using this template.
 #### Create a new release in this repository
 
 - [ ] I created a new release that is based on the latest autorelease created by the CI.
+- [ ] I enabled native-packaging-related CI steps after opam-repository got updated.
 
 #### Update brew bottles and repository mirrors
 
-- [ ] I compiled brew bottles using [`build-bottles.sh`](../../tree/scripts/build-bottles.sh) script and uploaded them to the created release.
+- [ ] I compiled brew bottles for all required macOS versions using [`build-bottles.sh`](../../tree/scripts/build-bottles.sh)
+      script and uploaded them to the created release. Note that for this you'll need a macOS machine running each required version.
 - [ ] I added new bottles sha256 hashes to the brew formulas.
 - [ ] I pushed changes to either [tezos-packaging-rc](https://github.com/serokell/tezos-packaging-rc) or
       [tezos-packaging-stable](https://github.com/serokell/tezos-packaging-stable) mirror repositories.

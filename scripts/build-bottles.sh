@@ -12,9 +12,9 @@ build_bottle () {
 }
 
 # tezos-sapling-params is used as a dependency for some of the formulas
-# so we handle it separately
-brew install --formula --build-bottle ./Formula/tezos-sapling-params.rb
-brew bottle --force-core-tap --no-rebuild ./Formula/tezos-sapling-params.rb
+# so we handle it separately.
+# We don't build the bottle for it because it is never updated over time.
+brew install --formula ./Formula/tezos-sapling-params.rb
 
 # we don't bottle meta-formulas that contains only services
 build_bottle ./Formula/tezos-accuser-009-PsFLoren.rb

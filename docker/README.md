@@ -171,7 +171,7 @@ In order to install `.rpm` package run the following command:
 sudo yum localinstall <path to rpm file>
 ```
 
-### `.src.rpm` packages
+### `.src.rpm` packages and publishing them on Copr
 
 In order to build source packages run the following commands:
 ```
@@ -187,4 +187,10 @@ rpm --add-sign out/*.src.rpm
 ```
 Note, that in order to sign them, you'll need gpg key to be set up in `~/.rpmmacros`.
 
-Resulting `.src.rpm` packages can be either built locally or submitted to the Copr.
+Signed package can be submitted to the Copr repository via `copr-cli`.
+Read more about setting up `copr-cli` [here](https://developer.fedoraproject.org/deployment/copr/copr-cli.html).
+
+In order to submit source package for building run the following command:
+```
+copr-cli build Serokell/Tezos --nowait <path to '.src.rpm' file>
+```

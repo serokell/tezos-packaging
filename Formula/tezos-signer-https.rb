@@ -4,7 +4,7 @@
 
 class TezosSignerHttps < Formula
   url "file:///dev/null"
-  version "v9.3-1"
+  version "v10.0-rc1-1"
 
   bottle :unneeded
   depends_on "tezos-signer"

@@ -20,6 +20,8 @@ steps:
    only_changes:
    - .buildkite/filter-pipeline.py
    - tests/buildkite/.*
+ - label: build utils
+   command: nix-build nix/util/* --no-out-link
 
  - label: build via nix
    commands:

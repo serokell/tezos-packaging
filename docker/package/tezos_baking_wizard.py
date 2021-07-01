@@ -207,36 +207,6 @@ def list_connected_ledgers():
     return [name.decode() for name in re.findall(ledger_regex, output.stdout)]
 
 
-def get_node_rpc_addr(network):
-    output = subprocess.run(
-        shlex.split("systemctl show tezos-node-" + network + ".service"),
-        capture_output=True,
-    ).stdout
-    config = re.search(b"Environment=(.*)(?:$|\n)", output)
-    if config is None:
-        print(
-            "tezos-node-" + network + ".service configuration not found, "
-            "defaulting to 'http://localhost:8732'"
-        )
-        return "http://localhost:8732"
-    config = config.group(1)
-    address = re.search(b"NODE_RPC_ADDR=(.*?)(?: |$|\n)", config)
-    if address is not None:
-        address = address.group(1).decode("utf-8")
-    else:
-        print("NODE_RPC_ADDR is undefined, defaulting to 'localhost:8732'")
-        address = "localhost:8732"
-
-    mode = "https://"
-    if (
-        re.search(b"KEY_PATH=(?: |$|\n)", config) is not None
-        or re.search(b"CERT_PATH=(?: |$|\n)", config) is not None
-    ):
-        mode = "http://"
-
-    return mode + address
-
-
 def get_data_dir(network):
     output = subprocess.run(
         shlex.split("systemctl show tezos-node-" + network + ".service"),
@@ -258,8 +228,11 @@ def get_data_dir(network):
         return "/var/lib/tezos/node-" + network
 
 
-def ledger_urls_info(ledger_urls):
+def ledger_urls_info(ledger_urls, node_endpoint):
     info = []
+    # max accepts only non-empty lists
+    if len(ledger_urls) == 0:
+        return info
     max_url_len = max(map(len, ledger_urls))
     for ledger_url in ledger_urls:
         output = subprocess.run(
@@ -269,7 +242,12 @@ def ledger_urls_info(ledger_urls):
         addr = re.search(address_regex, output).group(0).decode()
         balance = (
             subprocess.run(
-                shlex.split("tezos-client get balance for {}".format(addr)),
+                shlex.split(
+                    "tezos-client --endpoint "
+                    + node_endpoint
+                    + " get balance for "
+                    + addr
+                ),
                 capture_output=True,
             )
             .stdout.decode()
@@ -281,6 +259,14 @@ def ledger_urls_info(ledger_urls):
             )
         )
     return info
+
+
+def search_baking_service_config(config_contents, regex, default):
+    res = re.search(regex, config_contents)
+    if res is None:
+        return default
+    else:
+        return res.group(1)
 
 
 class Step:
@@ -430,14 +416,14 @@ json_filepath_query = Step(
 # tezos-node to be running and bootstrapped in order to gather the data
 # about the ledger-stored addresses, so it's called right before invoking
 # after the node was boostrapped
-def get_ledger_url_query(connected_ledgers):
+def get_ledger_url_query(connected_ledgers, node_endpoint):
     return Step(
         id="ledger_url",
         prompt="Provide the ledger URL for importing the baker secret key stored on a ledger.\n"
         "You can choose one of the suggested options or provide your own ledger URL.",
         help="Your ledger URL should look something like <ledger://<mnemonic>/ed25519/0'/1'>",
         default=None,
-        options=ledger_urls_info(connected_ledgers),
+        options=ledger_urls_info(connected_ledgers, node_endpoint),
         validator=Validator(
             [
                 required_field_validator,
@@ -479,6 +465,44 @@ class Setup:
                 else:
                     validated = True
                     self.config[step.id] = answer
+
+    def fill_baking_config(self):
+        network = self.config["network"]
+        output = subprocess.run(
+            shlex.split("systemctl show tezos-baking-" + network + ".service"),
+            capture_output=True,
+        ).stdout
+        config_filepath = re.search(b"EnvironmentFiles=(.*) ", output)
+        if config_filepath is None:
+            print(
+                "EnvironmentFiles not found in tezos-baking-"
+                + network
+                + ".service configuration",
+                "defaulting to /etc/default/tezos-baking-" + network,
+            )
+            config_filepath = "/etc/default/tezos-baking-" + network
+        else:
+            config_filepath = config_filepath.group(1).decode().strip()
+
+        with open(config_filepath, "r") as f:
+            config_contents = f.read()
+            self.config["client_data_dir"] = search_baking_service_config(
+                config_contents, 'DATA_DIR="(.*)"', "/var/lib/.tezos-client"
+            )
+            self.config["node_rpc_addr"] = search_baking_service_config(
+                config_contents, 'NODE_RPC_ENDPOINT="(.*)"', "http://localhost:8732"
+            )
+            self.config["baker_alias"] = search_baking_service_config(
+                config_contents, 'BAKER_ADDRESS_ALIAS="(.*)"', "baker"
+            )
+
+    def get_tezos_client_options(self):
+        return (
+            "--base-dir "
+            + self.config["client_data_dir"]
+            + " --endpoint "
+            + self.config["node_rpc_addr"]
+        )
 
     # Check if there is already some blockchain data in the tezos-node data directory,
     # and ask the user if it can be overwritten.
@@ -601,7 +625,7 @@ class Setup:
         self.systemctl_start_action("node")
 
         while True:
-            rpc_address = get_node_rpc_addr(self.config["network"])
+            rpc_address = self.config["node_rpc_addr"]
             try:
                 urllib.request.urlopen(rpc_address + "/version")
                 break
@@ -609,7 +633,9 @@ class Setup:
                 print("...Waiting for the node service to start...")
                 proc_call("sleep 1")
 
-        proc_call("sudo -u tezos tezos-client bootstrapped")
+        proc_call(
+            "sudo -u tezos tezos-client --endpoint " + rpc_address + " bootstrapped"
+        )
 
         print()
         print("The Tezos node bootstrapped successfully.")
@@ -617,8 +643,16 @@ class Setup:
     # Check if an account with the 'baker' alias already exists, and ask the user
     # if it can be overwritten.
     def check_baker_account(self):
+        tezos_client_options = self.get_tezos_client_options()
+        baker_alias = self.config["baker_alias"]
         address = subprocess.run(
-            shlex.split("sudo -u tezos tezos-client show address baker --show-secret"),
+            shlex.split(
+                "sudo -u tezos tezos-client"
+                + tezos_client_options
+                + " show address "
+                + baker_alias
+                + " --show-secret"
+            ),
             capture_output=True,
         )
         if address.returncode == 0:
@@ -626,7 +660,7 @@ class Setup:
             value = re.search(value_regex, address.stdout).group(0)
             address = re.search(address_regex, address.stdout).group(0)
             print()
-            print("An account with the 'baker' alias already exists.")
+            print("An account with the '" + baker_alias + "' alias already exists.")
             print("Its current value is", value.decode("utf-8"))
             print("With a corresponding address:", address.decode("utf-8"))
 
@@ -638,7 +672,8 @@ class Setup:
 
     # Importing the baker key
     def import_baker_key(self):
-
+        baker_alias = self.config["baker_alias"]
+        tezos_client_options = self.get_tezos_client_options()
         replace_baker_key = self.check_baker_account()
 
         if replace_baker_key:
@@ -656,33 +691,52 @@ class Setup:
                     if self.config["key_import_mode"] == "secret-key":
                         self.query_step(secret_key_query)
                         proc_call(
-                            "sudo -u tezos tezos-client import secret key baker "
+                            "sudo -u tezos tezos-client "
+                            + tezos_client_options
+                            + " import secret key "
+                            + baker_alias
+                            + " "
                             + self.config["secret_key"]
                             + " --force"
                         )
                     elif self.config["key_import_mode"] == "json":
                         self.query_step(json_filepath_query)
                         proc_call(
-                            "sudo -u tezos tezos-client activate account baker with "
+                            "sudo -u tezos tezos-client "
+                            + tezos_client_options
+                            + " activate account "
+                            + baker_alias
+                            + " with "
                             + self.config["json_filepath"]
                             + " --force"
                         )
 
                     else:
                         connected_ledgers = list_connected_ledgers()
-                        self.query_step(get_ledger_url_query(connected_ledgers))
+                        self.query_step(
+                            get_ledger_url_query(
+                                connected_ledgers, self.config["node_rpc_addr"]
+                            )
+                        )
 
                         print()
                         input(
                             "Please open the Tezos Baking app on your ledger, then hit Enter."
                         )
                         proc_call(
-                            "sudo -u tezos tezos-client import secret key baker "
+                            "sudo -u tezos tezos-client "
+                            + tezos_client_options
+                            + " import secret key "
+                            + baker_alias
+                            + " "
                             + self.config["ledger_url"]
                             + " --force"
                         )
                         proc_call(
-                            "sudo -u tezos tezos-client setup ledger to bake for baker"
+                            "sudo -u tezos tezos-client "
+                            + tezos_client_options
+                            + " setup ledger to bake for "
+                            + baker_alias
                         )
 
                 except EOFError:
@@ -697,7 +751,15 @@ class Setup:
 
     def register_baker(self):
         print()
-        proc_call("sudo -u tezos tezos-client register key baker as delegate")
+        tezos_client_options = self.get_tezos_client_options()
+        baker_alias = self.config["baker_alias"]
+        proc_call(
+            "sudo -u tezos tezos-client "
+            + tezos_client_options
+            + " register key "
+            + baker_alias
+            + " as delegate"
+        )
         print(
             "You can check a blockchain explorer (e.g. https://tzkt.io/ or https://tzstats.com/)\n"
             "to see the baker status and baking rights of your account."
@@ -754,6 +816,7 @@ class Setup:
         print()
 
         self.query_step(network_query)
+        self.fill_baking_config()
         self.query_step(service_mode_query)
 
         print("Trying to bootstrap tezos-node")

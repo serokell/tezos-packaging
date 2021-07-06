@@ -192,5 +192,5 @@ Read more about setting up `copr-cli` [here](https://developer.fedoraproject.org
 
 In order to submit source package for building run the following command:
 ```
-copr-cli build Serokell/Tezos --nowait <path to '.src.rpm' file>
+copr-cli build @Serokell/Tezos --nowait <path to '.src.rpm' file>
 ```

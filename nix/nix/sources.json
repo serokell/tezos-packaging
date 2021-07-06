@@ -24,15 +24,15 @@
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
     },
     "opam-nix": {
-        "branch": "rvem/optional-test-deps",
+        "branch": "master",
         "description": "A handy nix library to package OCaml software from OPAM repositories",
         "homepage": null,
         "owner": "balsoft",
         "repo": "opam-nix",
-        "rev": "22dda0bb9661a7a1150f14f3ada497ddb4d8acdd",
-        "sha256": "02nj1fmggl0amrsn19r5dbnmm0amzbdyx0h1gd6czfbhfxb2acfw",
+        "rev": "3d619a4c9f759e8ee13f428faac0d13938f087ee",
+        "sha256": "1gp1skm7nkvfg0sdyc2jal44rbfsja8hcl393rs0zhm41b7j61vm",
         "type": "tarball",
-        "url": "https://github.com/balsoft/opam-nix/archive/22dda0bb9661a7a1150f14f3ada497ddb4d8acdd.tar.gz",
+        "url": "https://github.com/balsoft/opam-nix/archive/3d619a4c9f759e8ee13f428faac0d13938f087ee.tar.gz",
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
     },
     "opam-repository": {
@@ -60,9 +60,9 @@
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
     },
     "tezos": {
-        "ref": "refs/tags/v10.0-rc1",
+        "ref": "refs/tags/v9.4",
         "repo": "https://gitlab.com/tezos/tezos",
-        "rev": "f8f93a017bc538b89472c83d01613e394ff9475e",
+        "rev": "706457dc9588860fe8d3f1eb0ad7e463a5eba025",
         "type": "git"
     }
 }

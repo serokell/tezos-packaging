@@ -165,6 +165,13 @@ def proc_call(cmd):
     return subprocess.check_call(shlex.split(cmd))
 
 
+def get_proc_output(cmd):
+    if sys.version_info.major == 3 and sys.version_info.minor < 7:
+        return subprocess.run(shlex.split(cmd), stdout=subprocess.PIPE)
+    else:
+        return subprocess.run(shlex.split(cmd), capture_output=True)
+
+
 def fetch_snapshot(url):
     print("Downloading the snapshot from", url)
     filename = "/tmp/tezos_node.snapshot"
@@ -200,18 +207,12 @@ def yes_or_no(prompt, default=None):
 
 
 def list_connected_ledgers():
-    output = subprocess.run(
-        shlex.split("sudo -u tezos tezos-client list connected ledgers"),
-        capture_output=True,
-    )
+    output = get_proc_output("sudo -u tezos tezos-client list connected ledgers")
     return [name.decode() for name in re.findall(ledger_regex, output.stdout)]
 
 
 def get_data_dir(network):
-    output = subprocess.run(
-        shlex.split("systemctl show tezos-node-" + network + ".service"),
-        capture_output=True,
-    ).stdout
+    output = get_proc_output("systemctl show tezos-node-" + network + ".service").stdout
     config = re.search(b"Environment=(.*)(?:$|\n)", output)
     if config is None:
         print(
@@ -235,20 +236,13 @@ def ledger_urls_info(ledger_urls, node_endpoint):
         return info
     max_url_len = max(map(len, ledger_urls))
     for ledger_url in ledger_urls:
-        output = subprocess.run(
-            shlex.split("sudo -u tezos tezos-client show ledger {}".format(ledger_url)),
-            capture_output=True,
+        output = get_proc_output(
+            "sudo -u tezos tezos-client show ledger {}".format(ledger_url)
         ).stdout
         addr = re.search(address_regex, output).group(0).decode()
         balance = (
-            subprocess.run(
-                shlex.split(
-                    "tezos-client --endpoint "
-                    + node_endpoint
-                    + " get balance for "
-                    + addr
-                ),
-                capture_output=True,
+            get_proc_output(
+                "tezos-client --endpoint " + node_endpoint + " get balance for " + addr
             )
             .stdout.decode()
             .strip()
@@ -468,16 +462,15 @@ class Setup:
 
     def fill_baking_config(self):
         network = self.config["network"]
-        output = subprocess.run(
-            shlex.split("systemctl show tezos-baking-" + network + ".service"),
-            capture_output=True,
+        output = get_proc_output(
+            "systemctl show tezos-baking-" + network + ".service"
         ).stdout
         config_filepath = re.search(b"EnvironmentFiles=(.*) ", output)
         if config_filepath is None:
             print(
                 "EnvironmentFiles not found in tezos-baking-"
                 + network
-                + ".service configuration",
+                + ".service configuration, ",
                 "defaulting to /etc/default/tezos-baking-" + network,
             )
             config_filepath = "/etc/default/tezos-baking-" + network
@@ -654,15 +647,12 @@ class Setup:
     def check_baker_account(self):
         tezos_client_options = self.get_tezos_client_options()
         baker_alias = self.config["baker_alias"]
-        address = subprocess.run(
-            shlex.split(
-                "sudo -u tezos tezos-client"
-                + tezos_client_options
-                + " show address "
-                + baker_alias
-                + " --show-secret"
-            ),
-            capture_output=True,
+        address = get_proc_output(
+            "sudo -u tezos tezos-client "
+            + tezos_client_options
+            + " show address "
+            + baker_alias
+            + " --show-secret"
         )
         if address.returncode == 0:
             value_regex = b"(?:" + ledger_regex + b")|(?:" + secret_key_regex + b")"

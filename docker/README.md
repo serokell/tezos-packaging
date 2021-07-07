@@ -116,7 +116,7 @@ debsign ../out/*.changes
 ```
 
 If you're not running `dput` on Ubuntu, you'll need to provide a config for it.
-Sample config can be found [here](./.dput.cf). Put the contents of this config
+Sample config can be found [here](./package/.dput.cf). Put the contents of this config
 into `~/.dput.cf`. In case you already have a config, add the following piece
 to it for the further convenience:
 ```

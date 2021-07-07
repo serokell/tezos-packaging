@@ -115,10 +115,22 @@ Once these files are updated, they should be signed using `debsign`.
 debsign ../out/*.changes
 ```
 
+If you're not running `dput` on Ubuntu, you'll need to provide a config for it.
+Sample config can be found [here](./.dput.cf). Put the contents of this config
+into `~/.dput.cf`. In case you already have a config, add the following piece
+to it for the further convenience:
+```
+[tezos-serokell]
+fqdn			= ppa.launchpad.net
+method			= ftp
+incoming		= ~serokell/ubuntu/tezos
+login			= anonymous
+```
+
 Signed files now can be submitted to Launchpad PPA. In order to do that run the following
 command for each `.changes` file:
 ```
-dput ppa:serokell/tezos ../out/<package>.changes
+dput tezos-serokell ../out/<package>.changes
 ```
 
 #### Updating release in scope of the same upstream version

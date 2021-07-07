@@ -27,6 +27,8 @@ class TezosSigner < Formula
 
   bottle do
     root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosSigner.version}/"
+    sha256 cellar: :any, mojave: "b850fbe206e0ac42f9bca33142f92ae2ef80dfb104ce05da549f7113b9c05a9f"
+    sha256 cellar: :any, catalina: "3c0c5ce0b700e2398f2632f475c227e69e71d45de38f7f89654d0e700b2f4946"
   end
 
   def make_deps

@@ -622,7 +622,14 @@ class Setup:
 
         self.import_snapshot()
 
+        print(
+            "Starting the node service. This is expected to take some "
+            "time, as the node needs a node identity to be generated."
+        )
+
         self.systemctl_start_action("node")
+
+        print("Waiting for the node service to start...")
 
         while True:
             rpc_address = self.config["node_rpc_addr"]
@@ -630,8 +637,10 @@ class Setup:
                 urllib.request.urlopen(rpc_address + "/version")
                 break
             except urllib.error.URLError:
-                print("...Waiting for the node service to start...")
                 proc_call("sleep 1")
+
+        print("Generated node identity and started the service.")
+        print("Waiting for the node to bootstrap...")
 
         proc_call(
             "sudo -u tezos tezos-client --endpoint " + rpc_address + " bootstrapped"

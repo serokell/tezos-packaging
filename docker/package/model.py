@@ -502,7 +502,7 @@ class TezosBakingServicesPackage(AbstractPackage):
 
     def fetch_sources(self, out_dir):
         os.makedirs(out_dir)
-        shutil.copy(f"{os.path.dirname(__file__)}/tezos_baking_wizard.py", out_dir)
+        shutil.copy(f"{os.path.dirname(__file__)}/tezos_setup_wizard.py", out_dir)
 
     def gen_control_file(self, deps, ubuntu_version, out):
         run_deps = ", ".join(
@@ -589,13 +589,13 @@ BINDIR=/usr/bin
 
 tezos-baking:
 
-tezos-baking-wizard:
-	mv $(CURDIR)/tezos_baking_wizard.py $(CURDIR)/tezos-baking-wizard
-	chmod +x $(CURDIR)/tezos-baking-wizard
+tezos-setup-wizard:
+	mv $(CURDIR)/tezos_setup_wizard.py $(CURDIR)/tezos-setup-wizard
+	chmod +x $(CURDIR)/tezos-setup-wizard
 
-install: tezos-baking tezos-baking-wizard
+install: tezos-baking tezos-setup-wizard
 	mkdir -p $(DESTDIR)$(BINDIR)
-	cp $(CURDIR)/tezos-baking-wizard $(DESTDIR)$(BINDIR)/tezos-baking-wizard
+	cp $(CURDIR)/tezos-setup-wizard $(DESTDIR)$(BINDIR)/tezos-setup-wizard
 """
         with open(out, "w") as f:
             f.write(file_contents)

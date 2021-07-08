@@ -804,7 +804,7 @@ class Setup:
 
     def run_setup(self):
 
-        print("Tezos Baking Wizard")
+        print("Tezos Setup Wizard")
         print()
         print(
             "Welcome, this wizard will help you to set up the infrastructure",
@@ -903,7 +903,7 @@ if __name__ == "__main__":
                 + setup.config["network"]
                 + ".service"
             )
-        print("Exiting the Tezos Baking Wizard.")
+        print("Exiting the Tezos Setup Wizard.")
         sys.exit(1)
     except EOFError:
         if "network" in setup.config:
@@ -912,7 +912,7 @@ if __name__ == "__main__":
                 + setup.config["network"]
                 + ".service"
             )
-        print("Exiting the Tezos Baking Wizard.")
+        print("Exiting the Tezos Setup Wizard.")
         sys.exit(1)
     except Exception as e:
         if "network" in setup.config:
@@ -921,8 +921,8 @@ if __name__ == "__main__":
                 + setup.config["network"]
                 + ".service"
             )
-        print("Error in Tezos Baking setup, exiting.")
-        logfile = "tezos_baking_wizard.log"
+        print("Error in Tezos Setup Wizard, exiting.")
+        logfile = "tezos_setup_wizard.log"
         with open(logfile, "a") as f:
             f.write(str(e) + "\n")
         print("The error has been logged to", os.path.abspath(logfile))

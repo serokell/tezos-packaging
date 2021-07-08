@@ -13,6 +13,7 @@ import os, sys, subprocess, shlex
 import readline
 import re, textwrap
 import urllib.request
+import json
 from typing import List
 
 
@@ -497,6 +498,12 @@ class Setup:
             + self.config["node_rpc_addr"]
         )
 
+    def get_current_head_level(self):
+        response = urllib.request.urlopen(
+            self.config["node_rpc_addr"] + "/chains/main/blocks/head/header"
+        )
+        return str(json.load(response)["level"])
+
     # Check if there is already some blockchain data in the tezos-node data directory,
     # and ask the user if it can be overwritten.
     def check_blockchain_data(self):
@@ -736,6 +743,8 @@ class Setup:
                             + tezos_client_options
                             + " setup ledger to bake for "
                             + baker_alias
+                            + " --main-hwm "
+                            + self.get_current_head_level()
                         )
 
                 except EOFError:

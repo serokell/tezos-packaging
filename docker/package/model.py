@@ -4,9 +4,9 @@
 
 import os, subprocess
 import shutil
+from copy import deepcopy
 from abc import abstractmethod
 from typing import List, Dict
-
 
 from .meta import PackagesMeta
 from .systemd import (
@@ -446,6 +446,13 @@ install: tezos-sapling-params
 
 
 class TezosBakingServicesPackage(AbstractPackage):
+
+    # Sometimes we need to update the tezos-baking package inbetween
+    # native releases, so we append an extra letter to the version of
+    # the package.
+    # This should be reset to "" whenever the native version is bumped.
+    letter_version = "a"
+
     def __init__(
         self,
         target_networks: List[str],
@@ -454,7 +461,8 @@ class TezosBakingServicesPackage(AbstractPackage):
     ):
         self.name = "tezos-baking"
         self.desc = "Package that provides systemd services that orchestrate other services from Tezos packages"
-        self.meta = meta
+        self.meta = deepcopy(meta)
+        self.meta.version = self.meta.version + self.letter_version
         self.target_protos = set()
         for network in target_networks:
             for proto in network_protos[network]:

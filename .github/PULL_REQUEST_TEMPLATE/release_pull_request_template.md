@@ -2,7 +2,7 @@
 
 This PR introduces a new <!-- insert new version here --> release in tezos-packaging.
 
-<!-- Depending on the type of the release some of the points below can be ommited.
+<!-- Depending on the type of the release some of the points below can be omitted.
 
 E.g. in case we introduce a new changes to our native packages, it's not necessary to bump
 used Tezos sources, create a new release in this repository and update brew formulas.
@@ -24,15 +24,16 @@ Follows #
 
 ### Changes related to the creation of a release (conditional)
 
-- [ ] I updated Tezos sources and opam-repository (if needed) revisions in [sources.json](../../tree/master/nix/nix/sources.json).
-- [ ] I removed old bottles hashes from the brew formulas in [Formula directory](../../tree/master/Formula).
-- [ ] I updated `url :tag` and `version`s in brew formulas..
-- [ ] I updated release number in [meta.json](../../tree/master/meta.json).
+- [ ] I updated Tezos sources and opam-repository (if needed) revisions in [sources.json](/serokell/tezos-packaging/tree/master/nix/nix/sources.json).
+- [ ] I removed old bottles hashes from the brew formulas in [Formula directory](/serokell/tezos-packaging/tree/master/Formula).
+- [ ] I updated `url :tag` and `version`s in brew formulas.
+- [ ] I updated release number in [meta.json](/serokell/tezos-packaging/tree/master/meta.json).
+- [ ] If the native release version was updated, I reset the `letter_version` in [model.py](/serokell/tezos-packaging/tree/master/docker/package/model.py).
 - [ ] I removed native-packaging-related steps from CI in case opam-repository wasn't updated yet.
 
 #### In case the new Tezos release provides a new protocol and corresponding testnet
 
-- [ ] I supported new protocol in [protocols.json](../../tree/master/protocols.json).
+- [ ] I supported new protocol in [protocols.json](/serokell/tezos-packaging/tree/master/protocols.json).
 - [ ] I supported new protocol and testnet in native packaging.
 - [ ] I supported new protocol and testnet in brew formulas.
 - [ ] I added tests for the new protocol and testnet.
@@ -51,8 +52,9 @@ and checking unfinished points in the merged release PR using this template.
 
 #### Update brew bottles and repository mirrors
 
-- [ ] I compiled brew bottles for all required macOS versions using [`build-bottles.sh`](../../tree/scripts/build-bottles.sh)
-      script and uploaded them to the created release. Note that for this you'll need a macOS machine running each required version.
+- [ ] I compiled brew bottles for all required macOS versions using [`build-bottles.sh`](/serokell/tezos-packaging/tree/scripts/build-bottles.sh)
+      script and uploaded them to the created release.
+      Note that for this you'll need a macOS machine running each required version.
 - [ ] I added new bottles sha256 hashes to the brew formulas.
 - [ ] I pushed changes to either [tezos-packaging-rc](https://github.com/serokell/tezos-packaging-rc) or
       [tezos-packaging-stable](https://github.com/serokell/tezos-packaging-stable) mirror repositories.
@@ -61,10 +63,10 @@ and checking unfinished points in the merged release PR using this template.
 
 Once [opam-repository](https://opam.ocaml.org/packages/) is updated with the new version of Tezos packages.
 
-- [ ] I published new Ubuntu packages, see [these instructions](../../tree/master/docker#source-packages-and-publishing-them-on-launchpad-ppa).
-- [ ] I published new Fedora packages, see [these instructions](../../tree/master/docker#srcrpm-packages).
+- [ ] I published new Ubuntu packages, see [these instructions](/serokell/tezos-packaging/tree/master/docker#source-packages-and-publishing-them-on-launchpad-ppa).
+- [ ] I published new Fedora packages, see [these instructions](/serokell/tezos-packaging/tree/master/docker#srcrpm-packages).
 
 #### Update documentation
 
-- [ ] I updated [README.md](../../tree/master/README.md).
-- [ ] I updated [baking doc](../../tree/master/docs/baking.md).
+- [ ] I updated [README.md](/serokell/tezos-packaging/tree/master/README.md).
+- [ ] I updated [baking doc](/serokell/tezos-packaging/tree/master/docs/baking.md).

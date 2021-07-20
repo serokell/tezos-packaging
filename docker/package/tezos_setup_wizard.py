@@ -162,15 +162,22 @@ class Validator:
 # Wizard CLI utility
 
 
+suppress_warning_env = dict(os.environ, TEZOS_CLIENT_UNSAFE_DISABLE_DISCLAIMER="YES")
+
+
 def proc_call(cmd):
-    return subprocess.check_call(shlex.split(cmd))
+    return subprocess.check_call(shlex.split(cmd), env=suppress_warning_env)
 
 
 def get_proc_output(cmd):
     if sys.version_info.major == 3 and sys.version_info.minor < 7:
-        return subprocess.run(shlex.split(cmd), stdout=subprocess.PIPE)
+        return subprocess.run(
+            shlex.split(cmd), stdout=subprocess.PIPE, env=suppress_warning_env
+        )
     else:
-        return subprocess.run(shlex.split(cmd), capture_output=True)
+        return subprocess.run(
+            shlex.split(cmd), capture_output=True, env=suppress_warning_env
+        )
 
 
 def fetch_snapshot(url):
@@ -208,7 +215,7 @@ def yes_or_no(prompt, default=None):
 
 
 def list_connected_ledgers():
-    output = get_proc_output("sudo -u tezos tezos-client list connected ledgers")
+    output = get_proc_output("sudo -u tezos -E tezos-client list connected ledgers")
     return [name.decode() for name in re.findall(ledger_regex, output.stdout)]
 
 
@@ -238,12 +245,15 @@ def ledger_urls_info(ledger_urls, node_endpoint):
     max_url_len = max(map(len, ledger_urls))
     for ledger_url in ledger_urls:
         output = get_proc_output(
-            "sudo -u tezos tezos-client show ledger {}".format(ledger_url)
+            "sudo -u tezos -E tezos-client show ledger {}".format(ledger_url)
         ).stdout
         addr = re.search(address_regex, output).group(0).decode()
         balance = (
             get_proc_output(
-                "tezos-client --endpoint " + node_endpoint + " get balance for " + addr
+                "sudo -u tezos -E tezos-client --endpoint "
+                + node_endpoint
+                + " get balance for "
+                + addr
             )
             .stdout.decode()
             .strip()
@@ -471,7 +481,7 @@ class Setup:
             print(
                 "EnvironmentFiles not found in tezos-baking-"
                 + network
-                + ".service configuration, ",
+                + ".service configuration,",
                 "defaulting to /etc/default/tezos-baking-" + network,
             )
             config_filepath = "/etc/default/tezos-baking-" + network
@@ -643,7 +653,7 @@ class Setup:
         print("Waiting for the node to bootstrap...")
 
         proc_call(
-            "sudo -u tezos tezos-client --endpoint " + rpc_address + " bootstrapped"
+            "sudo -u tezos -E tezos-client --endpoint " + rpc_address + " bootstrapped"
         )
 
         print()
@@ -655,7 +665,7 @@ class Setup:
         tezos_client_options = self.get_tezos_client_options()
         baker_alias = self.config["baker_alias"]
         address = get_proc_output(
-            "sudo -u tezos tezos-client "
+            "sudo -u tezos -E tezos-client "
             + tezos_client_options
             + " show address "
             + baker_alias
@@ -697,7 +707,7 @@ class Setup:
                     if self.config["key_import_mode"] == "secret-key":
                         self.query_step(secret_key_query)
                         proc_call(
-                            "sudo -u tezos tezos-client "
+                            "sudo -u tezos -E tezos-client "
                             + tezos_client_options
                             + " import secret key "
                             + baker_alias
@@ -708,7 +718,7 @@ class Setup:
                     elif self.config["key_import_mode"] == "json":
                         self.query_step(json_filepath_query)
                         proc_call(
-                            "sudo -u tezos tezos-client "
+                            "sudo -u tezos -E tezos-client "
                             + tezos_client_options
                             + " activate account "
                             + baker_alias
@@ -730,7 +740,7 @@ class Setup:
                             "Please open the Tezos Baking app on your ledger, then hit Enter."
                         )
                         proc_call(
-                            "sudo -u tezos tezos-client "
+                            "sudo -u tezos -E tezos-client "
                             + tezos_client_options
                             + " import secret key "
                             + baker_alias
@@ -739,7 +749,7 @@ class Setup:
                             + " --force"
                         )
                         proc_call(
-                            "sudo -u tezos tezos-client "
+                            "sudo -u tezos -E tezos-client "
                             + tezos_client_options
                             + " setup ledger to bake for "
                             + baker_alias
@@ -762,7 +772,7 @@ class Setup:
         tezos_client_options = self.get_tezos_client_options()
         baker_alias = self.config["baker_alias"]
         proc_call(
-            "sudo -u tezos tezos-client "
+            "sudo -u tezos -E tezos-client "
             + tezos_client_options
             + " register key "
             + baker_alias

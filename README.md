@@ -30,10 +30,10 @@ different networks, you can read more about this in [this article](https://tezos
 
 * [Getting binaries](#getting-binaries).
   * [Ubuntu](#ubuntu)
-  * [Raspberry Pi OS](#raspberyy)
+  * [Raspberry Pi OS](#raspberry-pi-os)
   * [Fedora](#fedora)
-  * [Other Linux distros](#linux)
-  * [macOS](#macOS)
+  * [Other Linux distros](#static-binaries-and-other-linux-distros)
+  * [macOS](#macos)
 * [Setting up a node and/or baking on Ubuntu](#baking-on-ubuntu).
 * [Building instructions](#building).
 * [Contribution](#contribution).
@@ -44,22 +44,18 @@ different networks, you can read more about this in [this article](https://tezos
 
 The following distributions are supported by the `tezos-packaging`:
 
-<a name="ubuntu"></a>
 ### [Ubuntu](./docs/distros/ubuntu.md)
 
 Native Ubuntu packages that can be installed with `apt-get` from a PPA.
 
-<a name="raspberry"></a>
 ### [Raspberry Pi OS](./docs/distros/ubuntu.md#raspberry)
 
-Some Raspverry systems also support packages that can be installed using `apt-get`.
+Some Raspberry systems also support packages that can be installed using `apt-get`.
 
-<a name="fedora"></a>
 ### [Fedora](./docs/distros/fedora.md)
 
 Native Fedora packages that can be installed using using `dnf` or `yum`.
 
-<a name="linux"></a>
 ### [Static binaries and other linux distros](https://github.com/serokell/tezos-packaging/releases/latest)
 
 Prebuilt static binaries can be downloaded directly from the [latest release](https://github.com/serokell/tezos-packaging/releases/latest).
@@ -67,7 +63,6 @@ Prebuilt static binaries can be downloaded directly from the [latest release](ht
 You can also use `systemd` services for running some of the Tezos binaries in the background.
 For more information about these services, refer to [this doc](./docs/systemd.md#generic-linux).
 
-<a name="macos"></a>
 ### [macOS](./docs/distros/macos.md)
 
 `brew` formulae and taps for stable releases and release candidates.

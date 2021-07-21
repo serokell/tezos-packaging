@@ -214,9 +214,14 @@ def yes_or_no(prompt, default=None):
             print(color("Please provide a 'yes' or 'no' answer.", "\x1b[1;31m"))
 
 
-def list_connected_ledgers():
-    output = get_proc_output("sudo -u tezos -E tezos-client list connected ledgers")
-    return [name.decode() for name in re.findall(ledger_regex, output.stdout)]
+def wait_for_ledger_baking_app():
+    output = b""
+    while re.search(b"Found a Tezos Baking", output) is None:
+        output = get_proc_output(
+            "sudo -u tezos -E tezos-client list connected ledgers"
+        ).stdout
+        proc_call("sleep 1")
+    return [name.decode() for name in re.findall(ledger_regex, output)]
 
 
 def get_data_dir(network):
@@ -728,16 +733,12 @@ class Setup:
                         )
 
                     else:
-                        connected_ledgers = list_connected_ledgers()
+                        print("Please open the Tezos Baking app on your ledger.")
+                        connected_ledgers = wait_for_ledger_baking_app()
                         self.query_step(
                             get_ledger_url_query(
                                 connected_ledgers, self.config["node_rpc_addr"]
                             )
-                        )
-
-                        print()
-                        input(
-                            "Please open the Tezos Baking app on your ledger, then hit Enter."
                         )
                         proc_call(
                             "sudo -u tezos -E tezos-client "

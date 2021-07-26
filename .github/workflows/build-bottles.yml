@@ -1,0 +1,22 @@
+name: Build homebrew bottles
+on:
+  # Run when a release is tagged
+  push:
+    tags:
+      - "v*"
+jobs:
+  build-bottles:
+    runs-on: macos-10.15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Build bottles
+        run: ./scripts/build-bottles.sh
+
+      - name: Upload bottles to Github Actions
+        uses: actions/upload-artifact@v2
+        with:
+          name: homebrew-bottles
+          path: '*.bottle.*'
+

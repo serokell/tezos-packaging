@@ -1,0 +1,21 @@
+name: Check homebrew formulas
+on:
+  # Run on any push which changes related files
+  push:
+    paths:
+      - 'Formula/*.rb'
+      - '.github/workflows/check-formulas.yml'
+jobs:
+  check-formulas:
+    runs-on: macos-10.15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Check formula syntax
+        run: ruby -c ./Formula/*.rb
+
+      - name: Check formula source
+        # All formulas share the same source URL, so it's fine to fetch sources
+        # for only one formula
+        run: brew fetch --formula -s ./Formula/tezos-client.rb

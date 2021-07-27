@@ -24,15 +24,15 @@
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
     },
     "opam-nix": {
-        "branch": "rvem/optional-test-deps",
+        "branch": "master",
         "description": "A handy nix library to package OCaml software from OPAM repositories",
         "homepage": null,
-        "owner": "balsoft",
+        "owner": "serokell",
         "repo": "opam-nix",
-        "rev": "22dda0bb9661a7a1150f14f3ada497ddb4d8acdd",
-        "sha256": "02nj1fmggl0amrsn19r5dbnmm0amzbdyx0h1gd6czfbhfxb2acfw",
+        "rev": "bdd7e6730bdf0ea91ada3ebc68387424b087c9f8",
+        "sha256": "1wda717d6391vbgrp0vcv27pxfj4xy1511mssky8ll3iy7i851hn",
         "type": "tarball",
-        "url": "https://github.com/balsoft/opam-nix/archive/22dda0bb9661a7a1150f14f3ada497ddb4d8acdd.tar.gz",
+        "url": "https://github.com/serokell/opam-nix/archive/bdd7e6730bdf0ea91ada3ebc68387424b087c9f8.tar.gz",
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
     },
     "opam-repository": {

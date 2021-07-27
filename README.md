@@ -29,11 +29,6 @@ different networks, you can read more about this in [this article](https://tezos
 ## Table of contents
 
 * [Installing Tezos](#installing-tezos).
-  * [Ubuntu](#ubuntu)
-  * [Raspberry Pi OS](#raspberry-pi-os)
-  * [Fedora](#fedora)
-  * [Other Linux distros](#static-binaries-and-other-linux-distros)
-  * [macOS](#macos)
 * [Setting up a node and/or baking on Ubuntu](#baking-on-ubuntu).
 * [Building instructions](#building).
 * [Contribution](#contribution).
@@ -41,30 +36,20 @@ different networks, you can read more about this in [this article](https://tezos
 
 ## Installing Tezos
 
-The following distributions are supported by the `tezos-packaging`:
+`tezos-packaging` supports several native distribution methods for convenience:
 
-### [Ubuntu](./docs/distros/ubuntu.md)
+- [**Ubuntu**](./docs/distros/ubuntu.md)
+- [**Raspberry Pi OS**](./docs/distros/ubuntu.md#raspberry)
+- [**Fedora**](./docs/distros/fedora.md)
+- [**macOS**](./docs/distros/macos.md)
 
-Native Ubuntu packages that can be installed with `apt-get` from a PPA.
+Additionally, prebuilt **static binaries** can be downloaded directly from the
+[latest release](https://github.com/serokell/tezos-packaging/releases/latest)
+for other linux distros.
 
-### [Raspberry Pi OS](./docs/distros/ubuntu.md#raspberry)
-
-Some Raspberry systems also support packages that can be installed using `apt-get`.
-
-### [Fedora](./docs/distros/fedora.md)
-
-Native Fedora packages that can be installed using using `dnf` or `yum`.
-
-### [Static binaries and other linux distros](https://github.com/serokell/tezos-packaging/releases/latest)
-
-Prebuilt static binaries can be downloaded directly from the [latest release](https://github.com/serokell/tezos-packaging/releases/latest).
-
-You can also use `systemd` services for running some of the Tezos binaries in the background.
+You can also use `systemd` services to run some of these static Tezos binaries
+in the background.
 For more information about these services, refer to [this doc](./docs/systemd.md#generic-linux).
-
-### [macOS](./docs/distros/macos.md)
-
-`brew` formulae and taps for stable releases and release candidates.
 
 <a name="baking-on-ubuntu"></a>
 ## Setting up a node and/or baking on Ubuntu

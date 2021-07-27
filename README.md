@@ -8,23 +8,10 @@
 
 [![Build status](https://badge.buildkite.com/e899e9e54babcd14139e3bd4381bad39b5d680e08e7b7766d4.svg?branch=master)](https://buildkite.com/serokell/tezos-packaging)
 
-This repo provides various form of distribution for tezos-related executables:
-* `tezos-client`
-* `tezos-admin-client`
-* `tezos-node`
-* `tezos-baker`
-* `tezos-accuser`
-* `tezos-endorser`
-* `tezos-signer`
-* `tezos-codec`
-* `tezos-sandbox`
+This repo provides various forms of distribution for [Tezos](http://tezos.gitlab.io/) executables.
 
-Daemon binaries (as well as packages for them) have suffix that defines their target protocol,
-e.g. `tezos-baker-010-PtGRANAD` can be used only on the chain with 010 protocol.
-
-Other binaries can be used with all protocols if they're new enough. E.g.
-010 protocol is supported only from `v9.2`. `tezos-node` can be set up to run
-different networks, you can read more about this in [this article](https://tezos.gitlab.io/user/multinetwork.html).
+See the [official documentation](http://tezos.gitlab.io/introduction/howtouse.html)
+for information about the binaries, their usage, and concepts about the Tezos networks.
 
 ## Table of contents
 

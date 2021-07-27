@@ -28,7 +28,7 @@ different networks, you can read more about this in [this article](https://tezos
 
 ## Table of contents
 
-* [Getting binaries](#getting-binaries).
+* [Installing Tezos](#installing-tezos).
   * [Ubuntu](#ubuntu)
   * [Raspberry Pi OS](#raspberry-pi-os)
   * [Fedora](#fedora)
@@ -39,8 +39,7 @@ different networks, you can read more about this in [this article](https://tezos
 * [Contribution](#contribution).
 * [About Serokell](#about)
 
-<a name="getting-binaries"></a>
-## Getting Tezos binaries
+## Installing Tezos
 
 The following distributions are supported by the `tezos-packaging`:
 

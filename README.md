@@ -13,15 +13,6 @@ This repo provides various forms of distribution for [Tezos](http://tezos.gitlab
 See the [official documentation](http://tezos.gitlab.io/introduction/howtouse.html)
 for information about the binaries, their usage, and concepts about the Tezos networks.
 
-## Table of contents
-
-* [Installing Tezos](#installing-tezos).
-* [Setting up a node and/or baking on Ubuntu](#baking-on-ubuntu).
-* [Building instructions](#building).
-* [Contribution](#contribution).
-* [About Serokell](#about)
-
-<a name="baking-on-ubuntu"></a>
 ## Set up a node and/or baking on Ubuntu
 
 The simplest procedure to set up a node and/or baking instance is provided for Ubuntu.
@@ -54,19 +45,16 @@ You can also use `systemd` services to run some of these static Tezos binaries
 in the background.
 For more information about these services, refer to [this doc](./docs/systemd.md#generic-linux).
 
-<a name="building"></a>
 ## Build Instructions
 
 This repository provides two distinct ways for building and packaging tezos binaries:
 * [Docker-based](./docker/README.md)
 * [Nix-based](./nix/README.md)
 
-<a name="contribution"></a>
 ## For Contributors
 
 Please see [CONTRIBUTING.md](.github/CONTRIBUTING.md) for more information.
 
-<a name="about"></a>
 ## About Serokell
 
 This repository is maintained with ❤️ by [Serokell](https://serokell.io/).

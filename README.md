@@ -21,6 +21,22 @@ for information about the binaries, their usage, and concepts about the Tezos ne
 * [Contribution](#contribution).
 * [About Serokell](#about)
 
+<a name="baking-on-ubuntu"></a>
+## Set up a node and/or baking on Ubuntu
+
+The simplest procedure to set up a node and/or baking instance is provided for Ubuntu.
+
+These commands will install everything necessary and start an interactive
+setup wizard:
+```
+sudo add-apt-repository -yu ppa:serokell/tezos
+sudo apt-get install -y tezos-baking
+tezos-setup-wizard
+```
+
+Read [the dedicated article](./docs/baking.md) to find out more about the setup,
+the binaries, and the services used.
+
 ## Installing Tezos
 
 `tezos-packaging` supports several native distribution methods for convenience:
@@ -37,17 +53,6 @@ for other linux distros.
 You can also use `systemd` services to run some of these static Tezos binaries
 in the background.
 For more information about these services, refer to [this doc](./docs/systemd.md#generic-linux).
-
-<a name="baking-on-ubuntu"></a>
-## Setting up a node and/or baking on Ubuntu
-
-Read [the article](./docs/baking.md) to find out an easy way to set up
-baking instance on Ubuntu using packages provided by our launchpad PPA.
-
-For ease of use, a CLI wizard is provided within the `tezos-baking` package, designed to query all
-necessary configuration options and use the answers to automatically set up a baking instance.
-
-To use it, install the `tezos-baking` package for Ubuntu and run `tezos-setup-wizard`.
 
 <a name="building"></a>
 ## Build Instructions

@@ -451,7 +451,7 @@ class TezosBakingServicesPackage(AbstractPackage):
     # native releases, so we append an extra letter to the version of
     # the package.
     # This should be reset to "" whenever the native version is bumped.
-    letter_version = "b"
+    letter_version = ""
 
     def __init__(
         self,

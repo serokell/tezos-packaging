@@ -10,11 +10,11 @@ class TezosEndorser010Ptgranad < Formula
   end
   homepage "https://gitlab.com/tezos/tezos"
 
-  url "https://gitlab.com/tezos/tezos.git", :tag => "v10.0-rc2", :shallow => false
+  url "https://gitlab.com/tezos/tezos.git", :tag => "v9.5", :shallow => false
 
-  version "v10.0-rc2-1"
+  version "v9.5-1"
 
-  build_dependencies = %w[pkg-config autoconf rsync wget opam rustup-init]
+  build_dependencies = %w[pkg-config autoconf rsync wget rustup-init]
   build_dependencies.each do |dependency|
     depends_on dependency => :build
   end
@@ -28,13 +28,15 @@ class TezosEndorser010Ptgranad < Formula
 
   bottle do
     root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosEndorser010Ptgranad.version}/"
-    sha256 cellar: :any, mojave: "8112cc92155632c899286c60a6a2aa85b584eb51eb1d6f9f3f284f01b7504c3d"
-    sha256 cellar: :any, catalina: "2b5e22fd905c976739c1626a33489d4ac514cb1dda49a02b4b244b425c2fb549"
   end
 
   def make_deps
     ENV.deparallelize
     ENV["CARGO_HOME"]="./.cargo"
+    # Here is the workaround to use opam 2.0.9 because Tezos is currently not compatible with opam 2.1.0 and newer
+    system "curl", "-L", "https://github.com/ocaml/opam/releases/download/2.0.9/opam-2.0.9-x86_64-macos", "--create-dirs", "-o", "#{ENV["HOME"]}/.opam-bin/opam"
+    system "chmod", "+x", "#{ENV["HOME"]}/.opam-bin/opam"
+    ENV["PATH"]="#{ENV["HOME"]}/.opam-bin:#{ENV["PATH"]}"
     system "rustup-init", "--default-toolchain", "1.44.0", "-y"
     system "opam", "init", "--bare", "--debug", "--auto-setup", "--disable-sandboxing"
     system ["source .cargo/env",  "make build-deps"].join(" && ")

@@ -13,7 +13,7 @@ let
     All the other binaries target x86_64.
 
     Release artifacts are signed with the following key: 0x7EAF9B150ACE940CF8C008A0BF847A85AC7BF43E.
-    You can check it on http://keys.gnupg.net/.
+    You can check it on http://keyserver.ubuntu.com/.
 
     Descriptions for binaries included in this release:
     ${builtins.concatStringsSep "\n"

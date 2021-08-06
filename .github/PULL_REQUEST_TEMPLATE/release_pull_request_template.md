@@ -25,6 +25,8 @@ Follows #
 ### Changes related to the creation of a release (conditional)
 
 - [ ] I updated Tezos sources and opam-repository (if needed) revisions in [sources.json](/serokell/tezos-packaging/tree/master/nix/nix/sources.json).
+    The opam-repository revision should be the same as the one defined in
+    [`tezos/tezos`](https://gitlab.com/tezos/tezos/-/blob/master/scripts/version.sh) for the relevant tag.
 - [ ] I removed old bottles hashes from the brew formulas in [Formula directory](/serokell/tezos-packaging/tree/master/Formula).
 - [ ] I updated `url :tag` and `version`s in brew formulas.
 - [ ] I updated release number in [meta.json](/serokell/tezos-packaging/tree/master/meta.json).

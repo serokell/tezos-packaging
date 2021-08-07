@@ -10,9 +10,9 @@ class TezosSandbox < Formula
   end
   homepage "https://gitlab.com/tezos/tezos"
 
-  url "https://gitlab.com/tezos/tezos.git", :tag => "v9.6", :shallow => false
+  url "https://gitlab.com/tezos/tezos.git", :tag => "v9.7", :shallow => false
 
-  version "v9.6-1"
+  version "v9.7-1"
 
   build_dependencies = %w[pkg-config autoconf rsync wget rustup-init]
   build_dependencies.each do |dependency|

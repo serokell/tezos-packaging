@@ -8,8 +8,6 @@ with lib;
 
 let
   tezos-baker-pkgs = {
-    "009-PsFLoren" =
-      "${pkgs.ocamlPackages.tezos-baker-009-PsFLoren}/bin/tezos-baker-009-PsFLoren";
     "010-PtGRANAD" =
       "${pkgs.ocamlPackages.tezos-baker-010-PtGRANAD}/bin/tezos-baker-010-PtGRANAD";
   };

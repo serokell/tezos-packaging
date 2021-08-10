@@ -83,9 +83,6 @@ def test_node_with_daemons_scenario(network, use_tls=False):
     kill_node_with_daemons()
 
 
-with subtest("run node with daemons on florencenet"):
-    test_node_with_daemons_scenario("florencenet")
-
 with subtest("run node with daemons on granadanet"):
     test_node_with_daemons_scenario("granadanet")
 

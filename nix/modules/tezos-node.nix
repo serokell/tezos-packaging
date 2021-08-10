@@ -47,7 +47,7 @@ let
 
       network = mkOption {
         type = types.str;
-        default = "florencenet";
+        default = "granadanet";
         description = ''
           Network which node will be running on.
         '';

@@ -39,7 +39,6 @@ background services.
 
 Formulas with `tezos-node` background services:
 * `tezos-node-mainnet`
-* `tezos-node-florencenet`
 * `tezos-node-granadanet`
 
 Formulas with `tezos-signer` background services:

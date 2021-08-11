@@ -162,22 +162,18 @@ class Validator:
 # Wizard CLI utility
 
 
-suppress_warning_env = dict(os.environ, TEZOS_CLIENT_UNSAFE_DISABLE_DISCLAIMER="YES")
+suppress_warning_text = "TEZOS_CLIENT_UNSAFE_DISABLE_DISCLAIMER=YES"
 
 
 def proc_call(cmd):
-    return subprocess.check_call(shlex.split(cmd), env=suppress_warning_env)
+    return subprocess.check_call(shlex.split(cmd))
 
 
 def get_proc_output(cmd):
     if sys.version_info.major == 3 and sys.version_info.minor < 7:
-        return subprocess.run(
-            shlex.split(cmd), stdout=subprocess.PIPE, env=suppress_warning_env
-        )
+        return subprocess.run(shlex.split(cmd), stdout=subprocess.PIPE)
     else:
-        return subprocess.run(
-            shlex.split(cmd), capture_output=True, env=suppress_warning_env
-        )
+        return subprocess.run(shlex.split(cmd), capture_output=True)
 
 
 def fetch_snapshot(url):
@@ -218,7 +214,7 @@ def wait_for_ledger_baking_app():
     output = b""
     while re.search(b"Found a Tezos Baking", output) is None:
         output = get_proc_output(
-            "sudo -u tezos -E tezos-client list connected ledgers"
+            f"sudo -u tezos {suppress_warning_text} tezos-client list connected ledgers"
         ).stdout
         proc_call("sleep 1")
     base_ledger_url = (
@@ -255,17 +251,14 @@ def ledger_urls_info(ledger_derivations, base_ledger_url, node_endpoint):
     max_derivation_len = max(map(len, ledger_derivations))
     for derivation in ledger_derivations:
         output = get_proc_output(
-            "sudo -u tezos -E tezos-client show ledger {}".format(
-                base_ledger_url + derivation
-            )
+            f"sudo -u tezos {suppress_warning_text} tezos-client "
+            f"show ledger {base_ledger_url + derivation}"
         ).stdout
         addr = re.search(address_regex, output).group(0).decode()
         balance = (
             get_proc_output(
-                "sudo -u tezos -E tezos-client --endpoint "
-                + node_endpoint
-                + " get balance for "
-                + addr
+                f"sudo -u tezos {suppress_warning_text} tezos-client "
+                f"--endpoint {node_endpoint} get balance for {addr}"
             )
             .stdout.decode()
             .strip()
@@ -672,7 +665,8 @@ class Setup:
         print("Waiting for the node to bootstrap...")
 
         proc_call(
-            "sudo -u tezos -E tezos-client --endpoint " + rpc_address + " bootstrapped"
+            f"sudo -u tezos {suppress_warning_text} tezos-client "
+            f"--endpoint {rpc_address} bootstrapped"
         )
 
         print()
@@ -684,11 +678,8 @@ class Setup:
         tezos_client_options = self.get_tezos_client_options()
         baker_alias = self.config["baker_alias"]
         address = get_proc_output(
-            "sudo -u tezos -E tezos-client "
-            + tezos_client_options
-            + " show address "
-            + baker_alias
-            + " --show-secret"
+            f"sudo -u tezos {suppress_warning_text} tezos-client {tezos_client_options} "
+            f"show address {baker_alias} --show-secret"
         )
         if address.returncode == 0:
             value_regex = b"(?:" + ledger_regex + b")|(?:" + secret_key_regex + b")"
@@ -726,24 +717,14 @@ class Setup:
                     if self.config["key_import_mode"] == "secret-key":
                         self.query_step(secret_key_query)
                         proc_call(
-                            "sudo -u tezos -E tezos-client "
-                            + tezos_client_options
-                            + " import secret key "
-                            + baker_alias
-                            + " "
-                            + self.config["secret_key"]
-                            + " --force"
+                            f"sudo -u tezos {suppress_warning_text} tezos-client {tezos_client_options} "
+                            f"import secret key {baker_alias} {self.config['secret_key']} --force"
                         )
                     elif self.config["key_import_mode"] == "json":
                         self.query_step(json_filepath_query)
                         proc_call(
-                            "sudo -u tezos -E tezos-client "
-                            + tezos_client_options
-                            + " activate account "
-                            + baker_alias
-                            + " with "
-                            + self.config["json_filepath"]
-                            + " --force"
+                            f"sudo -u tezos {suppress_warning_text} tezos-client {tezos_client_options} "
+                            f"activate account {baker_alias} with {self.config['json_filepath']} --force"
                         )
 
                     else:
@@ -789,21 +770,12 @@ class Setup:
                                     base_ledger_url + self.config["ledger_derivation"]
                                 )
                         proc_call(
-                            "sudo -u tezos -E tezos-client "
-                            + tezos_client_options
-                            + " import secret key "
-                            + baker_alias
-                            + " "
-                            + baker_ledger_url
-                            + " --force"
+                            f"sudo -u tezos {suppress_warning_text} tezos-client {tezos_client_options} "
+                            f"import secret key {baker_alias} {baker_ledger_url} --force"
                         )
                         proc_call(
-                            "sudo -u tezos -E tezos-client "
-                            + tezos_client_options
-                            + " setup ledger to bake for "
-                            + baker_alias
-                            + " --main-hwm "
-                            + self.get_current_head_level()
+                            f"sudo -u tezos {suppress_warning_text} tezos-client {tezos_client_options} "
+                            f"setup ledger to bake for {baker_alias} --main-hwm {self.get_current_head_level()}"
                         )
 
                 except EOFError:
@@ -821,11 +793,8 @@ class Setup:
         tezos_client_options = self.get_tezos_client_options()
         baker_alias = self.config["baker_alias"]
         proc_call(
-            "sudo -u tezos -E tezos-client "
-            + tezos_client_options
-            + " register key "
-            + baker_alias
-            + " as delegate"
+            f"sudo -u tezos {suppress_warning_text} tezos-client {tezos_client_options} "
+            f"register key {baker_alias} as delegate"
         )
         print(
             "You can check a blockchain explorer (e.g. https://tzkt.io/ or https://tzstats.com/)\n"

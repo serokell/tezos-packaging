@@ -77,7 +77,7 @@ rec {
 
   genUsers = node-name: {
     groups."tezos-${node-name}" = { };
-    users."tezos-${node-name}" = { group = "tezos-${node-name}"; };
+    users."tezos-${node-name}" = { group = "tezos-${node-name}"; isNormalUser = true; };
   };
 
   genSystemdService = node-name: node-cfg: service-name: {

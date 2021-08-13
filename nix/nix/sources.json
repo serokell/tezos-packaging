@@ -42,7 +42,7 @@
         "owner": "ocaml",
         "repo": "opam-repository",
         "rev": "d2b022bcd8e39f765da6df49a005a3bb88246097",
-        "sha256": "1rs30hqml5sx0j0v2w39r705lacyvb9nhn55fknmvhn18bj3vz9w",
+        "sha256": "07w0lm4y7kfbnph8fds8vhlbhnfxipbpj85fg6d6h04nppjcnzb3",
         "type": "tarball",
         "url": "https://github.com/ocaml/opam-repository/archive/d2b022bcd8e39f765da6df49a005a3bb88246097.tar.gz",
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"

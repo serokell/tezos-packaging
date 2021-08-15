@@ -18,26 +18,26 @@ in import "${nixpkgs}/nixos/tests/make-test-python.nix" ({ ... }:
                 ../nix/modules/tezos-endorser.nix
               ];
 
-    services.tezos-node.instances.florencenet.enable = true;
+    services.tezos-node.instances.granadanet.enable = true;
 
-    services.tezos-signer.instances.florencenet = {
+    services.tezos-signer.instances.granadanet = {
       enable = true;
       networkProtocol = "http";
     };
 
-    services.tezos-accuser.instances.florencenet = {
+    services.tezos-accuser.instances.granadanet = {
       enable = true;
-      baseProtocol = "009-PsFLoren";
+      baseProtocol = "010-PtGRANAD";
     };
 
-    services.tezos-baker.instances.florencenet = {
+    services.tezos-baker.instances.granadanet = {
       enable = true;
-      baseProtocol = "009-PsFLoren";
+      baseProtocol = "010-PtGRANAD";
     };
 
-    services.tezos-endorser.instances.florencenet = {
+    services.tezos-endorser.instances.granadanet = {
       enable = true;
-      baseProtocol = "009-PsFLoren";
+      baseProtocol = "010-PtGRANAD";
     };
 
   };
@@ -54,7 +54,7 @@ in import "${nixpkgs}/nixos/tests/make-test-python.nix" ({ ... }:
     ]
 
     for s in services:
-        machine.wait_for_unit(f"tezos-florencenet-{s}.service")
+        machine.wait_for_unit(f"tezos-granadanet-{s}.service")
 
     with subtest("check tezos-node rpc response"):
         machine.wait_for_open_port(8732)
@@ -64,6 +64,6 @@ in import "${nixpkgs}/nixos/tests/make-test-python.nix" ({ ... }:
 
     with subtest("service status sanity check"):
         for s in services:
-            machine.succeed(f"systemctl status tezos-florencenet-{s}.service")
+            machine.succeed(f"systemctl status tezos-granadanet-{s}.service")
   '';
 })

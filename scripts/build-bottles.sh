@@ -17,14 +17,11 @@ build_bottle () {
 brew install --formula ./Formula/tezos-sapling-params.rb
 
 # we don't bottle meta-formulas that contains only services
-build_bottle ./Formula/tezos-accuser-009-PsFLoren.rb
 build_bottle ./Formula/tezos-accuser-010-PtGRANAD.rb
 build_bottle ./Formula/tezos-admin-client.rb
-build_bottle ./Formula/tezos-baker-009-PsFLoren.rb
 build_bottle ./Formula/tezos-baker-010-PtGRANAD.rb
 build_bottle ./Formula/tezos-client.rb
 build_bottle ./Formula/tezos-codec.rb
-build_bottle ./Formula/tezos-endorser-009-PsFLoren.rb
 build_bottle ./Formula/tezos-endorser-010-PtGRANAD.rb
 build_bottle ./Formula/tezos-node.rb
 build_bottle ./Formula/tezos-sandbox.rb

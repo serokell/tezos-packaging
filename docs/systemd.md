@@ -41,7 +41,7 @@ from scratch.
 For this you'll need a `.service` file to define each systemd service.
 The easiest way to get one is to run [`gen_systemd_service_file.py`](../gen_systemd_service_file.py).
 You should specify the service name as an argument. Note that there are three
-predefined services for `tezos-node`: `tezos-node-{mainnet, florencenet, granadanet}`.
+predefined services for `tezos-node`: `tezos-node-{mainnet, granadanet}`.
 
 E.g.:
 ```
@@ -62,8 +62,8 @@ It's possible to run multiple similar services, e.g. two `tezos-node`s that run 
 networks.
 
 `tezos-node` packages provide multiple services out of the box:
-`tezos-node-florencenet`, `tezos-node-granadanet`, and `tezos-node-mainnet` that run
-`florencenet`, `granadanet`, and `mainnet` networks respectively.
+`tezos-node-granadanet`, and `tezos-node-mainnet` that run
+`granadanet` and `mainnet` networks respectively.
 
 In order to start it run:
 ```
@@ -76,7 +76,7 @@ TEZOS_NODE_DIR="<DATA_DIR from tezos-node-<network>.service>" tezos-node
 ```
 
 In addition to node services where the config is predefined to a specific network
-(e.g. `tezos-node-mainnet` or `tezos-node-florencenet`), it's possible to run `tezos-node-custom`
+(e.g. `tezos-node-mainnet` or `tezos-node-granadanet`), it's possible to run `tezos-node-custom`
 service and provide a path to the custom node config file via the
 `CUSTOM_NODE_CONFIG` variable in the `tezos-node-custom.service` file.
 

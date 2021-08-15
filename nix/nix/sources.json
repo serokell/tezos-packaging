@@ -41,10 +41,10 @@
         "homepage": "https://opam.ocaml.org",
         "owner": "ocaml",
         "repo": "opam-repository",
-        "rev": "d2b022bcd8e39f765da6df49a005a3bb88246097",
+        "rev": "5cf7fff7b9a7bda3695954b06c0c7ff58c5e2a05",
         "sha256": "1rs30hqml5sx0j0v2w39r705lacyvb9nhn55fknmvhn18bj3vz9w",
         "type": "tarball",
-        "url": "https://github.com/ocaml/opam-repository/archive/d2b022bcd8e39f765da6df49a005a3bb88246097.tar.gz",
+        "url": "https://github.com/ocaml/opam-repository/archive/5cf7fff7b9a7bda3695954b06c0c7ff58c5e2a05.tar.gz",
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
     },
     "serokell-nix": {

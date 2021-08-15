@@ -21,7 +21,6 @@ from typing import List
 
 networks = {
     "mainnet": "Main Tezos network",
-    "florencenet": "Test network using version 009 of Tezos protocol (Florence)",
     "granadanet": "Test network using version 010 of Tezos protocol (Granada)",
 }
 
@@ -331,9 +330,9 @@ network_query = Step(
     id="network",
     prompt="Which Tezos network would you like to use?\nCurrently supported:",
     help="The selected network will be used to set up all required services.\n"
-    "The currently supported protocols are 009-PsFLoren (used on florencenet and mainnet)\n"
-    "and 010-PtGRANAD (granadanet).\nKeep in mind that you must select the test network "
-    "(either florencenet or granadanet) if you plan on baking with a faucet JSON file.",
+    "The currently supported protocol is 010-PtGRANAD (used on granadanet and mainnet).\n"
+    "\nKeep in mind that you must select the test network "
+    "(granadanet) if you plan on baking with a faucet JSON file.",
     options=networks,
     validator=Validator(enum_range_validator(networks)),
 )

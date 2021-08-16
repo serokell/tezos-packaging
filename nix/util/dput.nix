@@ -4,8 +4,8 @@
 
 let
   pkgs = import ../build/pkgs.nix { };
-in pkgs.python36Packages.buildPythonApplication rec {
-  propagatedBuildInputs = with pkgs.python36Packages;
+in pkgs.python39Packages.buildPythonApplication rec {
+  propagatedBuildInputs = with pkgs.python39Packages;
     [ debian gpgme pygpgme testscenarios pkgs.gpgme setuptools ];
   src = builtins.fetchTarball {
     url = "https://launchpad.net/ubuntu/+archive/primary/+sourcefiles/dput/1.1.0ubuntu1/dput_1.1.0ubuntu1.tar.xz";

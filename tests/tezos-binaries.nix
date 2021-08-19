@@ -26,6 +26,10 @@ in import "${nixpkgs}/nixos/tests/make-test-python.nix" ({ ... }:
     tezos_signer = f"{path_to_binaries}/tezos-signer"
     tezos_codec = f"{path_to_binaries}/tezos-codec"
     openssl = "${pkgs.openssl.bin}/bin/openssl"
+
+    host_key = "${./host.key}"
+    host_cert = "${./host.cert}"
+
     binaries = [
         tezos_accuser,
         tezos_admin_client,

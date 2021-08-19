@@ -22,12 +22,7 @@ def pkill_background(binary):
 def run_node(network, use_tls):
     machine.succeed("rm -rf node-dir")
     machine.succeed("mkdir node-dir")
-    if use_tls:
-        machine.succeed(f"{openssl} genrsa 2048 > host.key")
-        machine.succeed(
-            f"{openssl} req -new -x509 -nodes -sha256 -days 365 -key host.key -out host.cert -subj '/'"
-        )
-    tls_args = " --rpc-tls=host.cert,host.key " if use_tls else " "
+    tls_args = " --rpc-tls=" + host_cert + "," + host_key + " " if use_tls else " "
     machine.succeed(f"{tezos_node} config init --data-dir node-dir --network {network}")
     machine.succeed(f"{tezos_node} identity generate 1 --data-dir node-dir")
     machine.succeed(

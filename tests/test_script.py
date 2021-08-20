@@ -90,7 +90,7 @@ with subtest("run node with daemons using tls"):
 with subtest("test remote signer"):
     machine.succeed(f"{tezos_signer} -d signer-dir gen keys signer")
     signer_addr = machine.succeed(
-        f'{tezos_signer} -d signer-dir show address signer | head -n 1 | sed -e s/^"Hash: "//g'
+        f'{tezos_signer} -d signer-dir show address signer | tail -n +1 | head -n 1 | sed -e s/^"Hash: "//g'
     )
     machine.succeed(
         f"{tezos_signer} -d signer-dir launch socket signer -a 127.0.0.1 -p 22000 &"

@@ -22,12 +22,7 @@ def pkill_background(binary):
 def run_node(network, use_tls):
     machine.succeed("rm -rf node-dir")
     machine.succeed("mkdir node-dir")
-    if use_tls:
-        machine.succeed(f"{openssl} genrsa 2048 > host.key")
-        machine.succeed(
-            f"{openssl} req -new -x509 -nodes -sha256 -days 365 -key host.key -out host.cert -subj '/'"
-        )
-    tls_args = " --rpc-tls=host.cert,host.key " if use_tls else " "
+    tls_args = " --rpc-tls=" + host_cert + "," + host_key + " " if use_tls else " "
     machine.succeed(f"{tezos_node} config init --data-dir node-dir --network {network}")
     machine.succeed(f"{tezos_node} identity generate 1 --data-dir node-dir")
     machine.succeed(
@@ -95,7 +90,7 @@ with subtest("run node with daemons using tls"):
 with subtest("test remote signer"):
     machine.succeed(f"{tezos_signer} -d signer-dir gen keys signer")
     signer_addr = machine.succeed(
-        f'{tezos_signer} -d signer-dir show address signer | head -n 1 | sed -e s/^"Hash: "//g'
+        f'{tezos_signer} -d signer-dir show address signer | tail -n +1 | head -n 1 | sed -e s/^"Hash: "//g'
     )
     machine.succeed(
         f"{tezos_signer} -d signer-dir launch socket signer -a 127.0.0.1 -p 22000 &"

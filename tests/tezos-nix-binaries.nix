@@ -14,6 +14,7 @@ in import "${nixpkgs}/nixos/tests/make-test-python.nix" ({ ... }:
     environment.systemPackages = with pkgs; [
       libev
     ];
+    security.pki.certificateFiles = [ ./ca.cert ];
     environment.sessionVariables.LD_LIBRARY_PATH =
       [ "${pkgs.ocamlPackages.hacl-star-raw}/lib/ocaml/4.10.0/site-lib/hacl-star-raw" ];
   };
@@ -32,6 +33,8 @@ in import "${nixpkgs}/nixos/tests/make-test-python.nix" ({ ... }:
     )
     tezos_codec = "${tezos-codec}/bin/tezos-codec"
     openssl = "${pkgs.openssl.bin}/bin/openssl"
+    host_key = "${./host.key}"
+    host_cert = "${./host.cert}"
     binaries = [
         tezos_accuser,
         tezos_admin_client,

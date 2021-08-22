@@ -60,9 +60,9 @@
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
     },
     "tezos": {
-        "ref": "refs/tags/v10.0-rc3",
+        "ref": "refs/tags/v10.0",
         "repo": "https://gitlab.com/tezos/tezos",
-        "rev": "68c4ee8a31b61a36f240ef01dd37e0cc85ac6567",
+        "rev": "ea8f2aefbcd54d23ae2919fea1802e2f1f977a94",
         "type": "git"
     }
 }

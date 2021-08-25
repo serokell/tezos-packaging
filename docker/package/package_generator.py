@@ -43,21 +43,13 @@ else:
 package_to_build = args.package
 source_archive = args.sources
 
+# At the moment we package static binaries
 if is_ubuntu:
-    run_deps = ["libev-dev", "libgmp-dev", "libhidapi-dev", "libffi-dev"]
+    run_deps = []
 else:
-    run_deps = ["libev-devel", "gmp-devel", "hidapi-devel", "libffi-devel"]
-build_deps = [
-    "make",
-    "m4",
-    "perl",
-    "pkg-config",
-    "wget",
-    "unzip",
-    "rsync",
-    "gcc",
-    "cargo",
-]
+    run_deps = []
+build_deps = ["make", "wget"]
+
 common_deps = run_deps + build_deps
 
 ubuntu_versions = [

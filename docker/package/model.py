@@ -175,7 +175,9 @@ def gen_systemd_rules_contents(package):
 	dh $@ {"--with systemd" if len(package.systemd_units) > 0 else ""}
 override_dh_systemd_start:
 	dh_systemd_start --no-start
-{override_dh_install_init if len(package.systemd_units) > 1 else ""}"""
+{override_dh_install_init if len(package.systemd_units) > 1 else ""}
+override_dh_strip:
+	dh_strip --exclude={package.name} --exclude={package.name}-arm64"""
     return rules_contents
 
 
@@ -203,17 +205,17 @@ class OpamBasedPackage(AbstractPackage):
         self.meta = meta
 
     def fetch_sources(self, out_dir):
-        opam_package = (
-            "tezos-client" if self.name == "tezos-admin-client" else self.name
-        )
+        os.makedirs(out_dir)
+        # Fetch static binaries from the corresponding release
         subprocess.run(
-            ["opam", "exec", "--", "opam-bundle", f"{opam_package}={self.meta.version}"]
-            + self.optional_opam_deps
-            + ["--ocaml=4.10.2", "--yes", "--opam=2.0.8"],
-            check=True,
+            [
+                "wget",
+                "-P",
+                out_dir,
+                f"https://github.com/serokell/tezos-packaging/releases/download/v{self.meta.version}-1/{self.name}",
+                f"https://github.com/serokell/tezos-packaging/releases/download/v{self.meta.version}-1/{self.name}-arm64",
+            ]
         )
-        subprocess.run(["tar", "-zxf", f"{opam_package}-bundle.tar.gz"], check=True)
-        os.rename(f"{opam_package}-bundle", out_dir)
 
     def gen_control_file(self, deps, ubuntu_version, out):
         str_build_deps = ", ".join(deps)
@@ -268,7 +270,11 @@ Maintainer: {self.meta.maintainer}
 %install
 make %{{name}}
 mkdir -p %{{buildroot}}/%{{_bindir}}
-install -m 0755 %{{name}} %{{buildroot}}/%{{_bindir}}
+if [[ %{{_arch}} == "aarch64" ]]; then
+    install -m 0755 %{{name}}-arm64 %{{buildroot}}/%{{_bindir}}/%{{name}}
+else
+    install -m 0755 %{{name}} %{{buildroot}}/%{{_bindir}}/%{{name}}
+fi
 {systemd_install}
 %files
 %license LICENSE
@@ -286,10 +292,11 @@ install -m 0755 %{{name}} %{{buildroot}}/%{{_bindir}}
 BINDIR=/usr/bin
 
 {self.name}:
-	./compile.sh
-	cp $(CURDIR)/opam/default/bin/{self.name} {self.name}
 
 install: {self.name}
+    ifeq ($(DEB_HOST_ARCH), arm64)
+	cp $(CURDIR)/{self.name}-arm64 $(CURDIR)/{self.name}
+    endif
 	mkdir -p $(DESTDIR)$(BINDIR)
 	cp $(CURDIR)/{self.name} $(DESTDIR)$(BINDIR)
 """

@@ -4,11 +4,7 @@
 
 FROM ubuntu:20.04
 ENV DEBIAN_FRONTEND="noninteractive"
-RUN apt-get update && apt-get install -y libev-dev libgmp-dev libhidapi-dev libffi-dev m4 perl pkg-config \
-  debhelper dh-make dh-systemd devscripts autotools-dev python3 python3-distutils wget rsync
-RUN wget https://github.com/ocaml/opam/releases/download/2.0.8/opam-2.0.8-x86_64-linux -O /usr/bin/opam && chmod +x /usr/bin/opam
-RUN apt-get install -y software-properties-common
-RUN add-apt-repository ppa:ubuntu-mozilla-security/rust-next -y && apt-get update && apt-get -y install cargo
+RUN apt-get update && apt-get install -y debhelper dh-make dh-systemd devscripts autotools-dev wget
 ENV USER dockerbuilder
 RUN useradd dockerbuilder && mkdir /tezos-packaging
 ENV HOME /tezos-packaging
@@ -16,10 +12,6 @@ COPY meta.json /tezos-packaging/meta.json
 COPY protocols.json /tezos-packaging/protocols.json
 WORKDIR /tezos-packaging/docker
 ENV OPAMROOT "/tezos-packaging/docker/opamroot"
-RUN opam init --bare --yes --disable-sandboxing
-RUN opam switch create ocaml-base-compiler.4.10.2
-RUN opam switch set ocaml-base-compiler.4.10.2
-RUN opam install opam-bundle=0.4 --yes
 COPY docker/package/*.py /tezos-packaging/docker/package/
 COPY docker/package/defaults /tezos-packaging/docker/package/defaults
 COPY docker/package/scripts /tezos-packaging/docker/package/scripts

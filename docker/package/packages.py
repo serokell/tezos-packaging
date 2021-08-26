@@ -6,7 +6,7 @@ import os, json
 from .meta import packages_meta
 
 from .model import (
-    OpamBasedPackage,
+    TezosBinaryPackage,
     TezosSaplingParamsPackage,
     TezosBakingServicesPackage,
 )
@@ -117,21 +117,23 @@ ledger_udev_postinst = open(
 ).read()
 
 packages = [
-    OpamBasedPackage(
+    TezosBinaryPackage(
         "tezos-client",
         "CLI client for interacting with tezos blockchain",
         meta=packages_meta,
         optional_opam_deps=["tls", "ledgerwallet-tezos"],
         additional_native_deps=["tezos-sapling-params", "udev"],
         postinst_steps=ledger_udev_postinst,
+        dune_filepath="src/bin_client/main_client.exe",
     ),
-    OpamBasedPackage(
+    TezosBinaryPackage(
         "tezos-admin-client",
         "Administration tool for the node",
         meta=packages_meta,
         optional_opam_deps=["tls"],
+        dune_filepath="src/bin_client/main_admin.exe",
     ),
-    OpamBasedPackage(
+    TezosBinaryPackage(
         "tezos-signer",
         "A client to remotely sign operations or blocks",
         meta=packages_meta,
@@ -139,9 +141,13 @@ packages = [
         additional_native_deps=["udev"],
         systemd_units=signer_units,
         postinst_steps=ledger_udev_postinst,
+        dune_filepath="src/bin_signer/main_signer.exe",
     ),
-    OpamBasedPackage(
-        "tezos-codec", "A client to decode and encode JSON", meta=packages_meta
+    TezosBinaryPackage(
+        "tezos-codec",
+        "A client to decode and encode JSON",
+        meta=packages_meta,
+        dune_filepath="src/bin_codec/codec.exe",
     ),
 ]
 
@@ -215,7 +221,7 @@ node_units.append(
 node_postinst_steps += "mkdir -p /var/lib/tezos/node-custom\n"
 
 packages.append(
-    OpamBasedPackage(
+    TezosBinaryPackage(
         "tezos-node",
         "Entry point for initializing, configuring and running a Tezos node",
         meta=packages_meta,
@@ -232,6 +238,7 @@ packages.append(
         postinst_steps=node_postinst_steps,
         postrm_steps=node_postrm_steps,
         additional_native_deps=["tezos-sapling-params"],
+        dune_filepath="src/bin_node/main.exe",
     )
 )
 
@@ -254,6 +261,7 @@ daemon_postinst_common = (
 
 
 for proto in active_protocols:
+    proto_snake_case = proto.replace("-", "_")
     daemons_instances = [
         network for network, protos in networks_protos.items() if proto in protos
     ]
@@ -373,7 +381,7 @@ for proto in active_protocols:
         Install(wanted_by=["multi-user.target"]),
     )
     packages.append(
-        OpamBasedPackage(
+        TezosBinaryPackage(
             f"tezos-baker-{proto}",
             "Daemon for baking",
             meta=packages_meta,
@@ -400,10 +408,11 @@ for proto in active_protocols:
                 "acl",
                 "udev",
             ],
+            dune_filepath=f"src/proto_{proto_snake_case}/bin_baker/main_baker_{proto_snake_case}.exe",
         )
     )
     packages.append(
-        OpamBasedPackage(
+        TezosBinaryPackage(
             f"tezos-accuser-{proto}",
             "Daemon for accusing",
             meta=packages_meta,
@@ -425,10 +434,11 @@ for proto in active_protocols:
             optional_opam_deps=["tls", "ledgerwallet-tezos"],
             additional_native_deps=["udev"],
             postinst_steps=daemon_postinst_common + ledger_udev_postinst,
+            dune_filepath=f"src/proto_{proto_snake_case}/bin_accuser/main_accuser_{proto_snake_case}.exe",
         )
     )
     packages.append(
-        OpamBasedPackage(
+        TezosBinaryPackage(
             f"tezos-endorser-{proto}",
             "Daemon for endorsing",
             meta=packages_meta,
@@ -450,6 +460,7 @@ for proto in active_protocols:
             optional_opam_deps=["tls", "ledgerwallet-tezos"],
             postinst_steps=daemon_postinst_common + ledger_udev_postinst,
             additional_native_deps=["tezos-client", "acl", "udev"],
+            dune_filepath=f"src/proto_{proto_snake_case}/bin_endorser/main_endorser_{proto_snake_case}.exe",
         )
     )
 

@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: LicenseRef-MIT-TQ
 
 import os, subprocess
+import re
 import shutil
 from copy import deepcopy
 from abc import abstractmethod
@@ -179,12 +180,13 @@ override_dh_systemd_start:
     return rules_contents
 
 
-class OpamBasedPackage(AbstractPackage):
+class TezosBinaryPackage(AbstractPackage):
     def __init__(
         self,
         name: str,
         desc: str,
         meta: PackagesMeta,
+        dune_filepath: str,
         systemd_units: List[SystemdUnit] = [],
         target_proto: str = None,
         optional_opam_deps: List[str] = [],
@@ -201,19 +203,36 @@ class OpamBasedPackage(AbstractPackage):
         self.postrm_steps = postrm_steps
         self.additional_native_deps = additional_native_deps
         self.meta = meta
+        self.dune_filepath = dune_filepath
 
     def fetch_sources(self, out_dir):
-        opam_package = (
-            "tezos-client" if self.name == "tezos-admin-client" else self.name
+        os.makedirs(out_dir)
+        os.chdir(out_dir)
+        shutil.copy(
+            f"{os.path.dirname(__file__)}/scripts/build-binary.sh", "build-binary.sh"
         )
         subprocess.run(
-            ["opam", "exec", "--", "opam-bundle", f"{opam_package}={self.meta.version}"]
-            + self.optional_opam_deps
-            + ["--ocaml=4.10.2", "--yes", "--opam=2.0.8"],
-            check=True,
+            [
+                "git",
+                "clone",
+                "--branch",
+                f"v{self.meta.version}",
+                "https://gitlab.com/tezos/tezos.git",
+                "--depth",
+                "1",
+            ]
         )
-        subprocess.run(["tar", "-zxf", f"{opam_package}-bundle.tar.gz"], check=True)
-        os.rename(f"{opam_package}-bundle", out_dir)
+        subprocess.run(["git", "clone", "https://gitlab.com/tezos/opam-repository.git"])
+        with open("tezos/scripts/version.sh", "r") as f:
+            opam_repository_tag = re.search(
+                "^opam_repository_tag=([0-9a-z]*)", f.read(), flags=re.MULTILINE
+            ).group(1)
+            os.chdir("opam-repository")
+            subprocess.run(["git", "checkout", opam_repository_tag])
+            subprocess.run(["rm", "-rf", ".git"])
+            subprocess.run(["rm", "-r", "zcash-params"])
+            subprocess.run(["opam", "admin", "cache"])
+            os.chdir("../..")
 
     def gen_control_file(self, deps, ubuntu_version, out):
         str_build_deps = ", ".join(deps)
@@ -286,8 +305,7 @@ install -m 0755 %{{name}} %{{buildroot}}/%{{_bindir}}
 BINDIR=/usr/bin
 
 {self.name}:
-	./compile.sh
-	cp $(CURDIR)/opam/default/bin/{self.name} {self.name}
+	./build-binary.sh {self.dune_filepath} {self.name}
 
 install: {self.name}
 	mkdir -p $(DESTDIR)$(BINDIR)

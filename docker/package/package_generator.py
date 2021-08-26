@@ -44,9 +44,15 @@ package_to_build = args.package
 source_archive = args.sources
 
 if is_ubuntu:
-    run_deps = ["libev-dev", "libgmp-dev", "libhidapi-dev", "libffi-dev"]
+    run_deps = ["libev-dev", "libgmp-dev", "libhidapi-dev", "libffi-dev", "zlib1g-dev"]
 else:
-    run_deps = ["libev-devel", "gmp-devel", "hidapi-devel", "libffi-devel"]
+    run_deps = [
+        "libev-devel",
+        "gmp-devel",
+        "hidapi-devel",
+        "libffi-devel",
+        "zlib-devel",
+    ]
 build_deps = [
     "make",
     "m4",
@@ -57,6 +63,9 @@ build_deps = [
     "rsync",
     "gcc",
     "cargo",
+    "opam",
+    "git",
+    "autoconf",
 ]
 common_deps = run_deps + build_deps
 

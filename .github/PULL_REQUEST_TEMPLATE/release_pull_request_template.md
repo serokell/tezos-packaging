@@ -6,11 +6,6 @@ This PR introduces a new <!-- insert new version here --> release in tezos-packa
 
 E.g. in case we introduce a new changes to our native packages, it's not necessary to bump
 used Tezos sources, create a new release in this repository and update brew formulas.
-
-Note that opam-repository is usually updated with some delay, so CI may fail
-due to lack of updated opam Tezos packages. In such case feel free to comment
-out native-packaging-related CI steps from the pipeline until the opam-repository
-is updated.
 -->
 
 <!-- List issues which are going to be resolved in the new packages from this
@@ -31,7 +26,6 @@ Follows #
 - [ ] I updated `url :tag` and `version`s in brew formulas.
 - [ ] I updated release number in [meta.json](/serokell/tezos-packaging/tree/master/meta.json).
 - [ ] If the native release version was updated, I reset the `letter_version` in [model.py](/serokell/tezos-packaging/tree/master/docker/package/model.py).
-- [ ] I removed native-packaging-related steps from CI in case opam-repository wasn't updated yet.
 
 #### In case the new Tezos release provides a new protocol and corresponding testnet
 
@@ -50,7 +44,6 @@ and checking unfinished points in the merged release PR using this template.
 #### Create a new release in this repository
 
 - [ ] I created a new release that is based on the latest autorelease created by the CI.
-- [ ] I enabled native-packaging-related CI steps after opam-repository got updated.
 
 #### Update brew bottles and repository mirrors
 
@@ -62,8 +55,6 @@ and checking unfinished points in the merged release PR using this template.
       [tezos-packaging-stable](https://github.com/serokell/tezos-packaging-stable) mirror repositories.
 
 #### Publish new native packages
-
-Once [opam-repository](https://opam.ocaml.org/packages/) is updated with the new version of Tezos packages.
 
 - [ ] I published new Ubuntu packages, see [these instructions](/serokell/tezos-packaging/tree/master/docker#source-packages-and-publishing-them-on-launchpad-ppa).
 - [ ] I published new Fedora packages, see [these instructions](/serokell/tezos-packaging/tree/master/docker#srcrpm-packages).

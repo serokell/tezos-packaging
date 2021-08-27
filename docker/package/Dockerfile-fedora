@@ -5,7 +5,7 @@
 FROM fedora:32
 RUN dnf update -y
 RUN dnf install -y libev-devel gmp-devel hidapi-devel libffi-devel zlib-devel m4 perl git pkg-config \
-  rpmdevtools python3 wget opam rsync which cargo
+  rpmdevtools python3 wget opam rsync which cargo autoconf
 ENV USER dockerbuilder
 RUN useradd dockerbuilder && mkdir /tezos-packaging
 ENV HOME /tezos-packaging

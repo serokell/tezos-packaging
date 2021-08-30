@@ -10,9 +10,9 @@ class TezosClient < Formula
   end
   homepage "https://gitlab.com/tezos/tezos"
 
-  url "https://gitlab.com/tezos/tezos.git", :tag => "v10.0", :shallow => false
+  url "https://gitlab.com/tezos/tezos.git", :tag => "v10.1", :shallow => false
 
-  version "v10.0-1"
+  version "v10.1-1"
 
   build_dependencies = %w[pkg-config autoconf rsync wget rustup-init]
   build_dependencies.each do |dependency|

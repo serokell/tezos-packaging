@@ -8,6 +8,9 @@ set -euo pipefail
 
 node="/usr/bin/tezos-node"
 
+"$node" upgrade --data-dir "$DATA_DIR" storage
+rm -rf "$DATA_DIR/lmdb_store_to_remove"
+
 if [[ ! -f "$DATA_DIR/identity.json" ]]; then
     "$node" identity generate --data-dir "$DATA_DIR"
 fi

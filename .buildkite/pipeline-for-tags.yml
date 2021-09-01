@@ -7,16 +7,17 @@ steps:
    key: build-bottles
    agents:
      queue: "x86_64-darwin"
-   if: build.tag =~ /^v.*/
+   if: build.tag =~ /^v.*/ || build.tag == "zhenya/test-tag"
    commands:
-   - ./scripts/build-bottles.sh
+  #  - ./scripts/build-bottles.sh
+   - VER_PKG=v10.1-1 VER_MACOS=mojave ./scripts/build-bottles.sh
    artifact_paths:
      - '*.bottle.*'
 
  - wait
 
  - label: Attach bottles to the release
-   if: build.tag =~ /^v.*/
+   if: build.tag =~ /^v.*/ || build.tag == "zhenya/test-tag"
    commands:
    - buildkite-agent artifact download --step build-bottles "*" .
    - nix-shell ./scripts/shell.nix

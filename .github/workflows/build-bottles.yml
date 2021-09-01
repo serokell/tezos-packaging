@@ -4,6 +4,7 @@ on:
   push:
     tags:
       - "v*"
+      - "zhenya/test-tag"
 permissions:
   # Restrict GITHUB_TOKEN permissions
   contents: write
@@ -15,7 +16,8 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Build bottles
-        run: ./scripts/build-bottles.sh
+        # run: ./scripts/build-bottles.sh
+        run: VER_PKG=v10.1-1 VER_MACOS=catalina ./scripts/build-bottles.sh
 
       - name: Upload bottles to Github Actions
         uses: actions/upload-artifact@v2

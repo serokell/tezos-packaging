@@ -1,0 +1,23 @@
+# SPDX-FileCopyrightText: 2021 TQ Tezos <https://tqtezos.com/>
+#
+# SPDX-License-Identifier: LicenseRef-MIT-TQ
+
+steps:
+ - label: Build bottles
+   key: build-bottles
+   agents:
+     queue: "x86_64-darwin"
+   if: build.tag =~ /^v.*/
+   commands:
+   - ./scripts/build-bottles.sh
+   artifact_paths:
+     - '*.bottle.*'
+
+ - wait
+
+ - label: Attach bottles to the release
+   if: build.tag =~ /^v.*/
+   commands:
+   - buildkite-agent artifact download --step build-bottles "*" .
+   - nix-shell ./scripts/shell.nix
+       --run 'gh release upload "$BUILDKITE_TAG" *.bottle.*'

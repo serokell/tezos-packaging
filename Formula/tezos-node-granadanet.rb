@@ -4,7 +4,7 @@
 
 class TezosNodeGranadanet < Formula
   url "file:///dev/null"
-  version "v10.1-1"
+  version "v10.2-1"
 
   bottle :unneeded
   depends_on "tezos-node"

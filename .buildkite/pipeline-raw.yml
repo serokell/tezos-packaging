@@ -22,6 +22,10 @@ steps:
    - tests/buildkite/.*
  - label: build utils
    command: nix-build nix/util/* --no-out-link
+ - label: check auto-inserting bottle hashes
+   commands:
+   - cd tests/bottle-hashes/
+   - ./test-hash-insert.sh
 
  - label: build via nix
    commands:

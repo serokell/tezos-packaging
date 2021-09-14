@@ -5,22 +5,22 @@
         "homepage": "",
         "owner": "kolloch",
         "repo": "crate2nix",
-        "rev": "be7de80a3a94f169f8e666d63031af3122b61f6e",
-        "sha256": "1yggdxkxgnpq23kzgcij8ljahvmvj5cs88vy9sa2wsmqsjpiv2h6",
+        "rev": "773c8775e256fa7ab7fc39c28b25b8fe4086a082",
+        "sha256": "1z6g9m17vy8v6g0q32k7qpkkz6ry3fkwgdixqlwa271phlwrnn55",
         "type": "tarball",
-        "url": "https://github.com/kolloch/crate2nix/archive/be7de80a3a94f169f8e666d63031af3122b61f6e.tar.gz",
+        "url": "https://github.com/kolloch/crate2nix/archive/773c8775e256fa7ab7fc39c28b25b8fe4086a082.tar.gz",
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
     },
     "nixpkgs": {
         "branch": "master",
         "description": "Pinned Nixpkgs tree (master follows nixos-unstable-small, only tags have stable history)",
         "homepage": "",
-        "owner": "NixOS",
+        "owner": "serokell",
         "repo": "nixpkgs",
-        "rev": "5d73f669a84b5271ae0993244b389411794a1a47",
-        "sha256": "0bbmdfgg1x6k5wzvx4371mv0f29xlhl4vng0rpap3jlwf7qlcwf9",
+        "rev": "1714a2ead1a18678afa3cbf75dff3f024c579061",
+        "sha256": "12lypkc60p1w4v4j6gr097hdp1kj7fwhhi5yhb3j73z2l99zrq1d",
         "type": "tarball",
-        "url": "https://github.com/NixOS/nixpkgs/archive/5d73f669a84b5271ae0993244b389411794a1a47.tar.gz",
+        "url": "https://github.com/serokell/nixpkgs/archive/1714a2ead1a18678afa3cbf75dff3f024c579061.tar.gz",
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
     },
     "opam-nix": {
@@ -41,10 +41,10 @@
         "homepage": "https://opam.ocaml.org",
         "owner": "ocaml",
         "repo": "opam-repository",
-        "rev": "aad0f94dee43a430df1f6844690ab429ab089a3c",
-        "sha256": "1ixpxjwigjs731kf1g206mjadshzwxkbnfd234p1yykrlmzpb4zy",
+        "rev": "3e92793804b7f34fca09fb17e2ebafd6d29d90cf",
+        "sha256": "175fdlydmwn6kb09dyz2pz8z2wdsa2lkfys0yqdgv237m67mk2yh",
         "type": "tarball",
-        "url": "https://github.com/ocaml/opam-repository/archive/aad0f94dee43a430df1f6844690ab429ab089a3c.tar.gz",
+        "url": "https://github.com/ocaml/opam-repository/archive/3e92793804b7f34fca09fb17e2ebafd6d29d90cf.tar.gz",
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
     },
     "serokell-nix": {
@@ -53,10 +53,10 @@
         "homepage": "",
         "owner": "serokell",
         "repo": "serokell.nix",
-        "rev": "c8d39be5ea3b5cac5da952f28d37095ef385b89f",
-        "sha256": "0db2hgh2fgpr8hn7rpg1fixjsvl20clj6ld893825rn56a2aq76v",
+        "rev": "46d762e5107d10ad409295a7f668939c21cc048d",
+        "sha256": "04v171r3ii285j3q9ma6sgy7gfj1m1aml6akv01icqwpvailddpd",
         "type": "tarball",
-        "url": "https://github.com/serokell/serokell.nix/archive/c8d39be5ea3b5cac5da952f28d37095ef385b89f.tar.gz",
+        "url": "https://github.com/serokell/serokell.nix/archive/46d762e5107d10ad409295a7f668939c21cc048d.tar.gz",
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
     },
     "tezos": {

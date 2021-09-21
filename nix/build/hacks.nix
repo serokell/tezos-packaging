@@ -229,6 +229,9 @@ rec {
     propagatedBuildInputs = buildInputs;
   });
 
+  tezos-protocol-alpha = osuper.tezos-protocol-alpha.overrideAttrs (o : {
+    buildInputs = o.buildInputs ++ [ tezos-protocol-environment ];
+  });
   tezos-protocol-000-Ps9mPmXa = osuper.tezos-protocol-000-Ps9mPmXa.overrideAttrs (o : {
     buildInputs = o.buildInputs ++ [ tezos-protocol-environment ];
   });
@@ -277,6 +280,9 @@ rec {
   tezos-protocol-genesis = osuper.tezos-protocol-genesis.overrideAttrs (o : {
     buildInputs = o.buildInputs ++ [ tezos-protocol-environment ];
   });
+  tezos-protocol-plugin-alpha = osuper.tezos-protocol-plugin-alpha.overrideAttrs (o : {
+    buildInputs = o.buildInputs ++ [ tezos-protocol-environment ];
+  });
   tezos-protocol-plugin-007-PsDELPH1 = osuper.tezos-protocol-plugin-007-PsDELPH1.overrideAttrs (o : {
     buildInputs = o.buildInputs ++ [ tezos-protocol-environment ];
   });
@@ -294,6 +300,11 @@ rec {
   tezos-validator = osuper.tezos-validator.overrideAttrs
     (o: rec {
       buildInputs = o.buildInputs ++ [ librustzcash ];
+    });
+  tezos-protocol-alpha-parameters = osuper.tezos-protocol-alpha-parameters.overrideAttrs
+    (o: rec {
+      buildInputs = o.buildInputs ++ [ librustzcash ];
+      XDG_DATA_DIRS = "${zcash-params}:$XDG_DATA_DIRS";
     });
   tezos-protocol-006-PsCARTHA-parameters = osuper.tezos-protocol-006-PsCARTHA-parameters.overrideAttrs
     (o: rec {
@@ -332,7 +343,7 @@ rec {
 
   tezos-client = osuper.tezos-client.overrideAttrs
     (o: {
-      buildInputs = o.buildInputs ++ [ librustzcash self.makeWrapper ];
+      buildInputs = o.buildInputs ++ [ librustzcash self.makeWrapper tezos-client-alpha-commands-registration ];
       postInstall = "rm $bin/tezos-admin-client $bin/*.sh";
       postFixup = zcash-post-fixup o;
     });

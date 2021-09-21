@@ -1,9 +1,9 @@
 {
   "ignored": [
-    "alpha",
     "demo-counter"
   ],
   "allowed": [
+    "alpha",
     "genesis",
     "genesis-carthagenet",
     "000-Ps9mPmXa",

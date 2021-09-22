@@ -15,6 +15,10 @@ steps:
 
  - wait
 
+ - label: Add Mojave bottle hashes to formulae
+   commands:
+   - ./buildkite/sync-bottle-hashes.sh "$BUILDKITE_TAG" "Mojave"
+
  - label: Attach bottles to the release
    if: build.tag =~ /^v.*/
    commands:

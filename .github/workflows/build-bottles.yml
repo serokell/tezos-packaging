@@ -23,6 +23,9 @@ jobs:
           name: homebrew-bottles
           path: '*.bottle.*'
 
+      - name: Add Catalina bottle hashes to formulae
+        run: ./buildkite/sync-bottle-hashes.sh "${GITHUB_REF#refs/tags/}" "Catalina"
+
       - name: Attach bottles to the release
         env:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}

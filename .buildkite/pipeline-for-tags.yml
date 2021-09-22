@@ -34,6 +34,15 @@ steps:
    - buildkite-agent artifact download "out/*" . --step build-source-packages
    - ./scripts/publish-native-packages.sh out
 
+ - label: Add Mojave bottle hashes to formulae
+   depends_on:
+   - "build-bottles"
+   if: build.tag =~ /^v.*/
+   commands:
+   - buildkite-agent artifact download --step build-bottles "*" .
+   - nix-shell ./scripts/shell.nix
+       --run './scripts/sync-bottle-hashes.sh "$BUILDKITE_TAG" "Mojave"'
+
  - label: Attach bottles to the release
    depends_on:
    - "build-bottles"

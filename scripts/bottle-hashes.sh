@@ -6,6 +6,8 @@
 # This script takes a directory where the bottles are stored as its argument.
 # Run it from the base directory (tezos-packaging).
 
+set -e
+
 if [[ -d ./Formula ]]
 then
     if [[ -d "$1" ]]

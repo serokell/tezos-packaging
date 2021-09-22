@@ -5,5 +5,5 @@
 { pkgs ? import (import ../nix/nix/sources.nix {}).nixpkgs { } }:
 with pkgs;
 mkShell {
-  buildInputs = [ gh git rename gnupg dput rpm debian-devscripts which util-linux perl ];
+  buildInputs = [ coreutils gnused gh git rename gnupg dput rpm debian-devscripts which util-linux perl ];
 }

@@ -48,7 +48,7 @@ let
   '';
 in
 rec {
-  ocaml = self.ocaml-ng.ocamlPackages_4_10.ocaml;
+  ocaml = self.ocaml-ng.ocamlPackages_4_12.ocaml;
   dune = self.ocamlPackages.dune_2;
   # FIXME opam-nix needs to do this
   ocamlfind = findlib;

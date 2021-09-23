@@ -14,6 +14,13 @@ cd tezos
 
 git apply ../static.patch
 export OPAMYES="true"
+wget https://sh.rustup.rs/rustup-init.sh
+chmod +x rustup-init.sh
+./rustup-init.sh --profile minimal --default-toolchain 1.52.1 -y
+source "$HOME/.cargo/env"
+
+rustc --version
 opam init --bare --disable-sandboxing
 make build-deps
-eval "$(opam env)" && make && make build-sandbox
+eval "$(opam env)" && PROFILE="static" make build && make build-sandbox
+chmod +w tezos-*

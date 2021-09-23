@@ -29,10 +29,10 @@
         "homepage": null,
         "owner": "serokell",
         "repo": "opam-nix",
-        "rev": "bdd7e6730bdf0ea91ada3ebc68387424b087c9f8",
-        "sha256": "1wda717d6391vbgrp0vcv27pxfj4xy1511mssky8ll3iy7i851hn",
+        "rev": "ee285a3b6e05dc274f9ebf59ad64d8a4fded915e",
+        "sha256": "0f3dm834zf7y4c4pp8xr12zl0n1xk0zql3a9m2wh6a5shdcdcwj7",
         "type": "tarball",
-        "url": "https://github.com/serokell/opam-nix/archive/bdd7e6730bdf0ea91ada3ebc68387424b087c9f8.tar.gz",
+        "url": "https://github.com/serokell/opam-nix/archive/ee285a3b6e05dc274f9ebf59ad64d8a4fded915e.tar.gz",
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
     },
     "opam-repository": {

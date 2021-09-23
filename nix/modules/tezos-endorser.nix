@@ -10,6 +10,8 @@ let
   tezos-endorser-pkgs = {
     "010-PtGRANAD" =
       "${pkgs.ocamlPackages.tezos-endorser-010-PtGRANAD}/bin/tezos-endorser-010-PtGRANAD";
+    "011-PtHangzH" =
+      "${pkgs.ocamlPackages.tezos-endorser-011-PtHangzH}/bin/tezos-endorser-011-PtHangzH";
   };
   common = import ./common.nix { inherit lib; inherit pkgs; };
   cfg = config.services.tezos-endorser;

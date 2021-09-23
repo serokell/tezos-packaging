@@ -10,6 +10,8 @@ let
   tezos-accuser-pkgs = {
     "010-PtGRANAD" =
       "${pkgs.ocamlPackages.tezos-accuser-010-PtGRANAD}/bin/tezos-accuser-010-PtGRANAD";
+    "011-PtHangzH" =
+      "${pkgs.ocamlPackages.tezos-accuser-011-PtHangzH}/bin/tezos-accuser-011-PtHangzH";
   };
   cfg = config.services.tezos-accuser;
   common = import ./common.nix { inherit lib; inherit pkgs; };

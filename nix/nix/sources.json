@@ -37,15 +37,14 @@
     },
     "opam-repository": {
         "branch": "master",
-        "description": "Main public package repository for OPAM, the source package manager of OCaml.",
-        "homepage": "https://opam.ocaml.org",
-        "owner": "ocaml",
+        "description": "Tezos opam-repository fork.",
+        "owner": "tezos",
         "repo": "opam-repository",
-        "rev": "3e92793804b7f34fca09fb17e2ebafd6d29d90cf",
-        "sha256": "175fdlydmwn6kb09dyz2pz8z2wdsa2lkfys0yqdgv237m67mk2yh",
+        "rev": "393349af19bb54e3cb790ac8ef54a72adc71aecf",
+        "sha256": "1b89v9488qq0nxjbr249h8mcm6fgz6dyz6ph83gkf3yi83mpqcv0",
         "type": "tarball",
-        "url": "https://github.com/ocaml/opam-repository/archive/3e92793804b7f34fca09fb17e2ebafd6d29d90cf.tar.gz",
-        "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
+        "url": "https://gitlab.com/tezos/opam-repository/-/archive/393349af19bb54e3cb790ac8ef54a72adc71aecf.tar.gz",
+        "url_template": "https://gitlab.com/<owner>/<repo>/-/archive/<rev>.tar.gz"
     },
     "serokell-nix": {
         "branch": "master",

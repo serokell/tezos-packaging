@@ -20,8 +20,6 @@ steps:
    only_changes:
    - .buildkite/filter-pipeline.py
    - tests/buildkite/.*
- - label: build utils
-   command: nix-build nix/util/* --no-out-link
  - label: check auto-inserting bottle hashes
    commands:
    - cd tests/bottle-hashes/

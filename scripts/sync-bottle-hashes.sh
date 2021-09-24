@@ -18,7 +18,7 @@ if [ -z "$1" ] && [ -z "$2" ]; then
         git commit -a -m "[Chore] Add $1 hashes to brew formulae"
     }
 
-    commit_body="Add bottle hashes for $1
+   pr_body="Add bottle hashes for $1
 
 Problem: we have built brew bottles for the new Octez release, but their hashes
 aren't in the formulae yet.
@@ -33,21 +33,21 @@ Solution: added the hashes.
         compute_and_commit "$2"
         git push
 
-        gh pr create -H -b "$commit_body"
+        gh pr create -H -b "$pr_body"
     else
         git switch -c "$branch_name"
         compute_and_commit "$2"
         git push --set-upstream origin "$branch_name"
 
         # If there is a collision precisely at the time of pushing, that means the other pipeline
-        # has pushed but opened the PR yet. Reset to origin and try again, this time opening a PR.
+        # has pushed but not opened the PR yet. Reset to origin and try again, this time opening a PR.
         # Once should always be enough.
         if [[ $? != 0 ]]; then
             git fetch
             git reset --hard origin/"$branch_name"
             compute_and_commit "$2"
             git push
-            gh pr create -H -b "$commit_body"
+            gh pr create -H -b "$pr_body"
         fi
     fi
 else

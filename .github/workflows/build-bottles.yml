@@ -24,7 +24,7 @@ jobs:
           path: '*.bottle.*'
 
       - name: Add Catalina bottle hashes to formulae
-        run: ./buildkite/sync-bottle-hashes.sh "${GITHUB_REF#refs/tags/}" "Catalina"
+        run: ./scripts/sync-bottle-hashes.sh "${GITHUB_REF#refs/tags/}" "Catalina"
 
       - name: Attach bottles to the release
         env:

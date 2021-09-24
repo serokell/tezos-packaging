@@ -266,17 +266,18 @@ Description: {self.desc}
             systemd_files,
             systemd_macros,
         ) = gen_spec_systemd_part(self)
+        version = self.meta.version.replace("-", "")
 
         file_contents = f"""
 %define debug_package %{{nil}}
 Name:    {self.name}
-Version: {self.meta.version}
+Version: {version}
 Release: {self.meta.release}
 Epoch: {self.meta.fedora_epoch}
 Summary: {self.desc}
 License: MIT
 BuildArch: x86_64 aarch64
-Source0: {self.name}-{self.meta.version}.tar.gz
+Source0: {self.name}-{version}.tar.gz
 Source1: https://gitlab.com/tezos/tezos/tree/v{self.meta.version}/
 BuildRequires: {build_requires} {systemd_deps}
 Requires: {requires}, {str_additional_native_deps}
@@ -406,16 +407,17 @@ Description: {self.desc}
             f.write(file_contents)
 
     def gen_spec_file(self, build_deps, run_deps, out):
+        version = self.meta.version.replace("-", "")
         file_contents = f"""
 %define debug_package %{{nil}}
 Name:    {self.name}
-Version: {self.meta.version}
+Version: {version}
 Release: {self.meta.release}
 Epoch: {self.meta.fedora_epoch}
 Summary: {self.desc}
 License: MIT
 BuildArch: x86_64 aarch64
-Source0: {self.name}-{self.meta.version}.tar.gz
+Source0: {self.name}-{version}.tar.gz
 BuildRequires: wget
 %description
 {self.desc}
@@ -580,16 +582,17 @@ Description: {self.desc}
             systemd_files,
             systemd_macros,
         ) = gen_spec_systemd_part(self)
+        version = self.meta.version.replace("-", "")
         file_contents = f"""
 %define debug_package %{{nil}}
 Name:    {self.name}
-Version: {self.meta.version}
+Version: {version}
 Release: {self.meta.release}
 Epoch: {self.meta.fedora_epoch}
 Summary: {self.desc}
 License: MIT
 BuildArch: x86_64 aarch64
-Source0: {self.name}-{self.meta.version}.tar.gz
+Source0: {self.name}-{version}.tar.gz
 Source1: https://gitlab.com/tezos/tezos/tree/v{self.meta.version}/
 BuildRequires: {systemd_deps}
 Requires: {run_deps}

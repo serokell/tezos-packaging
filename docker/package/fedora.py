@@ -15,7 +15,8 @@ def build_fedora_package(
     run_deps: List[str],
     is_source: bool,
 ):
-    dir = f"{pkg.name}-{pkg.meta.version}"
+    version = pkg.meta.version.replace("-", "")
+    dir = f"{pkg.name}-{version}"
     cwd = os.path.dirname(__file__)
     home = os.environ["HOME"]
 

@@ -172,6 +172,8 @@ def gen_systemd_rules_contents(package):
         override_dh_install_init += f"	dh_installinit --name={unit_name}\n"
     rules_contents = f"""#!/usr/bin/make -f
 
+export DEB_CFLAGS_APPEND=-fPIC
+
 %:
 	dh $@ {"--with systemd" if len(package.systemd_units) > 0 else ""}
 override_dh_systemd_start:

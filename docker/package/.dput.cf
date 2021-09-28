@@ -23,3 +23,9 @@ fqdn			= ppa.launchpad.net
 method			= ftp
 incoming		= ~serokell/ubuntu/tezos
 login			= anonymous
+
+[tezos-rc-serokell]
+fqdn			= ppa.launchpad.net
+method			= ftp
+incoming		= ~serokell/ubuntu/tezos-rc
+login			= anonymous

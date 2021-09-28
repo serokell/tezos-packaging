@@ -16,6 +16,7 @@ steps:
  - wait
 
  - label: Add Mojave bottle hashes to formulae
+   if: build.tag =~ /^v.*/
    commands:
    - buildkite-agent artifact download --step build-bottles "*" .
    - ./scripts/sync-bottle-hashes.sh "$BUILDKITE_TAG" "Mojave"

@@ -18,14 +18,7 @@ brew install --formula ./Formula/tezos-sapling-params.rb
 
 # we don't bottle meta-formulas that contains only services
 build_bottle ./Formula/tezos-accuser-010-PtGRANAD.rb
-build_bottle ./Formula/tezos-admin-client.rb
-build_bottle ./Formula/tezos-baker-010-PtGRANAD.rb
 build_bottle ./Formula/tezos-client.rb
-build_bottle ./Formula/tezos-codec.rb
-build_bottle ./Formula/tezos-endorser-010-PtGRANAD.rb
-build_bottle ./Formula/tezos-node.rb
-build_bottle ./Formula/tezos-sandbox.rb
-build_bottle ./Formula/tezos-signer.rb
 
 brew uninstall ./Formula/tezos-sapling-params.rb
 # https://github.com/Homebrew/brew/pull/4612#commitcomment-29995084

@@ -16,6 +16,7 @@ fi
 git config user.name "Serokell CI bot" # necessary for pushing
 git config user.email "hi@serokell.io"
 git fetch --all
+git switch ixahedron/#286-automate-bottle-hashes-pr
 
 branch_name="auto/update-brew-formulae-$1"
 

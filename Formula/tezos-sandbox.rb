@@ -27,8 +27,6 @@ class TezosSandbox < Formula
 
   bottle do
     root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosSandbox.version}/"
-    sha256 cellar: :any, mojave: "536f9184499a3fb993d510de1e88f3e09e2c161d64920f9f1875369d73150e72"
-    sha256 cellar: :any, catalina: "92e1d3123a088e3c897e9bf2f9ed1445007025015ad65c16ea8ea0b83706314c"
   end
 
   def make_deps

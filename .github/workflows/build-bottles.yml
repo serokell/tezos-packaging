@@ -11,6 +11,9 @@ jobs:
   build-bottles:
     runs-on: macos-10.15
     steps:
+      - name: Install coreutils for macOS # for sha256sum
+        run: brew install coreutils
+
       - name: Checkout
         uses: actions/checkout@v2
 
@@ -25,9 +28,4 @@ jobs:
 
       - name: Add Catalina bottle hashes to formulae
         run: ./scripts/sync-bottle-hashes.sh "${GITHUB_REF#refs/tags/}" "Catalina"
-
-      - name: Attach bottles to the release
-        env:
-          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
-        run: gh release upload "${GITHUB_REF#refs/tags/}" *.bottle.*
 

@@ -27,8 +27,6 @@ class TezosCodec < Formula
 
   bottle do
     root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosCodec.version}/"
-    sha256 cellar: :any, mojave: "864e31f9720ceda7d1075e5282eb89aadb57e79903a1c950909be5538d0588a9"
-    sha256 cellar: :any, catalina: "6234e4ecc9453179b4393840459302214acb10661631f96558c0bb68ff31c9ac"
   end
 
   def make_deps

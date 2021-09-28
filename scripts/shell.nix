@@ -5,5 +5,5 @@
 { pkgs ? import (import ../nix/nix/sources.nix {}).nixpkgs { } }:
 with pkgs;
 mkShell {
-  buildInputs = [ gh git rename gnupg ];
+  buildInputs = [ coreutils gh git rename gnupg ];
 }

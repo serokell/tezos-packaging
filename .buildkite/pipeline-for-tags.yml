@@ -19,10 +19,11 @@ steps:
    if: build.tag =~ /^v.*/
    commands:
    - buildkite-agent artifact download --step build-bottles "*" .
-   - ./scripts/sync-bottle-hashes.sh "$BUILDKITE_TAG" "Mojave"
+   - nix-shell ./scripts/shell.nix
+       --run './scripts/sync-bottle-hashes.sh "$BUILDKITE_TAG" "Mojave"'
 
  - label: Attach bottles to the release
-   if: build.tag =~ /^v.*/
+   branches: "master"
    commands:
    - buildkite-agent artifact download --step build-bottles "*" .
    - nix-shell ./scripts/shell.nix

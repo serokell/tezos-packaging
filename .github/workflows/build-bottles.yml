@@ -11,6 +11,14 @@ jobs:
   build-bottles:
     runs-on: macos-10.15
     steps:
+      - name: Install coreutils for macOS # for sha256sum
+        run: brew install coreutils
+
+      - name: Install GNU sed # for the other pipeline compatibility
+        run: |
+          brew install gnu-sed
+          echo "$(brew --prefix)/opt/gnu-sed/libexec/gnubin" >> $GITHUB_PATH
+
       - name: Checkout
         uses: actions/checkout@v2
 
@@ -23,8 +31,10 @@ jobs:
           name: homebrew-bottles
           path: '*.bottle.*'
 
+      - name: Add Catalina bottle hashes to formulae
+        run: ./scripts/sync-bottle-hashes.sh "${GITHUB_REF#refs/tags/}" "Catalina"
+
       - name: Attach bottles to the release
         env:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
         run: gh release upload "${GITHUB_REF#refs/tags/}" *.bottle.*
-

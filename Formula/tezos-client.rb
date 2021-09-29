@@ -27,6 +27,7 @@ class TezosClient < Formula
 
   bottle do
     root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosClient.version}/"
+    sha256 cellar: :any, mojave: "cfb6aded36af733a27efb60c27020168d6bffde70ec3f8262653ce229cf436c1"
     sha256 cellar: :any, mojave: "4c2da21a9d8536b2a804361cf667250b5297e879f5a87dd18a8eae547193f89e"
   end
 

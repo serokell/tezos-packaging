@@ -13,9 +13,30 @@ steps:
    artifact_paths:
      - '*.bottle.*'
 
- - wait
+ - label: Build source packages
+   key: build-source-packages
+   if: build.tag =~ /^v.*-1/
+   agents:
+     queue: "docker"
+   commands:
+   - export TEZOS_VERSION="$(cat nix/nix/sources.json | jq -r '.tezos.ref' | cut -d'/' -f3)"
+   - ./docker/docker-tezos-packages.sh --os ubuntu --type source
+   - ./docker/docker-tezos-packages.sh --os fedora --type source
+   artifact_paths:
+     - ./out/*
+
+ - label: Publish native packages
+   if: build.tag =~ /^v.*-1/
+   depends_on:
+   - "build-source-packages"
+   commands:
+   - export TEZOS_VERSION="$(cat nix/nix/sources.json | jq -r '.tezos.ref' | cut -d'/' -f3)"
+   - buildkite-agent artifact download "out/*" . --step build-source-packages
+   - ./scripts/publish-native-packages.sh out
 
  - label: Attach bottles to the release
+   depends_on:
+   - "build-bottles"
    if: build.tag =~ /^v.*/
    commands:
    - buildkite-agent artifact download --step build-bottles "*" .

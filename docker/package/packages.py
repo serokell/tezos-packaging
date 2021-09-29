@@ -464,7 +464,6 @@ for proto in active_protocols:
         )
     )
 
-packages.append(TezosSaplingParamsPackage(meta=packages_meta))
 packages.append(
     TezosBakingServicesPackage(
         target_networks=networks, network_protos=networks_protos, meta=packages_meta

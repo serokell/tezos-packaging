@@ -22,10 +22,10 @@ rec {
   daemonOptions = sharedOptions // {
 
     baseProtocol = mkOption {
-      type = types.enum [ "010-PtGRANAD"];
+      type = types.enum [ "010-PtGRANAD" "011-PtHangzH" ];
       description = ''
         Base protocol version,
-        '010-PtGRANAD' is supported.
+        '010-PtGRANAD' and '011-PtHangzH' are supported.
       '';
       example = "010-PtGRANAD";
     };

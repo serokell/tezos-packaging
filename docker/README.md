@@ -121,16 +121,24 @@ into `~/.dput.cf`. In case you already have a config, add the following piece
 to it for the further convenience:
 ```
 [tezos-serokell]
-fqdn			= ppa.launchpad.net
-method			= ftp
-incoming		= ~serokell/ubuntu/tezos
-login			= anonymous
+fqdn        = ppa.launchpad.net
+method      = ftp
+incoming    = ~serokell/ubuntu/tezos
+login       = anonymous
+
+[tezos-rc-serokell]
+fqdn        = ppa.launchpad.net
+method      = ftp
+incoming    = ~serokell/ubuntu/tezos-rc
+login       = anonymous
 ```
 
 Signed files now can be submitted to Launchpad PPA. In order to do that run the following
 command for each `.changes` file:
 ```
 dput tezos-serokell ../out/<package>.changes
+# or tezos-rc-serokell in case the corresponding upstream version is release-candidate
+dput tezos-rc-serokell ../out/<package>.changes
 ```
 
 #### Updating release in scope of the same upstream version
@@ -205,4 +213,6 @@ Read more about setting up `copr-cli` [here](https://developer.fedoraproject.org
 In order to submit source package for building run the following command:
 ```
 copr-cli build @Serokell/Tezos --nowait <path to '.src.rpm' file>
+# or @Serokell/Tezos-rc in case the corresponding upstream version is release-candidate
+copr-cli build @Serokell/Tezos-rc --nowait <path to '.src.rpm' file>
 ```

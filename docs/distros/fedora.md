@@ -20,6 +20,18 @@ sudo yum install tezos-baker-010-PtGRANAD
 ```
 Once you install such packages the commands `tezos-*` will be available.
 
+## Using release-candidate packages
+
+In order to use packages with the latest release-candidate Tezos binaries,
+use `@Serokell/Tezos-rc` project:
+```
+# use dnf
+sudo dnf copr enable @Serokell/Tezos-rc
+
+# or use yum
+sudo yum copr enable @Serokell/Tezos-rc
+```
+
 ## Systemd services from Fedora packages
 
 Some of the packages provide background `systemd` services, you can read more about them

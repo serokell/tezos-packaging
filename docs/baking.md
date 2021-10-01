@@ -54,6 +54,12 @@ On Ubuntu:
 sudo add-apt-repository ppa:serokell/tezos
 ```
 
+Alternatively, use packages with release-candidate Tezos binaries:
+```
+# Or use PPA with release-candidate Tezos binaries
+sudo add-apt-repository ppa:serokell/tezos
+```
+
 On Raspberry Pi OS:
 
 ```

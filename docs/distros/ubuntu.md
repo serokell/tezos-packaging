@@ -16,6 +16,14 @@ sudo apt-get install tezos-baker-010-ptgranad
 ```
 Once you install such packages the commands `tezos-*` will be available.
 
+## Using release-candidate packages
+
+In order to use packages with the latest release-candidate Tezos binaries,
+use `ppa:serokell/tezos-rc` PPA:
+```
+sudo add-apt-repository ppa:serokell/tezos-rc && sudo apt-get update
+```
+
 ## `tezos-baking` package
 
 As an addition, `tezos-baking` package provides `tezos-baking-<network>` services that orchestrate

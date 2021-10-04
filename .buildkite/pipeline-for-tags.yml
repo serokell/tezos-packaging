@@ -53,6 +53,6 @@ steps:
        --run 'gh release upload "$BUILDKITE_TAG" *.bottle.*'
 
  - label: Check for new Tezos release
-   if: build.source == "schedule" && build.branch == "master"
+   if: build.source == "schedule" && build.branch == "rvem/#288-automatic-tezos-update"
    commands:
    - nix-shell ./scripts/shell.nix --run scripts/update-tezos.sh

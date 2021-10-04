@@ -3,7 +3,6 @@
 #
 # SPDX-License-Identifier: LicenseRef-MIT-TQ
 
-# TODO: #288 use this script to automate releases PRs
 # This script takes the new tag as its argument.
 # Run it from the base directory (tezos-packaging).
 

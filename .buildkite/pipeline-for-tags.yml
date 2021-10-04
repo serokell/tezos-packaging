@@ -51,3 +51,8 @@ steps:
    - buildkite-agent artifact download --step build-bottles "*" .
    - nix-shell ./scripts/shell.nix
        --run 'gh release upload "$BUILDKITE_TAG" *.bottle.*'
+
+ - label: Check for new Tezos release
+   if: build.source == "schedule" && build.branch == "master"
+   commands:
+   - nix-shell ./scripts/shell.nix --run ./scripts/update-tezos.sh

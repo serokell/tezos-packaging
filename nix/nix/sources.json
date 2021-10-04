@@ -36,15 +36,10 @@
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
     },
     "opam-repository": {
-        "branch": "master",
-        "description": "Tezos opam-repository fork.",
-        "owner": "tezos",
-        "repo": "opam-repository",
+        "ref": "master",
+        "repo": "https://gitlab.com/tezos/opam-repository",
         "rev": "393349af19bb54e3cb790ac8ef54a72adc71aecf",
-        "sha256": "1b89v9488qq0nxjbr249h8mcm6fgz6dyz6ph83gkf3yi83mpqcv0",
-        "type": "tarball",
-        "url": "https://gitlab.com/tezos/opam-repository/-/archive/393349af19bb54e3cb790ac8ef54a72adc71aecf.tar.gz",
-        "url_template": "https://gitlab.com/<owner>/<repo>/-/archive/<rev>.tar.gz"
+        "type": "git"
     },
     "serokell-nix": {
         "branch": "master",

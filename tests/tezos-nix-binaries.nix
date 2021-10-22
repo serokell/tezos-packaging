@@ -5,7 +5,7 @@ let
   nixpkgs = (import ../nix/nix/sources.nix).nixpkgs;
   pkgs = import ../nix/build/pkgs.nix {};
   inherit (pkgs.ocamlPackages) tezos-client tezos-admin-client tezos-node tezos-signer tezos-codec
-    tezos-accuser-011-PtHangzH tezos-baker-011-PtHangzH tezos-endorser-011-PtHangzH;
+    tezos-accuser-010-PtGRANAD tezos-baker-010-PtGRANAD tezos-endorser-010-PtGRANAD;
 in import "${nixpkgs}/nixos/tests/make-test-python.nix" ({ ... }:
 {
   nodes.machine = { ... }: {
@@ -20,13 +20,13 @@ in import "${nixpkgs}/nixos/tests/make-test-python.nix" ({ ... }:
   };
 
   testScript = ''
-    tezos_accuser = "${tezos-accuser-011-PtHangzH}/bin/tezos-accuser-011-PtHangzH"
+    tezos_accuser = "${tezos-accuser-010-PtGRANAD}/bin/tezos-accuser-010-PtGRANAD"
     tezos_admin_client = "${tezos-admin-client}/bin/tezos-admin-client"
-    tezos_baker = "${tezos-baker-011-PtHangzH}/bin/tezos-baker-011-PtHangzH"
+    tezos_baker = "${tezos-baker-010-PtGRANAD}/bin/tezos-baker-010-PtGRANAD"
     tezos_client = (
         "${tezos-client}/bin/tezos-client"
     )
-    tezos_endorser = "${tezos-endorser-011-PtHangzH}/bin/tezos-endorser-011-PtHangzH"
+    tezos_endorser = "${tezos-endorser-010-PtGRANAD}/bin/tezos-endorser-010-PtGRANAD"
     tezos_node = "${tezos-node}/bin/tezos-node"
     tezos_signer = (
         "${tezos-signer}/bin/tezos-signer"

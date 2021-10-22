@@ -10,8 +10,6 @@ let
   tezos-baker-pkgs = {
     "010-PtGRANAD" =
       "${pkgs.ocamlPackages.tezos-baker-010-PtGRANAD}/bin/tezos-baker-010-PtGRANAD";
-    "011-PtHangzH" =
-      "${pkgs.ocamlPackages.tezos-baker-011-PtHangzH}/bin/tezos-baker-011-PtHangzH";
   };
   cfg = config.services.tezos-baker;
   common = import ./common.nix { inherit lib; inherit pkgs; };

@@ -22,7 +22,6 @@ from typing import List
 networks = {
     "mainnet": "Main Tezos network",
     "granadanet": "Test network using version 010 of Tezos protocol (Granada)",
-    "hangzhounet": "Test network using version 011 of Tezos protocol (Hangzhou)",
 }
 
 modes = {

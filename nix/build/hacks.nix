@@ -217,9 +217,6 @@ rec {
   tezos-protocol-010-PtGRANAD = osuper.tezos-protocol-010-PtGRANAD.overrideAttrs (o : {
     buildInputs = o.buildInputs ++ [ tezos-protocol-environment ];
   });
-  tezos-protocol-011-PtHangzH = osuper.tezos-protocol-011-PtHangzH.overrideAttrs (o : {
-    buildInputs = o.buildInputs ++ [ tezos-protocol-environment ];
-  });
   tezos-protocol-demo-noops = osuper.tezos-protocol-demo-noops.overrideAttrs (o : {
     buildInputs = o.buildInputs ++ [ tezos-protocol-environment ];
   });
@@ -242,9 +239,6 @@ rec {
     buildInputs = o.buildInputs ++ [ tezos-protocol-environment ];
   });
   tezos-protocol-plugin-010-PtGRANAD = osuper.tezos-protocol-plugin-010-PtGRANAD.overrideAttrs (o : {
-    buildInputs = o.buildInputs ++ [ tezos-protocol-environment ];
-  });
-  tezos-protocol-plugin-011-PtHangzH = osuper.tezos-protocol-plugin-011-PtHangzH.overrideAttrs (o : {
     buildInputs = o.buildInputs ++ [ tezos-protocol-environment ];
   });
 
@@ -288,11 +282,6 @@ rec {
       buildInputs = o.buildInputs ++ [ librustzcash ];
       XDG_DATA_DIRS = "${zcash-params}:$XDG_DATA_DIRS";
     });
-  tezos-protocol-011-PtHangzH-parameters = osuper.tezos-protocol-011-PtHangzH-parameters.overrideAttrs
-    (o: rec {
-      buildInputs = o.buildInputs ++ [ librustzcash ];
-      XDG_DATA_DIRS = "${zcash-params}:$XDG_DATA_DIRS";
-    });
 
   # FIXME apply this patch upstream
   tezos-stdlib-unix = osuper.tezos-stdlib-unix.overrideAttrs
@@ -316,21 +305,6 @@ rec {
       postFixup = zcash-post-fixup o;
     });
   tezos-endorser-010-PtGRANAD = osuper.tezos-endorser-010-PtGRANAD.overrideAttrs
-    (o: {
-      buildInputs = o.buildInputs ++ [ librustzcash self.makeWrapper ];
-      postFixup = zcash-post-fixup o;
-    });
-  tezos-accuser-011-PtHangzH = osuper.tezos-accuser-011-PtHangzH.overrideAttrs
-    (o: {
-      buildInputs = o.buildInputs ++ [ librustzcash self.makeWrapper ];
-      postFixup = zcash-post-fixup o;
-    });
-  tezos-baker-011-PtHangzH = osuper.tezos-baker-011-PtHangzH.overrideAttrs
-    (o: {
-      buildInputs = o.buildInputs ++ [ librustzcash self.makeWrapper ];
-      postFixup = zcash-post-fixup o;
-    });
-  tezos-endorser-011-PtHangzH = osuper.tezos-endorser-011-PtHangzH.overrideAttrs
     (o: {
       buildInputs = o.buildInputs ++ [ librustzcash self.makeWrapper ];
       postFixup = zcash-post-fixup o;

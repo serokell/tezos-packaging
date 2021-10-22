@@ -7,7 +7,7 @@
 , hacks ? import ./hacks.nix
 , pkgs ? import sources.nixpkgs { }, opam-nix ? import sources.opam-nix pkgs }:
 self: super: {
-  ocamlPackages = self.ocaml-ng.ocamlPackages_4_12.overrideScope'
+  ocamlPackages = self.ocaml-ng.ocamlPackages_4_10.overrideScope'
     (builtins.foldl' self.lib.composeExtensions (_: _: { }) [
       (opam-nix.traverseOPAMRepo' sources.opam-repository)
       (oself: osuper: { index-super = osuper.index.versions."1.2.0"; })

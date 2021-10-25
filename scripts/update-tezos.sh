@@ -22,6 +22,10 @@ source scripts/version.sh
 cd ..
 rm -rf upstream-repo
 
+git clone --bare https://gitlab.com/tezos/opam-repository.git upstream-opam-repository
+opam_repository_branch="$(git --git-dir=upstream-opam-repository name-rev --name-only "$opam_repository_tag" | cut -d'/' -f3)"
+rm -rf upstream-opam-repository
+
 branch_name="auto/$latest_upstream_tag-release"
 
 our_tezos_tag="$(jq -r '.tezos.ref' nix/nix/sources.json | cut -d'/' -f3)"
@@ -34,7 +38,7 @@ if [[ "$latest_upstream_tag" != "$our_tezos_tag" ]]; then
     echo "Updating Tezos to $latest_upstream_tag"
     cd nix
     niv update tezos -a ref="refs/tags/$latest_upstream_tag" -a rev="$latest_upstream_tag_hash"
-    niv update opam-repository -a rev="$opam_repository_tag"
+    niv update opam-repository -a rev="$opam_repository_tag" -a ref="$opam_repository_branch" -b "$opam_repository_branch"
     git commit -a -m "[Chore] Bump Tezos sources to $latest_upstream_tag"
     cd ..
     ./scripts/update-brew-formulae.sh "$latest_upstream_tag-1"

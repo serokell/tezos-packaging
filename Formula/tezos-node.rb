@@ -27,6 +27,7 @@ class TezosNode < Formula
 
   bottle do
     root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosNode.version}/"
+    sha256 cellar: :any, mojave: "28b71c17d35c93ab83e1612a48e06cf9efe7de71054e2ee24a8dfd5fb098d1b5"
   end
 
   def make_deps

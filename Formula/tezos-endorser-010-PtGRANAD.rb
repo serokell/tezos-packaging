@@ -28,6 +28,7 @@ class TezosEndorser010Ptgranad < Formula
 
   bottle do
     root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosEndorser010Ptgranad.version}/"
+    sha256 cellar: :any, mojave: "a8d2131a794a2f9bf5bd88b2c916593b4a8bd29cc7da75f6991cd22b033552dc"
   end
 
   def make_deps

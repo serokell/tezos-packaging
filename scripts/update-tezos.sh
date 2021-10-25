@@ -33,7 +33,7 @@ our_tezos_tag="$(jq -r '.tezos.ref' nix/nix/sources.json | cut -d'/' -f3)"
 if [[ "$latest_upstream_tag" != "$our_tezos_tag" ]]; then
   # If corresponding branch doesn't exist yet, then the release PR
   # wasn't created
-  if ! git rev-parse --verify branch_name; then
+  if ! git rev-parse --verify "$branch_name"; then
     git switch -c "$branch_name"
     echo "Updating Tezos to $latest_upstream_tag"
     cd nix

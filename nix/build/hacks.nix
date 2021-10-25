@@ -48,19 +48,20 @@ let
   '';
 in
 rec {
-  ocaml = self.ocaml-ng.ocamlPackages_4_12.ocaml;
+  ocaml = self.ocaml-ng.ocamlPackages_4_10.ocaml;
   dune = self.ocamlPackages.dune_2;
   # FIXME opam-nix needs to do this
   ocamlfind = findlib;
 
-  hacl-star-raw = osuper.hacl-star-raw.versions."0.4.1".overrideAttrs (o: rec {
+  hacl-star-raw = osuper.hacl-star-raw.versions."0.3.2".overrideAttrs (o: rec {
     preConfigure = "patchShebangs raw/configure";
     sourceRoot = ".";
     buildInputs = o.buildInputs ++ [ self.which ];
     minimalOCamlVersion = "4.10";
   });
-  hacl-star = osuper.hacl-star.versions."0.4.1".overrideAttrs (o: rec {
+  hacl-star = osuper.hacl-star.versions."0.3.2".overrideAttrs (o: rec {
     sourceRoot = ".";
+    buildInputs = o.buildInputs ++ [ odoc ];
     buildPhase = ''
       runHook preBuild
       dune build -p hacl-star -j $NIX_BUILD_CORES @install @doc
@@ -69,14 +70,14 @@ rec {
   });
 
   lwt-canceler = osuper.lwt-canceler.versions."0.3";
-  data-encoding = osuper.data-encoding.versions."0.4";
-  json-data-encoding = osuper.json-data-encoding.versions."0.10";
-  json-data-encoding-bson = osuper.json-data-encoding-bson.versions."0.10";
+  data-encoding = osuper.data-encoding.versions."0.3";
+  json-data-encoding = osuper.json-data-encoding.versions."0.9.1";
+  json-data-encoding-bson = osuper.json-data-encoding-bson.versions."0.9.1";
   ocamlformat = osuper.ocamlformat.overrideAttrs (o: {
     buildInputs = o.buildInputs ++ [ alcotest ocp-indent ];
   });
 
-  bls12-381 = osuper.bls12-381.versions."1.0.0".overrideAttrs (o:
+  bls12-381 = osuper.bls12-381.versions."0.4.3".overrideAttrs (o:
     rec {
       buildInputs = o.buildInputs ++ [ rustc-bls12-381 ];
       buildPhase = ''
@@ -84,16 +85,11 @@ rec {
       '' + o.buildPhase;
   });
 
-  bls12-381-unix = osuper.bls12-381-unix.overrideAttrs (o:
-    rec {
-      buildInputs = o.buildInputs ++ [ rustc-bls12-381 ];
-  });
-
-  bls12-381-legacy = osuper.bls12-381-legacy.overrideAttrs (o:
+  bls12-381-unix = osuper.bls12-381-unix.versions."0.4.3".overrideAttrs (o:
     rec {
       buildInputs = o.buildInputs ++ [ rustc-bls12-381 ];
       buildPhase = ''
-        cp ${rustc-bls12-381.src}/include/* src/legacy/
+        cp ${rustc-bls12-381.src}/include/* src/unix
       '' + o.buildPhase;
   });
 
@@ -141,7 +137,7 @@ rec {
   });
 
   tezos-protocol-environment-structs = osuper.tezos-protocol-environment-structs.overrideAttrs (o: rec {
-    buildInputs = o.buildInputs ++ [ bls12-381-legacy ];
+    buildInputs = o.buildInputs ++ [ ];
     propagatedBuildInputs = buildInputs;
   });
 
@@ -217,9 +213,6 @@ rec {
   tezos-protocol-010-PtGRANAD = osuper.tezos-protocol-010-PtGRANAD.overrideAttrs (o : {
     buildInputs = o.buildInputs ++ [ tezos-protocol-environment ];
   });
-  tezos-protocol-011-PtHangzH = osuper.tezos-protocol-011-PtHangzH.overrideAttrs (o : {
-    buildInputs = o.buildInputs ++ [ tezos-protocol-environment ];
-  });
   tezos-protocol-demo-noops = osuper.tezos-protocol-demo-noops.overrideAttrs (o : {
     buildInputs = o.buildInputs ++ [ tezos-protocol-environment ];
   });
@@ -242,9 +235,6 @@ rec {
     buildInputs = o.buildInputs ++ [ tezos-protocol-environment ];
   });
   tezos-protocol-plugin-010-PtGRANAD = osuper.tezos-protocol-plugin-010-PtGRANAD.overrideAttrs (o : {
-    buildInputs = o.buildInputs ++ [ tezos-protocol-environment ];
-  });
-  tezos-protocol-plugin-011-PtHangzH = osuper.tezos-protocol-plugin-011-PtHangzH.overrideAttrs (o : {
     buildInputs = o.buildInputs ++ [ tezos-protocol-environment ];
   });
 
@@ -288,11 +278,6 @@ rec {
       buildInputs = o.buildInputs ++ [ librustzcash ];
       XDG_DATA_DIRS = "${zcash-params}:$XDG_DATA_DIRS";
     });
-  tezos-protocol-011-PtHangzH-parameters = osuper.tezos-protocol-011-PtHangzH-parameters.overrideAttrs
-    (o: rec {
-      buildInputs = o.buildInputs ++ [ librustzcash ];
-      XDG_DATA_DIRS = "${zcash-params}:$XDG_DATA_DIRS";
-    });
 
   # FIXME apply this patch upstream
   tezos-stdlib-unix = osuper.tezos-stdlib-unix.overrideAttrs
@@ -316,21 +301,6 @@ rec {
       postFixup = zcash-post-fixup o;
     });
   tezos-endorser-010-PtGRANAD = osuper.tezos-endorser-010-PtGRANAD.overrideAttrs
-    (o: {
-      buildInputs = o.buildInputs ++ [ librustzcash self.makeWrapper ];
-      postFixup = zcash-post-fixup o;
-    });
-  tezos-accuser-011-PtHangzH = osuper.tezos-accuser-011-PtHangzH.overrideAttrs
-    (o: {
-      buildInputs = o.buildInputs ++ [ librustzcash self.makeWrapper ];
-      postFixup = zcash-post-fixup o;
-    });
-  tezos-baker-011-PtHangzH = osuper.tezos-baker-011-PtHangzH.overrideAttrs
-    (o: {
-      buildInputs = o.buildInputs ++ [ librustzcash self.makeWrapper ];
-      postFixup = zcash-post-fixup o;
-    });
-  tezos-endorser-011-PtHangzH = osuper.tezos-endorser-011-PtHangzH.overrideAttrs
     (o: {
       buildInputs = o.buildInputs ++ [ librustzcash self.makeWrapper ];
       postFixup = zcash-post-fixup o;

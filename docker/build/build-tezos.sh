@@ -14,13 +14,14 @@ cd tezos
 
 git apply ../static.patch
 export OPAMYES="true"
-wget https://sh.rustup.rs/rustup-init.sh
-chmod +x rustup-init.sh
-./rustup-init.sh --profile minimal --default-toolchain 1.52.1 -y
-source "$HOME/.cargo/env"
+# Alpine 3.12 already provides rust with required version
+# Uncomment and adjust when another version is required by Tezos
+# wget https://sh.rustup.rs/rustup-init.sh
+# chmod +x rustup-init.sh
+# ./rustup-init.sh --profile minimal --default-toolchain 1.52.1 -y
+# source "$HOME/.cargo/env"
 
-rustc --version
 opam init --bare --disable-sandboxing
 make build-deps
-eval "$(opam env)" && PROFILE="static" make build && make build-sandbox
+eval "$(opam env)" && PROFILE="static" make && make build-sandbox
 chmod +w tezos-*

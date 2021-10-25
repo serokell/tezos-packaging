@@ -10,9 +10,9 @@ class TezosNode < Formula
   end
   homepage "https://gitlab.com/tezos/tezos"
 
-  url "https://gitlab.com/tezos/tezos.git", :tag => "v11.0-rc1", :shallow => false
+  url "https://gitlab.com/tezos/tezos.git", :tag => "v10.3", :shallow => false
 
-  version "v11.0-rc1-1"
+  version "v10.3-1"
 
   build_dependencies = %w[pkg-config autoconf rsync wget rustup-init]
   build_dependencies.each do |dependency|
@@ -27,8 +27,6 @@ class TezosNode < Formula
 
   bottle do
     root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosNode.version}/"
-    sha256 cellar: :any, catalina: "ac7ca4d883ec950fa5f0491296cf90f48d7a8b3490b9c19be0051ea8602ace6c"
-    sha256 cellar: :any, mojave: "7c6402350586f3c25124207b138e96e337ef30dc0465847b535a1583c398796b"
   end
 
   def make_deps
@@ -38,7 +36,7 @@ class TezosNode < Formula
     system "curl", "-L", "https://github.com/ocaml/opam/releases/download/2.0.9/opam-2.0.9-x86_64-macos", "--create-dirs", "-o", "#{ENV["HOME"]}/.opam-bin/opam"
     system "chmod", "+x", "#{ENV["HOME"]}/.opam-bin/opam"
     ENV["PATH"]="#{ENV["HOME"]}/.opam-bin:#{ENV["PATH"]}"
-    system "rustup-init", "--default-toolchain", "1.52.1", "-y"
+    system "rustup-init", "--default-toolchain", "1.44.0", "-y"
     system "opam", "init", "--bare", "--debug", "--auto-setup", "--disable-sandboxing"
     system ["source .cargo/env",  "make build-deps"].join(" && ")
   end

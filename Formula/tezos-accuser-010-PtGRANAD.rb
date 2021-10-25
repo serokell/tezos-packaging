@@ -10,9 +10,9 @@ class TezosAccuser010Ptgranad < Formula
   end
   homepage "https://gitlab.com/tezos/tezos"
 
-  url "https://gitlab.com/tezos/tezos.git", :tag => "v11.0-rc1", :shallow => false
+  url "https://gitlab.com/tezos/tezos.git", :tag => "v10.3", :shallow => false
 
-  version "v11.0-rc1-1"
+  version "v10.3-1"
 
   build_dependencies = %w[pkg-config autoconf rsync wget rustup-init]
   build_dependencies.each do |dependency|
@@ -27,8 +27,6 @@ class TezosAccuser010Ptgranad < Formula
 
   bottle do
     root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosAccuser010Ptgranad.version}/"
-    sha256 cellar: :any, catalina: "5bf99bf2fd86089171411e46a71b1bba724824c83189f8d8c06da0e3d28df59b"
-    sha256 cellar: :any, mojave: "bb60fdeb49d00eb8dd1d97e09a03ba87f88a62d3fe5335a4e4310a483c410bec"
   end
 
   def make_deps
@@ -38,7 +36,7 @@ class TezosAccuser010Ptgranad < Formula
     system "curl", "-L", "https://github.com/ocaml/opam/releases/download/2.0.9/opam-2.0.9-x86_64-macos", "--create-dirs", "-o", "#{ENV["HOME"]}/.opam-bin/opam"
     system "chmod", "+x", "#{ENV["HOME"]}/.opam-bin/opam"
     ENV["PATH"]="#{ENV["HOME"]}/.opam-bin:#{ENV["PATH"]}"
-    system "rustup-init", "--default-toolchain", "1.52.1", "-y"
+    system "rustup-init", "--default-toolchain", "1.44.0", "-y"
     system "opam", "init", "--bare", "--debug", "--auto-setup", "--disable-sandboxing"
     system ["source .cargo/env",  "make build-deps"].join(" && ")
   end

@@ -1,4 +1,5 @@
-#! /usr/bin/env bash
+#! /usr/bin/env nix-shell
+#! nix-shell shell.nix -i bash
 # SPDX-FileCopyrightText: 2021 TQ Tezos <https://tqtezos.com/>
 #
 # SPDX-License-Identifier: LicenseRef-MIT-TQ
@@ -14,7 +15,7 @@ if [ -z "$1" ] || [ -z "$2" ]; then
 fi
 
 git config user.name "Serokell CI bot" # necessary for pushing
-git config user.email "hi@serokell.io"
+git config user.email "tezos-packaging@serokell.io" # this address matches the one that is used for signing packages
 git fetch --all
 
 branch_name="auto/update-brew-formulae-$1"
@@ -31,7 +32,7 @@ while : ; do
     git fetch --all
     git reset --hard origin/"$branch_name"
     ./scripts/bottle-hashes.sh .
-    git commit -a -m "[Chore] Add $1 hashes to brew formulae"
+    git commit -a -m "[Chore] Add $1 hashes to brew formulae" --gpg-sign="tezos-packaging@serokell.io"
     ! git push || break
 done
 

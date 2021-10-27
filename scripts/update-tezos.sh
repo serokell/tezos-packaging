@@ -1,4 +1,5 @@
-#! /usr/bin/env bash
+#! /usr/bin/env nix-shell
+#! nix-shell shell.nix -i bash
 # SPDX-FileCopyrightText: 2021 TQ Tezos <https://tqtezos.com/>
 #
 # SPDX-License-Identifier: LicenseRef-MIT-TQ
@@ -10,7 +11,7 @@
 set -e
 
 git config user.name "Serokell CI bot" # necessary for pushing
-git config user.email "hi@serokell.io"
+git config user.email "tezos-packaging@serokell.io" # this address matches the one that is used for signing packages
 git fetch --all
 
 # Get latest tag from tezos/tezos
@@ -22,6 +23,10 @@ source scripts/version.sh
 cd ..
 rm -rf upstream-repo
 
+git clone --bare https://gitlab.com/tezos/opam-repository.git upstream-opam-repository
+opam_repository_branch="$(git --git-dir=upstream-opam-repository name-rev --name-only "$opam_repository_tag" | cut -d'/' -f3)"
+rm -rf upstream-opam-repository
+
 branch_name="auto/$latest_upstream_tag-release"
 
 our_tezos_tag="$(jq -r '.tezos.ref' nix/nix/sources.json | cut -d'/' -f3)"
@@ -29,16 +34,16 @@ our_tezos_tag="$(jq -r '.tezos.ref' nix/nix/sources.json | cut -d'/' -f3)"
 if [[ "$latest_upstream_tag" != "$our_tezos_tag" ]]; then
   # If corresponding branch doesn't exist yet, then the release PR
   # wasn't created
-  if ! git rev-parse --verify branch_name; then
+  if ! git rev-parse --verify "$branch_name"; then
     git switch -c "$branch_name"
     echo "Updating Tezos to $latest_upstream_tag"
     cd nix
     niv update tezos -a ref="refs/tags/$latest_upstream_tag" -a rev="$latest_upstream_tag_hash"
-    niv update opam-repository -a rev="$opam_repository_tag"
-    git commit -a -m "[Chore] Bump Tezos sources to $latest_upstream_tag"
+    niv update opam-repository -a rev="$opam_repository_tag" -a ref="$opam_repository_branch" -b "$opam_repository_branch"
+    git commit -a -m "[Chore] Bump Tezos sources to $latest_upstream_tag" --gpg-sign="tezos-packaging@serokell.io"
     cd ..
     ./scripts/update-brew-formulae.sh "$latest_upstream_tag-1"
-    git commit -a -m "[Chore] Update brew formulae for $latest_upstream_tag"
+    git commit -a -m "[Chore] Update brew formulae for $latest_upstream_tag" --gpg-sign="tezos-packaging@serokell.io"
     git push --set-upstream origin "$branch_name"
 
     gh pr create -B master -t "[Chore] $latest_upstream_tag release" -F .github/PULL_REQUEST_TEMPLATE/release_pull_request_template.md

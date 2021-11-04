@@ -227,7 +227,7 @@ class TezosBinaryPackage(AbstractPackage):
         subprocess.run(["git", "clone", "https://gitlab.com/tezos/opam-repository.git"])
         with open("tezos/scripts/version.sh", "r") as f:
             opam_repository_tag = re.search(
-                "^opam_repository_tag=([0-9a-z]*)", f.read(), flags=re.MULTILINE
+                "^export opam_repository_tag=([0-9a-z]*)", f.read(), flags=re.MULTILINE
             ).group(1)
             os.chdir("opam-repository")
             subprocess.run(["git", "checkout", opam_repository_tag])

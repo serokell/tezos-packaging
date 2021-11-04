@@ -53,19 +53,29 @@ rec {
   # FIXME opam-nix needs to do this
   ocamlfind = findlib;
 
-  hacl-star-raw = osuper.hacl-star-raw.versions."0.4.1".overrideAttrs (o: rec {
+  hacl-star-raw = osuper.hacl-star-raw.versions."0.4.3".overrideAttrs (o: rec {
     preConfigure = "patchShebangs raw/configure";
     sourceRoot = ".";
     buildInputs = o.buildInputs ++ [ self.which ];
-    minimalOCamlVersion = "4.10";
+    minimalOCamlVersion = "4.12";
   });
-  hacl-star = osuper.hacl-star.versions."0.4.1".overrideAttrs (o: rec {
+  hacl-star = osuper.hacl-star.versions."0.4.3".overrideAttrs (o: rec {
     sourceRoot = ".";
     buildPhase = ''
       runHook preBuild
       dune build -p hacl-star -j $NIX_BUILD_CORES @install @doc
       runHook postBuild
     '';
+  });
+
+  irmin = osuper.irmin.versions."2.8.0".overrideAttrs (o: {
+    useDune2 = true;
+  });
+  irmin-pack = osuper.irmin-pack.versions."2.8.0";
+  irmin-layers = osuper.irmin-layers.versions."2.8.0";
+
+  repr = osuper.repr.versions."0.5.0".overrideAttrs (o: {
+    useDune2 = true;
   });
 
   lwt-canceler = osuper.lwt-canceler.versions."0.3";
@@ -76,7 +86,7 @@ rec {
     buildInputs = o.buildInputs ++ [ alcotest ocp-indent ];
   });
 
-  bls12-381 = osuper.bls12-381.versions."1.0.0".overrideAttrs (o:
+  bls12-381 = osuper.bls12-381.versions."1.0.1".overrideAttrs (o:
     rec {
       buildInputs = o.buildInputs ++ [ rustc-bls12-381 ];
       buildPhase = ''
@@ -106,11 +116,11 @@ rec {
     }
   );
   zarith = osuper.zarith.overrideAttrs(o : {
-    version = "1.11";
+    version = "1.12";
     buildInputs = o.buildInputs ++ [self.perl];
     src = self.fetchurl {
-      url = "https://github.com/ocaml/Zarith/archive/release-1.11.tar.gz";
-      sha256 = "111n33flg4aq5xp5jfksqm4yyz6mzxx9ps9a4yl0dz8h189az5pr";
+      url = "https://github.com/ocaml/Zarith/archive/release-1.12.tar.gz";
+      sha256 = "1098xpqsq3gwpz9k2gc6ahiz2zk0z0xxi1lwc07nvj2570y5ccnc";
     };
     patchPhase = "patchShebangs ./z_pp.pl";
   });

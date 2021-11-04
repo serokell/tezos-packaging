@@ -16,7 +16,7 @@ in import "${nixpkgs}/nixos/tests/make-test-python.nix" ({ ... }:
     ];
     security.pki.certificateFiles = [ ./ca.cert ];
     environment.sessionVariables.LD_LIBRARY_PATH =
-      [ "${pkgs.ocamlPackages.hacl-star-raw}/lib/ocaml/4.10.0/site-lib/hacl-star-raw" ];
+      [ "${pkgs.ocamlPackages.hacl-star-raw}/lib/ocaml/4.12.0/site-lib/hacl-star-raw" ];
   };
 
   testScript = ''

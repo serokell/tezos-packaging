@@ -93,13 +93,50 @@ index c19a310a8f..6c38226293 100644
 +                   -open Tezos_client_base_unix
 +                   -ccopt -static
 +                   -cclib "-lusb-1.0 -lhidapi-libusb -ludev")))
+diff --git a/src/proto_011_PtHangz2/bin_accuser/dune b/src/proto_011_PtHangz2/bin_accuser/dune
+index 11c77973e3..43515f16ed 100644
+--- a/src/proto_011_PtHangz2/bin_accuser/dune
++++ b/src/proto_011_PtHangz2/bin_accuser/dune
+@@ -10,4 +10,6 @@
+                    -open Tezos_client_commands
+                    -open Tezos_baking_011_PtHangz2_commands
+                    -open Tezos_stdlib_unix
+-                   -open Tezos_client_base_unix)))
++                   -open Tezos_client_base_unix
++                   -ccopt -static
++                   -cclib "-lusb-1.0 -lhidapi-libusb -ludev")))
+diff --git a/src/proto_011_PtHangz2/bin_baker/dune b/src/proto_011_PtHangz2/bin_baker/dune
+index 0535edf13c..f0c85ad447 100644
+--- a/src/proto_011_PtHangz2/bin_baker/dune
++++ b/src/proto_011_PtHangz2/bin_baker/dune
+@@ -10,4 +10,6 @@
+                    -open Tezos_client_commands
+                    -open Tezos_baking_011_PtHangz2_commands
+                    -open Tezos_stdlib_unix
+-                   -open Tezos_client_base_unix)))
++                   -open Tezos_client_base_unix
++                   -ccopt -static
++                   -cclib "-lusb-1.0 -lhidapi-libusb -ludev")))
+diff --git a/src/proto_011_PtHangz2/bin_endorser/dune b/src/proto_011_PtHangz2/bin_endorser/dune
+index c19a310a8f..6c38226293 100644
+--- a/src/proto_011_PtHangz2/bin_endorser/dune
++++ b/src/proto_011_PtHangz2/bin_endorser/dune
+@@ -10,4 +10,6 @@
+                    -open Tezos_client_commands
+                    -open Tezos_baking_011_PtHangz2_commands
+                    -open Tezos_stdlib_unix
+-                   -open Tezos_client_base_unix)))
++                   -open Tezos_client_base_unix
++                   -ccopt -static
++                   -cclib "-lusb-1.0 -lhidapi-libusb -ludev")))
 diff --git a/src/bin_sandbox/dune b/src/bin_sandbox/dune
 index 6289c6d124..aa2eb20a29 100644
 --- a/src/bin_sandbox/dune
 +++ b/src/bin_sandbox/dune
-@@ -3,4 +3,4 @@
+@@ -2,4 +2,5 @@
+   (names main)
    (libraries tezos-base
               tezos-base.unix
-              flextesa)
--  (flags :standard))
+-             flextesa))
++             flextesa)
 +  (flags :standard -ccopt -static))

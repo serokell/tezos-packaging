@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: LicenseRef-MIT-TQ
 
-class TezosEndorser010Ptgranad < Formula
+class TezosEndorser011Pthangzh < Formula
   @all_bins = []
 
   class << self
@@ -27,7 +27,7 @@ class TezosEndorser010Ptgranad < Formula
   desc "Daemon for endorsing"
 
   bottle do
-    root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosEndorser010Ptgranad.version}/"
+    root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosEndorser011Pthangzh.version}/"
   end
 
   def make_deps
@@ -57,7 +57,7 @@ class TezosEndorser010Ptgranad < Formula
 
       set -euo pipefail
 
-      endorser="#{bin}/tezos-endorser-010-PtGRANAD"
+      endorser="#{bin}/tezos-endorser-011-PtHangz2"
 
       endorser_dir="$DATA_DIR"
 
@@ -86,15 +86,15 @@ class TezosEndorser010Ptgranad < Formula
           launch_endorser "$ENDORSER_ACCOUNT"
       fi
     EOS
-    File.write("tezos-endorser-010-PtGRANAD-start", startup_contents)
-    bin.install "tezos-endorser-010-PtGRANAD-start"
+    File.write("tezos-endorser-011-PtHangz2-start", startup_contents)
+    bin.install "tezos-endorser-011-PtHangz2-start"
     make_deps
-    install_template "src/proto_010_PtGRANAD/bin_endorser/main_endorser_010_PtGRANAD.exe",
-                     "_build/default/src/proto_010_PtGRANAD/bin_endorser/main_endorser_010_PtGRANAD.exe",
-                     "tezos-endorser-010-PtGRANAD"
+    install_template "src/proto_011_PtHangz2/bin_endorser/main_endorser_011_PtHangz2.exe",
+                     "_build/default/src/proto_011_PtHangz2/bin_endorser/main_endorser_011_PtHangz2.exe",
+                     "tezos-endorser-011-PtHangz2"
   end
 
-  plist_options manual: "tezos-endorser-010-PtGRANAD run"
+  plist_options manual: "tezos-endorser-011-PtHangz2 run"
   def plist
     <<~EOS
       <?xml version="1.0" encoding="UTF-8"?>
@@ -105,7 +105,7 @@ class TezosEndorser010Ptgranad < Formula
           <key>Label</key>
           <string>#{plist_name}</string>
           <key>Program</key>
-          <string>#{opt_bin}/tezos-endorser-010-PtGRANAD-start</string>
+          <string>#{opt_bin}/tezos-endorser-011-PtHangz2-start</string>
           <key>EnvironmentVariables</key>
             <dict>
               <key>DATA_DIR</key>

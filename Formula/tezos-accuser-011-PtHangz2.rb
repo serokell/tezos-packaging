@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: LicenseRef-MIT-TQ
 
-class TezosEndorser010Ptgranad < Formula
+class TezosAccuser011Pthangzh < Formula
   @all_bins = []
 
   class << self
@@ -23,17 +23,16 @@ class TezosEndorser010Ptgranad < Formula
   dependencies.each do |dependency|
     depends_on dependency
   end
-
-  desc "Daemon for endorsing"
+  desc "Daemon for accusing"
 
   bottle do
-    root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosEndorser010Ptgranad.version}/"
+    root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosAccuser011Pthangzh.version}/"
   end
 
   def make_deps
     ENV.deparallelize
     ENV["CARGO_HOME"]="./.cargo"
-    # Here is the workaround to use opam 2.0.9 because Tezos is currently not compatible with opam 2.1.0 and newer
+    # Here is the workaround to use opam 2.0 because Tezos is currently not compatible with opam 2.1.0 and newer
     system "curl", "-L", "https://github.com/ocaml/opam/releases/download/2.0.9/opam-2.0.9-x86_64-macos", "--create-dirs", "-o", "#{ENV["HOME"]}/.opam-bin/opam"
     system "chmod", "+x", "#{ENV["HOME"]}/.opam-bin/opam"
     ENV["PATH"]="#{ENV["HOME"]}/.opam-bin:#{ENV["PATH"]}"
@@ -49,7 +48,6 @@ class TezosEndorser010Ptgranad < Formula
     bin.install name
   end
 
-
   def install
     startup_contents =
       <<~EOS
@@ -57,44 +55,36 @@ class TezosEndorser010Ptgranad < Formula
 
       set -euo pipefail
 
-      endorser="#{bin}/tezos-endorser-010-PtGRANAD"
+      accuser="#{bin}/tezos-accuser-011-PtHangz2"
 
-      endorser_dir="$DATA_DIR"
+      accuser_dir="$DATA_DIR"
 
-      endorser_config="$endorser_dir/config"
-      mkdir -p "$endorser_dir"
+      accuser_config="$accuser_dir/config"
+      mkdir -p "$accuser_dir"
 
-      if [ ! -f "$endorser_config" ]; then
-          "$endorser" --base-dir "$endorser_dir" \
-                      --endpoint "$NODE_RPC_ENDPOINT" \
-                      config init --output "$endorser_config" >/dev/null 2>&1
+      if [ ! -f "$accuser_config" ]; then
+          "$accuser" --base-dir "$accuser_dir" \
+                    --endpoint "$NODE_RPC_ENDPOINT" \
+                    config init --output "$accuser_config" >/dev/null 2>&1
       else
-          "$endorser" --base-dir "$endorser_dir" \
-                      --endpoint "$NODE_RPC_ENDPOINT" \
-                      config update >/dev/null 2>&1
+          "$accuser" --base-dir "$accuser_dir" \
+                    --endpoint "$NODE_RPC_ENDPOINT" \
+                    config update >/dev/null 2>&1
       fi
 
-      launch_endorser() {
-          exec "$endorser" --base-dir "$endorser_dir" \
-              --endpoint "$NODE_RPC_ENDPOINT" \
-              run "$@"
-      }
-
-      if [[ -z "$ENDORSER_ACCOUNT" ]]; then
-          launch_endorser
-      else
-          launch_endorser "$ENDORSER_ACCOUNT"
-      fi
+      exec "$accuser" --base-dir "$accuser_dir" \
+          --endpoint "$NODE_RPC_ENDPOINT" \
+          run
     EOS
-    File.write("tezos-endorser-010-PtGRANAD-start", startup_contents)
-    bin.install "tezos-endorser-010-PtGRANAD-start"
+    File.write("tezos-accuser-011-PtHangz2-start", startup_contents)
+    bin.install "tezos-accuser-011-PtHangz2-start"
     make_deps
-    install_template "src/proto_010_PtGRANAD/bin_endorser/main_endorser_010_PtGRANAD.exe",
-                     "_build/default/src/proto_010_PtGRANAD/bin_endorser/main_endorser_010_PtGRANAD.exe",
-                     "tezos-endorser-010-PtGRANAD"
+    install_template "src/proto_011_PtHangz2/bin_accuser/main_accuser_011_PtHangz2.exe",
+                     "_build/default/src/proto_011_PtHangz2/bin_accuser/main_accuser_011_PtHangz2.exe",
+                     "tezos-accuser-011-PtHangz2"
   end
 
-  plist_options manual: "tezos-endorser-010-PtGRANAD run"
+  plist_options manual: "tezos-accuser-011-PtHangz2 run"
   def plist
     <<~EOS
       <?xml version="1.0" encoding="UTF-8"?>
@@ -105,15 +95,13 @@ class TezosEndorser010Ptgranad < Formula
           <key>Label</key>
           <string>#{plist_name}</string>
           <key>Program</key>
-          <string>#{opt_bin}/tezos-endorser-010-PtGRANAD-start</string>
+          <string>#{opt_bin}/tezos-accuser-011-PtHangz2-start</string>
           <key>EnvironmentVariables</key>
             <dict>
               <key>DATA_DIR</key>
               <string>#{var}/lib/tezos/client</string>
               <key>NODE_RPC_ENDPOINT</key>
               <string>http://localhost:8732</string>
-              <key>ENDORSER_ACCOUNT</key>
-              <string></string>
           </dict>
           <key>RunAtLoad</key><true/>
           <key>StandardOutPath</key>

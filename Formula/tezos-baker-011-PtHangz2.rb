@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: LicenseRef-MIT-TQ
 
-class TezosEndorser010Ptgranad < Formula
+class TezosBaker011Pthangzh < Formula
   @all_bins = []
 
   class << self
@@ -19,15 +19,14 @@ class TezosEndorser010Ptgranad < Formula
     depends_on dependency => :build
   end
 
-  dependencies = %w[gmp hidapi libev libffi]
+  dependencies = %w[gmp hidapi libev libffi tezos-sapling-params]
   dependencies.each do |dependency|
     depends_on dependency
   end
-
-  desc "Daemon for endorsing"
+  desc "Daemon for baking"
 
   bottle do
-    root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosEndorser010Ptgranad.version}/"
+    root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosBaker011Pthangzh.version}/"
   end
 
   def make_deps
@@ -49,7 +48,6 @@ class TezosEndorser010Ptgranad < Formula
     bin.install name
   end
 
-
   def install
     startup_contents =
       <<~EOS
@@ -57,44 +55,43 @@ class TezosEndorser010Ptgranad < Formula
 
       set -euo pipefail
 
-      endorser="#{bin}/tezos-endorser-010-PtGRANAD"
+      baker="#{bin}/tezos-baker-011-PtHangz2"
 
-      endorser_dir="$DATA_DIR"
+      baker_dir="$DATA_DIR"
 
-      endorser_config="$endorser_dir/config"
-      mkdir -p "$endorser_dir"
+      baker_config="$baker_dir/config"
+      mkdir -p "$baker_dir"
 
-      if [ ! -f "$endorser_config" ]; then
-          "$endorser" --base-dir "$endorser_dir" \
-                      --endpoint "$NODE_RPC_ENDPOINT" \
-                      config init --output "$endorser_config" >/dev/null 2>&1
+      if [ ! -f "$baker_config" ]; then
+          "$baker" --base-dir "$baker_dir" \
+                  --endpoint "$NODE_RPC_ENDPOINT" \
+                  config init --output "$baker_config" >/dev/null 2>&1
       else
-          "$endorser" --base-dir "$endorser_dir" \
-                      --endpoint "$NODE_RPC_ENDPOINT" \
-                      config update >/dev/null 2>&1
+          "$baker" --base-dir "$baker_dir" \
+                  --endpoint "$NODE_RPC_ENDPOINT" \
+                  config update >/dev/null 2>&1
       fi
 
-      launch_endorser() {
-          exec "$endorser" --base-dir "$endorser_dir" \
-              --endpoint "$NODE_RPC_ENDPOINT" \
-              run "$@"
+      launch_baker() {
+          exec "$baker" \
+              --base-dir "$baker_dir" --endpoint "$NODE_RPC_ENDPOINT" \
+              run with local node "$NODE_DATA_DIR" "$@"
       }
 
-      if [[ -z "$ENDORSER_ACCOUNT" ]]; then
-          launch_endorser
+      if [[ -z "$BAKER_ACCOUNT" ]]; then
+          launch_baker
       else
-          launch_endorser "$ENDORSER_ACCOUNT"
+          launch_baker "$BAKER_ACCOUNT"
       fi
     EOS
-    File.write("tezos-endorser-010-PtGRANAD-start", startup_contents)
-    bin.install "tezos-endorser-010-PtGRANAD-start"
+    File.write("tezos-baker-011-PtHangz2-start", startup_contents)
+    bin.install "tezos-baker-011-PtHangz2-start"
     make_deps
-    install_template "src/proto_010_PtGRANAD/bin_endorser/main_endorser_010_PtGRANAD.exe",
-                     "_build/default/src/proto_010_PtGRANAD/bin_endorser/main_endorser_010_PtGRANAD.exe",
-                     "tezos-endorser-010-PtGRANAD"
+    install_template "src/proto_011_PtHangz2/bin_baker/main_baker_011_PtHangz2.exe",
+                     "_build/default/src/proto_011_PtHangz2/bin_baker/main_baker_011_PtHangz2.exe",
+                     "tezos-baker-011-PtHangz2"
   end
-
-  plist_options manual: "tezos-endorser-010-PtGRANAD run"
+  plist_options manual: "tezos-baker-011-PtHangz2 run with local node"
   def plist
     <<~EOS
       <?xml version="1.0" encoding="UTF-8"?>
@@ -105,14 +102,16 @@ class TezosEndorser010Ptgranad < Formula
           <key>Label</key>
           <string>#{plist_name}</string>
           <key>Program</key>
-          <string>#{opt_bin}/tezos-endorser-010-PtGRANAD-start</string>
+          <string>#{opt_bin}/tezos-baker-011-PtHangz2-start</string>
           <key>EnvironmentVariables</key>
             <dict>
               <key>DATA_DIR</key>
               <string>#{var}/lib/tezos/client</string>
+              <key>NODE_DATA_DIR</key>
+              <string></string>
               <key>NODE_RPC_ENDPOINT</key>
               <string>http://localhost:8732</string>
-              <key>ENDORSER_ACCOUNT</key>
+              <key>BAKER_ACCOUNT</key>
               <string></string>
           </dict>
           <key>RunAtLoad</key><true/>

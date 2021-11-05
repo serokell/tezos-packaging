@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: LicenseRef-MIT-TQ
 
-class TezosBaker011Pthangzh < Formula
+class TezosBaker011Pthangz2 < Formula
   @all_bins = []
 
   class << self
@@ -26,7 +26,7 @@ class TezosBaker011Pthangzh < Formula
   desc "Daemon for baking"
 
   bottle do
-    root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosBaker011Pthangzh.version}/"
+    root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosBaker011Pthangz2.version}/"
   end
 
   def make_deps

@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: LicenseRef-MIT-TQ
 
-class TezosEndorser011Pthangzh < Formula
+class TezosEndorser011Pthangz2 < Formula
   @all_bins = []
 
   class << self
@@ -27,7 +27,7 @@ class TezosEndorser011Pthangzh < Formula
   desc "Daemon for endorsing"
 
   bottle do
-    root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosEndorser011Pthangzh.version}/"
+    root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosEndorser011Pthangz2.version}/"
   end
 
   def make_deps

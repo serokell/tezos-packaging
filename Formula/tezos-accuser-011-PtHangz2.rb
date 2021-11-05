@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: LicenseRef-MIT-TQ
 
-class TezosAccuser011Pthangzh < Formula
+class TezosAccuser011Pthangz2 < Formula
   @all_bins = []
 
   class << self
@@ -26,7 +26,7 @@ class TezosAccuser011Pthangzh < Formula
   desc "Daemon for accusing"
 
   bottle do
-    root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosAccuser011Pthangzh.version}/"
+    root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosAccuser011Pthangz2.version}/"
   end
 
   def make_deps

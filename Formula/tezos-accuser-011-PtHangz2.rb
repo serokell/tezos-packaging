@@ -27,6 +27,7 @@ class TezosAccuser011Pthangz2 < Formula
 
   bottle do
     root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosAccuser011Pthangz2.version}/"
+    sha256 cellar: :any, mojave: "8ccd3d5939314ca8a4d47a43cd87fba024a0ee2e4d079fa8e60c9ad05ef9c9fe"
   end
 
   def make_deps

@@ -10,8 +10,8 @@
 
 set -e
 
-git config user.name "Serokell CI bot" # necessary for pushing
-git config user.email "tezos-packaging@serokell.io" # this address matches the one that is used for signing packages
+git config user.name "serokell-bot" # necessary for pushing
+git config user.email "tezos-packaging@serokell.io"
 git fetch --all
 
 # Get latest tag from tezos/tezos

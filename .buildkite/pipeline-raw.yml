@@ -178,3 +178,12 @@ steps:
        (build.message =~ /^Merge pull request .* from serokell\/auto\/v[0-9]+\.[0-9]+-rc.*-release/ ||
           build.message =~ /^Merge pull request .* from serokell\/auto\/update-brew-formulae-v[.0-9]-rc.*/)
    command: git push git@github.com:serokell/tezos-packaging-rc.git
+
+ # To avoid race-conditions for the gpg key between jobs which sometimes leads to a weird errors
+ - wait
+ # We need to sign commits that update brew formulae separately
+ - label: Sign formulae update commits
+   if: build.branch =~ /^auto\/update-brew-formulae-.*/
+   commands:
+   - nix-shell ./scripts/shell.nix
+       --run './scripts/sign-commits.sh'

@@ -13,8 +13,8 @@ if [ -z "$1" ] || [ -z "$2" ]; then
     exit 1
 fi
 
-git config user.name "Serokell CI bot" # necessary for pushing
-git config user.email "tezos-packaging@serokell.io" # this address matches the one that is used for signing packages
+git config user.name "serokell-bot" # necessary for pushing
+git config user.email "tezos-packaging@serokell.io"
 git fetch --all
 
 branch_name="auto/update-brew-formulae-$1"
@@ -45,6 +45,6 @@ set +e
 
 # We create the PR with the first push, when the other pipeline hasn't finished yet.
 # That's why we 'set +e': one of the two times the command will fail.
-gh pr create -B master -t "[Chore] Add bottle hashes for $1" -b "$pr_body"
+gh pr create -B master -t "[Chore] Add bottle hashes for $1 <unsigned>" -b "$pr_body"
 
 exit 0

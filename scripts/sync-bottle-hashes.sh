@@ -1,5 +1,4 @@
-#! /usr/bin/env nix-shell
-#! nix-shell shell.nix -i bash
+#! /usr/bin/env bash
 # SPDX-FileCopyrightText: 2021 TQ Tezos <https://tqtezos.com/>
 #
 # SPDX-License-Identifier: LicenseRef-MIT-TQ
@@ -32,7 +31,7 @@ while : ; do
     git fetch --all
     git reset --hard origin/"$branch_name"
     ./scripts/bottle-hashes.sh .
-    git commit -a -m "[Chore] Add $1 hashes to brew formulae" --gpg-sign="tezos-packaging@serokell.io"
+    git commit -a -m "[Chore] Add $1 hashes to brew formulae"
     ! git push || break
 done
 

@@ -22,7 +22,7 @@ Resolves #
 
 #### Related changes (conditional)
 
-- [ ] I checked whether I should update the [README](../../tree/master/README.md)
+- [ ] I checked whether I should update the [README](/serokell/tezos-packaging/tree/master/README.md)
 
 - [ ] I checked whether native packaging works, i.e. native binary packages
   can be successfully built.

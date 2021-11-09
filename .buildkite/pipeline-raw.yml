@@ -163,3 +163,18 @@ steps:
    - nix/.*
    - default.nix
    - release.nix
+
+ # Update mirror repositories on master if brew formulae have been updated or bottle hashes added
+ - label: update stable mirror repository
+   if: |
+     build.branch == "master" &&
+       ( build.message =~ /^Merge pull request .* from serokell\/auto\/v[0-9]+\.[0-9]+-release/ ||
+         build.message =~ /^Merge pull request .* from serokell\/auto\/update-brew-formulae-v[.0-9]+-[0-9]+/ )
+   command: git push git@github.com:serokell/tezos-packaging-stable.git
+
+ - label: update RC mirror repository
+   if: |
+     build.branch == "master" &&
+       (build.message =~ /^Merge pull request .* from serokell\/auto\/v[0-9]+\.[0-9]+-rc.*-release/ ||
+          build.message =~ /^Merge pull request .* from serokell\/auto\/update-brew-formulae-v[.0-9]-rc.*/)
+   command: git push git@github.com:serokell/tezos-packaging-rc.git

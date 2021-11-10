@@ -46,7 +46,7 @@ if [[ "$latest_upstream_tag" != "$our_tezos_tag" ]]; then
     git commit -a -m "[Chore] Update brew formulae for $latest_upstream_tag" --gpg-sign="tezos-packaging@serokell.io"
     git push --set-upstream origin "$branch_name"
 
-    gh pr create -B master -t "[Chore] $latest_upstream_tag release" -F .github/PULL_REQUEST_TEMPLATE/release_pull_request_template.md
+    gh pr create -B master -t "[Chore] $latest_upstream_tag release" -F .github/release_pull_request_template.md
   fi
 else
   echo "Our version is the same as the latest tag in the upstream repository"

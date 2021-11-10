@@ -19,11 +19,6 @@ Follows #
 
 ### Changes related to the creation of a release (conditional)
 
-- [ ] I updated Tezos sources and opam-repository (if needed) revisions in [sources.json](/serokell/tezos-packaging/tree/master/nix/nix/sources.json).
-    The opam-repository revision should be the same as the one defined in
-    [`tezos/tezos`](https://gitlab.com/tezos/tezos/-/blob/master/scripts/version.sh) for the relevant tag.
-- [ ] I removed old bottles hashes from the brew formulas in [Formula directory](/serokell/tezos-packaging/tree/master/Formula).
-- [ ] I updated `url :tag` and `version`s in brew formulas.
 - [ ] I updated release number in [meta.json](/serokell/tezos-packaging/tree/master/meta.json).
 - [ ] If the native release version was updated, I reset the `letter_version` in [model.py](/serokell/tezos-packaging/tree/master/docker/package/model.py).
 
@@ -46,18 +41,10 @@ and checking unfinished points in the merged release PR using this template.
 - [ ] I created a new release that is based on the latest autorelease created by the CI.
 
 #### Update brew bottles and repository mirrors
-
-- [ ] I compiled brew bottles for all required macOS versions using [`build-bottles.sh`](/serokell/tezos-packaging/tree/scripts/build-bottles.sh)
-      script and uploaded them to the created release.
-      Note that for this you'll need a macOS machine running each required version.
-- [ ] I added new bottles sha256 hashes to the brew formulas.
+- [ ] I merged PR that updates bottles hashes (this PR is supposed to be created by the CI).
+<!--TODO: remove once https://github.com/serokell/tezos-packaging/issues/314 is resolved -->
 - [ ] I pushed changes to either [tezos-packaging-rc](https://github.com/serokell/tezos-packaging-rc) or
       [tezos-packaging-stable](https://github.com/serokell/tezos-packaging-stable) mirror repositories.
-
-#### Publish new native packages
-
-- [ ] I published new Ubuntu packages, see [these instructions](/serokell/tezos-packaging/tree/master/docker#source-packages-and-publishing-them-on-launchpad-ppa).
-- [ ] I published new Fedora packages, see [these instructions](/serokell/tezos-packaging/tree/master/docker#srcrpm-packages).
 
 #### Update documentation
 

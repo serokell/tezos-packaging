@@ -42,9 +42,6 @@ and checking unfinished points in the merged release PR using this template.
 
 #### Update brew bottles and repository mirrors
 - [ ] I merged PR that updates bottles hashes (this PR is supposed to be created by the CI).
-<!--TODO: remove once https://github.com/serokell/tezos-packaging/issues/314 is resolved -->
-- [ ] I pushed changes to either [tezos-packaging-rc](https://github.com/serokell/tezos-packaging-rc) or
-      [tezos-packaging-stable](https://github.com/serokell/tezos-packaging-stable) mirror repositories.
 
 #### Update documentation
 

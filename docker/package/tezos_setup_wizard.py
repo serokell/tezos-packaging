@@ -9,7 +9,7 @@ A wizard utility to help set up tezos-baker.
 Asks questions, validates answers, and executes the appropriate steps using the final configuration.
 """
 
-import os, sys, subprocess, shlex
+import os, sys, subprocess, shlex, shutil
 import readline
 import re, textwrap
 import urllib.request
@@ -568,7 +568,9 @@ class Setup:
                 return
             elif self.config["snapshot"] == "file":
                 self.query_step(snapshot_file_query)
-                snapshot_file = self.config["snapshot_file"]
+                snapshot_file = shutil.copyfile(
+                    self.config["snapshot_file"], "/tmp/tezos_node.snapshot"
+                )
             elif self.config["snapshot"] == "url":
                 self.query_step(snapshot_url_query)
                 url = self.config["snapshot_url"]
@@ -628,16 +630,13 @@ class Setup:
 
             print("Snapshot imported.")
 
-            if (
-                self.config["snapshot"] == "download rolling"
-                or self.config["snapshot"] == "download full"
-            ):
+            if self.config["snapshot"] in ["download rolling", "download full", "file"]:
                 try:
                     os.remove("/tmp/tezos_node.snapshot")
                 except:
                     pass
                 else:
-                    print("Deleted the downloaded snapshot.")
+                    print("Deleted the temporary snapshot file.")
 
     # Bootstrapping tezos-node
     def bootstrap_node(self):
@@ -662,6 +661,20 @@ class Setup:
                 proc_call("sleep 1")
 
         print("Generated node identity and started the service.")
+
+        self.systemctl_enable()
+
+        if self.config["mode"] == "node":
+            print(
+                "The node setup is finished. It will take some time for the node to bootstrap.",
+                "You can check the progress by running the following command:",
+            )
+            print(f"systemctl status tezos-node-{self.config['network']}.service")
+
+            print()
+            print("Exiting the Tezos Setup Wizard.")
+            sys.exit(0)
+
         print("Waiting for the node to bootstrap...")
 
         proc_call(
@@ -722,10 +735,17 @@ class Setup:
                         )
                     elif self.config["key_import_mode"] == "json":
                         self.query_step(json_filepath_query)
+                        json_tmp_path = shutil.copy(
+                            self.config["json_filepath"], "/tmp/"
+                        )
                         proc_call(
                             f"sudo -u tezos {suppress_warning_text} tezos-client {tezos_client_options} "
-                            f"activate account {baker_alias} with {self.config['json_filepath']} --force"
+                            f"activate account {baker_alias} with {json_tmp_path} --force"
                         )
+                        try:
+                            os.remove(json_tmp_path)
+                        except:
+                            pass
 
                     else:
                         print("Please open the Tezos Baking app on your ledger.")
@@ -855,38 +875,37 @@ class Setup:
         self.fill_baking_config()
         self.query_step(service_mode_query)
 
+        print()
+        self.query_step(systemd_mode_query)
+
         print("Trying to bootstrap tezos-node")
         self.bootstrap_node()
 
-        if self.config["mode"] == "baking":
-            executed = False
-            while not executed:
-                print()
-                print("Importing the baker key")
-                self.import_baker_key()
-
-                print()
-                print("Registering the baker")
-                try:
-                    self.register_baker()
-                except EOFError:
-                    raise EOFError
-                except Exception as e:
-                    print("Something went wrong when calling tezos-client:")
-                    print(str(e))
-                    print()
-                    print("Going back to the previous step.")
-                    print("Please check your input and try again.")
-                    continue
-                executed = True
+        # If we continue execution here, it means we need to set up baking as well.
+        executed = False
+        while not executed:
+            print()
+            print("Importing the baker key")
+            self.import_baker_key()
 
             print()
-            print("Starting the baking instance")
-            self.start_baking()
+            print("Registering the baker")
+            try:
+                self.register_baker()
+            except EOFError:
+                raise EOFError
+            except Exception as e:
+                print("Something went wrong when calling tezos-client:")
+                print(str(e))
+                print()
+                print("Going back to the previous step.")
+                print("Please check your input and try again.")
+                continue
+            executed = True
 
         print()
-        self.query_step(systemd_mode_query)
-        self.systemctl_enable()
+        print("Starting the baking instance")
+        self.start_baking()
 
         print()
         print(
@@ -897,24 +916,15 @@ class Setup:
         )
         print("journalctl -f _UID=$(id tezos -u)")
 
-        if self.config["mode"] == "baking":
-            print()
-            print("To stop the baking instance, run:")
-            print(
-                "sudo systemctl stop tezos-baking-"
-                + self.config["network"]
-                + ".service"
-            )
+        print()
+        print("To stop the baking instance, run:")
+        print(f"sudo systemctl stop tezos-baking-{self.config['network']}.service")
 
-            print()
-            print(
-                "If you previously enabled the baking service and want to disable it, run:"
-            )
-            print(
-                "sudo systemctl disable tezos-baking-"
-                + self.config["network"]
-                + ".service"
-            )
+        print()
+        print(
+            "If you previously enabled the baking service and want to disable it, run:"
+        )
+        print(f"sudo systemctl disable tezos-baking-{self.config['network']}.service")
 
 
 if __name__ == "__main__":

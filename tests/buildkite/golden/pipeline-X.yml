@@ -37,6 +37,7 @@ steps:
   key: H
   label: H
   skip: skipped due to lack of changes
+- wait
 - depends_on:
   - A
   key: X

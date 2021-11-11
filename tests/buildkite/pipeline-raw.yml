@@ -50,6 +50,7 @@ steps:
     - E
     only_changes:
     - H
+  - wait
   - label: X
     key: X
     depends_on:

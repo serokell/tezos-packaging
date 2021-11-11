@@ -120,9 +120,10 @@ visited = set()
 visited_rev = set()
 
 steps = pipeline["steps"]
-key_to_label = build_key_to_label(steps)
-depends_on_dict, depends_on_dict_rev = build_tree(steps, key_to_label)
-for step in steps:
+dict_steps = list(filter(lambda x: isinstance(x, dict), steps))
+key_to_label = build_key_to_label(dict_steps)
+depends_on_dict, depends_on_dict_rev = build_tree(dict_steps, key_to_label)
+for step in dict_steps:
     if check_step(step, splitted_diff):
         label = step["label"]
         dfs(label, depends_on_dict, visited)
@@ -131,7 +132,7 @@ for step in steps:
 for name in visited:
     dfs(name, depends_on_dict_rev, visited_rev)
 
-for step in steps:
+for step in dict_steps:
     label = step["label"]
     if (label not in visited) and (label not in visited_rev):
         step["skip"] = "skipped due to lack of changes"

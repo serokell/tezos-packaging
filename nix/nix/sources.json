@@ -56,9 +56,9 @@
     },
     "tezos": {
         "branch": "master",
-        "ref": "refs/tags/v11.0-rc2",
+        "ref": "refs/tags/v11.0",
         "repo": "https://gitlab.com/tezos/tezos",
-        "rev": "d2739858033fbd2c98fb844b08be99d082b06a3b",
+        "rev": "0e7a0e9a67a381916b8e23cd704f43ac4d770920",
         "type": "git"
     }
 }

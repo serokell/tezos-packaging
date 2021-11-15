@@ -144,14 +144,14 @@ steps:
      queue: "docker"
    only_changes: *native_packaging_changes_regexes
 
- - label: create auto pre-release
+ - label: create auto release/pre-release
    commands:
    - mkdir binaries
    - mkdir arm-binaries
    - buildkite-agent artifact download "docker/*" binaries --step "build-via-docker"
    - buildkite-agent artifact download "docker/*" arm-binaries --step "build-arm-via-docker"
    - ls binaries
-   - ./scripts/autorelease.sh
+   - ./scripts/autorelease.sh "$BUILDKITE_MESSAGE"
    branches: master
    depends_on:
     - "build-via-docker"

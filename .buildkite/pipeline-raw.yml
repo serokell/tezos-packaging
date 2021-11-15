@@ -176,7 +176,7 @@ steps:
    if: |
      build.branch == "master" &&
        (build.message =~ /^Merge pull request .* from serokell\/auto\/v[0-9]+\.[0-9]+-rc.*-release/ ||
-          build.message =~ /^Merge pull request .* from serokell\/auto\/update-brew-formulae-v[.0-9]-rc.*/)
+          build.message =~ /^Merge pull request .* from serokell\/auto\/update-brew-formulae-v[.0-9]+-rc.*/)
    command: git push git@github.com:serokell/tezos-packaging-rc.git
 
  # To avoid race-conditions for the gpg key between jobs which sometimes leads to a weird errors

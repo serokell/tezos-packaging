@@ -30,6 +30,7 @@ steps:
   - E
   key: H
   label: H
+- wait
 - depends_on:
   - A
   key: X

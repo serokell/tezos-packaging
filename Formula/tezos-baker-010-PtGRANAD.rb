@@ -10,9 +10,9 @@ class TezosBaker010Ptgranad < Formula
   end
   homepage "https://gitlab.com/tezos/tezos"
 
-  url "https://gitlab.com/tezos/tezos.git", :tag => "v11.0-rc2", :shallow => false
+  url "https://gitlab.com/tezos/tezos.git", :tag => "v11.0", :shallow => false
 
-  version "v11.0-rc2-1"
+  version "v11.0-1"
 
   build_dependencies = %w[pkg-config autoconf rsync wget rustup-init]
   build_dependencies.each do |dependency|
@@ -27,8 +27,6 @@ class TezosBaker010Ptgranad < Formula
 
   bottle do
     root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosBaker010Ptgranad.version}/"
-    sha256 cellar: :any, catalina: "c6ee0ff180544782897995f93c502a1afc79f021b039863cb7c9731f9a21fdc2"
-    sha256 cellar: :any, mojave: "52a3593704b58dcbf02bda6f7a1ddbb4c06373b0d54f7b555fc65d27997f2906"
   end
 
   def make_deps

@@ -36,10 +36,6 @@ Some of the changes are done after the new release is created, consider followin
 and checking unfinished points in the merged release PR using this template.
 -->
 
-#### Create a new release in this repository
-
-- [ ] I created a new release that is based on the latest autorelease created by the CI.
-
 #### Update brew bottles and repository mirrors
 - [ ] I merged PR that updates bottles hashes (this PR is supposed to be created by the CI).
 

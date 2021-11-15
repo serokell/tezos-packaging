@@ -145,6 +145,7 @@ steps:
    only_changes: *native_packaging_changes_regexes
 
  - label: create auto release/pre-release
+   key: auto-release
    commands:
    - mkdir binaries
    - mkdir arm-binaries
@@ -170,14 +171,18 @@ steps:
      build.branch == "master" &&
        ( build.message =~ /^Merge pull request .* from serokell\/auto\/v[0-9]+\.[0-9]+-release/ ||
          build.message =~ /^Merge pull request .* from serokell\/auto\/update-brew-formulae-v[.0-9]+-[0-9]+/ )
-   command: git push git@github.com:serokell/tezos-packaging-stable.git
+   depends_on:
+   - "auto-release"
+   command: git push --mirror git@github.com:serokell/tezos-packaging-stable.git
 
  - label: update RC mirror repository
    if: |
      build.branch == "master" &&
        (build.message =~ /^Merge pull request .* from serokell\/auto\/v[0-9]+\.[0-9]+-rc.*-release/ ||
           build.message =~ /^Merge pull request .* from serokell\/auto\/update-brew-formulae-v[.0-9]+-rc.*/)
-   command: git push git@github.com:serokell/tezos-packaging-rc.git
+   depends_on:
+   - "auto-release"
+   command: git push --mirror git@github.com:serokell/tezos-packaging-rc.git
 
  # To avoid race-conditions for the gpg key between jobs which sometimes leads to a weird errors
  - wait

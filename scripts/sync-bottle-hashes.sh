@@ -45,6 +45,6 @@ set +e
 
 # We create the PR with the first push, when the other pipeline hasn't finished yet.
 # That's why we 'set +e': one of the two times the command will fail.
-gh pr create -B master -t "[Chore] Add bottle hashes for $1 <unsigned>" -b "$pr_body"
+gh pr create -B master -t "[Chore] Add bottle hashes for $1" -b "$pr_body"
 
 exit 0

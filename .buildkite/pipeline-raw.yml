@@ -6,6 +6,15 @@ env:
   SET_VERSION: "export TEZOS_VERSION=\"$(cat nix/nix/sources.json | jq -r '.tezos.ref' | cut -d'/' -f3)\""
 
 steps:
+ # We need to sign commits that update brew formulae separately
+ - label: Sign formulae update commits
+   if: build.branch =~ /^auto\/update-brew-formulae-.*/
+   commands:
+   - nix-shell ./scripts/shell.nix
+       --run './scripts/sign-commits.sh'
+ # To avoid race-conditions for the gpg key between jobs which sometimes leads to weird errors
+ - wait
+
  - label: reuse lint
    command: nix run -f . pkgs.reuse -c reuse lint
  - label: check trailing whitespace
@@ -183,12 +192,3 @@ steps:
    depends_on:
    - "auto-release"
    command: git push --mirror git@github.com:serokell/tezos-packaging-rc.git
-
- # To avoid race-conditions for the gpg key between jobs which sometimes leads to a weird errors
- - wait
- # We need to sign commits that update brew formulae separately
- - label: Sign formulae update commits
-   if: build.branch =~ /^auto\/update-brew-formulae-.*/
-   commands:
-   - nix-shell ./scripts/shell.nix
-       --run './scripts/sign-commits.sh'

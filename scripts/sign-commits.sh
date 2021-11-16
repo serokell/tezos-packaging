@@ -34,3 +34,7 @@ while : ; do
     exit 0
   fi
 done
+
+# Branch is updated when commits are successfully signed so we exit with non-zero exit code to stop the pipeline in order
+# to avoid running steps on the outdated branch revision
+exit 1

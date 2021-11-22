@@ -36,10 +36,10 @@
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
     },
     "opam-repository": {
-        "branch": "master",
-        "ref": "master",
+        "branch": "v11-no_adx-release",
+        "ref": "v11-no_adx-release",
         "repo": "https://gitlab.com/tezos/opam-repository",
-        "rev": "81526450d9a35941769e88517757c046ed0aef61",
+        "rev": "efc37824b5abfccbf7deeb5d8eebd190348f5a4b",
         "type": "git"
     },
     "serokell-nix": {
@@ -56,9 +56,9 @@
     },
     "tezos": {
         "branch": "master",
-        "ref": "refs/tags/v11.0",
+        "ref": "refs/tags/v11.0+no_adx",
         "repo": "https://gitlab.com/tezos/tezos",
-        "rev": "0e7a0e9a67a381916b8e23cd704f43ac4d770920",
+        "rev": "d43f7230809ffc80b99c3f2b3cbc261389976f66",
         "type": "git"
     }
 }

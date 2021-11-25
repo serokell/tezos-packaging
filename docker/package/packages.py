@@ -15,7 +15,7 @@ from .systemd import Service, ServiceFile, SystemdUnit, Unit, Install
 
 networks = ["mainnet", "granadanet", "hangzhounet"]
 networks_protos = {
-    "mainnet": ["010-PtGRANAD"],
+    "mainnet": ["010-PtGRANAD", "011-PtHangz2"],
     "granadanet": ["010-PtGRANAD"],
     "hangzhounet": ["011-PtHangz2"],
 }

@@ -18,10 +18,12 @@ def build_ubuntu_package(
 ):
     # ubuntu prohibits uppercase in packages names
     pkg_name = pkg.name.lower()
-    dir = f"{pkg_name}-{pkg.meta.version}"
+    old_version = pkg.meta.version
+    # debian build utils don't like '_' symbol in version
+    fixed_version = pkg.meta.version.replace("_", "-")
+    dir = f"{pkg_name}-{fixed_version}"
     cwd = os.path.dirname(__file__)
     date = subprocess.check_output(["date", "-R"]).decode().strip()
-
     if source_archive_path is None:
         pkg.fetch_sources(dir)
         pkg.gen_makefile(f"{dir}/Makefile")
@@ -29,6 +31,7 @@ def build_ubuntu_package(
     else:
         shutil.copy(f"{cwd}/../{source_archive_path}", f"{dir}.tar.gz")
         subprocess.run(["tar", "-xzf", f"{dir}.tar.gz"], check=True)
+    pkg.meta.version = fixed_version
     for ubuntu_version in ubuntu_versions:
         os.chdir(dir)
         subprocess.run(["rm", "-r", "debian"])
@@ -77,7 +80,10 @@ def build_ubuntu_package(
         pkg.gen_postinst("debian/postinst")
         pkg.gen_postrm("debian/postrm")
         pkg.gen_control_file(build_deps, ubuntu_version, "debian/control")
+        # License is downloaded from the tezos repo, thus version should be without workarounds
+        pkg.meta.version = old_version
         pkg.gen_license("debian/copyright")
+        pkg.meta.version = fixed_version
         subprocess.run(
             "rm debian/*.ex debian/*.EX debian/README*", shell=True, check=True
         )
@@ -87,5 +93,6 @@ def build_ubuntu_package(
             check=True,
         )
         os.chdir("..")
+        pkg.meta.version = old_version
 
     subprocess.run(f"rm -rf {dir}", shell=True, check=True)

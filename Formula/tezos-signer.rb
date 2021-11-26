@@ -10,9 +10,9 @@ class TezosSigner < Formula
   end
   homepage "https://gitlab.com/tezos/tezos"
 
-  url "https://gitlab.com/tezos/tezos.git", :tag => "v11.0", :shallow => false
+  url "https://gitlab.com/tezos/tezos.git", :tag => "v11.0+no_adx", :shallow => false
 
-  version "v11.0-1"
+  version "v11.0+no_adx-1"
 
   build_dependencies = %w[pkg-config autoconf rsync wget rustup-init]
   build_dependencies.each do |dependency|
@@ -27,8 +27,6 @@ class TezosSigner < Formula
 
   bottle do
     root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosSigner.version}/"
-    sha256 cellar: :any, catalina: "ebd073aa9d5f3149f79101e9566efc8940cb71820ca6bb9138b686ea3869b676"
-    sha256 cellar: :any, mojave: "9ba5c98bbcf3ec6b779c03525ae5ac8d7032eee9da337267be6b768554d4c205"
   end
 
   def make_deps

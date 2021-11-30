@@ -19,7 +19,7 @@ class TezosSandbox < Formula
     depends_on dependency => :build
   end
 
-  dependencies = %w[gmp hidapi libev libffi]
+  dependencies = %w[gmp hidapi libev libffi coreutils util-linux]
   dependencies.each do |dependency|
     depends_on dependency
   end
@@ -54,5 +54,14 @@ class TezosSandbox < Formula
     install_template "src/bin_sandbox/main.exe",
                      "_build/default/src/bin_sandbox/main.exe",
                      "tezos-sandbox"
+  end
+
+  # homebrew does not allow for post-setup modification of user files,
+  # so we have to provide a caveat to be displayed for the user to adjust $PATH manually
+  def caveats
+    <<~EOS
+      tezos-sandbox depends on 'coreutils' and 'util-linux', which have been installed. Please run the following command to bring them in scope:
+        export PATH=#{HOMEBREW_PREFIX}/opt/coreutils/libexec/gnubin:#{HOMEBREW_PREFIX}/opt/util-linux/bin:$PATH
+    EOS
   end
 end

@@ -12,7 +12,7 @@ sudo add-apt-repository ppa:serokell/tezos && sudo apt-get update
 sudo apt-get install tezos-client
 # dpkg-source prohibits uppercase in the packages names so the protocol
 # name is in lowercase
-sudo apt-get install tezos-baker-010-ptgranad
+sudo apt-get install tezos-baker-011-pthangz2
 ```
 Once you install such packages the commands `tezos-*` will be available.
 

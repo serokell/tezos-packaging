@@ -8,8 +8,6 @@ with lib;
 
 let
   tezos-endorser-pkgs = {
-    "010-PtGRANAD" =
-      "${pkgs.ocamlPackages.tezos-endorser-010-PtGRANAD}/bin/tezos-endorser-010-PtGRANAD";
     "011-PtHangz2" =
       "${pkgs.ocamlPackages.tezos-endorser-011-PtHangz2}/bin/tezos-endorser-011-PtHangz2";
   };

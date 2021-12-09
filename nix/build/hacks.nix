@@ -327,21 +327,6 @@ rec {
       postFixup = zcash-post-fixup o;
     });
 
-  tezos-accuser-010-PtGRANAD = osuper.tezos-accuser-010-PtGRANAD.overrideAttrs
-    (o: {
-      buildInputs = o.buildInputs ++ [ librustzcash self.makeWrapper ];
-      postFixup = zcash-post-fixup o;
-    });
-  tezos-baker-010-PtGRANAD = osuper.tezos-baker-010-PtGRANAD.overrideAttrs
-    (o: {
-      buildInputs = o.buildInputs ++ [ librustzcash self.makeWrapper ];
-      postFixup = zcash-post-fixup o;
-    });
-  tezos-endorser-010-PtGRANAD = osuper.tezos-endorser-010-PtGRANAD.overrideAttrs
-    (o: {
-      buildInputs = o.buildInputs ++ [ librustzcash self.makeWrapper ];
-      postFixup = zcash-post-fixup o;
-    });
   tezos-accuser-011-PtHangz2 = osuper.tezos-accuser-011-PtHangz2.overrideAttrs
     (o: {
       buildInputs = o.buildInputs ++ [ librustzcash self.makeWrapper ];

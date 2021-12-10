@@ -12,11 +12,11 @@ E.g. in order to install `tezos-client` or `tezos-baker` run the following comma
 # use dnf
 sudo dnf copr enable @Serokell/Tezos
 sudo dnf install tezos-client
-sudo dnf install tezos-baker-010-PtGRANAD
+sudo dnf install tezos-baker-011-PtHangz2
 
 # or use yum
 sudo yum copr enable @Serokell/Tezos
-sudo yum install tezos-baker-010-PtGRANAD
+sudo yum install tezos-baker-011-PtHangz2
 ```
 Once you install such packages the commands `tezos-*` will be available.
 

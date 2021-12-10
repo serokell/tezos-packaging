@@ -22,12 +22,12 @@ rec {
   daemonOptions = sharedOptions // {
 
     baseProtocol = mkOption {
-      type = types.enum [ "010-PtGRANAD" "011-PtHangz2" ];
+      type = types.enum [ "011-PtHangz2" ];
       description = ''
         Base protocol version,
-        '010-PtGRANAD' and '011-PtHangz2' are supported.
+        '011-PtHangz2' is supported.
       '';
-      example = "010-PtGRANAD";
+      example = "011-PtHangz2";
     };
 
     rpcPort = mkOption {

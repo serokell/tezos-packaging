@@ -8,8 +8,6 @@ with lib;
 
 let
   tezos-accuser-pkgs = {
-    "010-PtGRANAD" =
-      "${pkgs.ocamlPackages.tezos-accuser-010-PtGRANAD}/bin/tezos-accuser-010-PtGRANAD";
     "011-PtHangz2" =
       "${pkgs.ocamlPackages.tezos-accuser-011-PtHangz2}/bin/tezos-accuser-011-PtHangz2";
   };

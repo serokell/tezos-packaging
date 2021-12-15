@@ -13,6 +13,9 @@ This repo provides various forms of distribution for [Tezos](http://tezos.gitlab
 See the [official documentation](http://tezos.gitlab.io/introduction/howtouse.html)
 for information about the binaries, their usage, and concepts about the Tezos networks.
 
+See the [versioning doc](./docs/versioning.md) for information about the versioning
+policy for the provided forms of distribution.
+
 ## Set up a node and/or baking on Ubuntu
 
 The simplest procedure to set up a node and/or baking instance is provided for Ubuntu.

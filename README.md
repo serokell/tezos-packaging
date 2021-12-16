@@ -40,6 +40,8 @@ the binaries, and the services used.
 - [**Fedora**](./docs/distros/fedora.md)
 - [**macOS**](./docs/distros/macos.md)
 
+The information about supported versions of the aforementioned OSes is available in the [support policy doc](./docs/support-policy.md).
+
 Additionally, prebuilt **static binaries** can be downloaded directly from the
 [latest release](https://github.com/serokell/tezos-packaging/releases/latest)
 for other linux distros.

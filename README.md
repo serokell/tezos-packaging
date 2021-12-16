@@ -56,6 +56,11 @@ This repository provides two distinct ways for building and packaging tezos bina
 * [Docker-based](./docker/README.md)
 * [Nix-based](./nix/README.md)
 
+## Release process
+
+Please see the [release workflow doc](./docs/release-workflow.md) for more information about the details of the `tezos-packaging`
+releasing process.
+
 ## For Contributors
 
 Please see [CONTRIBUTING.md](.github/CONTRIBUTING.md) for more information.

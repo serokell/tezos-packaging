@@ -12,7 +12,7 @@ class TezosSandbox < Formula
 
   url "https://gitlab.com/tezos/tezos.git", :tag => "v11.0+no_adx", :shallow => false
 
-  version "v11.0+no_adx-1"
+  version "v11.0+no_adx-2"
 
   build_dependencies = %w[pkg-config autoconf rsync wget rustup-init]
   build_dependencies.each do |dependency|
@@ -27,14 +27,14 @@ class TezosSandbox < Formula
 
   bottle do
     root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosSandbox.version}/"
-    sha256 cellar: :any, catalina: "fa023385d72c253f5d7cb42376b10416f1cef463d47afbf651138d3bb264709e"
   end
 
   def make_deps
     ENV.deparallelize
     ENV["CARGO_HOME"]="./.cargo"
     # Here is the workaround to use opam 2.0.9 because Tezos is currently not compatible with opam 2.1.0 and newer
-    system "curl", "-L", "https://github.com/ocaml/opam/releases/download/2.0.9/opam-2.0.9-x86_64-macos", "--create-dirs", "-o", "#{ENV["HOME"]}/.opam-bin/opam"
+    arch = RUBY_PLATFORM.include?("arm64") ? "arm64" : "x86_64"
+    system "curl", "-L", "https://github.com/ocaml/opam/releases/download/2.0.9/opam-2.0.9-#{arch}-macos", "--create-dirs", "-o", "#{ENV["HOME"]}/.opam-bin/opam"
     system "chmod", "+x", "#{ENV["HOME"]}/.opam-bin/opam"
     ENV["PATH"]="#{ENV["HOME"]}/.opam-bin:#{ENV["PATH"]}"
     system "rustup-init", "--default-toolchain", "1.52.1", "-y"

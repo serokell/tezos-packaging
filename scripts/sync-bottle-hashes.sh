@@ -31,7 +31,7 @@ while : ; do
     git fetch --all
     git reset --hard origin/"$branch_name"
     ./scripts/bottle-hashes.sh .
-    git commit -a -m "[Chore] Add $1 hashes to brew formulae"
+    git commit -a -m "[Chore] Add $1 hashes to brew formulae for $2"
     ! git push || break
 done
 

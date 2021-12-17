@@ -8,7 +8,7 @@ permissions:
   # Restrict GITHUB_TOKEN permissions
   contents: write
 jobs:
-  build-bottles:
+  build-bottles-catalina:
     runs-on: macos-10.15
     steps:
       - name: Install coreutils for macOS # for sha256sum
@@ -33,6 +33,40 @@ jobs:
 
       - name: Add Catalina bottle hashes to formulae
         run: ./scripts/sync-bottle-hashes.sh "${GITHUB_REF#refs/tags/}" "Catalina"
+
+      - name: Attach bottles to the release
+        env:
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+        run: gh release upload "${GITHUB_REF#refs/tags/}" *.bottle.*
+
+  build-bottles-big-sur:
+    runs-on: macos-11
+    # Unfortunately there is no convenient way to concatenate lists in YAML :(
+    # So the entire steps sequence is copy-pasted to use different macOS version as an
+    # argument in one step
+    steps:
+      - name: Install coreutils for macOS # for sha256sum
+        run: brew install coreutils
+
+      - name: Install GNU sed # for the other pipeline compatibility
+        run: |
+          brew install gnu-sed
+          echo "$(brew --prefix)/opt/gnu-sed/libexec/gnubin" >> $GITHUB_PATH
+
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Build bottles
+        run: ./scripts/build-bottles.sh
+
+      - name: Upload bottles to Github Actions
+        uses: actions/upload-artifact@v2
+        with:
+          name: homebrew-bottles
+          path: '*.bottle.*'
+
+      - name: Add Big Sur bottle hashes to formulae
+        run: ./scripts/sync-bottle-hashes.sh "${GITHUB_REF#refs/tags/}" "Big Sur"
 
       - name: Attach bottles to the release
         env:

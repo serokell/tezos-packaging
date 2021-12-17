@@ -15,6 +15,7 @@ class TezosSaplingParams < Formula
     root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosSaplingParams.version}/"
     sha256 cellar: :any, mojave: "4e89932b0626cffe80214ba45342280c340b34c58ebbf7c3e0185a6d4662732d"
     sha256 cellar: :any, catalina: "5f7a5687d67051eafcfb7cb5ac542143a325a135403daeca6595602bfd400441"
+    sha256 cellar: :any, big_sur: "c910acffd3369bf5c4e0cff112efe6d56035394639b9571d845ad5ecb4dbd01f"
   end
 
   def install

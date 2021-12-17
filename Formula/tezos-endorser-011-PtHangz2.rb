@@ -12,7 +12,7 @@ class TezosEndorser011Pthangz2 < Formula
 
   url "https://gitlab.com/tezos/tezos.git", :tag => "v11.0+no_adx", :shallow => false
 
-  version "v11.0+no_adx-1"
+  version "v11.0+no_adx-2"
 
   build_dependencies = %w[pkg-config autoconf rsync wget rustup-init]
   build_dependencies.each do |dependency|
@@ -28,8 +28,6 @@ class TezosEndorser011Pthangz2 < Formula
 
   bottle do
     root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosEndorser011Pthangz2.version}/"
-    sha256 cellar: :any, catalina: "08e27735c7b211d01c6d2811d5277f27632d6266ce37f25e4ed8eed195f2c96f"
-    sha256 cellar: :any, mojave: "775f3c3681ce511effd62146208bb4458f2f2454e9ceb21efb9a4afaad41eb65"
   end
 
   def make_deps

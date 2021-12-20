@@ -3,10 +3,10 @@
 # SPDX-License-Identifier: LicenseRef-MIT-TQ
 
 steps:
- - label: Build bottles
+ - label: Build Big Sur arm64 bottles
    key: build-bottles
    agents:
-     queue: "x86_64-darwin"
+     queue: "arm64-darwin"
    if: build.tag =~ /^v.*/
    commands:
    - ./scripts/build-bottles.sh
@@ -34,14 +34,14 @@ steps:
    - buildkite-agent artifact download "out/*" . --step build-source-packages
    - ./scripts/publish-native-packages.sh out
 
- - label: Add Mojave bottle hashes to formulae
+ - label: Add Big Sur arm64 bottle hashes to formulae
    depends_on:
    - "build-bottles"
    if: build.tag =~ /^v.*/
    commands:
    - buildkite-agent artifact download --step build-bottles "*" .
    - nix-shell ./scripts/shell.nix
-       --run './scripts/sync-bottle-hashes.sh "$BUILDKITE_TAG" "Mojave"'
+       --run './scripts/sync-bottle-hashes.sh "$BUILDKITE_TAG" "Big Sur arm64"'
 
  - label: Attach bottles to the release
    depends_on:

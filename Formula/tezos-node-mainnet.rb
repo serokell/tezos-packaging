@@ -4,7 +4,7 @@
 
 class TezosNodeMainnet < Formula
   url "file:///dev/null"
-  version "v11.0+no_adx-2"
+  version "v12.0-rc1-1"
 
   bottle :unneeded
   depends_on "tezos-node"

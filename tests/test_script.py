@@ -54,13 +54,11 @@ def run_node_with_daemons(network, use_tls):
         + tls_endpoint
         + "run with local node node-dir baker &"
     )
-    machine.succeed(tezos_endorser + tls_endpoint + "-d client-dir run baker &")
     machine.succeed(tezos_accuser + tls_endpoint + "-d client-dir run &")
 
 
 def kill_node_with_daemons():
     pkill_background("tezos-accuser")
-    pkill_background("tezos-endorser")
     pkill_background("tezos-baker")
     pkill_background("tezos-node")
 
@@ -78,8 +76,8 @@ def test_node_with_daemons_scenario(network, use_tls=False):
     kill_node_with_daemons()
 
 
-with subtest("run node with daemons on hangzhounet"):
-    test_node_with_daemons_scenario("hangzhounet")
+with subtest("run node with daemons on ithacanet"):
+    test_node_with_daemons_scenario("ithacanet")
 
 with subtest("run node with daemons on mainnet"):
     test_node_with_daemons_scenario("mainnet")

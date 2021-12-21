@@ -18,8 +18,10 @@ brew install --formula ./Formula/tezos-sapling-params.rb
 
 # we don't bottle meta-formulas that contains only services
 build_bottle ./Formula/tezos-accuser-011-PtHangz2.rb
+build_bottle ./Formula/tezos-accuser-012-PsiThaCa.rb
 build_bottle ./Formula/tezos-admin-client.rb
 build_bottle ./Formula/tezos-baker-011-PtHangz2.rb
+build_bottle ./Formula/tezos-baker-012-PsiThaCa.rb
 build_bottle ./Formula/tezos-client.rb
 build_bottle ./Formula/tezos-codec.rb
 build_bottle ./Formula/tezos-endorser-011-PtHangz2.rb

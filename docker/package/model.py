@@ -473,13 +473,14 @@ class TezosBakingServicesPackage(AbstractPackage):
     # native releases, so we append an extra letter to the version of
     # the package.
     # This should be reset to "" whenever the native version is bumped.
-    letter_version = "a"
+    letter_version = ""
 
     def __init__(
         self,
         target_networks: List[str],
         network_protos: Dict[str, List[str]],
         meta: PackagesMeta,
+        protocols: Dict[str, List[str]],
     ):
         self.name = "tezos-baking"
         self.desc = "Package that provides systemd services that orchestrate other services from Tezos packages"
@@ -494,7 +495,8 @@ class TezosBakingServicesPackage(AbstractPackage):
             requires = [f"tezos-node-{network}.service"]
             for proto in network_protos[network]:
                 requires.append(f"tezos-baker-{proto.lower()}@{network}.service")
-                requires.append(f"tezos-endorser-{proto.lower()}@{network}.service")
+                if proto not in protocols["active_noendorser"]:
+                    requires.append(f"tezos-endorser-{proto.lower()}@{network}.service")
             self.systemd_units.append(
                 SystemdUnit(
                     service_file=ServiceFile(

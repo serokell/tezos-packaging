@@ -12,7 +12,11 @@ set -euo pipefail
 binaries=("tezos-admin-client" "tezos-client" "tezos-node" "tezos-signer" "tezos-codec" "tezos-sandbox")
 
 for proto in $(jq -r ".active | .[]" ../protocols.json); do
-    binaries+=("tezos-accuser-$proto" "tezos-baker-$proto" "tezos-endorser-$proto")
+    binaries+=("tezos-accuser-$proto" "tezos-baker-$proto" )
+done
+
+for proto in $(jq -r ".active-.active_noendorser | .[]" ../protocols.json); do
+    binaries+=("tezos-endorser-$proto")
 done
 
 if [[ "${USE_PODMAN-}" == "True" ]]; then

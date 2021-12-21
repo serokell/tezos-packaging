@@ -182,7 +182,7 @@ rec {
   tezos-protocol-compiler = osuper.tezos-protocol-compiler.overrideAttrs
     (oa: rec {
       buildInputs = oa.buildInputs ++
-        [ oself.pprint rustc-bls12-381 tezos-stdlib-unix ocp-ocamlres tezos-protocol-environment-sigs
+        [ oself.pprint rustc-bls12-381 ocp-ocamlres tezos-protocol-environment-sigs
           tezos-base re tezos-version
         ];
       propagatedBuildInputs = buildInputs;
@@ -318,10 +318,6 @@ rec {
       buildInputs = o.buildInputs ++ [ librustzcash ];
       XDG_DATA_DIRS = "${zcash-params}:$XDG_DATA_DIRS";
     });
-
-  # FIXME apply this patch upstream
-  tezos-stdlib-unix = osuper.tezos-stdlib-unix.overrideAttrs
-    (_: { patches = [ ./stdlib-unix.patch ]; });
 
   tezos-client = osuper.tezos-client.overrideAttrs
     (o: {

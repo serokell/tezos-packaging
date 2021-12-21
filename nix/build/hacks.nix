@@ -86,7 +86,7 @@ rec {
     buildInputs = o.buildInputs ++ [ alcotest ocp-indent ];
   });
 
-  bls12-381 = osuper.bls12-381.versions."1.0.1+no_adx".overrideAttrs (o:
+  bls12-381 = osuper.bls12-381.versions."1.0.1".overrideAttrs (o:
     rec {
       buildInputs = o.buildInputs ++ [ rustc-bls12-381 ];
       buildPhase = ''
@@ -96,18 +96,6 @@ rec {
 
   bls12-381-unix = osuper.bls12-381-unix.overrideAttrs (o:
     rec {
-      version = "1.0.1+no_adx";
-      src = self.fetchurl {
-        url =
-          "https://gitlab.com/dannywillems/ocaml-bls12-381/-/archive/1.0.1/ocaml-bls12-381-1.0.1.tar.bz2";
-        sha256 = "sha256-9/LcoZBLsaZb53xZa0SMEhcJX0jHj+5QU4wnE4mFV0E=";
-      };
-      patches = [
-        (self.fetchurl {
-          url = "https://gitlab.com/tezos/opam-repository/-/raw/efc37824b5abfccbf7deeb5d8eebd190348f5a4b/packages/bls12-381-unix/bls12-381-unix.1.0.1+no_adx/files/force-no-adx.diff";
-          sha256 = "sha256-nL+w+fmoMskVj52Dm9+Z3pVRWFn6Eq1xkwg1iey578k=";
-        })
-      ];
       buildInputs = o.buildInputs ++ [ rustc-bls12-381 ];
   });
 

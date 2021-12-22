@@ -13,10 +13,11 @@ from .model import (
 
 from .systemd import Service, ServiceFile, SystemdUnit, Unit, Install
 
-networks = ["mainnet", "hangzhounet"]
+networks = ["mainnet", "hangzhounet", "ithacanet"]
 networks_protos = {
     "mainnet": ["011-PtHangz2"],
     "hangzhounet": ["011-PtHangz2"],
+    "ithacanet": ["012-PsiThaCa"],
 }
 
 signer_units = [
@@ -242,9 +243,11 @@ packages.append(
     )
 )
 
-active_protocols = json.load(
+protocols_json = json.load(
     open(f"{os.path.dirname( __file__)}/../../protocols.json", "r")
-)["active"]
+)
+
+active_protocols = protocols_json["active"]
 
 daemons = ["baker", "accuser", "endorser"]
 
@@ -437,35 +440,39 @@ for proto in active_protocols:
             dune_filepath=f"src/proto_{proto_snake_case}/bin_accuser/main_accuser_{proto_snake_case}.exe",
         )
     )
-    packages.append(
-        TezosBinaryPackage(
-            f"tezos-endorser-{proto}",
-            "Daemon for endorsing",
-            meta=packages_meta,
-            systemd_units=[
-                SystemdUnit(
-                    service_file=service_file_endorser,
-                    startup_script=endorser_startup_script.split("/")[-1],
-                    startup_script_source="tezos-endorser-start",
-                    config_file="tezos-endorser.conf",
-                ),
-                SystemdUnit(
-                    service_file=service_file_endorser_instantiated,
-                    startup_script=endorser_startup_script.split("/")[-1],
-                    startup_script_source="tezos-endorser-start",
-                    instances=daemons_instances,
-                ),
-            ],
-            target_proto=proto,
-            optional_opam_deps=["tls", "ledgerwallet-tezos"],
-            postinst_steps=daemon_postinst_common + ledger_udev_postinst,
-            additional_native_deps=["tezos-client", "acl", "udev"],
-            dune_filepath=f"src/proto_{proto_snake_case}/bin_endorser/main_endorser_{proto_snake_case}.exe",
+    if proto not in protocols_json["active_noendorser"]:
+        packages.append(
+            TezosBinaryPackage(
+                f"tezos-endorser-{proto}",
+                "Daemon for endorsing",
+                meta=packages_meta,
+                systemd_units=[
+                    SystemdUnit(
+                        service_file=service_file_endorser,
+                        startup_script=endorser_startup_script.split("/")[-1],
+                        startup_script_source="tezos-endorser-start",
+                        config_file="tezos-endorser.conf",
+                    ),
+                    SystemdUnit(
+                        service_file=service_file_endorser_instantiated,
+                        startup_script=endorser_startup_script.split("/")[-1],
+                        startup_script_source="tezos-endorser-start",
+                        instances=daemons_instances,
+                    ),
+                ],
+                target_proto=proto,
+                optional_opam_deps=["tls", "ledgerwallet-tezos"],
+                postinst_steps=daemon_postinst_common + ledger_udev_postinst,
+                additional_native_deps=["tezos-client", "acl", "udev"],
+                dune_filepath=f"src/proto_{proto_snake_case}/bin_endorser/main_endorser_{proto_snake_case}.exe",
+            )
         )
-    )
 
 packages.append(
     TezosBakingServicesPackage(
-        target_networks=networks, network_protos=networks_protos, meta=packages_meta
+        target_networks=networks,
+        network_protos=networks_protos,
+        meta=packages_meta,
+        protocols=protocols_json,
     )
 )

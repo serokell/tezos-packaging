@@ -2,14 +2,14 @@
 #
 # SPDX-License-Identifier: LicenseRef-MIT-TQ
 
-class TezosNodeMainnet < Formula
+class TezosNodeIthacanet < Formula
   url "file:///dev/null"
   version "v12.0-rc1-1"
 
   bottle :unneeded
   depends_on "tezos-node"
 
-  desc "Meta formula that provides background tezos-node service that runs on mainnet"
+  desc "Meta formula that provides background tezos-node service that runs on ithacanet"
 
   def install
     startup_contents =
@@ -28,14 +28,14 @@ class TezosNodeMainnet < Formula
           "$node" config init \
                   --data-dir "$DATA_DIR" \
                   --rpc-addr "$NODE_RPC_ADDR" \
-                  --network=mainnet \
+                  --network=ithacanet \
                   "$@"
       else
           echo "Updating the node configuration..."
           "$node" config update \
                   --data-dir "$DATA_DIR" \
                   --rpc-addr "$NODE_RPC_ADDR" \
-                  --network=mainnet \
+                  --network=ithacanet \
                   "$@"
       fi
 
@@ -47,9 +47,9 @@ class TezosNodeMainnet < Formula
               --rpc-tls="$CERT_PATH","$KEY_PATH"
       fi
     EOS
-    File.write("tezos-node-mainnet-start", startup_contents)
-    bin.install "tezos-node-mainnet-start"
-    print "Installing tezos-node-mainnet service"
+    File.write("tezos-node-ithacanet-start", startup_contents)
+    bin.install "tezos-node-ithacanet-start"
+    print "Installing tezos-node-ithacanet service"
   end
   def plist
     <<~EOS
@@ -61,11 +61,11 @@ class TezosNodeMainnet < Formula
           <key>Label</key>
           <string>#{plist_name}</string>
           <key>Program</key>
-          <string>#{opt_bin}/tezos-node-mainnet-start</string>
+          <string>#{opt_bin}/tezos-node-ithacanet-start</string>
           <key>EnvironmentVariables</key>
             <dict>
               <key>DATA_DIR</key>
-              <string>#{var}/lib/tezos/node-mainnet</string>
+              <string>#{var}/lib/tezos/node-ithacanet</string>
               <key>NODE_RPC_ADDR</key>
               <string>127.0.0.1:8732</string>
               <key>CERT_PATH</key>
@@ -83,7 +83,7 @@ class TezosNodeMainnet < Formula
     EOS
   end
   def post_install
-    mkdir_p "#{var}/lib/tezos/node-mainnet"
-    system "tezos-node", "config", "init", "--data-dir" "#{var}/lib/tezos/node-mainnet", "--network", "mainnet"
+    mkdir_p "#{var}/lib/tezos/node-ithacanet"
+    system "tezos-node", "config", "init", "--data-dir" "#{var}/lib/tezos/node-ithacanet", "--network", "ithacanet"
   end
 end

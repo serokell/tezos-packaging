@@ -17,11 +17,10 @@ in import "${nixpkgs}/nixos/tests/make-test-python.nix" ({ ... }:
 
   testScript = ''
     path_to_binaries = "${path-to-binaries}"
-    tezos_accuser = f"{path_to_binaries}/tezos-accuser-011-PtHangz2"
+    tezos_accuser = f"{path_to_binaries}/tezos-accuser-012-PsiThaCa"
     tezos_admin_client = f"{path_to_binaries}/tezos-admin-client"
-    tezos_baker = f"{path_to_binaries}/tezos-baker-011-PtHangz2"
+    tezos_baker = f"{path_to_binaries}/tezos-baker-012-PsiThaCa"
     tezos_client = f"{path_to_binaries}/tezos-client"
-    tezos_endorser = f"{path_to_binaries}/tezos-endorser-011-PtHangz2"
     tezos_node = f"{path_to_binaries}/tezos-node"
     tezos_signer = f"{path_to_binaries}/tezos-signer"
     tezos_codec = f"{path_to_binaries}/tezos-codec"
@@ -35,7 +34,6 @@ in import "${nixpkgs}/nixos/tests/make-test-python.nix" ({ ... }:
         tezos_admin_client,
         tezos_baker,
         tezos_client,
-        tezos_endorser,
         tezos_node,
         tezos_signer,
         tezos_codec,

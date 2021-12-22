@@ -15,29 +15,23 @@ in import "${nixpkgs}/nixos/tests/make-test-python.nix" ({ ... }:
                 ../nix/modules/tezos-signer.nix
                 ../nix/modules/tezos-accuser.nix
                 ../nix/modules/tezos-baker.nix
-                ../nix/modules/tezos-endorser.nix
               ];
 
-    services.tezos-node.instances.hangzhounet.enable = true;
+    services.tezos-node.instances.ithacanet.enable = true;
 
-    services.tezos-signer.instances.hangzhounet = {
+    services.tezos-signer.instances.ithacanet = {
       enable = true;
       networkProtocol = "http";
     };
 
-    services.tezos-accuser.instances.hangzhounet = {
+    services.tezos-accuser.instances.ithacanet = {
       enable = true;
-      baseProtocol = "011-PtHangz2";
+      baseProtocol = "012-PsiThaCa";
     };
 
-    services.tezos-baker.instances.hangzhounet = {
+    services.tezos-baker.instances.ithacanet = {
       enable = true;
-      baseProtocol = "011-PtHangz2";
-    };
-
-    services.tezos-endorser.instances.hangzhounet = {
-      enable = true;
-      baseProtocol = "011-PtHangz2";
+      baseProtocol = "012-PsiThaCa";
     };
 
   };
@@ -50,11 +44,10 @@ in import "${nixpkgs}/nixos/tests/make-test-python.nix" ({ ... }:
         "tezos-signer",
         "tezos-baker",
         "tezos-accuser",
-        "tezos-endorser",
     ]
 
     for s in services:
-        machine.wait_for_unit(f"tezos-hangzhounet-{s}.service")
+        machine.wait_for_unit(f"tezos-ithacanet-{s}.service")
 
     with subtest("check tezos-node rpc response"):
         machine.wait_for_open_port(8732)
@@ -64,6 +57,6 @@ in import "${nixpkgs}/nixos/tests/make-test-python.nix" ({ ... }:
 
     with subtest("service status sanity check"):
         for s in services:
-            machine.succeed(f"systemctl status tezos-hangzhounet-{s}.service")
+            machine.succeed(f"systemctl status tezos-ithacanet-{s}.service")
   '';
 })

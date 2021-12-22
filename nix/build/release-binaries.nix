@@ -1,11 +1,12 @@
 # SPDX-FileCopyrightText: 2019 TQ Tezos <https://tqtezos.com/>
 #
 # SPDX-License-Identifier: LicenseRef-MIT-TQ
-
 let
   protocols = import ../protocols.nix;
   protocolsFormatted =
     builtins.concatStringsSep ", " (protocols.allowed ++ protocols.active);
+  protocolsWithEndorser =
+    builtins.filter (x: !(builtins.elem x protocols.active_noendorser)) protocols.active;
 in [
   {
     name = "tezos-client";
@@ -49,9 +50,10 @@ in [
     description = "Daemon for accusing";
     supports = protocol;
   }
+]) protocols.active ++ builtins.concatMap (protocol: [
   {
     name = "tezos-endorser-${protocol}";
     description = "Daemon for endorsing";
     supports = protocol;
   }
-]) protocols.active
+]) protocolsWithEndorser

@@ -44,7 +44,14 @@ package_to_build = args.package
 source_archive = args.sources
 
 if is_ubuntu:
-    run_deps = ["libev-dev", "libgmp-dev", "libhidapi-dev", "libffi-dev", "zlib1g-dev"]
+    run_deps = [
+        "libev-dev",
+        "libgmp-dev",
+        "libhidapi-dev",
+        "libffi-dev",
+        "zlib1g-dev",
+        "libpq-dev",
+    ]
 else:
     run_deps = [
         "libev-devel",
@@ -52,6 +59,7 @@ else:
         "hidapi-devel",
         "libffi-devel",
         "zlib-devel",
+        "libpq-devel",
     ]
 build_deps = [
     "make",

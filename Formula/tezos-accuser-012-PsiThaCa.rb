@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: LicenseRef-MIT-TQ
 
-class TezosAccuser011Pthangz2 < Formula
+class TezosAccuser012Psithaca < Formula
   @all_bins = []
 
   class << self
@@ -26,7 +26,7 @@ class TezosAccuser011Pthangz2 < Formula
   desc "Daemon for accusing"
 
   bottle do
-    root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosAccuser011Pthangz2.version}/"
+    root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosAccuser012Psithaca.version}/"
   end
 
   def make_deps
@@ -56,7 +56,7 @@ class TezosAccuser011Pthangz2 < Formula
 
       set -euo pipefail
 
-      accuser="#{bin}/tezos-accuser-011-PtHangz2"
+      accuser="#{bin}/tezos-accuser-012-PsiThaCa"
 
       accuser_dir="$DATA_DIR"
 
@@ -77,15 +77,15 @@ class TezosAccuser011Pthangz2 < Formula
           --endpoint "$NODE_RPC_ENDPOINT" \
           run
     EOS
-    File.write("tezos-accuser-011-PtHangz2-start", startup_contents)
-    bin.install "tezos-accuser-011-PtHangz2-start"
+    File.write("tezos-accuser-012-PsiThaCa-start", startup_contents)
+    bin.install "tezos-accuser-012-PsiThaCa-start"
     make_deps
-    install_template "src/proto_011_PtHangz2/bin_accuser/main_accuser_011_PtHangz2.exe",
-                     "_build/default/src/proto_011_PtHangz2/bin_accuser/main_accuser_011_PtHangz2.exe",
-                     "tezos-accuser-011-PtHangz2"
+    install_template "src/proto_012_PsiThaCa/bin_accuser/main_accuser_012_PsiThaCa.exe",
+                     "_build/default/src/proto_012_PsiThaCa/bin_accuser/main_accuser_012_PsiThaCa.exe",
+                     "tezos-accuser-012-PsiThaCa"
   end
 
-  plist_options manual: "tezos-accuser-011-PtHangz2 run"
+  plist_options manual: "tezos-accuser-012-PsiThaCa run"
   def plist
     <<~EOS
       <?xml version="1.0" encoding="UTF-8"?>
@@ -96,7 +96,7 @@ class TezosAccuser011Pthangz2 < Formula
           <key>Label</key>
           <string>#{plist_name}</string>
           <key>Program</key>
-          <string>#{opt_bin}/tezos-accuser-011-PtHangz2-start</string>
+          <string>#{opt_bin}/tezos-accuser-012-PsiThaCa-start</string>
           <key>EnvironmentVariables</key>
             <dict>
               <key>DATA_DIR</key>

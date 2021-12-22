@@ -41,7 +41,7 @@ jobs:
           path: '*.bottle.*'
 
       - name: Add bottle hashes to formulae
-        run: ./scripts/sync-bottle-hashes.sh "${GITHUB_REF#refs/tags/}" ${{ matrix.name }}
+        run: ./scripts/sync-bottle-hashes.sh "${GITHUB_REF#refs/tags/}" "${{ matrix.name }}"
 
       - name: Attach bottles to the release
         env:

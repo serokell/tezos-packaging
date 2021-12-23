@@ -487,6 +487,7 @@ class TezosBakingServicesPackage(AbstractPackage):
         self.meta = deepcopy(meta)
         self.meta.version = self.meta.version + self.letter_version
         self.target_protos = set()
+        self.noendorser_protos = protocols["active_noendorser"]
         for network in target_networks:
             for proto in network_protos[network]:
                 self.target_protos.add(proto)
@@ -495,7 +496,7 @@ class TezosBakingServicesPackage(AbstractPackage):
             requires = [f"tezos-node-{network}.service"]
             for proto in network_protos[network]:
                 requires.append(f"tezos-baker-{proto.lower()}@{network}.service")
-                if proto not in protocols["active_noendorser"]:
+                if proto not in self.noendorser_protos:
                     requires.append(f"tezos-endorser-{proto.lower()}@{network}.service")
             self.systemd_units.append(
                 SystemdUnit(
@@ -537,19 +538,12 @@ class TezosBakingServicesPackage(AbstractPackage):
         shutil.copy(f"{os.path.dirname(__file__)}/tezos_setup_wizard.py", out_dir)
 
     def gen_control_file(self, deps, ubuntu_version, out):
-        run_deps = ", ".join(
-            ["acl", "tezos-client", "tezos-node"]
-            + sum(
-                [
-                    [
-                        f"tezos-{daemon}-{proto.lower()}"
-                        for daemon in ["baker", "endorser"]
-                    ]
-                    for proto in self.target_protos
-                ],
-                [],
-            )
-        )
+        run_deps_list = ["acl", "tezos-client", "tezos-node"]
+        for proto in self.target_protos:
+            run_deps_list.append(f"tezos-baker-{proto.lower()}")
+            if proto not in self.noendorser_protos:
+                run_deps_list.append(f"tezos-endorser-{proto.lower()}")
+        run_deps = ", ".join(run_deps_list)
         file_contents = f"""
 Source: {self.name}
 Section: utils

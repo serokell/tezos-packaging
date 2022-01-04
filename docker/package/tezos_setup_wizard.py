@@ -51,6 +51,8 @@ systemd_enable = {
 }
 
 
+TMP_SNAPSHOT_LOCATION = "/tmp/tezos_node.snapshot"
+
 # Regexes
 
 ledger_regex = b"ledger:\/\/[\w\-]+\/[\w\-]+\/[\w']+\/[\w']+"
@@ -178,7 +180,7 @@ def get_proc_output(cmd):
 
 def fetch_snapshot(url):
     print("Downloading the snapshot from", url)
-    filename = "/tmp/tezos_node.snapshot"
+    filename = TMP_SNAPSHOT_LOCATION
     urllib.request.urlretrieve(url, filename, progressbar_hook)
     print()
     return filename
@@ -277,6 +279,17 @@ def search_baking_service_config(config_contents, regex, default):
         return default
     else:
         return res.group(1)
+
+
+def is_full_snapshot(import_mode):
+    if import_mode == "download full":
+        return True
+    if import_mode == "file" or import_mode == "url":
+        output = get_proc_output(
+            "sudo -u tezos tezos-node snapshot info " + TMP_SNAPSHOT_LOCATION
+        ).stdout
+        return re.search(b"at level [0-9]+ in full", output) is not None
+    return False
 
 
 class Step:
@@ -562,15 +575,16 @@ class Setup:
 
             self.query_step(snapshot_mode_query)
 
-            snapshot_file = ""
+            snapshot_file = TMP_SNAPSHOT_LOCATION
 
             if self.config["snapshot"] == "skip":
                 return
             elif self.config["snapshot"] == "file":
                 self.query_step(snapshot_file_query)
-                snapshot_file = shutil.copyfile(
-                    self.config["snapshot_file"], "/tmp/tezos_node.snapshot"
-                )
+                if self.config["snapshot_file"] != TMP_SNAPSHOT_LOCATION:
+                    snapshot_file = shutil.copyfile(
+                        self.config["snapshot_file"], TMP_SNAPSHOT_LOCATION
+                    )
             elif self.config["snapshot"] == "url":
                 self.query_step(snapshot_url_query)
                 url = self.config["snapshot_url"]
@@ -621,10 +635,19 @@ class Setup:
 
             valid_choice = True
 
+            import_flag = ""
+            if is_full_snapshot(self.config["snapshot"]):
+                if yes_or_no(
+                    "Do you also want to reconstruct all the chain data to run an archive node? (y/N) ",
+                    "no",
+                ):
+                    import_flag = "--reconstruct "
+
             proc_call(
                 "sudo -u tezos tezos-node-"
                 + self.config["network"]
                 + " snapshot import "
+                + import_flag
                 + snapshot_file
             )
 
@@ -632,7 +655,7 @@ class Setup:
 
             if self.config["snapshot"] in ["download rolling", "download full", "file"]:
                 try:
-                    os.remove("/tmp/tezos_node.snapshot")
+                    os.remove(TMP_SNAPSHOT_LOCATION)
                 except:
                     pass
                 else:

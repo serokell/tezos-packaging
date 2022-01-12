@@ -245,9 +245,6 @@ rec {
   tezos-protocol-011-PtHangz2 = osuper.tezos-protocol-011-PtHangz2.overrideAttrs (o : {
     buildInputs = o.buildInputs ++ [ tezos-protocol-environment ];
   });
-  tezos-protocol-012-PsiThaCa = osuper.tezos-protocol-012-PsiThaCa.overrideAttrs (o : {
-    buildInputs = o.buildInputs ++ [ tezos-protocol-environment ];
-  });
   tezos-protocol-demo-noops = osuper.tezos-protocol-demo-noops.overrideAttrs (o : {
     buildInputs = o.buildInputs ++ [ tezos-protocol-environment ];
   });
@@ -273,9 +270,6 @@ rec {
     buildInputs = o.buildInputs ++ [ tezos-protocol-environment ];
   });
   tezos-protocol-plugin-011-PtHangz2 = osuper.tezos-protocol-plugin-011-PtHangz2.overrideAttrs (o : {
-    buildInputs = o.buildInputs ++ [ tezos-protocol-environment ];
-  });
-  tezos-protocol-plugin-012-PsiThaCa = osuper.tezos-protocol-plugin-012-PsiThaCa.overrideAttrs (o : {
     buildInputs = o.buildInputs ++ [ tezos-protocol-environment ];
   });
 
@@ -324,11 +318,6 @@ rec {
       buildInputs = o.buildInputs ++ [ librustzcash ];
       XDG_DATA_DIRS = "${zcash-params}:$XDG_DATA_DIRS";
     });
-  tezos-protocol-012-PsiThaCa-parameters = osuper.tezos-protocol-012-PsiThaCa-parameters.overrideAttrs
-    (o: rec {
-      buildInputs = o.buildInputs ++ [ librustzcash ];
-      XDG_DATA_DIRS = "${zcash-params}:$XDG_DATA_DIRS";
-    });
 
   tezos-client = osuper.tezos-client.overrideAttrs
     (o: {
@@ -349,17 +338,14 @@ rec {
         tezos-client-009-PsFLoren-commands-registration
         tezos-client-010-PtGRANAD-commands-registration
         tezos-client-011-PtHangz2-commands-registration
-        tezos-client-012-PsiThaCa-commands-registration
         tezos-client-alpha-commands-registration
         tezos-baking-011-PtHangz2-commands
-        tezos-baking-012-PsiThaCa-commands
         tezos-baking-alpha-commands
         tezos-protocol-plugin-007-PsDELPH1
         tezos-protocol-plugin-008-PtEdo2Zk
         tezos-protocol-plugin-009-PsFLoren
         tezos-protocol-plugin-010-PtGRANAD
         tezos-protocol-plugin-011-PtHangz2
-        tezos-protocol-plugin-012-PsiThaCa
         tezos-protocol-plugin-alpha
       ];
       postInstall = "rm $bin/tezos-admin-client $bin/*.sh";
@@ -377,16 +363,6 @@ rec {
       postFixup = zcash-post-fixup o;
     });
   tezos-endorser-011-PtHangz2 = osuper.tezos-endorser-011-PtHangz2.overrideAttrs
-    (o: {
-      buildInputs = o.buildInputs ++ [ librustzcash self.makeWrapper ];
-      postFixup = zcash-post-fixup o;
-    });
-  tezos-accuser-012-PsiThaCa = osuper.tezos-accuser-012-PsiThaCa.overrideAttrs
-    (o: {
-      buildInputs = o.buildInputs ++ [ librustzcash self.makeWrapper ];
-      postFixup = zcash-post-fixup o;
-    });
-  tezos-baker-012-PsiThaCa = osuper.tezos-baker-012-PsiThaCa.overrideAttrs
     (o: {
       buildInputs = o.buildInputs ++ [ librustzcash self.makeWrapper ];
       postFixup = zcash-post-fixup o;
@@ -434,14 +410,12 @@ rec {
         tezos-embedded-protocol-009-PsFLoren
         tezos-embedded-protocol-010-PtGRANAD
         tezos-embedded-protocol-011-PtHangz2
-        tezos-embedded-protocol-012-PsiThaCa
         tezos-embedded-protocol-alpha
         tezos-protocol-plugin-007-PsDELPH1-registerer
         tezos-protocol-plugin-008-PtEdo2Zk-registerer
         tezos-protocol-plugin-009-PsFLoren-registerer
         tezos-protocol-plugin-010-PtGRANAD-registerer
         tezos-protocol-plugin-011-PtHangz2-registerer
-        tezos-protocol-plugin-012-PsiThaCa-registerer
         tezos-protocol-plugin-alpha-registerer
       ];
       postInstall = "rm $bin/*.sh";

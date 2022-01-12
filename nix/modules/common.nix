@@ -22,7 +22,7 @@ rec {
   daemonOptions = sharedOptions // {
 
     baseProtocol = mkOption {
-      type = types.enum [ "011-PtHangz2" "012-PsiThaCa" ];
+      type = types.enum [ "011-PtHangz2" ];
       description = ''
         Base protocol version.
       '';

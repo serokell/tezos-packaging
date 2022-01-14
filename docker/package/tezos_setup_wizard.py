@@ -50,6 +50,12 @@ systemd_enable = {
     "no": "Start the services this time only",
 }
 
+history_modes = {
+    "rolling": "Store a minimal rolling window of chain data, lightest option",
+    "full": "Store enough chain data to reconstruct the complete chain state",
+    "archive": "Store all the chain data, very storage-demanding",
+}
+
 
 TMP_SNAPSHOT_LOCATION = "/tmp/tezos_node.snapshot"
 
@@ -370,24 +376,27 @@ systemd_mode_query = Step(
     validator=Validator(enum_range_validator(systemd_enable)),
 )
 
-snapshot_mode_query = Step(
-    id="snapshot",
-    prompt="The Tezos node can take a significant time to bootstrap from scratch.\n"
-    "Bootstrapping from a snapshot is suggested instead.\n"
-    "How would you like to proceed?",
-    help="A fully-synced local tezos-node is required for running a baking instance.\n"
-    "By default, service with tezos-node will start to bootstrap from scratch,\n"
-    "which will take a significant amount of time.\nIn order to avoid this, we suggest "
-    "bootstrapping from a snapshot instead.\n\n"
-    "Snapshots can be downloaded from the following websites:\n"
-    "Tezos Giganode Snapshots - https://snapshots-tezos.giganode.io/ \n"
-    "XTZ-Shots - https://xtz-shots.io/ \n\n"
-    "We recommend to use rolling snapshots. This is the smallest and the fastest mode\n"
-    "that is sufficient for baking (you can read more about other tezos-node history modes here:\n"
-    "https://tezos.gitlab.io/user/history_modes.html#history-modes ).\n",
-    options=snapshot_import_modes,
-    validator=Validator(enum_range_validator(snapshot_import_modes)),
-)
+# We define this step as a function to better tailor snapshot options to the chosen history mode
+def get_snapshot_mode_query(modes):
+    return Step(
+        id="snapshot",
+        prompt="The Tezos node can take a significant time to bootstrap from scratch.\n"
+        "Bootstrapping from a snapshot is suggested instead.\n"
+        "How would you like to proceed?",
+        help="A fully-synced local tezos-node is required for running a baking instance.\n"
+        "By default, service with tezos-node will start to bootstrap from scratch,\n"
+        "which will take a significant amount of time.\nIn order to avoid this, we suggest "
+        "bootstrapping from a snapshot instead.\n\n"
+        "Snapshots can be downloaded from the following websites:\n"
+        "Tezos Giganode Snapshots - https://snapshots-tezos.giganode.io/ \n"
+        "XTZ-Shots - https://xtz-shots.io/ \n\n"
+        "We recommend to use rolling snapshots. This is the smallest and the fastest mode\n"
+        "that is sufficient for baking. You can read more about other tezos-node history modes here:\n"
+        "https://tezos.gitlab.io/user/history_modes.html#history-modes",
+        options=modes,
+        validator=Validator(enum_range_validator(modes)),
+    )
+
 
 snapshot_file_query = Step(
     id="snapshot_file",
@@ -402,6 +411,17 @@ snapshot_url_query = Step(
     prompt="Provide the url of the tezos-node snapshot file.",
     help="You have indicated wanting to import the snapshot from a custom url.\n"
     "You can use e.g. links to XTZ-Shots or Tezos Giganode Snapshots resources.",
+)
+
+history_mode_query = Step(
+    id="history_mode",
+    prompt="Which history mode do you want your node to run in?",
+    help="History modes govern how much data tezos-node stores, and, consequently, how much disk\n"
+    "space is required. Rolling mode is the smallest and fastest but still sufficient for baking.\n"
+    "You can read more about different tezos-node history modes here:\n"
+    "https://tezos.gitlab.io/user/history_modes.html",
+    options=history_modes,
+    validator=Validator(enum_range_validator(history_modes)),
 )
 
 # We define the step as a function to disallow choosing json baking on mainnet
@@ -571,9 +591,24 @@ class Setup:
         do_import = self.check_blockchain_data()
         valid_choice = False
 
-        while do_import and not valid_choice:
+        if do_import:
+            self.query_step(history_mode_query)
 
-            self.query_step(snapshot_mode_query)
+            proc_call(
+                f"sudo -u tezos tezos-node-{self.config['network']} config update "
+                f"--history-mode {self.config['history_mode']}"
+            )
+
+            if self.config["history_mode"] == "rolling":
+                snapshot_import_modes.pop("download full", None)
+            else:
+                snapshot_import_modes.pop("download rolling", None)
+        else:
+            return
+
+        while not valid_choice:
+
+            self.query_step(get_snapshot_mode_query(snapshot_import_modes))
 
             snapshot_file = TMP_SNAPSHOT_LOCATION
 
@@ -637,10 +672,7 @@ class Setup:
 
             import_flag = ""
             if is_full_snapshot(self.config["snapshot"]):
-                if yes_or_no(
-                    "Do you also want to reconstruct all the chain data to run an archive node? (y/N) ",
-                    "no",
-                ):
+                if self.config["history_mode"] == "archive":
                     import_flag = "--reconstruct "
 
             proc_call(

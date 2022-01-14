@@ -13,11 +13,10 @@ from .model import (
 
 from .systemd import Service, ServiceFile, SystemdUnit, Unit, Install
 
-networks = ["mainnet", "hangzhounet", "ithacanet"]
+networks = ["mainnet", "hangzhounet"]
 networks_protos = {
     "mainnet": ["011-PtHangz2"],
     "hangzhounet": ["011-PtHangz2"],
-    "ithacanet": ["012-PsiThaCa"],
 }
 
 signer_units = [

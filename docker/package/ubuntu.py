@@ -52,9 +52,12 @@ def build_ubuntu_package(
             )
             print_service_file(systemd_unit.service_file, out_path)
             if systemd_unit.config_file is not None:
+                default_name = (
+                    unit_name if systemd_unit.instances is None else f"{unit_name}@"
+                )
                 shutil.copy(
                     f"{cwd}/defaults/{systemd_unit.config_file}",
-                    f"debian/{unit_name}.default",
+                    f"debian/{default_name}.default",
                 )
             if systemd_unit.startup_script is not None:
                 dest_path = f"debian/{systemd_unit.startup_script}"

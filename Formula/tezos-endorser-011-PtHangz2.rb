@@ -28,6 +28,7 @@ class TezosEndorser011Pthangz2 < Formula
 
   bottle do
     root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosEndorser011Pthangz2.version}/"
+    sha256 cellar: :any, catalina: "1c233fcd664d770119923c953779251a0640ea7253e7bcd37a88e3030866a270"
     sha256 cellar: :any, arm64_big_sur: "8a56712850ca0d429d159a541b68c487806a1130e89036090ac0392ff7a20611"
   end
 

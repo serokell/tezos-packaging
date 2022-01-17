@@ -20,7 +20,6 @@ def pkill_background(binary):
 
 
 def run_node(network, use_tls):
-    machine.succeed("rm -rf node-dir")
     machine.succeed("mkdir node-dir")
     tls_args = " --rpc-tls=" + host_cert + "," + host_key + " " if use_tls else " "
     machine.succeed(f"{tezos_node} config init --data-dir node-dir --network {network}")
@@ -61,6 +60,9 @@ def kill_node_with_daemons():
     pkill_background("tezos-accuser")
     pkill_background("tezos-baker")
     pkill_background("tezos-node")
+    # Waiting node process to be killed before cleaning up to avoid race-conditions
+    machine.wait_until_fails("pgrep tezos-node")
+    machine.succeed("rm -rf node-dir")
 
 
 def test_node_with_daemons_scenario(network, use_tls=False):

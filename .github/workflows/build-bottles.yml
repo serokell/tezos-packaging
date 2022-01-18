@@ -9,41 +9,73 @@ permissions:
   contents: write
 jobs:
   build-bottles:
-    runs-on: ${{ matrix.os }}
+    runs-on: ${{ matrix.os.id }}
 
     strategy:
+      fail-fast: false
       matrix:
-        include:
-          - os: macos-10.15
-            name: "Catalina"
-          - os: macos-11
-            name: "Big Sur"
+        os: [ { id: macos-10.15, name: "catalina" }, { id: macos-11, name: "big_sur" } ]
+        formula: [tezos-accuser-011-PtHangz2, tezos-admin-client, tezos-baker-011-PtHangz2, tezos-client, tezos-codec, tezos-endorser-011-PtHangz2, tezos-node, tezos-sandbox, tezos-signer]
 
     steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - id: check-built
+        env:
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+        name: Check if the bottle has already been built
+        continue-on-error: true
+        run: gh release view "${GITHUB_REF#refs/tags/}" | grep "${{ matrix.formula }}.*${{ matrix.os.name }}.bottle.tar.gz"
+
       - name: Install coreutils for macOS # for sha256sum
+        if: ${{ steps.check-built.outcome }} == "failure"
         run: brew install coreutils
 
       - name: Install GNU sed # for the other pipeline compatibility
+        if: ${{ steps.check-built.outcome }} == "failure"
         run: |
           brew install gnu-sed
           echo "$(brew --prefix)/opt/gnu-sed/libexec/gnubin" >> $GITHUB_PATH
 
-      - name: Checkout
-        uses: actions/checkout@v2
+        # tezos-sapling-params is used as a dependency for some of the formulas
+        # so we handle it separately.
+        # We don't build the bottle for it because it is never updated over time.
+      - name: Build tezos-sapling-params
+        if: ${{ steps.check-built.outcome }} == "failure"
+        run: brew install --formula ./Formula/tezos-sapling-params.rb
 
-      - name: Build bottles
-        run: ./scripts/build-bottles.sh
+      - name: Build the bottle
+        if: ${{ steps.check-built.outcome }} == "failure"
+        run: ./scripts/build-one-bottle.sh "${{ matrix.formula }}"
 
-      - name: Upload bottles to Github Actions
+      - name: Upload the bottle to Github Actions
+        if: ${{ steps.check-built.outcome }} == "failure"
         uses: actions/upload-artifact@v2
         with:
-          name: homebrew-bottles
+          name: homebrew-bottles-${{ matrix.os }}
           path: '*.bottle.*'
 
-      - name: Add bottle hashes to formulae
-        run: ./scripts/sync-bottle-hashes.sh "${GITHUB_REF#refs/tags/}" "${{ matrix.name }}"
-
-      - name: Attach bottles to the release
+      - name: Attach the bottle to the release
+        if: ${{ steps.check-built.outcome }} == "failure"
         env:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
         run: gh release upload "${GITHUB_REF#refs/tags/}" *.bottle.*
+
+  sync-hashes:
+    runs-on: macos-10.15
+    needs: build-bottles
+    steps:
+       # It's possible we have had to rerun the building workflow, skipping some jobs and
+       # erasing the previously built bottles, so we use the release to download them all
+      - name: Download Catalina bottles from the release
+        run: gh release download "${GITHUB_REF#refs/tags/}" -p "*.catalina.bottle.tar.gz" -D "./Catalina"
+
+      - name: Add bottle hashes to formulae
+        run: ./scripts/sync-bottle-hashes.sh "${GITHUB_REF#refs/tags/}" "Catalina"
+
+      - name: Download Big Sur bottles from the release
+        run: gh release download "${GITHUB_REF#refs/tags/}" -p "*.big_sur.bottle.tar.gz" -D "./Big Sur"
+
+      - name: Add bottle hashes to formulae
+        run: ./scripts/sync-bottle-hashes.sh "${GITHUB_REF#refs/tags/}" "Big Sur"

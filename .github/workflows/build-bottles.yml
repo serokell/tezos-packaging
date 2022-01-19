@@ -15,6 +15,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ { id: macos-10.15, name: "catalina" }, { id: macos-11, name: "big_sur" } ]
+        # we don't bottle meta-formulas that contain only services
         formula: [tezos-accuser-011-PtHangz2, tezos-admin-client, tezos-baker-011-PtHangz2, tezos-client, tezos-codec, tezos-endorser-011-PtHangz2, tezos-node, tezos-sandbox, tezos-signer]
 
     steps:
@@ -29,11 +30,11 @@ jobs:
         run: gh release view "${GITHUB_REF#refs/tags/}" | grep "${{ matrix.formula }}.*${{ matrix.os.name }}.bottle.tar.gz"
 
       - name: Install coreutils for macOS # for sha256sum
-        if: ${{ steps.check-built.outcome }} == "failure"
+        if: steps.check-built.outcome == 'failure'
         run: brew install coreutils
 
       - name: Install GNU sed # for the other pipeline compatibility
-        if: ${{ steps.check-built.outcome }} == "failure"
+        if: steps.check-built.outcome == 'failure'
         run: |
           brew install gnu-sed
           echo "$(brew --prefix)/opt/gnu-sed/libexec/gnubin" >> $GITHUB_PATH
@@ -42,22 +43,22 @@ jobs:
         # so we handle it separately.
         # We don't build the bottle for it because it is never updated over time.
       - name: Build tezos-sapling-params
-        if: ${{ steps.check-built.outcome }} == "failure"
+        if: steps.check-built.outcome == 'failure'
         run: brew install --formula ./Formula/tezos-sapling-params.rb
 
       - name: Build the bottle
-        if: ${{ steps.check-built.outcome }} == "failure"
+        if: steps.check-built.outcome == 'failure'
         run: ./scripts/build-one-bottle.sh "${{ matrix.formula }}"
 
       - name: Upload the bottle to Github Actions
-        if: ${{ steps.check-built.outcome }} == "failure"
+        if: steps.check-built.outcome == 'failure'
         uses: actions/upload-artifact@v2
         with:
           name: homebrew-bottles-${{ matrix.os }}
           path: '*.bottle.*'
 
       - name: Attach the bottle to the release
-        if: ${{ steps.check-built.outcome }} == "failure"
+        if: steps.check-built.outcome == 'failure'
         env:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
         run: gh release upload "${GITHUB_REF#refs/tags/}" *.bottle.*

@@ -12,16 +12,16 @@ if [[ -d ./Formula ]]
 then
     if [[ -d "$1" ]]
     then
-        regex="(tezos-.*)-v.*\.(catalina|mojave|big_sur|arm64_big_sur)\.bottle\.tar\.gz"
+        regex="(tezos-.*)-v.*\.(catalina|big_sur|arm64_big_sur)\.bottle\.tar\.gz"
         for bottle in "$1"/tezos-*.bottle.tar.gz; do
             if [[ $bottle =~ $regex ]]; then
-                bottle_hash=`sha256sum "$bottle" | cut -d " " -f 1`
+                bottle_hash=$(sha256sum "$bottle" | cut -d " " -f 1)
                 formula_name="${BASH_REMATCH[1]}"
                 os="${BASH_REMATCH[2]}"
 
                 if [[ -f "./Formula/$formula_name.rb" ]]; then
                     line="\    sha256 cellar: :any, $os: \"$bottle_hash\""
-                    sed -i "/root_url.*/a $line" ./Formula/$formula_name.rb
+                    sed -i "/root_url.*/a $line" "./Formula/$formula_name.rb"
                 fi
             fi
         done

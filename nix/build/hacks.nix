@@ -53,13 +53,13 @@ rec {
   # FIXME opam-nix needs to do this
   ocamlfind = findlib;
 
-  hacl-star-raw = osuper.hacl-star-raw.versions."0.4.4".overrideAttrs (o: rec {
+  hacl-star-raw = osuper.hacl-star-raw.versions."0.4.3".overrideAttrs (o: rec {
     preConfigure = "patchShebangs raw/configure";
     sourceRoot = ".";
     buildInputs = o.buildInputs ++ [ self.which ];
     minimalOCamlVersion = "4.12";
   });
-  hacl-star = osuper.hacl-star.versions."0.4.4".overrideAttrs (o: rec {
+  hacl-star = osuper.hacl-star.versions."0.4.3".overrideAttrs (o: rec {
     sourceRoot = ".";
     buildPhase = ''
       runHook preBuild

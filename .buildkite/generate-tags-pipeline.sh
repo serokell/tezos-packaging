@@ -15,7 +15,7 @@ ymlappend () {
 }
 
 # we don't bottle meta-formulas that contain only services
-formulae=("tezos-accuser-011-PtHangz2" "tezos-admin-client" "tezos-baker-011-PtHangz2" "tezos-client" "tezos-codec" "tezos-endorser-011-PtHangz2" "tezos-node" "tezos-sandbox" "tezos-signer")
+formulae=("tezos-accuser-011-PtHangz2" "tezos-accuser-012-Psithaca" "tezos-admin-client" "tezos-baker-011-PtHangz2" "tezos-baker-012-Psithaca" "tezos-client" "tezos-codec" "tezos-endorser-011-PtHangz2" "tezos-node" "tezos-sandbox" "tezos-signer")
 
 # tezos-sapling-params is used as a dependency for some of the formulas
 # so we handle it separately.

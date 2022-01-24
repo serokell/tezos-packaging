@@ -21,8 +21,10 @@
     "010-PtGRANAD"
   ],
   "active": [
-    "011-PtHangz2"
+    "011-PtHangz2",
+    "012-Psithaca"
   ],
   "active_noendorser": [
+    "012-Psithaca"
   ]
 }

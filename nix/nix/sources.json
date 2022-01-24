@@ -39,7 +39,7 @@
         "branch": "master",
         "ref": "master",
         "repo": "https://gitlab.com/tezos/opam-repository",
-        "rev": "736a35328609e04e1c9e320485f3a47b5fa3251c",
+        "rev": "8ce29151e3b8965bfc74dd8bd114f48df3d5733c",
         "type": "git"
     },
     "serokell-nix": {
@@ -56,9 +56,9 @@
     },
     "tezos": {
         "branch": "master",
-        "ref": "refs/tags/v11.1",
+        "ref": "refs/tags/v12.0-rc2",
         "repo": "https://gitlab.com/tezos/tezos",
-        "rev": "6bc294384f123fec1e0c64ff9caf240b05a79a70",
+        "rev": "7985fafe19003eb6ab495e7d6ce83e747c4e01fc",
         "type": "git"
     }
 }

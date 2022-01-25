@@ -5,10 +5,10 @@ diff --git a/src/bin_sandbox/dune b/src/bin_sandbox/dune
 index 90d65b78a..b6fd1eb08 100644
 --- a/src/bin_sandbox/dune
 +++ b/src/bin_sandbox/dune
-@@ -2,4 +2,5 @@
-   (names main)
-   (libraries tezos-base
-              tezos-base.unix
--             flextesa))
-+             flextesa)
-+  (flags :standard -ccopt -static))
+@@ -4,4 +4,5 @@
+   tezos-base
+   tezos-base.unix
+   fmt
+-  flextesa))
++  flextesa)
++ (flags :standard -ccopt -static))

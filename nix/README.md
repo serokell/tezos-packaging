@@ -10,12 +10,12 @@
 
 In order to build all binaries run:
 ```bash
-nix build -f. binaries
+nix-build -A binaries
 ```
 
 As an alternative you can build single binary:
 ```
-nix build -f. binaries.tezos-client
+nix-build -A binaries.tezos-client
 ```
 
 This will produce `tezos-client` binary.

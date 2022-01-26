@@ -64,7 +64,8 @@ ymlappend "   agents:
    - \"uninstall-tsp\"
    if: build.tag =~ /^v.*/
    commands:
-   - buildkite-agent artifact download \"*bottle.tar.gz\" \"Big Sur arm64\"
+   - mkdir -p \"Big Sur arm64\"
+   - buildkite-agent artifact download \"*bottle.tar.gz\" \"Big Sur arm64/\"
    - nix-shell ./scripts/shell.nix
        --run './scripts/sync-bottle-hashes.sh \"\$BUILDKITE_TAG\" \"Big Sur arm64\"'
 

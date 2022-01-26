@@ -157,16 +157,25 @@ useradd --home-dir /var/lib/tezos tezos || true
 """
 
 
-def mk_node_unit(suffix, env, desc):
+def mk_node_unit(
+    suffix,
+    env,
+    desc,
+    instantiated=False,
+    dependencies_suffix=None,
+    environment_file=None,
+):
+    dependencies_suffix = suffix if dependencies_suffix is None else dependencies_suffix
     service_file = ServiceFile(
         Unit(
-            after=["network.target", f"tezos-baking-{suffix}.service"],
+            after=["network.target", f"tezos-baking-{dependencies_suffix}.service"],
             requires=[],
             description=desc,
-            part_of=[f"tezos-baking-{suffix}.service"],
+            part_of=[f"tezos-baking-{dependencies_suffix}.service"],
         ),
         Service(
             environment=env,
+            environment_file=environment_file,
             exec_start="/usr/bin/tezos-node-start",
             exec_start_pre=["/usr/bin/tezos-node-prestart"],
             timeout_start_sec="2400s",
@@ -180,6 +189,7 @@ def mk_node_unit(suffix, env, desc):
         service_file=service_file,
         startup_script="tezos-node-start",
         prestart_script="tezos-node-prestart",
+        instances=[] if instantiated else None,
     )
 
 
@@ -220,6 +230,17 @@ node_units.append(
     )
 )
 node_postinst_steps += "mkdir -p /var/lib/tezos/node-custom\n"
+# Add instantiated custom config service
+node_units.append(
+    mk_node_unit(
+        suffix="custom",
+        env=["NODE_DATA_DIR=/var/lib/tezos/node-custom@%i"] + common_node_env,
+        environment_file="/etc/default/tezos-baking-custom@%i",
+        desc="Tezos node with custom config",
+        instantiated=True,
+        dependencies_suffix="custom@%i",
+    )
+)
 
 packages.append(
     TezosBinaryPackage(

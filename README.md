@@ -40,6 +40,8 @@ the binaries, and the services used.
 - [**Fedora**](./docs/distros/fedora.md)
 - [**macOS**](./docs/distros/macos.md)
 
+The information about supported versions of the aforementioned OSes is available in the [support policy doc](./docs/support-policy.md).
+
 Additionally, prebuilt **static binaries** can be downloaded directly from the
 [latest release](https://github.com/serokell/tezos-packaging/releases/latest)
 for other linux distros.
@@ -53,6 +55,11 @@ For more information about these services, refer to [this doc](./docs/systemd.md
 This repository provides two distinct ways for building and packaging tezos binaries:
 * [Docker-based](./docker/README.md)
 * [Nix-based](./nix/README.md)
+
+## Release process
+
+Please see the [release workflow doc](./docs/release-workflow.md) for more information about the details of the `tezos-packaging`
+releasing process.
 
 ## For Contributors
 

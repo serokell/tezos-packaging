@@ -551,6 +551,10 @@ class TezosBakingServicesPackage(AbstractPackage):
             "tezos-baking-custom.conf",
             "custom",
         )
+        custom_unit.service_file.service.exec_stop_post.append(
+            "/usr/bin/tezos-baking-custom-poststop %i"
+        )
+        custom_unit.poststop_script = "tezos-baking-custom-poststop"
         custom_unit.instances = []
         self.systemd_units.append(custom_unit)
         self.postinst_steps = ""

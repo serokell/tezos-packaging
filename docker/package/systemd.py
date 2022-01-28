@@ -49,6 +49,8 @@ class SystemdUnit:
     startup_script_source: str = None
     prestart_script: str = None
     prestart_script_source: str = None
+    poststop_script: str = None
+    poststop_script_source: str = None
     suffix: str = None
     config_file: str = None
     instances: List[str] = None

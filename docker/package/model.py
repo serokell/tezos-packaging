@@ -50,24 +50,17 @@ class AbstractPackage:
         pass
 
     def gen_install(self, out):
-        startup_scripts = list(
-            {
-                x.startup_script
-                for x in self.systemd_units
-                if x.startup_script is not None
-            }
-        )
-        prestart_scripts = list(
-            {
-                x.prestart_script
-                for x in self.systemd_units
-                if x.prestart_script is not None
-            }
-        )
-        if len(startup_scripts + prestart_scripts) > 0:
-            install_contents = "\n".join(
-                [f"debian/{x} usr/bin" for x in startup_scripts + prestart_scripts]
-            )
+        scripts = set()
+        for unit in self.systemd_units:
+            for script in [
+                unit.startup_script,
+                unit.prestart_script,
+                unit.poststop_script,
+            ]:
+                if script is not None:
+                    scripts.add(script)
+        if len(scripts) > 0:
+            install_contents = "\n".join([f"debian/{x} usr/bin" for x in scripts])
             with open(out, "w") as f:
                 f.write(install_contents)
 
@@ -86,9 +79,11 @@ class AbstractPackage:
 
 def gen_spec_systemd_part(package):
     systemd_units = package.systemd_units
-    startup_scripts = list({x.startup_script for x in systemd_units}) + list(
-        {x.prestart_script for x in systemd_units}
-    )
+    scripts = set()
+    for unit in systemd_units:
+        for script in [unit.startup_script, unit.prestart_script, unit.poststop_script]:
+            if script is not None:
+                scripts.add(script)
     config_files = [x.config_file for x in systemd_units if x.config_file is not None]
     install_unit_files = ""
     systemd_unit_files = ""
@@ -122,12 +117,12 @@ def gen_spec_systemd_part(package):
             default_files += f"%{{_sysconfdir}}/default/{service_name}\n"
     install_startup_scripts = ""
     systemd_startup_files = ""
-    for startup_script in startup_scripts:
-        if startup_script is not None:
+    for script in scripts:
+        if script is not None:
             install_startup_scripts += (
-                f"install -m 0755 {startup_script} %{{buildroot}}/%{{_bindir}}\n"
+                f"install -m 0755 {script} %{{buildroot}}/%{{_bindir}}\n"
             )
-            systemd_startup_files += f"%{{_bindir}}/{startup_script}\n"
+            systemd_startup_files += f"%{{_bindir}}/{script}\n"
     systemd_deps = "systemd systemd-rpm-macros"
     systemd_install = f"""
 mkdir -p %{{buildroot}}/%{{_unitdir}}

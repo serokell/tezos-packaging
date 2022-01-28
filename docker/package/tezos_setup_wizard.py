@@ -225,12 +225,16 @@ def wait_for_ledger_baking_app():
             f"sudo -u tezos {suppress_warning_text} tezos-client list connected ledgers"
         ).stdout
         proc_call("sleep 1")
-    base_ledger_url = (
-        re.search(b"ledger:\/\/[\w\-]+\/", output).group(0).decode("utf-8")
-    )
-    return base_ledger_url, [
-        name.decode() for name in re.findall(derivation_path_regex, output)
-    ]
+    ledgers_derivations = {}
+    for ledger_derivation in re.findall(ledger_regex, output):
+        ledger_url = (
+            re.search(b"ledger:\/\/[\w\-]+\/", ledger_derivation).group(0).decode()
+        )
+        derivation_path = (
+            re.search(derivation_path_regex, ledger_derivation).group(0).decode()
+        )
+        ledgers_derivations.setdefault(ledger_url, []).append(derivation_path)
+    return ledgers_derivations
 
 
 def get_data_dir(network):
@@ -251,32 +255,32 @@ def get_data_dir(network):
         return "/var/lib/tezos/node-" + network
 
 
-def ledger_urls_info(ledger_derivations, base_ledger_url, node_endpoint):
-    info = []
-    # max accepts only non-empty lists
-    if len(ledger_derivations) == 0:
-        return info
-    max_derivation_len = max(map(len, ledger_derivations))
-    for derivation in ledger_derivations:
-        output = get_proc_output(
-            f"sudo -u tezos {suppress_warning_text} tezos-client "
-            f"show ledger {base_ledger_url + derivation}"
-        ).stdout
-        addr = re.search(address_regex, output).group(0).decode()
-        balance = (
-            get_proc_output(
+def ledger_urls_info(ledgers_derivations, node_endpoint):
+    ledgers_info = {}
+    max_derivation_len = 0
+    for derivations_paths in ledgers_derivations.values():
+        max_derivation_len = max(max_derivation_len, max(map(len, derivations_paths)))
+    for ledger_url, derivations_paths in ledgers_derivations.items():
+        for derivation_path in derivations_paths:
+            output = get_proc_output(
                 f"sudo -u tezos {suppress_warning_text} tezos-client "
-                f"--endpoint {node_endpoint} get balance for {addr}"
+                f"show ledger {ledger_url + derivation_path}"
+            ).stdout
+            addr = re.search(address_regex, output).group(0).decode()
+            balance = (
+                get_proc_output(
+                    f"sudo -u tezos {suppress_warning_text} tezos-client "
+                    f"--endpoint {node_endpoint} get balance for {addr}"
+                )
+                .stdout.decode()
+                .strip()
             )
-            .stdout.decode()
-            .strip()
-        )
-        info.append(
-            ("{:" + str(max_derivation_len + 1) + "} address: {}, balance: {}").format(
-                derivation + ",", addr, balance
+            ledgers_info.setdefault(ledger_url, []).append(
+                (
+                    "{:" + str(max_derivation_len + 1) + "} address: {}, balance: {}"
+                ).format(derivation_path + ",", addr, balance)
             )
-        )
-    return info
+    return ledgers_info
 
 
 def search_baking_service_config(config_contents, regex, default):
@@ -324,15 +328,42 @@ class Step:
             pass
 
         if self.options and isinstance(self.options, list):
-            str_format = "{:1}. {}"
+            options_count = 0
             for o in self.options:
-                if def_i is not None and i == def_i:
-                    print(str_format.format(i, "(default) " + o))
+                if isinstance(o, dict):
+                    for values in o.values():
+                        if not isinstance(values, list):
+                            options_count += 1
+                        else:
+                            options_count += len(values)
                 else:
-                    print(str_format.format(i, o))
-                i += 1
+                    options_count += 1
+            index_len = len(str(options_count))
+            str_format = f"{{:{index_len}}}. {{}}"
+            for o in self.options:
+                if isinstance(o, dict):
+                    for k, values in o.items():
+                        print()
+                        print(f"'{k}':")
+                        print()
+                        if not isinstance(values, list):
+                            values = [values]
+                        for v in values:
+                            if def_i is not None and i == def_i:
+                                print(str_format.format(i, "(default) " + v))
+                            else:
+                                print(str_format.format(i, v))
+                            i += 1
+                    print()
+                else:
+                    if def_i is not None and i == def_i:
+                        print(str_format.format(i, "(default) " + o))
+                    else:
+                        print(str_format.format(i, o))
+                    i += 1
         elif self.options and isinstance(self.options, dict):
-            str_format = "{:1}. {:<26}  {}"
+            index_len = len(str(len(self.options)))
+            str_format = f"{{:{index_len}}}. {{:<26}}  {{}}"
             for o in self.options:
                 description = textwrap.indent(
                     textwrap.fill(self.options[o], 60), " " * 31
@@ -462,25 +493,40 @@ derivation_path_query = Step(
     validator=Validator([required_field_validator, derivation_path_validator]),
 )
 
+
+def get_ledger_url(ledgers):
+    return Step(
+        id="ledger_url",
+        prompt="Choose a ledger to get the new derivation from.",
+        options=ledgers,
+        default=None,
+        validator=Validator([required_field_validator, enum_range_validator(ledgers)]),
+        help="In order to specify new derivation path, you need to specify a ledger to get the derivation from.",
+    )
+
+
 # We define this step as a function since the corresponding step requires
 # tezos-node to be running and bootstrapped in order to gather the data
 # about the ledger-stored addresses, so it's called right before invoking
 # after the node was boostrapped
-def get_ledger_derivation(ledger_derivations, base_ledger_url, node_endpoint):
+def get_ledger_derivation(ledgers_derivations, node_endpoint):
     extra_options = ["Specify derivation path", "Go back"]
+    full_ledger_urls = []
+    for ledger_url, derivations_paths in ledgers_derivations.items():
+        for derivation_path in derivations_paths:
+            full_ledger_urls.append(ledger_url + derivation_path)
     return Step(
         id="ledger_derivation",
-        prompt="Select a key to import from " + base_ledger_url + ".\n"
+        prompt="Select a key to import from the ledger.\n"
         "You can choose one of the suggested derivations or provide your own:",
         help="'Specify derivation path' will ask a derivation path from you."
         "'Go back' will return you back to the key type choice.",
         default=None,
-        options=ledger_urls_info(ledger_derivations, base_ledger_url, node_endpoint)
-        + extra_options,
+        options=[ledger_urls_info(ledgers_derivations, node_endpoint)] + extra_options,
         validator=Validator(
             [
                 required_field_validator,
-                enum_range_validator(ledger_derivations + extra_options),
+                enum_range_validator(full_ledger_urls + extra_options),
             ]
         ),
     )
@@ -804,10 +850,8 @@ class Setup:
 
                     else:
                         print("Please open the Tezos Baking app on your ledger.")
-                        (
-                            base_ledger_url,
-                            ledger_derivations,
-                        ) = wait_for_ledger_baking_app()
+                        ledgers_derivations = wait_for_ledger_baking_app()
+                        ledgers = list(ledgers_derivations.keys())
                         baker_ledger_url = ""
                         while (
                             re.match(ledger_regex.decode("utf-8"), baker_ledger_url)
@@ -815,8 +859,7 @@ class Setup:
                         ):
                             self.query_step(
                                 get_ledger_derivation(
-                                    ledger_derivations,
-                                    base_ledger_url,
+                                    ledgers_derivations,
                                     self.config["node_rpc_addr"],
                                 )
                             )
@@ -827,23 +870,30 @@ class Setup:
                                 self.config["ledger_derivation"]
                                 == "Specify derivation path"
                             ):
-                                self.query_step(derivation_path_query)
-                                signing_curves = [
-                                    "bip25519",
-                                    "ed25519",
-                                    "secp256k1",
-                                    "P-256",
-                                ]
-                                for signing_curve in signing_curves:
-                                    ledger_derivations.append(
-                                        signing_curve
-                                        + "/"
-                                        + self.config["derivation_path"]
-                                    )
+                                if len(ledgers) >= 1:
+                                    # If there is only one connected ledger, there is nothing to choose from
+                                    if len(ledgers) == 1:
+                                        ledger_url = ledgers[0]
+                                    else:
+                                        self.query_step(get_ledger_url(ledgers))
+                                        ledger_url = self.config["ledger_url"]
+                                    self.query_step(derivation_path_query)
+                                    signing_curves = [
+                                        "bip25519",
+                                        "ed25519",
+                                        "secp256k1",
+                                        "P-256",
+                                    ]
+                                    for signing_curve in signing_curves:
+                                        ledgers_derivations.setdefault(
+                                            ledger_url, []
+                                        ).append(
+                                            signing_curve
+                                            + "/"
+                                            + self.config["derivation_path"]
+                                        )
                             else:
-                                baker_ledger_url = (
-                                    base_ledger_url + self.config["ledger_derivation"]
-                                )
+                                baker_ledger_url = self.config["ledger_derivation"]
                         proc_call(
                             f"sudo -u tezos {suppress_warning_text} tezos-client {tezos_client_options} "
                             f"import secret key {baker_alias} {baker_ledger_url} --force"

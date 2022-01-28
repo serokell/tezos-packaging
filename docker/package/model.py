@@ -599,6 +599,7 @@ Maintainer: {self.meta.maintainer}
 %setup -q
 %build
 %install
+mkdir -p %{{buildroot}}/%{{_bindir}}
 {systemd_install}
 %files
 %license LICENSE

@@ -50,24 +50,17 @@ class AbstractPackage:
         pass
 
     def gen_install(self, out):
-        startup_scripts = list(
-            {
-                x.startup_script
-                for x in self.systemd_units
-                if x.startup_script is not None
-            }
-        )
-        prestart_scripts = list(
-            {
-                x.prestart_script
-                for x in self.systemd_units
-                if x.prestart_script is not None
-            }
-        )
-        if len(startup_scripts + prestart_scripts) > 0:
-            install_contents = "\n".join(
-                [f"debian/{x} usr/bin" for x in startup_scripts + prestart_scripts]
-            )
+        scripts = set()
+        for unit in self.systemd_units:
+            for script in [
+                unit.startup_script,
+                unit.prestart_script,
+                unit.poststop_script,
+            ]:
+                if script is not None:
+                    scripts.add(script)
+        if len(scripts) > 0:
+            install_contents = "\n".join([f"debian/{x} usr/bin" for x in scripts])
             with open(out, "w") as f:
                 f.write(install_contents)
 
@@ -86,9 +79,11 @@ class AbstractPackage:
 
 def gen_spec_systemd_part(package):
     systemd_units = package.systemd_units
-    startup_scripts = list({x.startup_script for x in systemd_units}) + list(
-        {x.prestart_script for x in systemd_units}
-    )
+    scripts = set()
+    for unit in systemd_units:
+        for script in [unit.startup_script, unit.prestart_script, unit.poststop_script]:
+            if script is not None:
+                scripts.add(script)
     config_files = [x.config_file for x in systemd_units if x.config_file is not None]
     install_unit_files = ""
     systemd_unit_files = ""
@@ -122,12 +117,12 @@ def gen_spec_systemd_part(package):
             default_files += f"%{{_sysconfdir}}/default/{service_name}\n"
     install_startup_scripts = ""
     systemd_startup_files = ""
-    for startup_script in startup_scripts:
-        if startup_script is not None:
+    for script in scripts:
+        if script is not None:
             install_startup_scripts += (
-                f"install -m 0755 {startup_script} %{{buildroot}}/%{{_bindir}}\n"
+                f"install -m 0755 {script} %{{buildroot}}/%{{_bindir}}\n"
             )
-            systemd_startup_files += f"%{{_bindir}}/{startup_script}\n"
+            systemd_startup_files += f"%{{_bindir}}/{script}\n"
     systemd_deps = "systemd systemd-rpm-macros"
     systemd_install = f"""
 mkdir -p %{{buildroot}}/%{{_unitdir}}
@@ -475,6 +470,40 @@ class TezosBakingServicesPackage(AbstractPackage):
     # This should be reset to "" whenever the native version is bumped.
     letter_version = ""
 
+    def __gen_baking_systemd_unit(
+        self, requires, description, environment_file, config_file, suffix
+    ):
+        return SystemdUnit(
+            service_file=ServiceFile(
+                Unit(
+                    after=["network.target"],
+                    requires=requires,
+                    description=description,
+                ),
+                Service(
+                    exec_start="/usr/bin/tezos-baking-start",
+                    user="tezos",
+                    state_directory="tezos",
+                    environment_file=environment_file,
+                    exec_start_pre=[
+                        "+/usr/bin/setfacl -m u:tezos:rwx /run/systemd/ask-password",
+                        "/usr/bin/tezos-baking-prestart",
+                    ],
+                    exec_stop_post=[
+                        "+/usr/bin/setfacl -x u:tezos /run/systemd/ask-password"
+                    ],
+                    remain_after_exit=True,
+                    type_="oneshot",
+                    keyring_mode="shared",
+                ),
+                Install(wanted_by=["multi-user.target"]),
+            ),
+            suffix=suffix,
+            config_file=config_file,
+            startup_script="tezos-baking-start",
+            prestart_script="tezos-baking-prestart",
+        )
+
     def __init__(
         self,
         target_networks: List[str],
@@ -499,37 +528,35 @@ class TezosBakingServicesPackage(AbstractPackage):
                 if proto not in self.noendorser_protos:
                     requires.append(f"tezos-endorser-{proto.lower()}@{network}.service")
             self.systemd_units.append(
-                SystemdUnit(
-                    service_file=ServiceFile(
-                        Unit(
-                            after=["network.target"],
-                            requires=requires,
-                            description=f"Tezos baking instance for {network}",
-                        ),
-                        Service(
-                            exec_start="/usr/bin/tezos-baking-start",
-                            user="tezos",
-                            state_directory="tezos",
-                            environment_file=f"/etc/default/tezos-baking-{network}",
-                            exec_start_pre=[
-                                "+/usr/bin/setfacl -m u:tezos:rwx /run/systemd/ask-password",
-                                "/usr/bin/tezos-baking-prestart",
-                            ],
-                            exec_stop_post=[
-                                "+/usr/bin/setfacl -x u:tezos /run/systemd/ask-password"
-                            ],
-                            remain_after_exit=True,
-                            type_="oneshot",
-                            keyring_mode="shared",
-                        ),
-                        Install(wanted_by=["multi-user.target"]),
-                    ),
-                    suffix=network,
-                    config_file="tezos-baking.conf",
-                    startup_script="tezos-baking-start",
-                    prestart_script="tezos-baking-prestart",
+                self.__gen_baking_systemd_unit(
+                    requires,
+                    f"Tezos baking instance for {network}",
+                    f"/etc/default/tezos-baking-{network}",
+                    "tezos-baking.conf",
+                    network,
                 )
             )
+        custom_requires = []
+        for network in target_networks:
+            for proto in network_protos[network]:
+                custom_requires.append(f"tezos-baker-{proto.lower()}@custom@%i.service")
+                if proto not in self.noendorser_protos:
+                    custom_requires.append(
+                        f"tezos-endorser-{proto.lower()}@custom@%i.service"
+                    )
+        custom_unit = self.__gen_baking_systemd_unit(
+            custom_requires,
+            f"Tezos baking instance for custom network",
+            f"/etc/default/tezos-baking-custom@%i",
+            "tezos-baking-custom.conf",
+            "custom",
+        )
+        custom_unit.service_file.service.exec_stop_post.append(
+            "/usr/bin/tezos-baking-custom-poststop %i"
+        )
+        custom_unit.poststop_script = "tezos-baking-custom-poststop"
+        custom_unit.instances = []
+        self.systemd_units.append(custom_unit)
         self.postinst_steps = ""
         self.postrm_steps = ""
 

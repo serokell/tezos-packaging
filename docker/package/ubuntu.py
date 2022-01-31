@@ -52,27 +52,25 @@ def build_ubuntu_package(
             )
             print_service_file(systemd_unit.service_file, out_path)
             if systemd_unit.config_file is not None:
+                default_name = (
+                    unit_name if systemd_unit.instances is None else f"{unit_name}@"
+                )
                 shutil.copy(
                     f"{cwd}/defaults/{systemd_unit.config_file}",
-                    f"debian/{unit_name}.default",
+                    f"debian/{default_name}.default",
                 )
-            if systemd_unit.startup_script is not None:
-                dest_path = f"debian/{systemd_unit.startup_script}"
-                source_script_name = (
-                    systemd_unit.startup_script
-                    if systemd_unit.startup_script_source is None
-                    else systemd_unit.startup_script_source
-                )
-                source_path = f"{cwd}/scripts/{source_script_name}"
-                shutil.copy(source_path, dest_path)
-            if systemd_unit.prestart_script is not None:
-                dest_path = f"debian/{systemd_unit.prestart_script}"
-                source_path = (
-                    f"{cwd}/scripts/{systemd_unit.prestart_script}"
-                    if systemd_unit.prestart_script_source is None
-                    else f"{cwd}/scripts/{systemd_unit.prestart_script_source}"
-                )
-                shutil.copy(source_path, dest_path)
+            for script, script_source in [
+                (systemd_unit.startup_script, systemd_unit.startup_script_source),
+                (systemd_unit.prestart_script, systemd_unit.prestart_script_source),
+                (systemd_unit.poststop_script, systemd_unit.poststop_script_source),
+            ]:
+                if script is not None:
+                    dest_path = f"debian/{script}"
+                    source_script_name = (
+                        script if script_source is None else script_source
+                    )
+                    source_path = f"{cwd}/scripts/{source_script_name}"
+                    shutil.copy(source_path, dest_path)
         with open("debian/compat", "w") as f:
             f.write("10")
         pkg.gen_install("debian/install")

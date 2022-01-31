@@ -16,6 +16,11 @@ import re, textwrap
 
 # Global options
 
+networks = {
+    "mainnet": "Main Tezos network",
+    "custom": "Custom network, will require its name",
+}
+
 ballot_outcomes = {
     "yay": "Vote for accepting the proposal",
     "nay": "Vote for rejecting the proposal",
@@ -92,11 +97,14 @@ class Validator:
 welcome_text = """Tezos Voting Wizard
 
 Welcome, this wizard will help you to vote in the Tezos protocol amendment process.
-Please note that for this you need to already have set up the baking infrastructure
-on mainnet, as only bakers can submit ballots or proposals.
+Please note that for this you need to already have set up the baking infrastructure,
+normally on mainnet, as only bakers can submit ballots or proposals.
 
 If you have installed tezos-baking, you can run Tezos Setup Wizard to set it up:
 tezos-setup-wizard
+
+Alternatively, you can use this wizard for voting on a custom chain,
+which also needs to be set up already.
 
 All commands within the service are run under the 'tezos' user.
 
@@ -223,7 +231,7 @@ custom_network_query = Step(
     help="The selected network will be used to vote.\n"
     "For example, to use the tezos-baking-custom@voting service, input 'voting'."
     "You need to already have set up the custom network using systemd services.",
-    # TODO: "\nFor that, you can follow a tutorial here:",
+    # TODO: "\nYou can follow a tutorial here:",
     validator=Validator(required_field_validator),
 )
 
@@ -315,12 +323,15 @@ class Setup:
             return bool(re.match(value_regex, address.stdout))
 
     def check_baking_service(self):
+        net = self.config["network_suffix"]
         try:
-            proc_call("systemctl is-active --quiet tezos-baking-mainnet.service")
+            proc_call(f"systemctl is-active --quiet tezos-baking-{net}.service")
         except:
-            print("Looks like the tezos-baking-mainnet service isn't running.")
-            print("Please start the service or set up baking by running:")
-            print("tezos-setup-wizard")
+            print(f"Looks like the tezos-baking-{net} service isn't running.")
+            print("Please start the service or set up baking.")
+            if self.config["network_mode"] == "mainnet":
+                print("You can do this by running:")
+                print("tezos-setup-wizard")
             sys.exit(1)
 
     def check_data_correctness(self):
@@ -333,15 +344,28 @@ class Setup:
             print("tezos-setup-wizard")
             sys.exit(1)
 
+    def get_network(self):
+        self.query_step(network_query)
+
+        if self.config["network_mode"] == "mainnet":
+            self.config["network_suffix"] = "mainnet"
+        elif self.config["network_mode"] == "custom":
+            # TODO: maybe check/validate this
+            self.query_step(custom_network_query)
+            self.config["network_suffix"] = (
+                "custom@" + self.config["custom_network_name"]
+            )
+
     def fill_baking_config(self):
-        output = get_proc_output("systemctl show tezos-baking-mainnet.service").stdout
+        net = self.config["network_suffix"]
+        output = get_proc_output(f"systemctl show tezos-baking-{net}.service").stdout
         config_filepath = re.search(b"EnvironmentFiles=(.*) ", output)
         if config_filepath is None:
             print(
-                "EnvironmentFiles not found in tezos-baking-mainnet.service configuration,",
-                "defaulting to /etc/default/tezos-baking-mainnet",
+                f"EnvironmentFiles not found in tezos-baking-{net}.service configuration,",
+                f"defaulting to /etc/default/tezos-baking-{net}",
             )
-            config_filepath = "/etc/default/tezos-baking-mainnet"
+            config_filepath = f"/etc/default/tezos-baking-{net}"
         else:
             config_filepath = config_filepath.group(1).decode().strip()
 
@@ -495,6 +519,8 @@ class Setup:
     def run_voting(self):
 
         print(welcome_text)
+
+        self.get_network()
 
         self.fill_baking_config()
 

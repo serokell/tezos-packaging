@@ -39,6 +39,7 @@ the binaries, and the services used.
 - [**Raspberry Pi OS**](./docs/distros/ubuntu.md#raspberry)
 - [**Fedora**](./docs/distros/fedora.md)
 - [**macOS**](./docs/distros/macos.md)
+- [**Windows using WSL**](./docs/distros/ubuntu.md#wsl)
 
 The information about supported versions of the aforementioned OSes is available in the [support policy doc](./docs/support-policy.md).
 

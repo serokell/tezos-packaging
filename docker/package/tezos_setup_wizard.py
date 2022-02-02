@@ -42,7 +42,7 @@ snapshot_import_modes = {
 key_import_modes = {
     "ledger": "From a ledger",
     "secret-key": "Either the unencrypted or password-encrypted secret key for your address",
-    "json": "Faucet JSON file from https://faucet.tzalpha.net/",
+    "json": "Faucet JSON file from https://teztnets.xyz/",
 }
 
 systemd_enable = {
@@ -450,7 +450,7 @@ secret_key_query = Step(
 json_filepath_query = Step(
     id="json_filepath",
     prompt="Provide the path to your downloaded faucet JSON file.",
-    help="Download the faucet JSON file from https://faucet.tzalpha.net/.\n"
+    help="Download the faucet JSON file from https://teztnets.xyz/.\n"
     "The file will contain the 'mnemonic' and 'secret' fields.",
     validator=Validator([required_field_validator, filepath_validator]),
 )

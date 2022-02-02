@@ -173,7 +173,7 @@ In order to import such a key, run:
 sudo -u tezos tezos-client import secret key baker <secret-key>
 ```
 
-3) You have a faucet JSON file from https://faucet.tzalpha.net/.
+1) You have a faucet JSON file from https://teztnets.xyz/.
 
 In order to activate the account run:
 ```

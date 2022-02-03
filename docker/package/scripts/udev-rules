@@ -6,11 +6,10 @@
 # that are fixing https://github.com/LedgerHQ/udev-rules/issues/5, so that provided rules work on the Raspberry Pi OS
 # Ubuntu 18.04
 
-# Don't add udev rules in case the package is installed inside either docker or podman container
-# or WSL (since it doesn't fully support udev and libusb at the moment).
+# Don't add udev rules in case the package is installed inside either docker or podman container.
 # Otherwise, post-installation script will fail due to inability to non-zero exit code of the
 # 'udevadm control --reload-rules' call
-if [ ! -f /.dockerenv ] && [ ! -f /.containerenv ] && ! grep -qEi "(Microsoft|WSL)" /proc/sys/kernel/osrelease ; then
+if [ ! -f /.dockerenv ] && [ ! -f /.containerenv ] ; then
     cat <<EOF > /etc/udev/rules.d/20-hw1.rules
 # HW.1 / Nano
 SUBSYSTEMS=="usb", ATTRS{idVendor}=="2581", ATTRS{idProduct}=="1b7c|2b7c|3b7c|4b7c", TAG+="uaccess", TAG+="udev-acl", MODE="0660", GROUP="plugdev"
@@ -27,6 +26,13 @@ SUBSYSTEMS=="usb", ATTRS{idVendor}=="2c97", ATTRS{idProduct}=="0004|4000|4001|40
 EOF
 
     udevadm trigger
+    # In WSL reloading the udev rules may fail unless the service is restarted
+    # first, see: https://github.com/dorssel/usbipd-win/wiki/WSL-support/e4a2d98725c3fea0cb139b71d290e887950c8371#udev
+    if grep -qEi "(Microsoft|WSL)" /proc/sys/kernel/osrelease ; then
+        # Here we try to restart using both the default 'service' command as well
+        # as 'systemctl', since many people switch to 'systemd'.
+        service udev restart || systemctl restart udev.service
+    fi
     udevadm control --reload-rules
     usermod -a -G plugdev tezos || true
 fi

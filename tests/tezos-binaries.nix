@@ -1,11 +1,12 @@
 # SPDX-FileCopyrightText: 2020 TQ Tezos <https://tqtezos.com/>
 #
 # SPDX-License-Identifier: LicenseRef-MIT-TQ
-{ path-to-binaries ? null } @ args:
+pkgs:
+{ self, nixpkgs, ... }:
+path-to-binaries:
 let
-  nixpkgs = (import ../nix/nix/sources.nix).nixpkgs;
-  pkgs = import ../nix/build/pkgs.nix {};
-  zcash = import ../nix/build/zcash.nix {};
+  system = pkgs.system;
+  zcash = pkgs.callPackage ../nix/build/zcash.nix {};
 in import "${nixpkgs}/nixos/tests/make-test-python.nix" ({ ... }:
 {
   nodes.machine = { ... }: {
@@ -39,4 +40,4 @@ in import "${nixpkgs}/nixos/tests/make-test-python.nix" ({ ... }:
         tezos_codec,
     ]
     ${builtins.readFile ./test_script.py}'';
-}) args
+}) { inherit pkgs system; }

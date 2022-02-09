@@ -9,7 +9,7 @@ with lib;
 let
   tezos-endorser-pkgs = {
     "011-PtHangz2" =
-      "${pkgs.ocamlPackages.tezos-endorser-011-PtHangz2}/bin/tezos-endorser-011-PtHangz2";
+      "${pkgs.tezosPackages.tezos-endorser-011-PtHangz2}/bin/tezos-endorser-011-PtHangz2";
   };
   common = import ./common.nix { inherit lib; inherit pkgs; };
   cfg = config.services.tezos-endorser;

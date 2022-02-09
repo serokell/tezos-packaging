@@ -1,21 +1,23 @@
 # SPDX-FileCopyrightText: 2021 TQ Tezos <https://tqtezos.com/>
 #
 # SPDX-License-Identifier: LicenseRef-MIT-TQ
-let
-  nixpkgs = (import ../nix/nix/sources.nix).nixpkgs;
-  pkgs = import ../nix/build/pkgs.nix {};
-in import "${nixpkgs}/nixos/tests/make-test-python.nix" ({ ... }:
-{
+pkgs:
+{ self, nixpkgs, ... }:
+import "${nixpkgs}/nixos/tests/make-test-python.nix" ({ ... }: {
+  system = pkgs.system;
+  inherit pkgs;
+
   machine = { ... }: {
     virtualisation.memorySize = 1024;
     virtualisation.diskSize = 1024;
 
     nixpkgs.pkgs = pkgs;
-    imports = [ ../nix/modules/tezos-node.nix
-                ../nix/modules/tezos-signer.nix
-                ../nix/modules/tezos-accuser.nix
-                ../nix/modules/tezos-baker.nix
-              ];
+    imports = with self.nixosModules; [
+      tezos-node
+      tezos-signer
+      tezos-accuser
+      tezos-baker
+    ];
 
     services.tezos-node.instances.ithacanet.enable = true;
 
@@ -59,4 +61,7 @@ in import "${nixpkgs}/nixos/tests/make-test-python.nix" ({ ... }:
         for s in services:
             machine.succeed(f"systemctl status tezos-ithacanet-{s}.service")
   '';
-})
+}) {
+  inherit pkgs;
+  system = pkgs.system;
+}

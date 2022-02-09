@@ -7,7 +7,7 @@
 with lib;
 
 let
-  tezos-signer-launch = "${pkgs.ocamlPackages.tezos-signer}/bin/tezos-signer launch";
+  tezos-signer-launch = "${pkgs.tezosPackages.tezos-signer}/bin/tezos-signer launch";
   common = import ./common.nix { inherit lib; inherit pkgs; };
   cfg = config.services.tezos-signer;
   instanceOptions = types.submodule ( {...} : {

@@ -2,14 +2,14 @@
 #
 # SPDX-License-Identifier: LicenseRef-MIT-TQ
 
+{ serokell-nix, ... }:
 {config, lib, pkgs, ...}:
 
 with lib;
 
 let
-  tezos-node-pkg = pkgs.ocamlPackages.tezos-node;
+  tezos-node-pkg = pkgs.tezosPackages.tezos-node;
   cfg = config.services.tezos-node;
-  sources = import ../nix/sources.nix;
   genConfigCommand = historyMode: rpcPort: netPort: network: ''
     --data-dir "$node_data_dir" \
     --history-mode "${historyMode}" \
@@ -64,7 +64,7 @@ let
 
       nodeConfig = mkOption {
         default = null;
-        type = types.nullOr (import sources.serokell-nix).lib.types.jsonConfig;
+        type = types.nullOr serokell-nix.lib.types.jsonConfig;
         description = ''
           Custom node config.
           This option overrides the all other options that affect

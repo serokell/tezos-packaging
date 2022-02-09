@@ -1,8 +1,8 @@
 # SPDX-FileCopyrightText: 2019 TQ Tezos <https://tqtezos.com/>
 #
 # SPDX-License-Identifier: LicenseRef-MIT-TQ
+protocols:
 let
-  protocols = import ../protocols.nix;
   protocolsFormatted =
     builtins.concatStringsSep ", " (protocols.allowed ++ protocols.active);
   protocolsWithEndorser =

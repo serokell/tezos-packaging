@@ -27,7 +27,9 @@
           scope = buildOpamProject' {
             recursive = true;
             resolveArgs.dev = false;
-          } src { ocaml-base-compiler = null; };
+          } src {
+            ocaml-base-compiler = null;
+          };
 
           release-binaries =
             builtins.filter (elem: elem.name != "tezos-sandbox")

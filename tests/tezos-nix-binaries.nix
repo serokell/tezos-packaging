@@ -16,13 +16,10 @@ in import "${nixpkgs}/nixos/tests/make-test-python.nix" ({ ... }:
       libev
     ];
     security.pki.certificateFiles = [ ./ca.cert ];
-    environment.sessionVariables.LD_LIBRARY_PATH =
-      [ "${pkgs.ocamlPackages.hacl-star-raw}/lib/ocaml/4.12.0/site-lib/hacl-star-raw" ];
   };
 
   testScript = ''
     tezos_accuser = "${tezos-accuser-012-Psithaca}/bin/tezos-accuser-012-Psithaca"
-    tezos_admin_client = "${tezos-admin-client}/bin/tezos-admin-client"
     tezos_baker = "${tezos-baker-012-Psithaca}/bin/tezos-baker-012-Psithaca"
     tezos_client = (
         "${tezos-client}/bin/tezos-client"
@@ -37,7 +34,6 @@ in import "${nixpkgs}/nixos/tests/make-test-python.nix" ({ ... }:
     host_cert = "${./host.cert}"
     binaries = [
         tezos_accuser,
-        tezos_admin_client,
         tezos_baker,
         tezos_client,
         tezos_node,

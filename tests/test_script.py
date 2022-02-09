@@ -72,9 +72,6 @@ def test_node_with_daemons_scenario(network, use_tls=False):
         else " --endpoint http://127.0.0.1:8732/ "
     )
     run_node_with_daemons(network, use_tls)
-    machine.succeed(
-        tezos_admin_client + tls_endpoint + "rpc get chains/main/blocks/head/"
-    )
     kill_node_with_daemons()
 
 

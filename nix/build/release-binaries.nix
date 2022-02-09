@@ -14,11 +14,6 @@ in [
     supports = protocolsFormatted;
   }
   {
-    name = "tezos-admin-client";
-    description = "Administration tool for the node";
-    supports = protocolsFormatted;
-  }
-  {
     name = "tezos-node";
     description =
       "Entry point for initializing, configuring and running a Tezos node";

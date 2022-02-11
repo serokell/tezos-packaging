@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: LicenseRef-MIT-TQ
 
-class TezosNodeHangzhounet < Formula
+class TezosNodeIthacanet < Formula
   url "file:///dev/null"
   version "v12.0-rc2-1"
 

@@ -9,10 +9,11 @@ A wizard utility to help with voting on the Tezos protocol.
 Asks questions, validates answers, and executes the appropriate steps using the final configuration.
 """
 
-import os, sys, subprocess, shlex
+import os, sys
 import readline
-import re, textwrap
+import re
 
+from wizard_structure import *
 
 # Global options
 
@@ -27,69 +28,13 @@ ballot_outcomes = {
     "pass": "Submit a vote not influencing the result but contributing to quorum",
 }
 
+
 # Regexes
 
 ledger_regex = b"ledger:\/\/[\w\-]+\/[\w\-]+\/[\w']+\/[\w']+"
 protocol_hash_regex = (
     b"P[123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]{50}"
 )
-
-# Input validators
-
-
-def enum_range_validator(options):
-    def _validator(input):
-        intrange = list(map(str, range(1, len(options) + 1)))
-        if input not in intrange and input not in options:
-            raise ValueError(
-                "Please choose one of the provided values or use their respective numbers: "
-                + ", ".join(options)
-            )
-        try:
-            opt = int(input) - 1
-        except:
-            return input
-        else:
-            opts = options
-            if isinstance(options, dict):
-                opts = list(options.keys())
-            return opts[opt]
-
-    return _validator
-
-
-def required_field_validator(input):
-    if not input.strip():
-        raise ValueError("Please provide this required option.")
-    return input
-
-
-# To be validated, the input should adhere to the protocol hash format:
-# <base58 encoded string with length 51 starting with P>
-def protocol_hash_validator(input):
-    proto_hash_regex_str = protocol_hash_regex.decode("utf-8")
-    match = re.match(proto_hash_regex_str, input.strip())
-    if not bool(match):
-        raise ValueError(
-            "The input doesn't match the format for the protocol hash: "
-            + proto_hash_regex_str
-            + "\nPlease check the input and try again."
-        )
-    return input
-
-
-class Validator:
-    def __init__(self, validator):
-        self.validator = validator
-
-    def validate(self, input):
-        if self.validator is not None:
-            if isinstance(self.validator, list):
-                for v in self.validator:
-                    input = v(input)
-                return input
-            else:
-                return self.validator(input)
 
 
 # Wizard CLI utility
@@ -112,42 +57,6 @@ To access help and possible options for each question, type in 'help' or '?'.
 Type in 'exit' to quit.
 """
 
-suppress_warning_text = "TEZOS_CLIENT_UNSAFE_DISABLE_DISCLAIMER=YES"
-
-
-def proc_call(cmd):
-    return subprocess.check_call(shlex.split(cmd))
-
-
-def get_proc_output(cmd):
-    if sys.version_info.major == 3 and sys.version_info.minor < 7:
-        return subprocess.run(shlex.split(cmd), stdout=subprocess.PIPE)
-    else:
-        return subprocess.run(shlex.split(cmd), capture_output=True)
-
-
-def color(input, colorcode):
-    return colorcode + input + "\x1b[0m"
-
-
-color_red = "\x1b[1;31m"
-
-
-def yes_or_no(prompt, default=None):
-    valid = False
-    while not valid:
-        answer = input(prompt).strip().lower()
-        if not answer and default is not None:
-            answer = default
-        if answer in ["y", "yes"]:
-            print()
-            return True
-        elif answer in ["n", "no"]:
-            print()
-            return False
-        else:
-            print(color("Please provide a 'yes' or 'no' answer.", color_red))
-
 
 # we don't need any data here, just a confirmation Tezos Wallet app is open
 def wait_for_ledger_wallet_app():
@@ -157,60 +66,6 @@ def wait_for_ledger_wallet_app():
             f"sudo -u tezos {suppress_warning_text} tezos-client list connected ledgers"
         ).stdout
         proc_call("sleep 1")
-
-
-def search_baking_service_config(config_contents, regex, default):
-    res = re.search(regex, config_contents)
-    if res is None:
-        return default
-    else:
-        return res.group(1)
-
-
-class Step:
-    def __init__(
-        self,
-        id: str,
-        prompt: str,
-        help: str,
-        default: str = "1",
-        options=None,
-        validator=None,
-    ):
-        self.id = id
-        self.prompt = prompt
-        self.help = help
-        self.default = default
-        self.options = options
-        self.validator = validator
-
-    def pprint_options(self):
-        i = 1
-        def_i = None
-        try:
-            def_i = int(self.default)
-        except:
-            pass
-
-        if self.options and isinstance(self.options, list):
-            str_format = "{:1}. {}"
-            for o in self.options:
-                if def_i is not None and i == def_i:
-                    print(str_format.format(i, "(default) " + o))
-                else:
-                    print(str_format.format(i, o))
-                i += 1
-        elif self.options and isinstance(self.options, dict):
-            str_format = "{:1}. {:<26}  {}"
-            for o in self.options:
-                description = textwrap.indent(
-                    textwrap.fill(self.options[o], 60), " " * 31
-                ).lstrip()
-                if def_i is not None and i == def_i:
-                    print(str_format.format(i, o + " (default)", description))
-                else:
-                    print(str_format.format(i, o, description))
-                i += 1
 
 
 # Steps
@@ -282,34 +137,7 @@ ballot_outcome_query = Step(
 )
 
 
-class Setup:
-    def __init__(self, config={}):
-        self.config = config
-
-    def query_step(self, step: Step):
-        validated = False
-        while not validated:
-            print(step.prompt)
-            step.pprint_options()
-            answer = input("> ").strip()
-
-            if answer.lower() in ["quit", "exit"]:
-                raise KeyboardInterrupt
-            elif answer.lower() in ["help", "?"]:
-                print(step.help)
-                print()
-            else:
-                if not answer and step.default is not None:
-                    answer = step.default
-
-                try:
-                    if step.validator is not None:
-                        answer = step.validator.validate(answer)
-                except ValueError as e:
-                    print(color("Validation error: " + str(e), color_red))
-                else:
-                    validated = True
-                    self.config[step.id] = answer
+class Setup(Setup):
 
     # Check whether the baker_alias account is set up to use ledger
     def check_ledger_use(self):
@@ -323,7 +151,7 @@ class Setup:
             return bool(re.match(value_regex, address.stdout))
 
     def check_baking_service(self):
-        net = self.config["network_suffix"]
+        net = self.config["network"]
         try:
             proc_call(f"systemctl is-active --quiet tezos-baking-{net}.service")
         except:
@@ -348,46 +176,11 @@ class Setup:
         self.query_step(network_query)
 
         if self.config["network_mode"] == "mainnet":
-            self.config["network_suffix"] = "mainnet"
+            self.config["network"] = "mainnet"
         elif self.config["network_mode"] == "custom":
             # TODO: maybe check/validate this
             self.query_step(custom_network_query)
-            self.config["network_suffix"] = (
-                "custom@" + self.config["custom_network_name"]
-            )
-
-    def fill_baking_config(self):
-        net = self.config["network_suffix"]
-        output = get_proc_output(f"systemctl show tezos-baking-{net}.service").stdout
-        config_filepath = re.search(b"EnvironmentFiles=(.*) ", output)
-        if config_filepath is None:
-            print(
-                f"EnvironmentFiles not found in tezos-baking-{net}.service configuration,",
-                f"defaulting to /etc/default/tezos-baking-{net}",
-            )
-            config_filepath = f"/etc/default/tezos-baking-{net}"
-        else:
-            config_filepath = config_filepath.group(1).decode().strip()
-
-        with open(config_filepath, "r") as f:
-            config_contents = f.read()
-            self.config["client_data_dir"] = search_baking_service_config(
-                config_contents, 'DATA_DIR="(.*)"', "/var/lib/tezos/.tezos-client"
-            )
-            self.config["node_rpc_addr"] = search_baking_service_config(
-                config_contents, 'NODE_RPC_ENDPOINT="(.*)"', "http://localhost:8732"
-            )
-            self.config["baker_alias"] = search_baking_service_config(
-                config_contents, 'BAKER_ADDRESS_ALIAS="(.*)"', "baker"
-            )
-
-    def get_tezos_client_options(self):
-        return (
-            "--base-dir "
-            + self.config["client_data_dir"]
-            + " --endpoint "
-            + self.config["node_rpc_addr"]
-        )
+            self.config["network"] = "custom@" + self.config["custom_network_name"]
 
     def fill_voting_period_info(self):
         voting_proc = get_proc_output(

@@ -562,6 +562,7 @@ class TezosBakingServicesPackage(AbstractPackage):
 
     def fetch_sources(self, out_dir):
         os.makedirs(out_dir)
+        shutil.copy(f"{os.path.dirname(__file__)}/wizard_structure.py", out_dir)
         shutil.copy(f"{os.path.dirname(__file__)}/tezos_setup_wizard.py", out_dir)
         shutil.copy(f"{os.path.dirname(__file__)}/tezos_voting_wizard.py", out_dir)
 
@@ -655,6 +656,7 @@ tezos-voting-wizard:
 
 install: tezos-baking tezos-setup-wizard tezos-voting-wizard
 	mkdir -p $(DESTDIR)$(BINDIR)
+	cp $(CURDIR)/wizard_structure.py $(DESTDIR)$(BINDIR)/wizard_structure.py
 	cp $(CURDIR)/tezos-setup-wizard $(DESTDIR)$(BINDIR)/tezos-setup-wizard
 	cp $(CURDIR)/tezos-voting-wizard $(DESTDIR)$(BINDIR)/tezos-voting-wizard
 """

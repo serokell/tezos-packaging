@@ -68,18 +68,18 @@ rec {
     '';
   });
 
-  irmin = osuper.irmin.versions."2.9.0".overrideAttrs (o: {
+  irmin = osuper.irmin.versions."2.9.1".overrideAttrs (o: {
     useDune2 = true;
   });
-  irmin-pack = osuper.irmin-pack.versions."2.9.0".overrideAttrs ( o: {
+  irmin-pack = osuper.irmin-pack.versions."2.9.1".overrideAttrs ( o: {
     buildPhase = ''
       runHook preBuild
       dune build -p irmin-pack -j $NIX_BUILD_CORES
       runHook postBuild
     '';
   });
-  irmin-layers = osuper.irmin-layers.versions."2.9.0";
-  ppx_irmin = osuper.ppx_irmin.versions."2.9.0";
+  irmin-layers = osuper.irmin-layers.versions."2.9.1";
+  ppx_irmin = osuper.ppx_irmin.versions."2.9.1";
 
   index = osuper.index.versions."1.5.0";
   progress = osuper.progress.versions."0.2.1".overrideAttrs (o: {
@@ -95,13 +95,13 @@ rec {
 
   lwt-canceler = osuper.lwt-canceler.versions."0.3";
   data-encoding = osuper.data-encoding.versions."0.4";
-  json-data-encoding = osuper.json-data-encoding.versions."0.10";
-  json-data-encoding-bson = osuper.json-data-encoding-bson.versions."0.10";
+  json-data-encoding = osuper.json-data-encoding.versions."0.11";
+  json-data-encoding-bson = osuper.json-data-encoding-bson.versions."0.11";
   ocamlformat = osuper.ocamlformat.overrideAttrs (o: {
     buildInputs = o.buildInputs ++ [ alcotest ocp-indent ];
   });
 
-  bls12-381 = osuper.bls12-381.versions."1.1.0".overrideAttrs (o:
+  bls12-381 = osuper.bls12-381.versions."1.1.1".overrideAttrs (o:
     rec {
       buildInputs = o.buildInputs ++ [ rustc-bls12-381 ];
       buildPhase = ''

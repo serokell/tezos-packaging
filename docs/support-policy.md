@@ -20,10 +20,6 @@ Currently, these are versions:
 * 18.04 LTS (Bionic Beaver)
 * 20.04 LTS (Focal Fossa)
 
-When feasible, we also provide support for non-LTS versions on request from the users.
-Currently:
-* 21.04 (Hirsute Hippo) - requested in [#212](https://github.com/serokell/tezos-packaging/issues/212)
-
 There are packages for `arm64` and `amd64` architectures.
 
 ## Fedora packages

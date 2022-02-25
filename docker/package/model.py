@@ -239,7 +239,7 @@ Source: {self.name.lower()}
 Section: utils
 Priority: optional
 Maintainer: {self.meta.maintainer}
-Build-Depends: debhelper (>=9), {"dh-systemd (>= 1.5), " if ubuntu_version != "hirsute" else ""} autotools-dev, {str_build_deps}
+Build-Depends: debhelper (>=9), dh-systemd (>= 1.5), autotools-dev, {str_build_deps}
 Standards-Version: 3.9.6
 Homepage: https://gitlab.com/tezos/tezos/
 
@@ -389,7 +389,7 @@ Source: {self.name}
 Section: utils
 Priority: optional
 Maintainer: {self.meta.maintainer}
-Build-Depends: debhelper (>=9), {"dh-systemd (>= 1.5), " if ubuntu_version != "hirsute" else ""} autotools-dev, wget
+Build-Depends: debhelper (>=9), dh-systemd (>= 1.5), autotools-dev, wget
 Standards-Version: 3.9.6
 Homepage: https://gitlab.com/tezos/tezos/
 
@@ -578,7 +578,7 @@ Source: {self.name}
 Section: utils
 Priority: optional
 Maintainer: {self.meta.maintainer}
-Build-Depends: debhelper (>=9), {"dh-systemd (>= 1.5), " if ubuntu_version != "hirsute" else ""} autotools-dev
+Build-Depends: debhelper (>=9), dh-systemd (>= 1.5), autotools-dev
 Standards-Version: 3.9.6
 Homepage: https://gitlab.com/tezos/tezos/
 

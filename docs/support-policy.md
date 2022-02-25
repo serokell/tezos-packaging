@@ -27,8 +27,8 @@ There are packages for `arm64` and `amd64` architectures.
 We aim to provide packages for all [currently supported Fedora releases](https://docs.fedoraproject.org/en-US/releases/).
 
 Currently, these are versions:
-* Fedora 34, both `x86_64` and `aarch64`
-* Fedora 35, only `aarch64`. `x86_64` is currently unsupported due to [tezos/#1449](https://gitlab.com/tezos/tezos/-/issues/1449)
+* Fedora 34
+* Fedora 35
 
 There are packages for `x86_64` and `aarch64` architectures.
 

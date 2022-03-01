@@ -182,7 +182,11 @@ steps:
          build.message =~ /^Merge pull request .* from serokell\/auto\/update-brew-formulae-v[.0-9]+-[0-9]+/ )
    depends_on:
    - "auto-release"
-   command: git push --mirror git@github.com:serokell/tezos-packaging-stable.git
+   env:
+    MIRROR_REPO: "git@github.com:serokell/tezos-packaging-stable.git"
+   commands: &update_mirror
+   - git pull origin "$BUILDKITE_BRANCH:$BUILDKITE_BRANCH"
+   - git push --mirror "$MIRROR_REPO"
 
  - label: update RC mirror repository
    if: |
@@ -191,4 +195,6 @@ steps:
           build.message =~ /^Merge pull request .* from serokell\/auto\/update-brew-formulae-v[.0-9]+-rc.*/)
    depends_on:
    - "auto-release"
-   command: git push --mirror git@github.com:serokell/tezos-packaging-rc.git
+   env:
+    MIRROR_REPO: "git@github.com:serokell/tezos-packaging-rc.git"
+   commands: *update_mirror

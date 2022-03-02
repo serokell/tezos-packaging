@@ -247,6 +247,42 @@ In case you want to use a different alias for the baking account:
 2. update the `BAKER_ADDRESS_ALIAS` by editing the
     `/etc/default/tezos-baking-<network>` file.
 
+### Using a custom chain
+
+In case you want to set up a baking instance on a custom chain instead of relying on mainnet
+or official testnets, you can do so:
+
+1. Create a config file for future custom baking instance:
+  ```bash
+  sudo cp /etc/default/tezos-baking-custom@ /etc/default/tezos-baking-custom@<chain-name>
+  ```
+2. In `/etc/default/tezos-baking-custom@<chain-name>`, provide the path to your custom node
+  config in `CUSTOM_NODE_CONFIG`.
+3. Start custom baking service:
+  ```bash
+  sudo systemctl start tezos-baking-custom@<chain-name>
+  ```
+4. Check that all parts are indeed running:
+  ```bash
+  systemctl status tezos-node-custom@<chain-name>
+  systemctl status tezos-baker-011-pthangz2@custom@<chain-name>.service
+  systemctl status tezos-baker-012-psithaca@custom@<chain-name>.service
+  systemctl status tezos-endorser-011-pthangz2@custom@<chain-name>.service
+```
+
+If at any point after that you want to reset the custom baking service, you can set
+`RESET_ON_STOP=true` in the `/etc/default/tezos-baking-custom@<chain-name>` config file and run:
+
+```bash
+sudo systemctl stop tezos-baking-custom@voting
+```
+
+Manually resetting is possible through:
+
+1. Removing the custom chain node directory, `/var/lib/tezos/node-custom@<chain-name>` by default.
+2. Deleting `blocks`, `nonces`, and `endorsements` from the `tezos-client` data directory,
+  `/var/lib/tezos/.tezos-client` by default.
+
 ## Quick Start
 
 <details>

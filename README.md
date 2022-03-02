@@ -31,6 +31,18 @@ tezos-setup-wizard
 Read [the dedicated article](./docs/baking.md) to find out more about the setup,
 the binaries, and the services used.
 
+### Voting on Ubuntu
+
+An interactive voting wizard is provided for Ubuntu. After setting up a baking instance
+on mainnet, you can vote by running:
+
+```bash
+tezos-voting-wizard
+```
+
+Read the [documentation on voting](./docs/voting.md) to find out more details about
+voting on custom networks.
+
 ## Installing Tezos
 
 `tezos-packaging` supports several native distribution methods for convenience:

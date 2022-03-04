@@ -15,6 +15,6 @@ fi
 
 brew install --formula --build-bottle "./Formula/$1.rb"
 brew bottle --force-core-tap --no-rebuild "./Formula/$1.rb"
-brew uninstall "./Formula/$1.rb"
+brew uninstall --formula "./Formula/$1.rb"
 # https://github.com/Homebrew/brew/pull/4612#commitcomment-29995084
 mv "$1"*.bottle.* "$(echo $1*.bottle.* | sed s/--/-/)"

@@ -58,12 +58,20 @@ Once the configuration is updated, you should restart the service:
 
 ## Building brew bottles
 
-In order to build bottles with Tezos binaries run
-`build-bottles.sh` script:
+In order to build bottles with Tezos binaries run the [`build-one-bottle.sh`](../../scripts/build-one-bottle.sh)
+script with the formula that you want to build. For example:
 ```
-./scripts/build-bottles.sh
+./scripts/scripts/build-one-bottle.sh tezos-client
 ```
 
-Note that this might take a while, because builds don't share common parts and for each binary
-dependencies are compiled from scratch. Once the bottles are built, the corresponding sections in the
-formulas should be updated. Also, bottles should be uploaded to the release artifacts.
+Note that several formulae have `tezos-sapling-params` has a dependency, so you
+might need to run:
+```
+brew install --formula ./Formula/tezos-sapling-params.rb
+```
+first.
+
+Building many of these might take a while, because builds don't share common parts and for each
+binary dependencies are compiled from scratch.
+Once the bottles are built, the corresponding sections in the formulae should be updated.
+Also, bottles should be uploaded to the release artifacts.

@@ -203,7 +203,7 @@ cd .. && ./docker/docker-tezos-packages.sh --os fedora --type source --package t
 
 Sign source packages:
 ```
-rpm --add-sign out/*.src.rpm
+rpm --addsign out/*.src.rpm
 ```
 Note, that in order to sign them, you'll need gpg key to be set up in `~/.rpmmacros`.
 

@@ -29,7 +29,7 @@ def build_fedora_package(
                 systemd_unit.service_file.service.environment_file.lower()
             )
         if systemd_unit.suffix is None:
-            unit_name = f"{pkg.name}"
+            unit_name = pkg.name
         else:
             unit_name = f"{pkg.name}-{systemd_unit.suffix}"
         out_path = (
@@ -39,9 +39,12 @@ def build_fedora_package(
         )
         print_service_file(systemd_unit.service_file, out_path)
         if systemd_unit.config_file is not None:
+            default_name = (
+                unit_name if systemd_unit.instances is None else f"{unit_name}@"
+            )
             shutil.copy(
                 f"{cwd}/defaults/{systemd_unit.config_file}",
-                f"{dir}/{unit_name}.default",
+                f"{dir}/{default_name}.default",
             )
         for script, script_source in [
             (systemd_unit.startup_script, systemd_unit.startup_script_source),

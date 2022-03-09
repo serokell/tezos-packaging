@@ -23,9 +23,8 @@ It is the recommended way at the moment to set up a baking instance.
 To bake on a Raspberry Pi you will need a device that has at least 4 GB of RAM
 and an arm64 processor; for example a Raspberry Pi 4B.
 
-You will also need to run the 64bit version of the [Raspberry Pi OS](https://www.raspberrypi.org/software/),
-that you can use by following the [installation instructions](https://www.raspberrypi.org/documentation/installation/installing-images/)
-with an image downloaded from the [official 64bit repository](https://downloads.raspberrypi.org/raspios_arm64/images/).
+You will also need to run the [64bit version of the Raspberry Pi OS](https://www.raspberrypi.com/software/operating-systems/#raspberry-pi-os-64-bit),
+that you can use by following the [installation instructions](https://www.raspberrypi.com/documentation/computers/getting-started.html#installing-the-operating-system).
 
 ### Installation
 
@@ -66,7 +65,7 @@ On Raspberry Pi OS:
 # Install software properties commons
 sudo apt-get install software-properties-common
 # Add PPA with Tezos binaries
-sudo add-apt-repository 'deb http://ppa.launchpad.net/serokell/tezos/ubuntu bionic main'
+sudo add-apt-repository 'deb http://ppa.launchpad.net/serokell/tezos/ubuntu focal main'
 sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 37B8819B7D0D183812DCA9A8CE5A4D8933AE7CBB
 ```
 

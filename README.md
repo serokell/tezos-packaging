@@ -1,7 +1,7 @@
 <!--
-   - SPDX-FileCopyrightText: 2019-2021 TQ Tezos <https://tqtezos.com/>
+   - SPDX-FileCopyrightText: 2022 Oxhead Alpha
    -
-   - SPDX-License-Identifier: LicenseRef-MIT-TQ
+   - SPDX-License-Identifier: LicenseRef-MIT-OA
    -->
 
 # Tezos packaging

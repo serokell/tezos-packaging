@@ -85,9 +85,9 @@ def print_service_file(service_file: ServiceFile, out):
         exec_stop_posts = "\n".join(
             f"ExecStopPost={x}" for x in service_file.service.exec_stop_post
         )
-    file_contents = f"""# SPDX-FileCopyrightText: 2020 TQ Tezos <https://tqtezos.com/>
+    file_contents = f"""# SPDX-FileCopyrightText: 2022 Oxhead Alpha
 #
-# SPDX-License-Identifier: LicenseRef-MIT-TQ
+# SPDX-License-Identifier: LicenseRef-MIT-OA
 [Unit]
 {after}{requires}{part_of}Description={service_file.unit.description}
 [Service]

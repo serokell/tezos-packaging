@@ -1,8 +1,7 @@
 #! /usr/bin/env python3
 
-# SPDX-FileCopyrightText: 2021 TQ Tezos <https://tqtezos.com/>
-#
-# SPDX-License-Identifier: LicenseRef-MIT-TQ
+# SPDX-FileCopyrightText: 2021 Oxhead Alpha
+# SPDX-License-Identifier: LicenseRef-MIT-OA
 
 # This script performs filtering of a buildkite pipeline.yml configuration
 # file. The filter is based on the contents of 'only_changes' steps

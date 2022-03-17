@@ -1,6 +1,5 @@
-# SPDX-FileCopyrightText: 2020 TQ Tezos <https://tqtezos.com/>
-#
-# SPDX-License-Identifier: LicenseRef-MIT-TQ
+# SPDX-FileCopyrightText: 2021 Oxhead Alpha
+# SPDX-License-Identifier: LicenseRef-MIT-OA
 import os, json
 
 from .meta import packages_meta

@@ -1,7 +1,6 @@
 #! /usr/bin/env bash
-# SPDX-FileCopyrightText: 2021 TQ Tezos <https://tqtezos.com/>
-#
-# SPDX-License-Identifier: LicenseRef-MIT-TQ
+# SPDX-FileCopyrightText: 2021 Oxhead Alpha
+# SPDX-License-Identifier: LicenseRef-MIT-OA
 
 # This script signs all commits in the current 'BUILDKITE_BRANCH'
 

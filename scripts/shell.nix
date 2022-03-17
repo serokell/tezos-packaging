@@ -1,6 +1,5 @@
-# SPDX-FileCopyrightText: 2019-2020 TQ Tezos <https://tqtezos.com/>
-#
-# SPDX-License-Identifier: LicenseRef-MIT-TQ
+# SPDX-FileCopyrightText: 2021 Oxhead Alpha
+# SPDX-License-Identifier: LicenseRef-MIT-OA
 
 { pkgs ? import (import ../nix/nix/sources.nix {}).nixpkgs { } }:
 with pkgs;

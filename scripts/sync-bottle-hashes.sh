@@ -1,7 +1,6 @@
 #! /usr/bin/env bash
-# SPDX-FileCopyrightText: 2021 TQ Tezos <https://tqtezos.com/>
-#
-# SPDX-License-Identifier: LicenseRef-MIT-TQ
+# SPDX-FileCopyrightText: 2021 Oxhead Alpha
+# SPDX-License-Identifier: LicenseRef-MIT-OA
 
 # This script takes the new tag and the OS name as its arguments
 # and handles git shenanigans related to syncing two pipelines over a common branch.

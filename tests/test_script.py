@@ -1,6 +1,5 @@
-# SPDX-FileCopyrightText: 2020 TQ Tezos <https://tqtezos.com/>
-#
-# SPDX-License-Identifier: LicenseRef-MIT-TQ
+# SPDX-FileCopyrightText: 2021 Oxhead Alpha
+# SPDX-License-Identifier: LicenseRef-MIT-OA
 
 # This script is used in tezos-binaries.nix and isn't supposed to be run
 # other way than 'nix-build tezos-binaries.nix'

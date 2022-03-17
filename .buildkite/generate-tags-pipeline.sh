@@ -1,9 +1,8 @@
 #! /usr/bin/env nix-shell
 #! nix-shell shell.nix -i bash
 
-# SPDX-FileCopyrightText: 2022 TQ Tezos <https://tqtezos.com/>
-#
-# SPDX-License-Identifier: LicenseRef-MIT-TQ
+# SPDX-FileCopyrightText: 2022 Oxhead Alpha
+# SPDX-License-Identifier: LicenseRef-MIT-OA
 
 # This script generates part of the .buildkite/pipeline-for-tags.yml config file
 # by appending every step associated with bottle building to the steps defined there.

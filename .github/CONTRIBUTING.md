@@ -50,9 +50,9 @@ but, basically, it all boils down to the following:
     file – it is not as hard as it might sound):
 
     ```
-    # SPDX-FileCopyrightText: 2019 TQ Tezos <https://tqtezos.com/>
+    # SPDX-FileCopyrightText: 2022 Oxhead Alpha
     #
-    # SPDX-License-Identifier: LicenseRef-MIT-TQ
+    # SPDX-License-Identifier: LicenseRef-MIT-OA
     ```
 
     (This is an example for Nix; adapt it as needed for other languages.)

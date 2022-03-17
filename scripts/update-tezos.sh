@@ -1,8 +1,7 @@
 #! /usr/bin/env nix-shell
 #! nix-shell shell.nix -i bash
-# SPDX-FileCopyrightText: 2021 TQ Tezos <https://tqtezos.com/>
-#
-# SPDX-License-Identifier: LicenseRef-MIT-TQ
+# SPDX-FileCopyrightText: 2021 Oxhead Alpha
+# SPDX-License-Identifier: LicenseRef-MIT-OA
 
 # This script fetches the latest tag from the https://gitlab.com/tezos/tezos/ repository,
 # compares it with the version presented in the nix/nix/sources.json, and performs an

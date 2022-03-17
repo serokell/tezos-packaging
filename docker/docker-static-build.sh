@@ -1,8 +1,7 @@
 #! /usr/bin/env bash
 
-# SPDX-FileCopyrightText: 2020 TQ Tezos <https://tqtezos.com/>
-#
-# SPDX-License-Identifier: LicenseRef-MIT-TQ
+# SPDX-FileCopyrightText: 2021 Oxhead Alpha
+# SPDX-License-Identifier: LicenseRef-MIT-OA
 
 # This script builds static tezos-binaries using custom alpine image.
 # It expects docker or podman to be installed and configured.

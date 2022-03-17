@@ -1,6 +1,5 @@
-# SPDX-FileCopyrightText: 2020 TQ Tezos <https://tqtezos.com/>
-#
-# SPDX-License-Identifier: LicenseRef-MIT-TQ
+# SPDX-FileCopyrightText: 2021 Oxhead Alpha
+# SPDX-License-Identifier: LicenseRef-MIT-OA
 { path-to-binaries ? null } @ args:
 let
   nixpkgs = (import ../nix/nix/sources.nix).nixpkgs;

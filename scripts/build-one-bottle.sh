@@ -1,7 +1,6 @@
 #! /usr/bin/env bash
-# SPDX-FileCopyrightText: 2022 TQ Tezos <https://tqtezos.com/>
-#
-# SPDX-License-Identifier: LicenseRef-MIT-TQ
+# SPDX-FileCopyrightText: 2022 Oxhead Alpha
+# SPDX-License-Identifier: LicenseRef-MIT-OA
 
 # Newer brew versions fail when checking for a rebuild version of non-core taps.
 # So for now we skip the check with '--no-rebuild'

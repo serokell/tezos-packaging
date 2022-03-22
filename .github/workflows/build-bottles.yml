@@ -14,7 +14,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ { id: macos-10.15, name: "catalina" }, { id: macos-11, name: "big_sur" } ]
+        os: [ { id: macos-10.15, name: "catalina" } ]
         # we don't bottle meta-formulas that contain only services
         formula: [tezos-accuser-011-PtHangz2, tezos-accuser-012-Psithaca, tezos-admin-client, tezos-baker-011-PtHangz2, tezos-baker-012-Psithaca, tezos-client, tezos-codec, tezos-endorser-011-PtHangz2, tezos-node, tezos-sandbox, tezos-signer]
 
@@ -92,11 +92,3 @@ jobs:
 
       - name: Add bottle hashes to formulae
         run: ./scripts/sync-bottle-hashes.sh "${{ env.tag }}" "Catalina"
-
-      - name: Download Big Sur bottles from the release
-        env:
-          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
-        run: gh release download "${{ env.tag }}" -p "*.big_sur.bottle.tar.gz" -D "./Big Sur"
-
-      - name: Add bottle hashes to formulae
-        run: ./scripts/sync-bottle-hashes.sh "${{ env.tag }}" "Big Sur"

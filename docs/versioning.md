@@ -1,5 +1,5 @@
 <!--
-   - SPDX-FileCopyrightText: 2021 Oxhead Alpha
+   - SPDX-FileCopyrightText: 2022 Oxhead Alpha
    - SPDX-License-Identifier: LicenseRef-MIT-OA
    -->
 
@@ -7,7 +7,7 @@
 
 `tezos-packaging` follows all Octez releases, both stable and candidates.
 
-Packages from our releases provide addinional functionality (e.g. systemd services
+Packages from our releases provide additional functionality (e.g. systemd services
 in Ubuntu and Fedora package or brew formulae with launchd services).
 This additional functionality may change within the same upstream version.
 
@@ -17,17 +17,24 @@ the following RPM-like versioning scheme: `<name>-<version>-<release>`:
 * `<version>` is used to reference the packaged upstream version.
 * `<release>` is used to reflect changes in additional packages functionality.
 
+Note that each `<release>` will be consistent across distribution methods (
+corresponding to the same git commit), but may be partial in scope, affecting
+only some binaries in some distribution.
+
 ## GitHub releases
 
-We provide GitHub releases for stable upstream releases and pre-releases for release candidates.
+Depending on the upstream `<version>`, on GitHub we provide:
+- releases for stable Octez releases
+- pre-releases for Octez release candidates
 
-In our GitHub repository we use tags in which `<name>-` part is ommited.
+In our GitHub repository we use tags in which the `<name>-` part is omitted.
 
 E.g. `v11.0-1` is the first `tezos-packaging` release within the `v11.0` upstream stable release,
 or `v11.0-rc2-2` for the second `tezos-packaging` release within the `v11.0-rc2` upstream release candidate.
 
-GitHub {pre-}releases contain static binaries and brew bottles compiled from the given
-upstream source version.
+GitHub {pre-}releases contain static binaries compiled from the given
+upstream source `<version>`.
+If any are applicable, they also contain `brew` bottles for macOS (see below).
 
 ## Ubuntu packages
 

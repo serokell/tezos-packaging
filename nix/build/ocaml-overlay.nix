@@ -1,16 +1,23 @@
-# SPDX-FileCopyrightText: 2021 Oxhead Alpha
+# SPDX-FileCopyrightText: 2021-2022 Oxhead Alpha
 # SPDX-License-Identifier: LicenseRef-MIT-OA
 
 { sources ? import ../nix/sources.nix
 , protocols ? builtins.fromJSON (builtins.readFile ../../protocols.json)
-, hacks ? import ./hacks.nix
-, pkgs ? import sources.nixpkgs { }, opam-nix ? import sources.opam-nix pkgs }:
-self: super: {
-  ocamlPackages = self.ocaml-ng.ocamlPackages_4_12.overrideScope'
-    (builtins.foldl' self.lib.composeExtensions (_: _: { }) [
-      (opam-nix.traverseOPAMRepo' sources.opam-repository)
-      (oself: osuper: { index-super = osuper.index.versions."1.2.0"; })
-      (opam-nix.callOPAMPackage sources.tezos)
+, hacks ? import ./hacks.nix, zcash-overlay ? import ./zcash-overlay.nix
+, pkgs ? import sources.nixpkgs { }, opam-nix ? import sources.opam-nix }:
+
+self: super:
+with opam-nix.lib.${pkgs.system}; let
+  tezosSourcesResolved =
+    pkgs.runCommand "resolve-tezos-sources" {} "cp --no-preserve=all -Lr ${sources.tezos} $out";
+  tezosScope = buildOpamProject' {
+    inherit pkgs;
+    repos = [sources.opam-repository];
+    recursive = true;
+    resolveArgs = { };
+  } tezosSourcesResolved { };
+in {
+  ocamlPackages = tezosScope.overrideScope' (pkgs.lib.composeManyExtensions [
       (_: # Nullify all the ignored protocols so that we don't build them
         builtins.mapAttrs (name: pkg:
           if builtins.any
@@ -19,7 +26,7 @@ self: super: {
             null
           else
             pkg))
-      (hacks self super)
-      (opam-nix.cacheSources sources)
+      hacks
+      zcash-overlay
     ]);
 }

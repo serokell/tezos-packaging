@@ -1,12 +1,9 @@
-# SPDX-FileCopyrightText: 2019 TQ Tezos <https://tqtezos.com/>
+# SPDX-FileCopyrightText: 2022 Oxhead Alpha
 #
 # SPDX-License-Identifier: LicenseRef-MIT-TQ
 
 { sources ? import ../nix/sources.nix, pkgs ? import sources.nixpkgs { } }:
 let
-  ocaml-overlay = import ./ocaml-overlay.nix { inherit sources pkgs; };
-  static-overlay = import ./static-overlay.nix;
+  ocaml-overlay = import ./ocaml-overlay.nix { inherit sources; };
   nixpkgs = import sources.nixpkgs { overlays = [ ocaml-overlay ]; };
-in nixpkgs.extend (self: super: {
-  pkgsMusl = super.pkgsMusl.extend static-overlay;
-})
+in nixpkgs

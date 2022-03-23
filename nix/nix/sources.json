@@ -24,15 +24,15 @@
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
     },
     "opam-nix": {
-        "branch": "master",
-        "description": "A handy nix library to package OCaml software from OPAM repositories",
+        "branch": "main",
+        "description": null,
         "homepage": null,
-        "owner": "serokell",
+        "owner": "tweag",
         "repo": "opam-nix",
-        "rev": "ee285a3b6e05dc274f9ebf59ad64d8a4fded915e",
-        "sha256": "0f3dm834zf7y4c4pp8xr12zl0n1xk0zql3a9m2wh6a5shdcdcwj7",
+        "rev": "f20ed19391752fe8cf505945dce776ce0ffa48a2",
+        "sha256": "0j27nwqc88grz3zfwg3f62xj5cn57dmm3qrrzr9i3j2rkw0npkhz",
         "type": "tarball",
-        "url": "https://github.com/serokell/opam-nix/archive/ee285a3b6e05dc274f9ebf59ad64d8a4fded915e.tar.gz",
+        "url": "https://github.com/tweag/opam-nix/archive/f20ed19391752fe8cf505945dce776ce0ffa48a2.tar.gz",
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
     },
     "opam-repository": {

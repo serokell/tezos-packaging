@@ -10,6 +10,7 @@ the appropriate steps using the final configuration.
 
 import os, sys, subprocess, shlex
 import re, textwrap
+import argparse
 
 # Regexes
 
@@ -132,6 +133,12 @@ class Validator:
                 return input
             else:
                 return self.validator(input)
+
+
+# Command line argument parsing
+
+
+parser = argparse.ArgumentParser()
 
 
 # Utilities

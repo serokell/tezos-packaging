@@ -22,22 +22,21 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
+      - name: Install GNU sed
+        run: |
+          brew install gnu-sed
+          echo "$(brew --prefix)/opt/gnu-sed/libexec/gnubin" >> $GITHUB_PATH
+
+      - id: extract-tag
+        name: Extract the right version from the formula
+        run: echo "tag=$(sed -n 's/^\s\+version \"\(.*\)\"/\1/p' ./Formula/${{ matrix.formula }}.rb)" >> $GITHUB_ENV
+
       - id: check-built
         env:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
         name: Check if the bottle has already been built
         continue-on-error: true
-        run: gh release view "${GITHUB_REF#refs/tags/}" | grep "${{ matrix.formula }}.*\.${{ matrix.os.name }}.bottle.tar.gz"
-
-      - name: Install coreutils for macOS # for sha256sum
-        if: steps.check-built.outcome == 'failure'
-        run: brew install coreutils
-
-      - name: Install GNU sed # for the other pipeline compatibility
-        if: steps.check-built.outcome == 'failure'
-        run: |
-          brew install gnu-sed
-          echo "$(brew --prefix)/opt/gnu-sed/libexec/gnubin" >> $GITHUB_PATH
+        run: gh release view "${{ env.tag }}" | grep "${{ matrix.formula }}.*\.${{ matrix.os.name }}.bottle.tar.gz"
 
         # tezos-sapling-params is used as a dependency for some of the formulas
         # so we handle it separately.
@@ -61,7 +60,7 @@ jobs:
         if: steps.check-built.outcome == 'failure'
         env:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
-        run: gh release upload "${GITHUB_REF#refs/tags/}" *.bottle.*
+        run: gh release upload "${{ env.tag }}" *.bottle.*
 
   sync-hashes:
     runs-on: macos-10.15
@@ -70,20 +69,34 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
+      - name: Install GNU sed
+        run: |
+          brew install gnu-sed
+          echo "$(brew --prefix)/opt/gnu-sed/libexec/gnubin" >> $GITHUB_PATH
+
+      - name: Install coreutils for macOS # for sha256sum
+        run: brew install coreutils
+
+       # Since using the tag that triggered the pipeline isn't very resilient, we use the version
+       # from the tezos-client formula, which hopefully will stay the most up-to-date.
+      - id: extract-tag
+        name: Extract the right version from the formula
+        run: echo "tag=$(sed -n 's/^\s\+version \"\(.*\)\"/\1/p' ./Formula/tezos-client.rb)" >> $GITHUB_ENV
+
        # It's possible we have had to rerun the building workflow, skipping some jobs and
        # erasing the previously built bottles, so we use the release to download them all
       - name: Download Catalina bottles from the release
         env:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
-        run: gh release download "${GITHUB_REF#refs/tags/}" -p "*.catalina.bottle.tar.gz" -D "./Catalina"
+        run: gh release download "${{ env.tag }}" -p "*.catalina.bottle.tar.gz" -D "./Catalina"
 
       - name: Add bottle hashes to formulae
-        run: ./scripts/sync-bottle-hashes.sh "${GITHUB_REF#refs/tags/}" "Catalina"
+        run: ./scripts/sync-bottle-hashes.sh "${{ env.tag }}" "Catalina"
 
       - name: Download Big Sur bottles from the release
         env:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
-        run: gh release download "${GITHUB_REF#refs/tags/}" -p "*.big_sur.bottle.tar.gz" -D "./Big Sur"
+        run: gh release download "${{ env.tag }}" -p "*.big_sur.bottle.tar.gz" -D "./Big Sur"
 
       - name: Add bottle hashes to formulae
-        run: ./scripts/sync-bottle-hashes.sh "${GITHUB_REF#refs/tags/}" "Big Sur"
+        run: ./scripts/sync-bottle-hashes.sh "${{ env.tag }}" "Big Sur"

@@ -32,13 +32,26 @@ n=0
 for f in "${formulae[@]}"; do
   n=$((n+1))
   ymlappend "
+
+ - label: Check if $f bottle for Big Sur arm64 is already built
+   key: check-built-$n
+   if: build.tag =~ /^v.*/
+   soft_fail:
+   - exit_status: 3 # We don't want the pipeline to fail if the bottle's already built
+   commands:
+   - nix-shell ./scripts/shell.nix
+       --run './scripts/check-bottle-built.sh \"$f\" \"arm64_big_sur\"'
+
  - label: Build $f bottle for Big Sur arm64
    key: build-bottle-$n
    agents:
      queue: \"arm64-darwin\"
    if: build.tag =~ /^v.*/
-   commands:
-   - ./scripts/build-one-bottle.sh \"$f\"
+   depends_on: \"check-built-$n\"
+   command: |
+     if [ \$\$(buildkite-agent step get \"outcome\" --step \"check-built-$n\") == "passed" ]; then
+       ./scripts/build-one-bottle.sh \"$f\"
+     fi
    artifact_paths:
      - '*.bottle.*'"
 done
@@ -58,21 +71,27 @@ ymlappend "   agents:
    commands:
    - brew uninstall ./Formula/tezos-sapling-params.rb
 
+   # Since using the tag that triggered the pipeline isn't very resilient, we use the version
+   # from the tezos-client formula, which hopefully will stay the most up-to-date.
  - label: Add Big Sur arm64 bottle hashes to formulae
    depends_on:
    - \"uninstall-tsp\"
    if: build.tag =~ /^v.*/
+   soft_fail: true # No artifacts to download if all the bottles are already built
    commands:
    - mkdir -p \"Big Sur arm64\"
    - buildkite-agent artifact download \"*bottle.tar.gz\" \"Big Sur arm64/\"
+   - export FORMULA_TAG=\"\$(sed -n 's/^\s\+version \"\(.*\)\"/\1/p' ./Formula/tezos-client.rb)\"
    - nix-shell ./scripts/shell.nix
-       --run './scripts/sync-bottle-hashes.sh \"\$BUILDKITE_TAG\" \"Big Sur arm64\"'
+       --run './scripts/sync-bottle-hashes.sh \"\$FORMULA_TAG\" \"Big Sur arm64\"'
 
  - label: Attach bottles to the release
    depends_on:
    - \"uninstall-tsp\"
    if: build.tag =~ /^v.*/
+   soft_fail: true # No artifacts to download if all the bottles are already built
    commands:
    - buildkite-agent artifact download \"*bottle.tar.gz\" .
+   - export FORMULA_TAG=\"\$(sed -n 's/^\s\+version \"\(.*\)\"/\1/p' ./Formula/tezos-client.rb)\"
    - nix-shell ./scripts/shell.nix
-       --run 'gh release upload \"\$BUILDKITE_TAG\" *.bottle.*'"
+       --run 'gh release upload \"\$FORMULA_TAG\" *.bottle.*'"

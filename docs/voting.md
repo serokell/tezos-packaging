@@ -35,5 +35,11 @@ documented [here](./baking.md#using-a-custom-chain).
 After the custom baking instance is fully set up, you can vote or propose amendments on it by running:
 
 ```bash
-tezos-voting-wizard
+tezos-voting-wizard --network <custom-network-name>
+```
+
+E.g. if you have a custom baking instance `tezos-baking-custom@voting`, you can run:
+
+```bash
+tezos-voting-wizard --network voting
 ```

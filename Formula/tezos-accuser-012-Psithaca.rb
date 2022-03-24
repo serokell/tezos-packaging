@@ -34,6 +34,9 @@ class TezosAccuser012Psithaca < Formula
   def make_deps
     ENV.deparallelize
     ENV["CARGO_HOME"]="./.cargo"
+    # Disable usage of instructions from the ADX extension to avoid incompatibility
+    # with old CPUs, see https://gitlab.com/dannywillems/ocaml-bls12-381/-/merge_requests/135/
+    ENV["BLST_PORTABLE"]="yes"
     # Here is the workaround to use opam 2.0 because Tezos is currently not compatible with opam 2.1.0 and newer
     arch = RUBY_PLATFORM.include?("arm64") ? "arm64" : "x86_64"
     system "curl", "-L", "https://github.com/ocaml/opam/releases/download/2.0.9/opam-2.0.9-#{arch}-macos", "--create-dirs", "-o", "#{ENV["HOME"]}/.opam-bin/opam"

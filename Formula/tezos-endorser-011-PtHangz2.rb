@@ -11,7 +11,7 @@ class TezosEndorser011Pthangz2 < Formula
 
   url "https://gitlab.com/tezos/tezos.git", :tag => "v12.0", :shallow => false
 
-  version "v12.0-1"
+  version "v12.0-3"
 
   build_dependencies = %w[pkg-config autoconf rsync wget rustup-init]
   build_dependencies.each do |dependency|
@@ -27,14 +27,14 @@ class TezosEndorser011Pthangz2 < Formula
 
   bottle do
     root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosEndorser011Pthangz2.version}/"
-    sha256 cellar: :any, big_sur: "f3be51324f5d8438b07606f78ba78ba9235307efa670c49fe0814afe18956214"
-    sha256 cellar: :any, catalina: "b28fc4e07752c4b81d344591c428aa09728b98bbd406ecf6dee17d7bf7264789"
-    sha256 cellar: :any, arm64_big_sur: "46d65bc78ba02d3d75904843cfbae52048877a6c9ae5b2f9fef898063f29bd00"
   end
 
   def make_deps
     ENV.deparallelize
     ENV["CARGO_HOME"]="./.cargo"
+    # Disable usage of instructions from the ADX extension to avoid incompatibility
+    # with old CPUs, see https://gitlab.com/dannywillems/ocaml-bls12-381/-/merge_requests/135/
+    ENV["BLST_PORTABLE"]="yes"
     # Here is the workaround to use opam 2.0.9 because Tezos is currently not compatible with opam 2.1.0 and newer
     arch = RUBY_PLATFORM.include?("arm64") ? "arm64" : "x86_64"
     system "curl", "-L", "https://github.com/ocaml/opam/releases/download/2.0.9/opam-2.0.9-#{arch}-macos", "--create-dirs", "-o", "#{ENV["HOME"]}/.opam-bin/opam"

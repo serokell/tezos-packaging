@@ -167,6 +167,9 @@ def gen_systemd_rules_contents(package):
     rules_contents = f"""#!/usr/bin/make -f
 
 export DEB_CFLAGS_APPEND=-fPIC
+# Disable usage of instructions from the ADX extension to avoid incompatibility
+# with old CPUs, see https://gitlab.com/dannywillems/ocaml-bls12-381/-/merge_requests/135/
+export BLST_PORTABLE=yes
 
 %:
 	dh $@ {"--with systemd" if len(package.systemd_units) > 0 else ""}

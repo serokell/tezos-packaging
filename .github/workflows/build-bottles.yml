@@ -91,4 +91,6 @@ jobs:
         run: gh release download "${{ env.tag }}" -p "*.catalina.bottle.tar.gz" -D "./Catalina"
 
       - name: Add bottle hashes to formulae
+        env:
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
         run: ./scripts/sync-bottle-hashes.sh "${{ env.tag }}" "Catalina"

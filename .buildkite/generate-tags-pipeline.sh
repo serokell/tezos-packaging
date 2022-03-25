@@ -97,7 +97,7 @@ ymlappend "
    - buildkite-agent artifact download \"*bottle.tar.gz\" \"Big Sur/\"
    - export FORMULA_TAG=\"\$(sed -n 's/^\s\+version \"\(.*\)\"/\1/p' ./Formula/tezos-client.rb)\"
    - nix-shell ./scripts/shell.nix
-       --run './scripts/sync-bottle-hashes.sh \"\$FORMULA_TAG\" \"Big Sur\"'
+       --run './scripts/sync-bottle-hashes.sh \"\$\$FORMULA_TAG\" \"Big Sur\"'
  - label: Attach bottles to the release
    depends_on:
    - \"uninstall-tsp\"
@@ -107,4 +107,4 @@ ymlappend "
    - buildkite-agent artifact download \"*bottle.tar.gz\" .
    - export FORMULA_TAG=\"\$(sed -n 's/^\s\+version \"\(.*\)\"/\1/p' ./Formula/tezos-client.rb)\"
    - nix-shell ./scripts/shell.nix
-       --run 'gh release upload \"\$FORMULA_TAG\" *.bottle.*'"
+       --run 'gh release upload \"\$\$FORMULA_TAG\" *.bottle.*'"

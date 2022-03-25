@@ -19,6 +19,8 @@ fi
 
 tag=$(sed -n "s/^\s\+version \"\(.*\)\"/\1/p" "./Formula/$1.rb")
 
+# Command below is allowed to fail
+set +e
 gh release view "$tag" | grep "$1.*\.$2.bottle.tar.gz"
 
 if [ $? -eq 0 ]; then

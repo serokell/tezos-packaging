@@ -39,19 +39,18 @@ from scratch.
 
 For this you'll need a `.service` file to define each systemd service.
 The easiest way to get one is to run [`gen_systemd_service_file.py`](../gen_systemd_service_file.py).
-You should specify the service name as an argument. Note that there are two
-predefined services for `tezos-node`: `tezos-node-{mainnet, hangzhounet}`.
+You should specify the binary name as an argument.
 
 E.g.:
 ```
-./gen_systemd_service_file.py tezos-node-mainnet
+./gen_systemd_service_file.py tezos-node
 # or
 ./gen_systemd_service_file.py tezos-baker-011-PtHangz2
 ```
-After that you'll have a `.service` file in the current directory.
+After that you'll have `.service` files in the current directory.
 
-Apart from the `.service` file you'll need the service startup script and default
-configuration file, they can be found in the [`scripts`](../docker/package/scripts) and
+Apart from these `.service` files you'll need the services' startup scripts and default
+configuration files, they can be found in the [`scripts`](../docker/package/scripts) and
 [`defaults`](../docker/package/defaults) folders respectively.
 
 ## Systemd units on WSL

@@ -9,9 +9,9 @@ class TezosAccuser012Psithaca < Formula
   end
   homepage "https://gitlab.com/tezos/tezos"
 
-  url "https://gitlab.com/tezos/tezos.git", :tag => "v12.0", :shallow => false
+  url "https://gitlab.com/tezos/tezos.git", :tag => "v12.1", :shallow => false
 
-  version "v12.0-3"
+  version "v12.1-1"
 
   build_dependencies = %w[pkg-config autoconf rsync wget rustup-init]
   build_dependencies.each do |dependency|
@@ -26,9 +26,6 @@ class TezosAccuser012Psithaca < Formula
 
   bottle do
     root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosAccuser012Psithaca.version}/"
-    sha256 cellar: :any, big_sur: "05f9fc4e2725fd9c4947dd9bd53b8eb23c6295a6e1c31e98b5c4706e61f6d7da"
-    sha256 cellar: :any, arm64_big_sur: "0ec97b2c37cdd28bff5b1274aad2a4c02fcb46b0adf5f6a490326750f8613a95"
-    sha256 cellar: :any, catalina: "721695c9dde4cdf73513f991b71a072efe204c116632cf4e3dcbef31deb2a5ce"
   end
 
   def make_deps

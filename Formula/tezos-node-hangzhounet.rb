@@ -3,7 +3,7 @@
 
 class TezosNodeHangzhounet < Formula
   url "file:///dev/null"
-  version "v12.0-3"
+  version "v12.1-1"
 
   depends_on "tezos-node"
 

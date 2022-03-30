@@ -185,7 +185,7 @@ steps:
     MIRROR_REPO: "git@github.com:serokell/tezos-packaging-stable.git"
    commands: &update_mirror
    - git pull origin "$BUILDKITE_BRANCH:$BUILDKITE_BRANCH"
-   - git push --mirror "$MIRROR_REPO"
+   - git push --mirror "$$MIRROR_REPO"
 
  - label: update RC mirror repository
    if: |

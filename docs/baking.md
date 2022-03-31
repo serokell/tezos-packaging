@@ -79,6 +79,15 @@ Packages for `tezos-node`, `tezos-baker-<proto>` and `tezos-endorser-<proto>` pr
 systemd units for running the corresponding binaries in the background, these units
 are orchestrated by the `tezos-baking-<network>` units.
 
+## Packages and protocols updates
+
+In order to have a safe transition during a new protocol activation on mainnet,
+it's required to run two sets of daemons: for the current and for the upcoming protocol.
+
+`tezos-baking` package aims to provide such a setup. This package is updated some time before
+the new protocol is activated (usually 1-2 weeks) to run daemons for two protocols. Once the new
+protocol is activated, the `tezos-baking` package is updated again to stop running daemons for the old protocol.
+
 ## Using the wizard
 
 If at this point you want to set up the baking instance, or just a node, using the wizard, run:

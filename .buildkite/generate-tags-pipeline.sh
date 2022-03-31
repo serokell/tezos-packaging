@@ -87,10 +87,11 @@ done
 
 ymlappend "
  - label: Add Big Sur bottle hashes to formulae
-   depends_on:
-   - \"uninstall-tsp-arm64\"
-   - \"uninstall-tsp-x86_64\"
-   if: build.tag =~ /^v.*/
+   depends_on:"
+for arch in "${architecture[@]}"; do
+   ymlappend "   - \"uninstall-tsp-$arch\""
+done
+   ymlappend "   if: build.tag =~ /^v.*/
    soft_fail: true # No artifacts to download if all the bottles are already built
    commands:
    - mkdir -p \"Big Sur\"
@@ -99,9 +100,11 @@ ymlappend "
    - nix-shell ./scripts/shell.nix
        --run './scripts/sync-bottle-hashes.sh \"\$\$FORMULA_TAG\" \"Big Sur\"'
  - label: Attach bottles to the release
-   depends_on:
-   - \"uninstall-tsp\"
-   if: build.tag =~ /^v.*/
+   depends_on:"
+for arch in "${architecture[@]}"; do
+   ymlappend "   - \"uninstall-tsp-$arch\""
+done
+   ymlappend "   if: build.tag =~ /^v.*/
    soft_fail: true # No artifacts to download if all the bottles are already built
    commands:
    - buildkite-agent artifact download \"*bottle.tar.gz\" .

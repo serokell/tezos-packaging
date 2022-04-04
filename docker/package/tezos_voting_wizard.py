@@ -16,17 +16,26 @@ from wizard_structure import *
 
 # Global options
 
-networks = {
-    "mainnet": "Main Tezos network",
-    "custom": "Custom network, will require its name",
-}
-
 ballot_outcomes = {
     "yay": "Vote for accepting the proposal",
     "nay": "Vote for rejecting the proposal",
     "pass": "Submit a vote not influencing the result but contributing to quorum",
 }
 
+
+# Command line argument parsing
+
+parser.add_argument(
+    "--network",
+    required=False,
+    default="mainnet",
+    help="Name of the network to vote on. Is 'mainnet' by default, "
+    "but can take the (part after @) name of any custom instance. "
+    "For example, to use the tezos-baking-custom@voting service, input 'voting'. "
+    "You need to already have set up the custom network using systemd services.",
+)
+
+parsed_args = parser.parse_args()
 
 # Regexes
 
@@ -68,26 +77,6 @@ def wait_for_ledger_wallet_app():
 
 
 # Steps
-
-network_query = Step(
-    id="network_mode",
-    prompt="Which Tezos network would you like to use?\n",
-    help="The selected network will be used for voting.\n"
-    "Usually you would vote on the mainnet, but you can also select\n"
-    "a custom network (needs to already be set up).",
-    options=networks,
-    validator=Validator(enum_range_validator(networks)),
-)
-
-custom_network_query = Step(
-    id="custom_network_name",
-    prompt="What's the name of the custom network you'd like to use?",
-    help="The selected network will be used to vote.\n"
-    "For example, to use the tezos-baking-custom@voting service, input 'voting'."
-    "You need to already have set up the custom network using systemd services.",
-    # TODO: "\nYou can follow a tutorial here:",
-    validator=Validator(required_field_validator),
-)
 
 new_proposal_query = Step(
     id="new_proposal_hash",
@@ -172,14 +161,11 @@ class Setup(Setup):
             sys.exit(1)
 
     def get_network(self):
-        self.query_step(network_query)
-
-        if self.config["network_mode"] == "mainnet":
+        if parsed_args.network == "mainnet":
             self.config["network"] = "mainnet"
-        elif self.config["network_mode"] == "custom":
+        else:
             # TODO: maybe check/validate this
-            self.query_step(custom_network_query)
-            self.config["network"] = "custom@" + self.config["custom_network_name"]
+            self.config["network"] = "custom@" + parsed_args.network
 
     def fill_voting_period_info(self):
         voting_proc = get_proc_output(

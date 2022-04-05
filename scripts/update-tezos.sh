@@ -37,13 +37,19 @@ if [[ "$latest_upstream_tag" != "$our_tezos_tag" ]]; then
   if ! git rev-parse --verify "$branch_name"; then
     git switch -c "$branch_name"
     echo "Updating Tezos to $latest_upstream_tag"
+
     cd nix
     niv update tezos -a ref="refs/tags/$latest_upstream_tag" -a rev="$latest_upstream_tag_hash"
     niv update opam-repository -a rev="$opam_repository_tag" -a ref="$opam_repository_branch" -b "$opam_repository_branch"
     git commit -a -m "[Chore] Bump Tezos sources to $latest_upstream_tag" --gpg-sign="tezos-packaging@serokell.io"
+
     cd ..
     ./scripts/update-brew-formulae.sh "$latest_upstream_tag-1"
     git commit -a -m "[Chore] Update brew formulae for $latest_upstream_tag" --gpg-sign="tezos-packaging@serokell.io"
+
+    sed -i 's/"release": "[0-9]\+"/"release": "1"/' ./meta.json
+    git commit -a -m "[Chore] Reset release number for $latest_upstream_tag" --gpg-sign="tezos-packaging@serokell.io"
+
     git push --set-upstream origin "$branch_name"
 
     gh pr create -B master -t "[Chore] $latest_upstream_tag release" -F .github/release_pull_request_template.md

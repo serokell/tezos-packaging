@@ -49,15 +49,9 @@ protocol_hash_regex = (
 
 welcome_text = """Tezos Voting Wizard
 
-Welcome, this wizard will help you to vote in the Tezos protocol amendment process.
-Please note that for this you need to already have set up the baking infrastructure,
-normally on mainnet, as only bakers can submit ballots or proposals.
-
-If you have installed tezos-baking, you can run Tezos Setup Wizard to set it up:
-tezos-setup-wizard
-
-Alternatively, you can use this wizard for voting on a custom chain,
-which also needs to be set up already.
+Welcome, this wizard will help you vote in the Tezos protocol amendment process.
+Please note that to vote on mainnet, the minimum requirement is to have access
+to a key that has voting rights, preverably through a connected ledger device.
 
 All commands within the service are run under the 'tezos' user.
 
@@ -124,6 +118,33 @@ ballot_outcome_query = Step(
     ),
 )
 
+client_data_dir_query = Step(
+    id="client_data_dir",
+    prompt="Provide the path to the data directory of tezos-client.",
+    help="The data directory will be used by tezos-client to vote. If you have baking set up\n"
+    "through systemd services, the path is usually '/var/lib/tezos/.tezos-client' by default.",
+    default=None,
+    validator=Validator([required_field_validator, dirpath_validator]),
+)
+
+node_rpc_addr_query = Step(
+    id="node_rpc_addr",
+    prompt="Provide the node's RPC address.",
+    help="The node's RPC address will be used by tezos-client to vote. If you have baking set up\n"
+    "through systemd services, the address is usually 'http://localhost:8732' by default.",
+    default=None,
+    validator=Validator([required_field_validator]),
+)
+
+baker_alias_query = Step(
+    id="baker_alias",
+    prompt="Provide the baker's alias.",
+    help="The baker's alias will be used by tezos-client to vote. If you have baking set up\n"
+    "through systemd services, the address is usually 'baker' by default.",
+    default=None,
+    validator=Validator([required_field_validator]),
+)
+
 
 class Setup(Setup):
 
@@ -142,23 +163,59 @@ class Setup(Setup):
         net = self.config["network"]
         try:
             proc_call(f"systemctl is-active --quiet tezos-baking-{net}.service")
+            return True
         except:
             print(f"Looks like the tezos-baking-{net} service isn't running.")
-            print("Please start the service or set up baking.")
-            if self.config["network_mode"] == "mainnet":
-                print("You can do this by running:")
-                print("tezos-setup-wizard")
-            sys.exit(1)
+            print("If this is a mistake, and you should have a baking instance")
+            print("running on mainnet on this machine, please check if it is set up.")
+            print("If it isn't, you can use Tezos Setup Wizard to set it up:")
+            print("tezos-setup-wizard")
+            print()
+
+            return False
 
     def check_data_correctness(self):
         print("Baker data detected is as follows:")
         print(f"Data directory: {self.config['client_data_dir']}")
         print(f"Node RPC address: {self.config['node_rpc_addr']}")
         print(f"Baker alias: {self.config['baker_alias']}")
-        if not yes_or_no("Does this look correct? (Y/n)", "yes"):
-            print("Try setting up baking again by running:")
-            print("tezos-setup-wizard")
-            sys.exit(1)
+        return yes_or_no("Does this look correct? (Y/n) ", "yes")
+
+    def search_client_config(self, field, default):
+        config_filepath = os.path.join(self.config["client_data_dir"], "config")
+        if not os.path.isfile(config_filepath):
+            print("No config file in this directory. Falling back on the default.")
+            return default
+        else:
+            return search_json_with_default(config_filepath, field, default)
+
+    def collect_baking_info(self):
+        if self.check_baking_service():
+            self.fill_baking_config()
+            collected = self.check_data_correctness()
+        else:
+            # Here, we collect some semi-sensible defaults. Since the baking service isn't
+            # running here, these defaults have a low chance of being correct.
+            print("Default values will be used. Please check them carefully.\n")
+
+            self.config["client_data_dir"] = "/var/lib/tezos/.tezos-client"
+            self.config["node_rpc_addr"] = self.search_client_config(
+                "endpoint", "http://localhost:8732"
+            )
+            self.config["baker_alias"] = "baker"
+
+            collected = self.check_data_correctness()
+
+        while not collected:
+            self.query_step(client_data_dir_query)
+
+            self.config["node_rpc_addr"] = search_client_config("endpoint", None)
+            if self.config["node_rpc_addr"] is None:
+                self.query_step(node_rpc_addr_query)
+
+            self.query_step(baker_alias_query)
+
+            collected = self.check_data_correctness()
 
     def get_network(self):
         if parsed_args.network == "mainnet":
@@ -179,6 +236,7 @@ class Setup(Setup):
                 "Couldn't get the voting period info. Please check that the network",
                 "for voting has been set up correctly.",
             )
+            raise KeyboardInterrupt
 
         self.config["amendment_phase"] = (
             re.search(b'Current period: "(\w+)"', info).group(1).decode("utf-8")
@@ -300,12 +358,7 @@ class Setup(Setup):
 
         self.get_network()
 
-        self.fill_baking_config()
-
-        self.check_baking_service()
-
-        # check with the user that the baker data sounds correct
-        self.check_data_correctness()
+        self.collect_baking_info()
 
         self.config["tezos_client_options"] = self.get_tezos_client_options()
 

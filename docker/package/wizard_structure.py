@@ -11,6 +11,7 @@ the appropriate steps using the final configuration.
 import os, sys, subprocess, shlex
 import re, textwrap
 import argparse
+import json
 
 # Regexes
 
@@ -43,6 +44,12 @@ def enum_range_validator(options):
             return opts[opt]
 
     return _validator
+
+
+def dirpath_validator(input):
+    if input and not os.path.isdir(input):
+        raise ValueError("Please input a valid path to a directory.")
+    return input
 
 
 def filepath_validator(input):
@@ -229,6 +236,15 @@ def search_baking_service_config(config_contents, regex, default):
         return default
     else:
         return res.group(1)
+
+
+def search_json_with_default(json_filepath, field, default):
+    with open(json_filepath, "r") as f:
+        try:
+            json_dict = json.load(f)
+        except:
+            return default
+        return json_dict.pop(field, default)
 
 
 class Step:

@@ -26,6 +26,7 @@ class TezosBaker012Psithaca < Formula
 
   bottle do
     root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosBaker012Psithaca.version}/"
+    sha256 cellar: :any, catalina: "f96523cd0f3d6c43c3fe79a51f1fc0a2d2b361e57de0660343b79488facbf15a"
   end
 
   def make_deps

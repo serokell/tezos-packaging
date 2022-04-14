@@ -18,6 +18,7 @@ secret_key_regex = b"(encrypted|unencrypted):(?:\w{54}|\w{88})"
 protocol_hash_regex = (
     b"P[123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]{50}"
 )
+signer_uri_regex = b"((?:tcp|unix|https|http):\/\/.+)\/(tz[123]\w{33})\/?"
 
 
 # Input validators
@@ -87,7 +88,7 @@ def secret_key_validator(input):
     match = re.match(secret_key_regex.decode("utf-8"), input.strip())
     if not bool(match):
         raise ValueError(
-            "The input doesn't match the format for the Tezos secret key: "
+            "The input doesn't match the format for a Tezos secret key: "
             "{{encrypted, unencrypted}:<base58 encoded string with length 54 or 88>}"
             "\nPlease check the input and try again."
         )
@@ -97,12 +98,26 @@ def secret_key_validator(input):
 # To be validated, the input should adhere to the derivation path format:
 # [0-9]+h/[0-9]+h
 def derivation_path_validator(input):
-    match = re.match(b"[0-9]+h\/[0-9]+h".decode("utf-8"), input.strip())
+    derivation_path_regex_str = "[0-9]+h\/[0-9]+h"
+    match = re.match(derivation_path_regex_str, input.strip())
     if not bool(match):
         raise ValueError(
-            "The input doesn't match the format for the derivation path: "
-            "'[0-9]+h/[0-9]+h'"
-            "\nPlease check the input and try again."
+            "The input doesn't match the format for a derivation path: "
+            + derivation_path_regex_str
+            + "\nPlease check the input and try again."
+        )
+    return input
+
+
+# To be validated, the input should adhere to the signer URI format:
+# (tcp|unix|https|http)://<host address>/tz[123]\w{33}
+def signer_uri_validator(input):
+    match = re.match(signer_uri_regex.decode("utf-8"), input.strip())
+    if not bool(match):
+        raise ValueError(
+            "The input doesn't match the format for a remote signer URI: "
+            + "(tcp|unix|https|http)://<host address>/<public key address>"
+            + "\nPlease check the input and try again."
         )
     return input
 
@@ -114,7 +129,7 @@ def protocol_hash_validator(input):
     match = re.match(proto_hash_regex_str, input.strip())
     if not bool(match):
         raise ValueError(
-            "The input doesn't match the format for the protocol hash: "
+            "The input doesn't match the format for a protocol hash: "
             + proto_hash_regex_str
             + "\nPlease check the input and try again."
         )
@@ -338,12 +353,13 @@ class Setup:
             print("The services won't restart on boot.")
 
     def get_tezos_client_options(self):
-        return (
-            "--base-dir "
-            + self.config["client_data_dir"]
-            + " --endpoint "
-            + self.config["node_rpc_addr"]
+        options = (
+            f"--base-dir {self.config['client_data_dir']} "
+            f"--endpoint {self.config['node_rpc_addr']}"
         )
+        if "remote_host" in self.config:
+            options += f" -R '{self.config['remote_host']}'"
+        return options
 
     def fill_baking_config(self):
         net = self.config["network"]

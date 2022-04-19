@@ -42,6 +42,7 @@ snapshot_import_modes = {
 key_import_modes = {
     "ledger": "From a ledger",
     "secret-key": "Either the unencrypted or password-encrypted secret key for your address",
+    "remote": "Remote key governed by a signer running on a different machine",
     "json": "Faucet JSON file from https://teztnets.xyz/",
 }
 
@@ -63,7 +64,6 @@ TMP_SNAPSHOT_LOCATION = "/tmp/tezos_node.snapshot"
 # Regexes
 
 ledger_regex = b"ledger:\/\/[\w\-]+\/[\w\-]+\/[\w']+\/[\w']+"
-secret_key_regex = b"(encrypted|unencrypted):(?:\w{54}|\w{88})"
 address_regex = b"tz[123]\w{33}"
 derivation_path_regex = b"(?:bip25519|ed25519|secp256k1|P-256)\/[0-9]+h\/[0-9]+h"
 
@@ -255,6 +255,15 @@ secret_key_query = Step(
     help="The format is 'unencrypted:edsk...' for the unencrypted key, or 'encrypted:edesk...'"
     "for the encrypted key.",
     validator=Validator([required_field_validator, secret_key_validator]),
+)
+
+remote_signer_uri_query = Step(
+    id="remote_signer_uri",
+    prompt="Provide your remote key with the address of the signer.",
+    help="The format is the address of your remote signer host, followed by a public key,\n"
+    "i.e. something like http://127.0.0.1:6732/tz1V8fDHpHzN8RrZqiYCHaJM9EocsYZch5Cy\n"
+    "The supported schemes are https, http, tcp, and unix.",
+    validator=Validator([required_field_validator, signer_uri_validator]),
 )
 
 json_filepath_query = Step(
@@ -511,7 +520,15 @@ class Setup(Setup):
             f"show address {baker_alias} --show-secret"
         )
         if address.returncode == 0:
-            value_regex = b"(?:" + ledger_regex + b")|(?:" + secret_key_regex + b")"
+            value_regex = (
+                b"(?:"
+                + ledger_regex
+                + b")|(?:"
+                + secret_key_regex
+                + b")|(?:remote\:"
+                + address_regex
+                + b")"
+            )
             value = re.search(value_regex, address.stdout).group(0)
             address = re.search(address_regex, address.stdout).group(0)
             print()
@@ -524,6 +541,14 @@ class Setup(Setup):
             )
         else:
             return True
+
+    def fill_remote_signer_infos(self):
+        self.query_step(remote_signer_uri_query)
+
+        rsu = re.search(signer_uri_regex.decode(), self.config["remote_signer_uri"])
+
+        self.config["remote_host"] = rsu.group(1)
+        self.config["remote_key"] = rsu.group(2)
 
     # Importing the baker key
     def import_baker_key(self):
@@ -548,6 +573,14 @@ class Setup(Setup):
                         proc_call(
                             f"sudo -u tezos {suppress_warning_text} tezos-client {tezos_client_options} "
                             f"import secret key {baker_alias} {self.config['secret_key']} --force"
+                        )
+                    elif self.config["key_import_mode"] == "remote":
+                        self.fill_remote_signer_infos()
+
+                        tezos_client_options = self.get_tezos_client_options()
+                        proc_call(
+                            f"sudo -u tezos {suppress_warning_text} tezos-client {tezos_client_options} "
+                            f"import secret key {baker_alias} remote:{self.config['remote_key']} --force"
                         )
                     elif self.config["key_import_mode"] == "json":
                         self.query_step(json_filepath_query)

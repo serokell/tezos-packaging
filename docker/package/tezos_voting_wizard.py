@@ -49,15 +49,9 @@ protocol_hash_regex = (
 
 welcome_text = """Tezos Voting Wizard
 
-Welcome, this wizard will help you to vote in the Tezos protocol amendment process.
-Please note that for this you need to already have set up the baking infrastructure,
-normally on mainnet, as only bakers can submit ballots or proposals.
-
-If you have installed tezos-baking, you can run Tezos Setup Wizard to set it up:
-tezos-setup-wizard
-
-Alternatively, you can use this wizard for voting on a custom chain,
-which also needs to be set up already.
+Welcome, this wizard will help you vote in the Tezos protocol amendment process.
+Please note that to vote on mainnet, the minimum requirement is to have access
+to a key that has voting rights, preverably through a connected ledger device.
 
 All commands within the service are run under the 'tezos' user.
 
@@ -125,6 +119,44 @@ ballot_outcome_query = Step(
 )
 
 
+def get_node_rpc_addr_query(default=None):
+    return Step(
+        id="node_rpc_addr",
+        prompt="Provide the node's RPC address.",
+        help="The node's RPC address will be used by tezos-client to vote. If you have baking set up\n"
+        "through systemd services, the address is usually 'http://localhost:8732' by default.",
+        default=default,
+        validator=Validator(
+            [
+                required_field_validator,
+                reachable_url_validator("chains/main/blocks/head/"),
+            ]
+        ),
+    )
+
+
+baker_alias_query = Step(
+    id="baker_alias",
+    prompt="Provide the baker's alias.",
+    help="The baker's alias will be used by tezos-client to vote. If you have baking set up\n"
+    "through systemd services, the address is usually 'baker' by default.",
+    default=None,
+    validator=Validator([required_field_validator]),
+)
+
+# We define the step as a function to disallow choosing json
+def get_key_mode_query(modes):
+    return Step(
+        id="key_import_mode",
+        prompt="How do you want to import the voter key?",
+        help="Tezos Voting Wizard will use the 'baker' alias for the key\n"
+        "that will be used for voting. You will only need to import the key\n"
+        "once unless you'll want to change the key.",
+        options=modes,
+        validator=Validator(enum_range_validator(modes)),
+    )
+
+
 class Setup(Setup):
 
     # Check whether the baker_alias account is set up to use ledger
@@ -142,23 +174,90 @@ class Setup(Setup):
         net = self.config["network"]
         try:
             proc_call(f"systemctl is-active --quiet tezos-baking-{net}.service")
+            return True
         except:
             print(f"Looks like the tezos-baking-{net} service isn't running.")
-            print("Please start the service or set up baking.")
-            if self.config["network_mode"] == "mainnet":
-                print("You can do this by running:")
-                print("tezos-setup-wizard")
-            sys.exit(1)
+            print("If this is a mistake, and you should have a baking instance")
+            print("running on mainnet on this machine, please check if it is set up.")
+            print("If it isn't, you can use Tezos Setup Wizard to set it up:")
+            print("tezos-setup-wizard")
+            print()
+
+            return False
 
     def check_data_correctness(self):
         print("Baker data detected is as follows:")
         print(f"Data directory: {self.config['client_data_dir']}")
         print(f"Node RPC address: {self.config['node_rpc_addr']}")
-        print(f"Baker alias: {self.config['baker_alias']}")
-        if not yes_or_no("Does this look correct? (Y/n)", "yes"):
-            print("Try setting up baking again by running:")
-            print("tezos-setup-wizard")
-            sys.exit(1)
+        print(f"Voter key: {self.config['baker_key_value']}")
+        return yes_or_no("Does this look correct? (Y/n) ", "yes")
+
+    def search_client_config(self, field, default):
+        config_filepath = os.path.join(self.config["client_data_dir"], "config")
+        if not os.path.isfile(config_filepath):
+            return default
+        else:
+            return search_json_with_default(config_filepath, field, default)
+
+    def collect_baking_info(self):
+        if self.check_baking_service():
+            self.fill_baking_config()
+
+            value, _ = get_key_address(
+                self.config["tezos_client_options"], self.config["baker_alias"]
+            )
+            self.config["baker_key_value"] = value
+
+            collected = self.check_data_correctness()
+        else:
+
+            network_dir = "/var/lib/tezos/client-" + self.config["network"]
+
+            proc_call(f"sudo -u tezos mkdir -p {network_dir}")
+
+            print("With no tezos-baking.service running, this wizard will use")
+            print(f"the default directory for this network: {network_dir}")
+
+            self.config["client_data_dir"] = network_dir
+
+            self.config["node_rpc_addr"] = self.search_client_config("endpoint", None)
+            if self.config["node_rpc_addr"] is None:
+                self.query_and_update_config(get_node_rpc_addr_query())
+
+            key_import_modes.pop("json", None)
+            self.get_baker_key()
+
+            # Check correctness in case user wants to change this data upon reruns
+            collected = self.check_data_correctness()
+
+        while not collected:
+            self.query_and_update_config(
+                get_node_rpc_addr_query(self.config["node_rpc_addr"])
+            )
+
+            replace_baker_key = self.check_baker_account()
+            if replace_baker_key:
+                key_mode_query = get_key_mode_query(key_import_modes)
+                self.import_key(key_mode_query)
+
+            collected = self.check_data_correctness()
+
+    def get_baker_key(self):
+        if "baker_alias" not in self.config:
+            self.config["baker_alias"] = "baker"
+
+        self.config["tezos_client_options"] = self.get_tezos_client_options()
+
+        baker_key_value = get_key_address(
+            self.config["tezos_client_options"], self.config["baker_alias"]
+        )
+
+        if baker_key_value is not None:
+            value, _ = baker_key_value
+            self.config["baker_key_value"] = value
+        else:  # if there is no key with this alias, query import
+            key_mode_query = get_key_mode_query(key_import_modes)
+            self.import_key(key_mode_query)
 
     def get_network(self):
         if parsed_args.network == "mainnet":
@@ -179,6 +278,7 @@ class Setup(Setup):
                 "Couldn't get the voting period info. Please check that the network",
                 "for voting has been set up correctly.",
             )
+            raise KeyboardInterrupt
 
         self.config["amendment_phase"] = (
             re.search(b'Current period: "(\w+)"', info).group(1).decode("utf-8")
@@ -300,12 +400,7 @@ class Setup(Setup):
 
         self.get_network()
 
-        self.fill_baking_config()
-
-        self.check_baking_service()
-
-        # check with the user that the baker data sounds correct
-        self.check_data_correctness()
+        self.collect_baking_info()
 
         self.config["tezos_client_options"] = self.get_tezos_client_options()
 

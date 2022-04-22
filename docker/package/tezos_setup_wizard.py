@@ -61,13 +61,6 @@ history_modes = {
 TMP_SNAPSHOT_LOCATION = "/tmp/tezos_node.snapshot"
 
 
-# Regexes
-
-ledger_regex = b"ledger:\/\/[\w\-]+\/[\w\-]+\/[\w']+\/[\w']+"
-address_regex = b"tz[123]\w{33}"
-derivation_path_regex = b"(?:bip25519|ed25519|secp256k1|P-256)\/[0-9]+h\/[0-9]+h"
-
-
 # Wizard CLI utility
 
 
@@ -93,53 +86,6 @@ def fetch_snapshot(url):
     urllib.request.urlretrieve(url, filename, progressbar_hook)
     print()
     return filename
-
-
-def wait_for_ledger_baking_app():
-    output = b""
-    while re.search(b"Found a Tezos Baking", output) is None:
-        output = get_proc_output(
-            f"sudo -u tezos {suppress_warning_text} tezos-client list connected ledgers"
-        ).stdout
-        proc_call("sleep 1")
-    ledgers_derivations = {}
-    for ledger_derivation in re.findall(ledger_regex, output):
-        ledger_url = (
-            re.search(b"ledger:\/\/[\w\-]+\/", ledger_derivation).group(0).decode()
-        )
-        derivation_path = (
-            re.search(derivation_path_regex, ledger_derivation).group(0).decode()
-        )
-        ledgers_derivations.setdefault(ledger_url, []).append(derivation_path)
-    return ledgers_derivations
-
-
-def ledger_urls_info(ledgers_derivations, node_endpoint):
-    ledgers_info = {}
-    max_derivation_len = 0
-    for derivations_paths in ledgers_derivations.values():
-        max_derivation_len = max(max_derivation_len, max(map(len, derivations_paths)))
-    for ledger_url, derivations_paths in ledgers_derivations.items():
-        for derivation_path in derivations_paths:
-            output = get_proc_output(
-                f"sudo -u tezos {suppress_warning_text} tezos-client "
-                f"show ledger {ledger_url + derivation_path}"
-            ).stdout
-            addr = re.search(address_regex, output).group(0).decode()
-            balance = (
-                get_proc_output(
-                    f"sudo -u tezos {suppress_warning_text} tezos-client "
-                    f"--endpoint {node_endpoint} get balance for {addr}"
-                )
-                .stdout.decode()
-                .strip()
-            )
-            ledgers_info.setdefault(ledger_url, []).append(
-                (
-                    "{:" + str(max_derivation_len + 1) + "} address: {}, balance: {}"
-                ).format(derivation_path + ",", addr, balance)
-            )
-    return ledgers_info
 
 
 def is_full_snapshot(import_mode):
@@ -213,7 +159,8 @@ snapshot_file_query = Step(
     prompt="Provide the path to the tezos-node snapshot file.",
     help="You have indicated wanting to import the snapshot from a file.\n"
     "You can download the snapshot yourself e.g. from XTZ-Shots or Tezos Giganode Snapshots.",
-    validator=Validator(filepath_validator),
+    default=None,
+    validator=Validator([required_field_validator, filepath_validator]),
 )
 
 snapshot_url_query = Step(
@@ -221,6 +168,8 @@ snapshot_url_query = Step(
     prompt="Provide the url of the tezos-node snapshot file.",
     help="You have indicated wanting to import the snapshot from a custom url.\n"
     "You can use e.g. links to XTZ-Shots or Tezos Giganode Snapshots resources.",
+    default=None,
+    validator=Validator([required_field_validator, reachable_url_validator()]),
 )
 
 history_mode_query = Step(
@@ -249,84 +198,7 @@ def get_key_mode_query(modes):
     )
 
 
-secret_key_query = Step(
-    id="secret_key",
-    prompt="Provide either the unencrypted or password-encrypted secret key for your address.",
-    help="The format is 'unencrypted:edsk...' for the unencrypted key, or 'encrypted:edesk...'"
-    "for the encrypted key.",
-    validator=Validator([required_field_validator, secret_key_validator]),
-)
-
-remote_signer_uri_query = Step(
-    id="remote_signer_uri",
-    prompt="Provide your remote key with the address of the signer.",
-    help="The format is the address of your remote signer host, followed by a public key,\n"
-    "i.e. something like http://127.0.0.1:6732/tz1V8fDHpHzN8RrZqiYCHaJM9EocsYZch5Cy\n"
-    "The supported schemes are https, http, tcp, and unix.",
-    validator=Validator([required_field_validator, signer_uri_validator]),
-)
-
-json_filepath_query = Step(
-    id="json_filepath",
-    prompt="Provide the path to your downloaded faucet JSON file.",
-    help="Download the faucet JSON file from https://teztnets.xyz/.\n"
-    "The file will contain the 'mnemonic' and 'secret' fields.",
-    validator=Validator([required_field_validator, filepath_validator]),
-)
-
-derivation_path_query = Step(
-    id="derivation_path",
-    prompt="Provide derivation path for the key stored on the ledger.",
-    help="The format is '[0-9]+h/[0-9]+h'",
-    validator=Validator([required_field_validator, derivation_path_validator]),
-)
-
-
-def get_ledger_url(ledgers):
-    return Step(
-        id="ledger_url",
-        prompt="Choose a ledger to get the new derivation from.",
-        options=ledgers,
-        default=None,
-        validator=Validator([required_field_validator, enum_range_validator(ledgers)]),
-        help="In order to specify new derivation path, you need to specify a ledger to get the derivation from.",
-    )
-
-
-# We define this step as a function since the corresponding step requires
-# tezos-node to be running and bootstrapped in order to gather the data
-# about the ledger-stored addresses, so it's called right before invoking
-# after the node was boostrapped
-def get_ledger_derivation(ledgers_derivations, node_endpoint):
-    extra_options = ["Specify derivation path", "Go back"]
-    full_ledger_urls = []
-    for ledger_url, derivations_paths in ledgers_derivations.items():
-        for derivation_path in derivations_paths:
-            full_ledger_urls.append(ledger_url + derivation_path)
-    return Step(
-        id="ledger_derivation",
-        prompt="Select a key to import from the ledger.\n"
-        "You can choose one of the suggested derivations or provide your own:",
-        help="'Specify derivation path' will ask a derivation path from you."
-        "'Go back' will return you back to the key type choice.",
-        default=None,
-        options=[ledger_urls_info(ledgers_derivations, node_endpoint)] + extra_options,
-        validator=Validator(
-            [
-                required_field_validator,
-                enum_range_validator(full_ledger_urls + extra_options),
-            ]
-        ),
-    )
-
-
 class Setup(Setup):
-    def get_current_head_level(self):
-        response = urllib.request.urlopen(
-            self.config["node_rpc_addr"] + "/chains/main/blocks/head/header"
-        )
-        return str(json.load(response)["level"])
-
     # Check if there is already some blockchain data in the tezos-node data directory,
     # and ask the user if it can be overwritten.
     def check_blockchain_data(self):
@@ -395,13 +267,7 @@ class Setup(Setup):
                 url = self.config["snapshot_url"]
                 try:
                     snapshot_file = fetch_snapshot(url)
-                except ValueError:
-                    print()
-                    print("The snapshot URL you provided is unavailable.")
-                    print("Please check the URL again or choose another option.")
-                    print()
-                    continue
-                except urllib.error.URLError:
+                except (ValueError, urllib.error.URLError):
                     print()
                     print("The snapshot URL you provided is unavailable.")
                     print("Please check the URL again or choose another option.")
@@ -510,46 +376,6 @@ class Setup(Setup):
         print()
         print("The Tezos node bootstrapped successfully.")
 
-    # Check if an account with the 'baker' alias already exists, and ask the user
-    # if it can be overwritten.
-    def check_baker_account(self):
-        tezos_client_options = self.get_tezos_client_options()
-        baker_alias = self.config["baker_alias"]
-        address = get_proc_output(
-            f"sudo -u tezos {suppress_warning_text} tezos-client {tezos_client_options} "
-            f"show address {baker_alias} --show-secret"
-        )
-        if address.returncode == 0:
-            value_regex = (
-                b"(?:"
-                + ledger_regex
-                + b")|(?:"
-                + secret_key_regex
-                + b")|(?:remote\:"
-                + address_regex
-                + b")"
-            )
-            value = re.search(value_regex, address.stdout).group(0)
-            address = re.search(address_regex, address.stdout).group(0)
-            print()
-            print("An account with the '" + baker_alias + "' alias already exists.")
-            print("Its current value is", value.decode("utf-8"))
-            print("With a corresponding address:", address.decode("utf-8"))
-
-            return yes_or_no(
-                "Would you like to import a new key and replace this one? <y/N> ", "no"
-            )
-        else:
-            return True
-
-    def fill_remote_signer_infos(self):
-        self.query_step(remote_signer_uri_query)
-
-        rsu = re.search(signer_uri_regex.decode(), self.config["remote_signer_uri"])
-
-        self.config["remote_host"] = rsu.group(1)
-        self.config["remote_key"] = rsu.group(2)
-
     # Importing the baker key
     def import_baker_key(self):
         baker_alias = self.config["baker_alias"]
@@ -562,104 +388,7 @@ class Setup(Setup):
 
             key_mode_query = get_key_mode_query(key_import_modes)
 
-            valid_choice = False
-            while not valid_choice:
-
-                try:
-                    self.query_step(key_mode_query)
-
-                    if self.config["key_import_mode"] == "secret-key":
-                        self.query_step(secret_key_query)
-                        proc_call(
-                            f"sudo -u tezos {suppress_warning_text} tezos-client {tezos_client_options} "
-                            f"import secret key {baker_alias} {self.config['secret_key']} --force"
-                        )
-                    elif self.config["key_import_mode"] == "remote":
-                        self.fill_remote_signer_infos()
-
-                        tezos_client_options = self.get_tezos_client_options()
-                        proc_call(
-                            f"sudo -u tezos {suppress_warning_text} tezos-client {tezos_client_options} "
-                            f"import secret key {baker_alias} remote:{self.config['remote_key']} --force"
-                        )
-                    elif self.config["key_import_mode"] == "json":
-                        self.query_step(json_filepath_query)
-                        json_tmp_path = shutil.copy(
-                            self.config["json_filepath"], "/tmp/"
-                        )
-                        proc_call(
-                            f"sudo -u tezos {suppress_warning_text} tezos-client {tezos_client_options} "
-                            f"activate account {baker_alias} with {json_tmp_path} --force"
-                        )
-                        try:
-                            os.remove(json_tmp_path)
-                        except:
-                            pass
-
-                    else:
-                        print("Please open the Tezos Baking app on your ledger.")
-                        ledgers_derivations = wait_for_ledger_baking_app()
-                        ledgers = list(ledgers_derivations.keys())
-                        baker_ledger_url = ""
-                        while (
-                            re.match(ledger_regex.decode("utf-8"), baker_ledger_url)
-                            is None
-                        ):
-                            self.query_step(
-                                get_ledger_derivation(
-                                    ledgers_derivations,
-                                    self.config["node_rpc_addr"],
-                                )
-                            )
-                            if self.config["ledger_derivation"] == "Go back":
-                                self.import_baker_key()
-                                return
-                            elif (
-                                self.config["ledger_derivation"]
-                                == "Specify derivation path"
-                            ):
-                                if len(ledgers) >= 1:
-                                    # If there is only one connected ledger, there is nothing to choose from
-                                    if len(ledgers) == 1:
-                                        ledger_url = ledgers[0]
-                                    else:
-                                        self.query_step(get_ledger_url(ledgers))
-                                        ledger_url = self.config["ledger_url"]
-                                    self.query_step(derivation_path_query)
-                                    signing_curves = [
-                                        "bip25519",
-                                        "ed25519",
-                                        "secp256k1",
-                                        "P-256",
-                                    ]
-                                    for signing_curve in signing_curves:
-                                        ledgers_derivations.setdefault(
-                                            ledger_url, []
-                                        ).append(
-                                            signing_curve
-                                            + "/"
-                                            + self.config["derivation_path"]
-                                        )
-                            else:
-                                baker_ledger_url = self.config["ledger_derivation"]
-                        proc_call(
-                            f"sudo -u tezos {suppress_warning_text} tezos-client {tezos_client_options} "
-                            f"import secret key {baker_alias} {baker_ledger_url} --force"
-                        )
-                        proc_call(
-                            f"sudo -u tezos {suppress_warning_text} tezos-client {tezos_client_options} "
-                            f"setup ledger to bake for {baker_alias} --main-hwm {self.get_current_head_level()}"
-                        )
-
-                except EOFError:
-                    raise EOFError
-                except Exception as e:
-                    print("Something went wrong when calling tezos-client:")
-                    print(str(e))
-                    print()
-                    print("Please check your input and try again.")
-                else:
-                    valid_choice = True
+            self.import_key(key_mode_query)
 
     def register_baker(self):
         print()

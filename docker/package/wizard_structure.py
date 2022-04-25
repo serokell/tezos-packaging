@@ -234,6 +234,12 @@ key_import_modes = {
     "json": "Faucet JSON file from https://teztnets.xyz/",
 }
 
+networks = {
+    "mainnet": "Main Tezos network",
+    "hangzhounet": "Test network using version 011 of Tezos protocol (Hangzhou)",
+    "ithacanet": "Test network using version 012 of Tezos protocol (Ithaca2)",
+}
+
 # Wizard CLI skeleton
 
 

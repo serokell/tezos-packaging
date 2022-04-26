@@ -7,8 +7,6 @@ with lib;
 
 let
   tezos-baker-pkgs = {
-    "011-PtHangz2" =
-      "${pkgs.ocamlPackages.tezos-baker-011-PtHangz2}/bin/tezos-baker-011-PtHangz2";
     "012-Psithaca" =
       "${pkgs.ocamlPackages.tezos-baker-012-Psithaca}/bin/tezos-baker-012-Psithaca";
   };

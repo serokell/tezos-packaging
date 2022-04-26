@@ -99,9 +99,8 @@ network_query = Step(
     id="network",
     prompt="Which Tezos network would you like to use?\nCurrently supported:",
     help="The selected network will be used to set up all required services.\n"
-    "The currently supported protocol is 011-PtHangz2 (used on hangzhounet and mainnet)\n"
-    "and 012-Psithaca (used on ithacanet).\n"
-    "Keep in mind that you must select the test network (hangzhounet ot ithacanet)\n"
+    "The currently supported protocol is 012-Psithaca (used on ithacanet and mainnet).\n"
+    "Keep in mind that you must select the test network (ithacanet)\n"
     "if you plan on baking with a faucet JSON file.\n",
     options=networks,
     validator=Validator(enum_range_validator(networks)),

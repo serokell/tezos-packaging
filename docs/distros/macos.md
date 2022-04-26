@@ -59,7 +59,7 @@ background services.
 
 Formulas with `tezos-node` background services:
 * `tezos-node-mainnet`
-* `tezos-node-hangzhounet`
+* `tezos-node-ithacanet`
 
 Formulas with `tezos-signer` background services:
 * `tezos-signer-http`

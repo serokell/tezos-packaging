@@ -4,7 +4,7 @@ let
   nixpkgs = (import ../nix/nix/sources.nix).nixpkgs;
   pkgs = import ../nix/build/pkgs.nix {};
   inherit (pkgs.ocamlPackages) tezos-client tezos-admin-client tezos-node tezos-signer tezos-codec
-    tezos-accuser-012-Psithaca tezos-baker-012-Psithaca;
+    tezos-accuser-013-PtJakart tezos-baker-013-PtJakart;
 in import "${nixpkgs}/nixos/tests/make-test-python.nix" ({ ... }:
 {
   nodes.machine = { ... }: {
@@ -19,9 +19,9 @@ in import "${nixpkgs}/nixos/tests/make-test-python.nix" ({ ... }:
   };
 
   testScript = ''
-    tezos_accuser = "${tezos-accuser-012-Psithaca}/bin/tezos-accuser-012-Psithaca"
+    tezos_accuser = "${tezos-accuser-013-PtJakart}/bin/tezos-accuser-013-PtJakart"
     tezos_admin_client = "${tezos-admin-client}/bin/tezos-admin-client"
-    tezos_baker = "${tezos-baker-012-Psithaca}/bin/tezos-baker-012-Psithaca"
+    tezos_baker = "${tezos-baker-013-PtJakart}/bin/tezos-baker-013-PtJakart"
     tezos_client = (
         "${tezos-client}/bin/tezos-client"
     )

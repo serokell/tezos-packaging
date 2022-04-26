@@ -30,7 +30,8 @@ that you can use by following the [installation instructions](https://www.raspbe
 In order to run a baking instance, you'll need the following Tezos binaries:
 `tezos-client`, `tezos-node`, `tezos-baker-<proto>`, `tezos-endorser-<proto>`.
 
-The currently supported protocol is `012-Psithaca` (used on `ithacanet` and `mainnet`).
+The currently supported protocols are `012-Psithaca` (used on `ithacanet` and `mainnet`) and
+`013-PtJakart` (used on `jakartanet`).
 Also, note that the corresponding packages have protocol
 suffix in lowercase, e.g. the list of available baker packages can be found
 [here](https://launchpad.net/~serokell/+archive/ubuntu/tezos/+packages?field.name_filter=tezos-baker&field.status_filter=published).

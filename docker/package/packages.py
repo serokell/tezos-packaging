@@ -12,10 +12,17 @@ from .model import (
 
 from .systemd import Service, ServiceFile, SystemdUnit, Unit, Install
 
-networks = ["mainnet", "ithacanet"]
+# Testnets are either supported by the tezos-node directly or have known URL with
+# the config
+networks = {
+    "mainnet": "mainnet",
+    "ithacanet": "ithacanet",
+    "jakartanet": "https://teztnets.xyz/jakartanet",
+}
 networks_protos = {
     "mainnet": ["012-Psithaca"],
     "ithacanet": ["012-Psithaca"],
+    "jakartanet": ["013-PtJakart"],
 }
 
 signer_units = [
@@ -195,16 +202,16 @@ node_units = []
 node_postinst_steps = postinst_steps_common
 node_postrm_steps = ""
 common_node_env = ["NODE_RPC_ADDR=127.0.0.1:8732", "CERT_PATH=", "KEY_PATH="]
-for network in networks:
+for network, network_config in networks.items():
     env = [
         f"NODE_DATA_DIR=/var/lib/tezos/node-{network}",
-        f"NETWORK={network}",
+        f"NETWORK={network_config}",
     ] + common_node_env
     node_units.append(
         mk_node_unit(suffix=network, env=env, desc=f"Tezos node {network}")
     )
     node_postinst_steps += f"""mkdir -p /var/lib/tezos/node-{network}
-[ ! -f /var/lib/tezos/node-{network}/config.json ] && tezos-node config init --data-dir /var/lib/tezos/node-{network} --network {network}
+[ ! -f /var/lib/tezos/node-{network}/config.json ] && tezos-node config init --data-dir /var/lib/tezos/node-{network} --network {network_config}
 chown -R tezos:tezos /var/lib/tezos/node-{network}
 
 cat > /usr/bin/tezos-node-{network} <<- 'EOM'
@@ -489,7 +496,7 @@ for proto in active_protocols:
 
 packages.append(
     TezosBakingServicesPackage(
-        target_networks=networks,
+        target_networks=networks.keys(),
         network_protos=networks_protos,
         meta=packages_meta,
         protocols=protocols_json,

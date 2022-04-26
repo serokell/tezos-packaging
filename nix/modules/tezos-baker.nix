@@ -9,6 +9,8 @@ let
   tezos-baker-pkgs = {
     "012-Psithaca" =
       "${pkgs.ocamlPackages.tezos-baker-012-Psithaca}/bin/tezos-baker-012-Psithaca";
+    "013-PtJakart" =
+      "${pkgs.ocamlPackages.tezos-baker-013-PtJakart}/bin/tezos-baker-013-PtJakart";
   };
   cfg = config.services.tezos-baker;
   common = import ./common.nix { inherit lib; inherit pkgs; };

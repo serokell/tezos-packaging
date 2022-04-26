@@ -14,7 +14,7 @@ ymlappend () {
 }
 
 # we don't bottle meta-formulas that contain only services
-formulae=("tezos-accuser-012-Psithaca" "tezos-admin-client" "tezos-baker-012-Psithaca" "tezos-client" "tezos-codec" "tezos-node" "tezos-sandbox" "tezos-signer")
+formulae=("tezos-accuser-012-Psithaca" "tezos-accuser-013-PtJakart" "tezos-admin-client" "tezos-baker-012-Psithaca" "tezos-baker-013-PtJakart" "tezos-client" "tezos-codec" "tezos-node" "tezos-sandbox" "tezos-signer")
 architecture=("arm64" "x86_64")
 declare -A queues=(["arm64"]="arm64-darwin" ["x86_64"]="x86_64-rosetta-darwin")
 declare -A brew_bottle_oses=(["arm64"]="arm64_big_sur" ["x86_64"]="big_sur")

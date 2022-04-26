@@ -49,6 +49,7 @@ let
         default = "ithacanet";
         description = ''
           Network which node will be running on.
+          Can be either a predefined network name or a URL to the network config.
         '';
       };
 

@@ -17,7 +17,7 @@ amendment periods.
 
 1) Generate a pair of keys associated with `baker` alias:
 
-```
+```bash
 sudo -u tezos tezos-client gen keys baker
 ```
 
@@ -29,10 +29,12 @@ This script will provide you a path to the node config that will be used by the 
 
 4) Create a config for the custom baking service that will be used by the voting wizard:
 
-```
+```bash
 sudo cp /etc/default/tezos-baking-custom@ /etc/default/tezos-baking-custom@voting
 ```
+
 Edit with the config provided by the voting script on the second step:
+
 ```
 DATA_DIR="/var/lib/tezos/.tezos-client"
 NODE_RPC_ENDPOINT="http://localhost:8732"
@@ -46,19 +48,21 @@ be triggered once custom baking service will be stopped.
 
 5) Start custom baking service:
 
-```
+```bash
 sudo systemctl start tezos-baking-custom@voting
 ```
 
 Note that `tezos-node` service may take some time to generate a fresh identity and start.
 
 To check the status of the node service run:
-```
+
+```bash
 systemctl status tezos-node-custom@voting
 ```
 
 6) Register `baker` key as delegate once `tezos-node` is up and running:
-```
+
+```bash
 sudo -u tezos tezos-client register key baker as delegate
 ```
 
@@ -66,12 +70,19 @@ sudo -u tezos tezos-client register key baker as delegate
 
 The script will stop at the beginning of each voting period that requires voting and ask you to vote.
 
-Launch `tezos-voting-wizard`, select `custom` network with `voting` name and submit your vote.
+Launch the wizard by running:
+
+```bash
+tezos-voting-wizard --network voting
+```
+
 Under normal conditions, you won't have to adjust any information about your baking service.
+Confirm the information and submit your vote.
 
 Once you'll vote, you should prompt the `voting.py` script to continue going through the voting cycle.
 
 8) Stop custom baking service once voting cycle is over:
-```
+
+```bash
 sudo systemctl stop tezos-baking-custom@voting
 ```

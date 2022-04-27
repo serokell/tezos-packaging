@@ -22,7 +22,6 @@ ballot_outcomes = {
     "pass": "Submit a vote not influencing the result but contributing to quorum",
 }
 
-
 # Command line argument parsing
 
 parser.add_argument(
@@ -30,7 +29,7 @@ parser.add_argument(
     required=False,
     default="mainnet",
     help="Name of the network to vote on. Is 'mainnet' by default, "
-    "but can take the (part after @) name of any custom instance. "
+    "but can be a testnet or the (part after @) name of any custom instance. "
     "For example, to use the tezos-baking-custom@voting service, input 'voting'. "
     "You need to already have set up the custom network using systemd services.",
 )
@@ -260,8 +259,8 @@ class Setup(Setup):
             self.import_key(key_mode_query)
 
     def get_network(self):
-        if parsed_args.network == "mainnet":
-            self.config["network"] = "mainnet"
+        if parsed_args.network in networks.keys():
+            self.config["network"] = parsed_args.network
         else:
             # TODO: maybe check/validate this
             self.config["network"] = "custom@" + parsed_args.network

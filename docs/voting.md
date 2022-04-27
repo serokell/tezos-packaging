@@ -43,3 +43,11 @@ E.g. if you have a custom baking instance `tezos-baking-custom@voting`, you can 
 ```bash
 tezos-voting-wizard --network voting
 ```
+
+## Using testnets
+
+`tezos-voting-wizard` also supports voting on currently running testnets, for example:
+
+```bash
+tezos-voting-wizard --network ithacanet
+```

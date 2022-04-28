@@ -11,7 +11,7 @@ the appropriate steps using the final configuration.
 import os, sys, subprocess, shlex, shutil
 import re, textwrap
 import argparse
-import urllib.request, urllib.parse
+import urllib.request
 import json
 
 # Regexes
@@ -65,9 +65,11 @@ def filepath_validator(input):
 def reachable_url_validator(suffix=None):
     def _validator(input):
         if input:
-            full_url = urllib.parse.urljoin(input, suffix)
+            full_url = "/".join([input.rstrip("/"), suffix.lstrip("/")])
+            headers = {"User-Agent": "Mozilla/5.0"}
+            req = urllib.request.Request(full_url, headers=headers)
             try:
-                urllib.request.urlopen(full_url)
+                urllib.request.urlopen(req)
             except (urllib.error.URLError, ValueError):
                 raise ValueError(
                     f"{full_url} is unreachable. Please input a valid URL."
@@ -286,13 +288,16 @@ def get_key_address(tezos_client_options, key_alias):
         return None
 
 
-def wait_for_ledger_baking_app():
+def wait_for_ledger_app(ledger_app):
     output = b""
-    while re.search(b"Found a Tezos Baking", output) is None:
-        output = get_proc_output(
-            f"sudo -u tezos {suppress_warning_text} tezos-client list connected ledgers"
-        ).stdout
-        proc_call("sleep 1")
+    try:
+        while re.search(f"Found a Tezos {ledger_app}".encode(), output) is None:
+            output = get_proc_output(
+                f"sudo -u tezos {suppress_warning_text} tezos-client list connected ledgers"
+            ).stdout
+            proc_call("sleep 1")
+    except KeyboardInterrupt:
+        return None
     ledgers_derivations = {}
     for ledger_derivation in re.findall(ledger_regex, output):
         ledger_url = (
@@ -624,7 +629,7 @@ class Setup:
         else:
             return True
 
-    def import_key(self, key_mode_query):
+    def import_key(self, key_mode_query, ledger_app=None):
 
         baker_alias = self.config["baker_alias"]
         tezos_client_options = self.get_tezos_client_options()
@@ -661,8 +666,12 @@ class Setup:
                     except:
                         pass
                 else:
-                    print("Please open the Tezos Baking app on your ledger.")
-                    ledgers_derivations = wait_for_ledger_baking_app()
+                    print(f"Please open the Tezos {ledger_app} app on your ledger or")
+                    print("press Ctrl+C to go back to the key import mode selection.")
+                    ledgers_derivations = wait_for_ledger_app(ledger_app)
+                    if ledgers_derivations is None:
+                        print("Going back to the import mode selection.")
+                        continue
                     ledgers = list(ledgers_derivations.keys())
                     baker_ledger_url = ""
                     while re.match(ledger_regex.decode(), baker_ledger_url) is None:
@@ -673,7 +682,7 @@ class Setup:
                             )
                         )
                         if self.config["ledger_derivation"] == "Go back":
-                            self.import_key(key_mode_query)
+                            self.import_key(key_mode_query, ledger_app)
                             return
                         elif (
                             self.config["ledger_derivation"]
@@ -706,10 +715,6 @@ class Setup:
                     proc_call(
                         f"sudo -u tezos {suppress_warning_text} tezos-client {tezos_client_options} "
                         f"import secret key {baker_alias} {baker_ledger_url} --force"
-                    )
-                    proc_call(
-                        f"sudo -u tezos {suppress_warning_text} tezos-client {tezos_client_options} "
-                        f"setup ledger to bake for {baker_alias} --main-hwm {self.get_current_head_level()}"
                     )
 
             except EOFError:

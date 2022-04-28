@@ -50,7 +50,7 @@ welcome_text = """Tezos Voting Wizard
 
 Welcome, this wizard will help you vote in the Tezos protocol amendment process.
 Please note that to vote on mainnet, the minimum requirement is to have access
-to a key that has voting rights, preverably through a connected ledger device.
+to a key that has voting rights, preferably through a connected ledger device.
 
 All commands within the service are run under the 'tezos' user.
 
@@ -128,7 +128,7 @@ def get_node_rpc_addr_query(default=None):
         validator=Validator(
             [
                 required_field_validator,
-                reachable_url_validator("chains/main/blocks/head/"),
+                reachable_url_validator("chains/main/blocks/head/header"),
             ]
         ),
     )
@@ -160,14 +160,7 @@ class Setup(Setup):
 
     # Check whether the baker_alias account is set up to use ledger
     def check_ledger_use(self):
-        baker_alias = self.config["baker_alias"]
-        address = get_proc_output(
-            f"sudo -u tezos {suppress_warning_text} tezos-client "
-            f"{self.config['tezos_client_options']} show address {baker_alias} --show-secret"
-        )
-        if address.returncode == 0:
-            value_regex = b"(?:" + ledger_regex + b")"
-            return bool(re.match(value_regex, address.stdout))
+        return bool(re.match(ledger_regex.decode(), self.config["baker_key_value"]))
 
     def check_baking_service(self):
         net = self.config["network"]
@@ -175,11 +168,8 @@ class Setup(Setup):
             proc_call(f"systemctl is-active --quiet tezos-baking-{net}.service")
             return True
         except:
-            print(f"Looks like the tezos-baking-{net} service isn't running.")
-            print("If this is a mistake, and you should have a baking instance")
-            print("running on mainnet on this machine, please check if it is set up.")
-            print("If it isn't, you can use Tezos Setup Wizard to set it up:")
-            print("tezos-setup-wizard")
+            print(f"No local baking services for {net} running on this machine.")
+            print("If there should be, you can run 'tezos-setup-wizard' to set it up.")
             print()
 
             return False
@@ -201,6 +191,7 @@ class Setup(Setup):
     def collect_baking_info(self):
         if self.check_baking_service():
             self.fill_baking_config()
+            self.config["tezos_client_options"] = self.get_tezos_client_options()
 
             value, _ = get_key_address(
                 self.config["tezos_client_options"], self.config["baker_alias"]
@@ -237,7 +228,7 @@ class Setup(Setup):
             replace_baker_key = self.check_baker_account()
             if replace_baker_key:
                 key_mode_query = get_key_mode_query(key_import_modes)
-                self.import_key(key_mode_query)
+                self.import_key(key_mode_query, "Wallet")
 
             collected = self.check_data_correctness()
 
@@ -256,7 +247,7 @@ class Setup(Setup):
             self.config["baker_key_value"] = value
         else:  # if there is no key with this alias, query import
             key_mode_query = get_key_mode_query(key_import_modes)
-            self.import_key(key_mode_query)
+            self.import_key(key_mode_query, "Wallet")
 
     def get_network(self):
         if parsed_args.network in networks.keys():
@@ -299,11 +290,7 @@ class Setup(Setup):
             f"submit proposals for {self.config['baker_alias']} {hash_to_submit}"
         )
 
-        if result.returncode == 0:
-            if yes_or_no("Submission successful! Choose again? <Y/n> ", "yes"):
-                self.process_proposal_period()
-                return
-        else:
+        if result.returncode != 0:
             print()
 
             if re.search(b"[Ii]nvalid proposal", result.stderr) is not None:
@@ -405,8 +392,8 @@ class Setup(Setup):
 
         # if a ledger is used for baking, ask to open Tezos Wallet app on it before proceeding
         if self.check_ledger_use():
+            print("Please make sure the Tezos Wallet app is open on your ledger.")
             print()
-            print("Please open the Tezos Wallet app on your ledger.")
             wait_for_ledger_wallet_app()
 
         # process 'tezos-client show voting period'

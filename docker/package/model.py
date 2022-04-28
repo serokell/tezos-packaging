@@ -188,7 +188,6 @@ class TezosBinaryPackage(AbstractPackage):
         dune_filepath: str,
         systemd_units: List[SystemdUnit] = [],
         target_proto: str = None,
-        optional_opam_deps: List[str] = [],
         postinst_steps: str = "",
         postrm_steps: str = "",
         additional_native_deps: List[str] = [],
@@ -197,7 +196,6 @@ class TezosBinaryPackage(AbstractPackage):
         self.desc = desc
         self.systemd_units = systemd_units
         self.target_proto = target_proto
-        self.optional_opam_deps = optional_opam_deps
         self.postinst_steps = postinst_steps
         self.postrm_steps = postrm_steps
         self.additional_native_deps = additional_native_deps

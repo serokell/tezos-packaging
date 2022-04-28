@@ -14,10 +14,6 @@ for proto in $(jq -r ".active | .[]" ../protocols.json); do
     binaries+=("tezos-accuser-$proto" "tezos-baker-$proto" )
 done
 
-for proto in $(jq -r ".active-.active_noendorser | .[]" ../protocols.json); do
-    binaries+=("tezos-endorser-$proto")
-done
-
 if [[ "${USE_PODMAN-}" == "True" ]]; then
     virtualisation_engine="podman"
 else

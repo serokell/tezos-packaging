@@ -27,7 +27,7 @@ sudo add-apt-repository ppa:serokell/tezos-rc && sudo apt-get update
 ## `tezos-baking` package
 
 As an addition, `tezos-baking` package provides `tezos-baking-<network>` services that orchestrate
-systemd units for `tezos-node`, `tezos-baker-<proto>`, and `tezos-endorser-<proto>`.
+systemd units for `tezos-node` and `tezos-baker-<proto>`.
 Configuration files for these services are located in `/etc/default/tezos-baking-<network>`.
 
 <a name="raspberry"></a>

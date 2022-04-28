@@ -21,7 +21,7 @@ from wizard_structure import *
 
 modes = {
     "baking": "Set up and start all services for baking: "
-    "tezos-node, tezos-baker, and tezos-endorser.",
+    "tezos-node and tezos-baker.",
     "node": "Only bootstrap and run the Tezos node.",
 }
 
@@ -64,7 +64,7 @@ Welcome, this wizard will help you to set up the infrastructure to interact with
 Tezos blockchain.
 
 In order to run a baking instance, you'll need the following Tezos binaries:
- tezos-client, tezos-node, tezos-baker-<proto>, tezos-endorser-<proto>.
+ tezos-client, tezos-node, tezos-baker-<proto>.
 If you have installed tezos-baking, these binaries are already installed.
 
 All commands within the service are run under the 'tezos' user.

@@ -28,9 +28,10 @@ that you can use by following the [installation instructions](https://www.raspbe
 ### Installation
 
 In order to run a baking instance, you'll need the following Tezos binaries:
-`tezos-client`, `tezos-node`, `tezos-baker-<proto>`, `tezos-endorser-<proto>`.
+`tezos-client`, `tezos-node`, `tezos-baker-<proto>`.
 
-The currently supported protocol is `011-PtHangz2` (used on `hangzhounet` and `mainnet`).
+The currently supported protocols are `012-Psithaca` (used on `ithacanet` and `mainnet`) and
+`013-PtJakart` (used on `jakartanet`).
 Also, note that the corresponding packages have protocol
 suffix in lowercase, e.g. the list of available baker packages can be found
 [here](https://launchpad.net/~serokell/+archive/ubuntu/tezos/+packages?field.name_filter=tezos-baker&field.status_filter=published).
@@ -75,7 +76,7 @@ sudo apt-get update
 sudo apt-get install tezos-baking
 ```
 
-Packages for `tezos-node`, `tezos-baker-<proto>` and `tezos-endorser-<proto>` provide
+Packages for `tezos-node` and `tezos-baker-<proto>` provide
 systemd units for running the corresponding binaries in the background, these units
 are orchestrated by the `tezos-baking-<network>` units.
 
@@ -134,7 +135,7 @@ In order to import the snapshot, run the following command:
 sudo -u tezos tezos-node-<network> snapshot import <path to the snapshot file>
 ```
 
-## Setting up baker and endorser key
+## Setting up baker key
 
 Note that account activation from JSON file and baker registering require
 running a fully-bootstrapped `tezos-node`. In order to start node service do the following:
@@ -209,7 +210,6 @@ sudo systemctl start tezos-baking-<network>.service
 This service will trigger the following services to start:
 * `tezos-node-<network>.service`
 * `tezos-baker-<proto>@<network>.service`
-* `tezos-endorser-<proto>@network.service`
 
 Once services have started, you can check their logs via `journalctl`:
 ```
@@ -221,8 +221,6 @@ You'll see the following messages in the logs in case everything has started
 successfully:
 ```
 Baker started.
-
-Endorser started.
 ```
 
 To stop the baking instance run:
@@ -272,9 +270,7 @@ or official testnets, you can do so:
 4. Check that all parts are indeed running:
   ```bash
   systemctl status tezos-node-custom@<chain-name>
-  systemctl status tezos-baker-011-pthangz2@custom@<chain-name>.service
   systemctl status tezos-baker-012-psithaca@custom@<chain-name>.service
-  systemctl status tezos-endorser-011-pthangz2@custom@<chain-name>.service
 ```
 
 If at any point after that you want to reset the custom baking service, you can set

@@ -21,7 +21,7 @@ from wizard_structure import *
 
 modes = {
     "baking": "Set up and start all services for baking: "
-    "tezos-node, tezos-baker, and tezos-endorser.",
+    "tezos-node and tezos-baker.",
     "node": "Only bootstrap and run the Tezos node.",
 }
 
@@ -64,7 +64,7 @@ Welcome, this wizard will help you to set up the infrastructure to interact with
 Tezos blockchain.
 
 In order to run a baking instance, you'll need the following Tezos binaries:
- tezos-client, tezos-node, tezos-baker-<proto>, tezos-endorser-<proto>.
+ tezos-client, tezos-node, tezos-baker-<proto>.
 If you have installed tezos-baking, these binaries are already installed.
 
 All commands within the service are run under the 'tezos' user.
@@ -99,9 +99,9 @@ network_query = Step(
     id="network",
     prompt="Which Tezos network would you like to use?\nCurrently supported:",
     help="The selected network will be used to set up all required services.\n"
-    "The currently supported protocol is 011-PtHangz2 (used on hangzhounet and mainnet)\n"
-    "and 012-Psithaca (used on ithacanet).\n"
-    "Keep in mind that you must select the test network (hangzhounet ot ithacanet)\n"
+    "The currently supported protocol are 012-Psithaca (used on ithacanet and mainnet)\n"
+    "and 012-PtJakart (used on jakartanet).\n"
+    "Keep in mind that you must select the test network (ithacanet or jakartanet)\n"
     "if you plan on baking with a faucet JSON file.\n",
     options=networks,
     validator=Validator(enum_range_validator(networks)),

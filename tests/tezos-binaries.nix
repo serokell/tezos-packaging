@@ -12,13 +12,14 @@ in import "${nixpkgs}/nixos/tests/make-test-python.nix" ({ ... }:
     virtualisation.diskSize = 1024;
     environment.sessionVariables.XDG_DATA_DIRS =
       [ "${zcash}" ];
+    security.pki.certificateFiles = [ ./ca.cert ];
   };
 
   testScript = ''
     path_to_binaries = "${path-to-binaries}"
-    tezos_accuser = f"{path_to_binaries}/tezos-accuser-012-Psithaca"
+    tezos_accuser = f"{path_to_binaries}/tezos-accuser-013-PtJakart"
     tezos_admin_client = f"{path_to_binaries}/tezos-admin-client"
-    tezos_baker = f"{path_to_binaries}/tezos-baker-012-Psithaca"
+    tezos_baker = f"{path_to_binaries}/tezos-baker-013-PtJakart"
     tezos_client = f"{path_to_binaries}/tezos-client"
     tezos_node = f"{path_to_binaries}/tezos-node"
     tezos_signer = f"{path_to_binaries}/tezos-signer"

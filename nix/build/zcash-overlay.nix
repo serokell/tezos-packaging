@@ -15,7 +15,7 @@ let
   };
 
   relevant-packages =
-    "tezos-((node|client|codec|admin-client|signer)|((accuser|baker|endorser).*))";
+    "tezos-((node|client|codec|admin-client|signer)|((accuser|baker).*))";
 in builtins.mapAttrs (name: pkg:
   if !isNull (builtins.match relevant-packages name) then
     pkg.overrideAttrs inject-zcash

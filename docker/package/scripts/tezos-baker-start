@@ -25,6 +25,22 @@ else
              config update >/dev/null 2>&1
 fi
 
+# Ithaca and Jakarta baker daemons have different liquidity baking escape voting format.
+# Our baker services use format introduced in Jakarta and transform it to the format expected
+# by Ithaca.
+if [[ $PROTOCOL == "012-Psithaca" ]]; then
+    case $LIQUIDITY_BAKING_TOGGLE_VOTE in
+        off)
+            vote_args=(--liquidity-baking-escape-vote)
+        ;;
+        *)
+            vote_args=()
+        ;;
+    esac
+else
+    vote_args=(--liquidity-baking-toggle-vote "$LIQUIDITY_BAKING_TOGGLE_VOTE")
+fi
+
 launch_baker() {
     if [[ -n ${1-} ]]; then
         key_type="$("$tezos_client" show address "$BAKER_ADDRESS_ALIAS" -S | grep "Secret Key:" | cut -d':' -f2-2 | xargs)"
@@ -33,10 +49,10 @@ launch_baker() {
         password="$(systemd-ask-password --keyname="tezos-$BAKER_ADDRESS_ALIAS" --accept-cached \
             "Enter password for $BAKER_ADDRESS_ALIAS key:")"
         "$baker" --base-dir "$baker_dir" --endpoint "$NODE_RPC_ENDPOINT" \
-            run with local node "$NODE_DATA_DIR" "$@" <<< "$password" &
+            run with local node "$NODE_DATA_DIR" "${vote_args[@]}" "$@" <<< "$password" &
     else
         "$baker" --base-dir "$baker_dir" --endpoint "$NODE_RPC_ENDPOINT" \
-            run with local node "$NODE_DATA_DIR" "$@" &
+            run with local node "$NODE_DATA_DIR" "${vote_args[@]}" "$@" &
     fi
 }
 

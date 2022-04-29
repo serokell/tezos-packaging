@@ -188,7 +188,6 @@ class TezosBinaryPackage(AbstractPackage):
         dune_filepath: str,
         systemd_units: List[SystemdUnit] = [],
         target_proto: str = None,
-        optional_opam_deps: List[str] = [],
         postinst_steps: str = "",
         postrm_steps: str = "",
         additional_native_deps: List[str] = [],
@@ -197,7 +196,6 @@ class TezosBinaryPackage(AbstractPackage):
         self.desc = desc
         self.systemd_units = systemd_units
         self.target_proto = target_proto
-        self.optional_opam_deps = optional_opam_deps
         self.postinst_steps = postinst_steps
         self.postrm_steps = postrm_steps
         self.additional_native_deps = additional_native_deps
@@ -511,14 +509,12 @@ class TezosBakingServicesPackage(AbstractPackage):
         target_networks: List[str],
         network_protos: Dict[str, List[str]],
         meta: PackagesMeta,
-        protocols: Dict[str, List[str]],
     ):
         self.name = "tezos-baking"
         self.desc = "Package that provides systemd services that orchestrate other services from Tezos packages"
         self.meta = deepcopy(meta)
         self.meta.version = self.meta.version + self.letter_version
         self.target_protos = set()
-        self.noendorser_protos = protocols["active_noendorser"]
         for network in target_networks:
             for proto in network_protos[network]:
                 self.target_protos.add(proto)
@@ -527,8 +523,6 @@ class TezosBakingServicesPackage(AbstractPackage):
             requires = [f"tezos-node-{network}.service"]
             for proto in network_protos[network]:
                 requires.append(f"tezos-baker-{proto.lower()}@{network}.service")
-                if proto not in self.noendorser_protos:
-                    requires.append(f"tezos-endorser-{proto.lower()}@{network}.service")
             self.systemd_units.append(
                 self.__gen_baking_systemd_unit(
                     requires,
@@ -542,10 +536,6 @@ class TezosBakingServicesPackage(AbstractPackage):
         for network in target_networks:
             for proto in network_protos[network]:
                 custom_requires.append(f"tezos-baker-{proto.lower()}@custom@%i.service")
-                if proto not in self.noendorser_protos:
-                    custom_requires.append(
-                        f"tezos-endorser-{proto.lower()}@custom@%i.service"
-                    )
         custom_unit = self.__gen_baking_systemd_unit(
             custom_requires,
             f"Tezos baking instance for custom network",
@@ -572,8 +562,6 @@ class TezosBakingServicesPackage(AbstractPackage):
         run_deps_list = ["acl", "tezos-client", "tezos-node"]
         for proto in self.target_protos:
             run_deps_list.append(f"tezos-baker-{proto.lower()}")
-            if proto not in self.noendorser_protos:
-                run_deps_list.append(f"tezos-endorser-{proto.lower()}")
         run_deps = ", ".join(run_deps_list)
         file_contents = f"""
 Source: {self.name}
@@ -595,13 +583,7 @@ Description: {self.desc}
     def gen_spec_file(self, build_deps, run_deps, out):
         run_deps = ", ".join(
             ["acl", "tezos-client", "tezos-node"]
-            + sum(
-                [
-                    [f"tezos-{daemon}-{proto}" for daemon in ["baker", "endorser"]]
-                    for proto in self.target_protos
-                ],
-                [],
-            )
+            + [f"tezos-baker-{proto}" for proto in self.target_protos],
         )
         (
             systemd_deps,

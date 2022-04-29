@@ -24,16 +24,16 @@ def run_node(network, use_tls):
     machine.succeed(f"{tezos_node} config init --data-dir node-dir --network {network}")
     machine.succeed(f"{tezos_node} identity generate 1 --data-dir node-dir")
     machine.succeed(
-        f"{tezos_node} run --data-dir node-dir --rpc-addr 127.0.0.1:8732 "
+        f"{tezos_node} run --data-dir node-dir --rpc-addr :8732 "
         + tls_args
         + "--no-bootstrap-peers --network "
         + network
         + " &"
     )
     tls_endpoint = (
-        " --endpoint https://127.0.0.1:8732/ "
+        " --endpoint https://localhost:8732/ "
         if use_tls
-        else " --endpoint http://127.0.0.1:8732/ "
+        else " --endpoint http://localhost:8732/ "
     )
     machine.wait_until_succeeds(
         tezos_client + tls_endpoint + "rpc get chains/main/blocks/head/"
@@ -43,14 +43,14 @@ def run_node(network, use_tls):
 def run_node_with_daemons(network, use_tls):
     run_node(network, use_tls)
     tls_endpoint = (
-        " --endpoint https://127.0.0.1:8732/ "
+        " --endpoint https://localhost:8732/ "
         if use_tls
-        else " --endpoint http://127.0.0.1:8732/ "
+        else " --endpoint http://localhost:8732/ "
     )
     machine.succeed(
         f"{tezos_baker} -d client-dir"
         + tls_endpoint
-        + "run with local node node-dir baker &"
+        + "run with local node node-dir baker --liquidity-baking-toggle-vote on &"
     )
     machine.succeed(tezos_accuser + tls_endpoint + "-d client-dir run &")
 
@@ -66,9 +66,9 @@ def kill_node_with_daemons():
 
 def test_node_with_daemons_scenario(network, use_tls=False):
     tls_endpoint = (
-        " --endpoint https://127.0.0.1:8732/ "
+        " --endpoint https://localhost:8732/ "
         if use_tls
-        else " --endpoint http://127.0.0.1:8732/ "
+        else " --endpoint http://localhost:8732/ "
     )
     run_node_with_daemons(network, use_tls)
     machine.succeed(
@@ -79,6 +79,12 @@ def test_node_with_daemons_scenario(network, use_tls=False):
 
 with subtest("run node with daemons on ithacanet"):
     test_node_with_daemons_scenario("ithacanet")
+
+# Uncomment once '--network jakartanet' is supported by tezos-node.
+# Currently it's possible to get the network config from URL, but network
+# access is prohibited in NixOS tests:(
+# with subtest("run node with daemons on jakartanet"):
+#     test_node_with_daemons_scenario("jakartanet")
 
 with subtest("run node with daemons on mainnet"):
     test_node_with_daemons_scenario("mainnet")

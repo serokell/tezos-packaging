@@ -29,17 +29,17 @@
         "homepage": null,
         "owner": "tweag",
         "repo": "opam-nix",
-        "rev": "f20ed19391752fe8cf505945dce776ce0ffa48a2",
-        "sha256": "0j27nwqc88grz3zfwg3f62xj5cn57dmm3qrrzr9i3j2rkw0npkhz",
+        "rev": "44b97c71a379bb9517135600c7d5e83d941e65d9",
+        "sha256": "07cqkfgm2kzwb79y3gwrwqgmj4sszw2lrybqyv9vwwqkiwvbj7xc",
         "type": "tarball",
-        "url": "https://github.com/tweag/opam-nix/archive/f20ed19391752fe8cf505945dce776ce0ffa48a2.tar.gz",
+        "url": "https://github.com/tweag/opam-nix/archive/44b97c71a379bb9517135600c7d5e83d941e65d9.tar.gz",
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
     },
     "opam-repository": {
-        "branch": "v12-release",
-        "ref": "v12-release",
+        "branch": "master",
+        "ref": "master",
         "repo": "https://gitlab.com/tezos/opam-repository",
-        "rev": "049f2433bd7f4b4fb24dc7cb7faa4b9d77589138",
+        "rev": "fcd1fdae683f183947eeecf85887160dbf547a84",
         "type": "git"
     },
     "serokell-nix": {
@@ -56,9 +56,9 @@
     },
     "tezos": {
         "branch": "master",
-        "ref": "refs/tags/v12.3",
+        "ref": "refs/tags/v13.0-rc1",
         "repo": "https://gitlab.com/tezos/tezos",
-        "rev": "6e2037c907606587041136834cf7de16049412da",
+        "rev": "54143ed51b4dd9944e973771073a2451de236f50",
         "type": "git"
     }
 }

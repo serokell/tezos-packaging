@@ -12,11 +12,17 @@ from .model import (
 
 from .systemd import Service, ServiceFile, SystemdUnit, Unit, Install
 
-networks = ["mainnet", "hangzhounet", "ithacanet"]
+# Testnets are either supported by the tezos-node directly or have known URL with
+# the config
+networks = {
+    "mainnet": "mainnet",
+    "ithacanet": "ithacanet",
+    "jakartanet": "https://teztnets.xyz/jakartanet",
+}
 networks_protos = {
     "mainnet": ["012-Psithaca"],
-    "hangzhounet": ["011-PtHangz2"],
     "ithacanet": ["012-Psithaca"],
+    "jakartanet": ["013-PtJakart"],
 }
 
 signer_units = [
@@ -121,7 +127,6 @@ packages = [
         "tezos-client",
         "CLI client for interacting with tezos blockchain",
         meta=packages_meta,
-        optional_opam_deps=["tls", "ledgerwallet-tezos"],
         additional_native_deps=["tezos-sapling-params", "udev"],
         postinst_steps=ledger_udev_postinst,
         dune_filepath="src/bin_client/main_client.exe",
@@ -130,14 +135,12 @@ packages = [
         "tezos-admin-client",
         "Administration tool for the node",
         meta=packages_meta,
-        optional_opam_deps=["tls"],
         dune_filepath="src/bin_client/main_admin.exe",
     ),
     TezosBinaryPackage(
         "tezos-signer",
         "A client to remotely sign operations or blocks",
         meta=packages_meta,
-        optional_opam_deps=["tls", "ledgerwallet-tezos"],
         additional_native_deps=["udev"],
         systemd_units=signer_units,
         postinst_steps=ledger_udev_postinst,
@@ -196,16 +199,16 @@ node_units = []
 node_postinst_steps = postinst_steps_common
 node_postrm_steps = ""
 common_node_env = ["NODE_RPC_ADDR=127.0.0.1:8732", "CERT_PATH=", "KEY_PATH="]
-for network in networks:
+for network, network_config in networks.items():
     env = [
         f"NODE_DATA_DIR=/var/lib/tezos/node-{network}",
-        f"NETWORK={network}",
+        f"NETWORK={network_config}",
     ] + common_node_env
     node_units.append(
         mk_node_unit(suffix=network, env=env, desc=f"Tezos node {network}")
     )
     node_postinst_steps += f"""mkdir -p /var/lib/tezos/node-{network}
-[ ! -f /var/lib/tezos/node-{network}/config.json ] && tezos-node config init --data-dir /var/lib/tezos/node-{network} --network {network}
+[ ! -f /var/lib/tezos/node-{network}/config.json ] && tezos-node config init --data-dir /var/lib/tezos/node-{network} --network {network_config}
 chown -R tezos:tezos /var/lib/tezos/node-{network}
 
 cat > /usr/bin/tezos-node-{network} <<- 'EOM'
@@ -247,15 +250,6 @@ packages.append(
         "Entry point for initializing, configuring and running a Tezos node",
         meta=packages_meta,
         systemd_units=node_units,
-        optional_opam_deps=[
-            "tezos-embedded-protocol-001-PtCJ7pwo",
-            "tezos-embedded-protocol-002-PsYLVpVv",
-            "tezos-embedded-protocol-003-PsddFKi3",
-            "tezos-embedded-protocol-004-Pt24m4xi",
-            "tezos-embedded-protocol-005-PsBABY5H",
-            "tezos-embedded-protocol-005-PsBabyM1",
-            "tezos-embedded-protocol-006-PsCARTHA",
-        ],
         postinst_steps=node_postinst_steps,
         postrm_steps=node_postrm_steps,
         additional_native_deps=["tezos-sapling-params"],
@@ -269,12 +263,11 @@ protocols_json = json.load(
 
 active_protocols = protocols_json["active"]
 
-daemons = ["baker", "accuser", "endorser"]
+daemons = ["baker", "accuser"]
 
 daemon_decs = {
     "baker": "daemon for baking",
     "accuser": "daemon for accusing",
-    "endorser": "daemon for endorsing",
 }
 
 daemon_postinst_common = (
@@ -289,7 +282,6 @@ for proto in active_protocols:
         network for network, protos in networks_protos.items() if proto in protos
     ]
     baker_startup_script = f"/usr/bin/tezos-baker-{proto.lower()}-start"
-    endorser_startup_script = f"/usr/bin/tezos-endorser-{proto.lower()}-start"
     accuser_startup_script = f"/usr/bin/tezos-accuser-{proto.lower()}-start"
     service_file_baker = ServiceFile(
         Unit(after=["network.target"], description="Tezos baker"),
@@ -363,46 +355,6 @@ for proto in active_protocols:
         ),
         Install(wanted_by=["multi-user.target"]),
     )
-    service_file_endorser = ServiceFile(
-        Unit(after=["network.target"], description="Tezos endorser"),
-        Service(
-            environment_file=f"/etc/default/tezos-endorser-{proto}",
-            environment=[f"PROTOCOL={proto}"],
-            exec_start_pre=[
-                "+/usr/bin/setfacl -m u:tezos:rwx /run/systemd/ask-password"
-            ],
-            exec_start=endorser_startup_script,
-            exec_stop_post=["+/usr/bin/setfacl -x u:tezos /run/systemd/ask-password"],
-            state_directory="tezos",
-            user="tezos",
-            type_="forking",
-            keyring_mode="shared",
-        ),
-        Install(wanted_by=["multi-user.target"]),
-    )
-    service_file_endorser_instantiated = ServiceFile(
-        Unit(
-            after=[
-                "network.target",
-                "tezos-node-%i.service",
-                "tezos-baking-%i.service",
-            ],
-            requires=["tezos-node-%i.service"],
-            part_of=["tezos-baking-%i.service"],
-            description="Instantiated tezos endorser daemon service",
-        ),
-        Service(
-            environment_file="/etc/default/tezos-baking-%i",
-            environment=[f"PROTOCOL={proto}"],
-            exec_start=endorser_startup_script,
-            state_directory="tezos",
-            user="tezos",
-            restart="on-failure",
-            type_="forking",
-            keyring_mode="shared",
-        ),
-        Install(wanted_by=["multi-user.target"]),
-    )
     packages.append(
         TezosBinaryPackage(
             f"tezos-baker-{proto}",
@@ -423,7 +375,6 @@ for proto in active_protocols:
                 ),
             ],
             target_proto=proto,
-            optional_opam_deps=["tls", "ledgerwallet-tezos"],
             postinst_steps=daemon_postinst_common + ledger_udev_postinst,
             additional_native_deps=[
                 "tezos-sapling-params",
@@ -454,45 +405,16 @@ for proto in active_protocols:
                 ),
             ],
             target_proto=proto,
-            optional_opam_deps=["tls", "ledgerwallet-tezos"],
             additional_native_deps=["udev"],
             postinst_steps=daemon_postinst_common + ledger_udev_postinst,
             dune_filepath=f"src/proto_{proto_snake_case}/bin_accuser/main_accuser_{proto_snake_case}.exe",
         )
     )
-    if proto not in protocols_json["active_noendorser"]:
-        packages.append(
-            TezosBinaryPackage(
-                f"tezos-endorser-{proto}",
-                "Daemon for endorsing",
-                meta=packages_meta,
-                systemd_units=[
-                    SystemdUnit(
-                        service_file=service_file_endorser,
-                        startup_script=endorser_startup_script.split("/")[-1],
-                        startup_script_source="tezos-endorser-start",
-                        config_file="tezos-endorser.conf",
-                    ),
-                    SystemdUnit(
-                        service_file=service_file_endorser_instantiated,
-                        startup_script=endorser_startup_script.split("/")[-1],
-                        startup_script_source="tezos-endorser-start",
-                        instances=daemons_instances,
-                    ),
-                ],
-                target_proto=proto,
-                optional_opam_deps=["tls", "ledgerwallet-tezos"],
-                postinst_steps=daemon_postinst_common + ledger_udev_postinst,
-                additional_native_deps=["tezos-client", "acl", "udev"],
-                dune_filepath=f"src/proto_{proto_snake_case}/bin_endorser/main_endorser_{proto_snake_case}.exe",
-            )
-        )
 
 packages.append(
     TezosBakingServicesPackage(
-        target_networks=networks,
+        target_networks=networks.keys(),
         network_protos=networks_protos,
         meta=packages_meta,
-        protocols=protocols_json,
     )
 )

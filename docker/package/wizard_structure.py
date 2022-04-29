@@ -238,8 +238,8 @@ key_import_modes = {
 
 networks = {
     "mainnet": "Main Tezos network",
-    "hangzhounet": "Test network using version 011 of Tezos protocol (Hangzhou)",
     "ithacanet": "Test network using version 012 of Tezos protocol (Ithaca2)",
+    "jakartanet": "Test network using version 013 of Tezos protocol (Jakarta2)",
 }
 
 # Wizard CLI skeleton

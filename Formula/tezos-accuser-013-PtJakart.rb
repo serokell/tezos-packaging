@@ -1,7 +1,7 @@
-# SPDX-FileCopyrightText: 2021 Oxhead Alpha
+# SPDX-FileCopyrightText: 2022 Oxhead Alpha
 # SPDX-License-Identifier: LicenseRef-MIT-OA
 
-class TezosEndorser011Pthangz2 < Formula
+class TezosAccuser013Ptjakart < Formula
   @all_bins = []
 
   class << self
@@ -9,9 +9,9 @@ class TezosEndorser011Pthangz2 < Formula
   end
   homepage "https://gitlab.com/tezos/tezos"
 
-  url "https://gitlab.com/tezos/tezos.git", :tag => "v12.3", :shallow => false
+  url "https://gitlab.com/tezos/tezos.git", :tag => "v13.0-rc1", :shallow => false
 
-  version "v12.3-1"
+  version "v13.0-rc1-1"
 
   build_dependencies = %w[pkg-config autoconf rsync wget rustup-init]
   build_dependencies.each do |dependency|
@@ -22,14 +22,10 @@ class TezosEndorser011Pthangz2 < Formula
   dependencies.each do |dependency|
     depends_on dependency
   end
-
-  desc "Daemon for endorsing"
+  desc "Daemon for accusing"
 
   bottle do
-    root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosEndorser011Pthangz2.version}/"
-    sha256 cellar: :any, big_sur: "f1deddb8ef8a99c40ca117ea4b8a44e03bbd0345b7bf87290e1fcb465e7d96a1"
-    sha256 cellar: :any, arm64_big_sur: "d7f70c00f7bcc8338e598512f6b44d495b841491444c6664ec09b7a6e8f1c5db"
-    sha256 cellar: :any, catalina: "362cec279765b88b175ad4b3c04024e1f765e16af7f07329362a006812a272bf"
+    root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosAccuser013Ptjakart.version}/"
   end
 
   def make_deps
@@ -38,7 +34,7 @@ class TezosEndorser011Pthangz2 < Formula
     # Disable usage of instructions from the ADX extension to avoid incompatibility
     # with old CPUs, see https://gitlab.com/dannywillems/ocaml-bls12-381/-/merge_requests/135/
     ENV["BLST_PORTABLE"]="yes"
-    # Here is the workaround to use opam 2.0.9 because Tezos is currently not compatible with opam 2.1.0 and newer
+    # Here is the workaround to use opam 2.0 because Tezos is currently not compatible with opam 2.1.0 and newer
     arch = RUBY_PLATFORM.include?("arm64") ? "arm64" : "x86_64"
     system "curl", "-L", "https://github.com/ocaml/opam/releases/download/2.0.9/opam-2.0.9-#{arch}-macos", "--create-dirs", "-o", "#{ENV["HOME"]}/.opam-bin/opam"
     system "chmod", "+x", "#{ENV["HOME"]}/.opam-bin/opam"
@@ -55,7 +51,6 @@ class TezosEndorser011Pthangz2 < Formula
     bin.install name
   end
 
-
   def install
     startup_contents =
       <<~EOS
@@ -63,44 +58,36 @@ class TezosEndorser011Pthangz2 < Formula
 
       set -euo pipefail
 
-      endorser="#{bin}/tezos-endorser-011-PtHangz2"
+      accuser="#{bin}/tezos-accuser-013-PtJakart"
 
-      endorser_dir="$DATA_DIR"
+      accuser_dir="$DATA_DIR"
 
-      endorser_config="$endorser_dir/config"
-      mkdir -p "$endorser_dir"
+      accuser_config="$accuser_dir/config"
+      mkdir -p "$accuser_dir"
 
-      if [ ! -f "$endorser_config" ]; then
-          "$endorser" --base-dir "$endorser_dir" \
-                      --endpoint "$NODE_RPC_ENDPOINT" \
-                      config init --output "$endorser_config" >/dev/null 2>&1
+      if [ ! -f "$accuser_config" ]; then
+          "$accuser" --base-dir "$accuser_dir" \
+                    --endpoint "$NODE_RPC_ENDPOINT" \
+                    config init --output "$accuser_config" >/dev/null 2>&1
       else
-          "$endorser" --base-dir "$endorser_dir" \
-                      --endpoint "$NODE_RPC_ENDPOINT" \
-                      config update >/dev/null 2>&1
+          "$accuser" --base-dir "$accuser_dir" \
+                    --endpoint "$NODE_RPC_ENDPOINT" \
+                    config update >/dev/null 2>&1
       fi
 
-      launch_endorser() {
-          exec "$endorser" --base-dir "$endorser_dir" \
-              --endpoint "$NODE_RPC_ENDPOINT" \
-              run "$@"
-      }
-
-      if [[ -z "$ENDORSER_ACCOUNT" ]]; then
-          launch_endorser
-      else
-          launch_endorser "$ENDORSER_ACCOUNT"
-      fi
+      exec "$accuser" --base-dir "$accuser_dir" \
+          --endpoint "$NODE_RPC_ENDPOINT" \
+          run
     EOS
-    File.write("tezos-endorser-011-PtHangz2-start", startup_contents)
-    bin.install "tezos-endorser-011-PtHangz2-start"
+    File.write("tezos-accuser-013-PtJakart-start", startup_contents)
+    bin.install "tezos-accuser-013-PtJakart-start"
     make_deps
-    install_template "src/proto_011_PtHangz2/bin_endorser/main_endorser_011_PtHangz2.exe",
-                     "_build/default/src/proto_011_PtHangz2/bin_endorser/main_endorser_011_PtHangz2.exe",
-                     "tezos-endorser-011-PtHangz2"
+    install_template "src/proto_013_PtJakart/bin_accuser/main_accuser_013_PtJakart.exe",
+                     "_build/default/src/proto_013_PtJakart/bin_accuser/main_accuser_013_PtJakart.exe",
+                     "tezos-accuser-013-PtJakart"
   end
 
-  plist_options manual: "tezos-endorser-011-PtHangz2 run"
+  plist_options manual: "tezos-accuser-013-PtJakart run"
   def plist
     <<~EOS
       <?xml version="1.0" encoding="UTF-8"?>
@@ -111,15 +98,13 @@ class TezosEndorser011Pthangz2 < Formula
           <key>Label</key>
           <string>#{plist_name}</string>
           <key>Program</key>
-          <string>#{opt_bin}/tezos-endorser-011-PtHangz2-start</string>
+          <string>#{opt_bin}/tezos-accuser-013-PtJakart-start</string>
           <key>EnvironmentVariables</key>
             <dict>
               <key>DATA_DIR</key>
               <string>#{var}/lib/tezos/client</string>
               <key>NODE_RPC_ENDPOINT</key>
               <string>http://localhost:8732</string>
-              <key>ENDORSER_ACCOUNT</key>
-              <string></string>
           </dict>
           <key>RunAtLoad</key><true/>
           <key>StandardOutPath</key>

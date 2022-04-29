@@ -12,7 +12,7 @@ sudo add-apt-repository ppa:serokell/tezos && sudo apt-get update
 sudo apt-get install tezos-client
 # dpkg-source prohibits uppercase in the packages names so the protocol
 # name is in lowercase
-sudo apt-get install tezos-baker-011-pthangz2
+sudo apt-get install tezos-baker-012-psithaca
 ```
 Once you install such packages the commands `tezos-*` will be available.
 
@@ -27,7 +27,7 @@ sudo add-apt-repository ppa:serokell/tezos-rc && sudo apt-get update
 ## `tezos-baking` package
 
 As an addition, `tezos-baking` package provides `tezos-baking-<network>` services that orchestrate
-systemd units for `tezos-node`, `tezos-baker-<proto>`, and `tezos-endorser-<proto>`.
+systemd units for `tezos-node` and `tezos-baker-<proto>`.
 Configuration files for these services are located in `/etc/default/tezos-baking-<network>`.
 
 <a name="raspberry"></a>

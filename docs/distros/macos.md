@@ -50,7 +50,7 @@ ln -s /opt/homebrew/Cellar/tezos-sapling-params/v8.2-3/share/zcash-params/ ~/.zc
 
 IMPORTANT: All provided `launchd` services are run as a user agents, thus they're stopped after the logout.
 
-`tezos-accuser-<proto>`, `tezos-baker-<proto>`, `tezos-endorser-<proto>` formulas
+`tezos-accuser-<proto>`, `tezos-baker-<proto>` formulas
 provide backround services for running the corresponding daemons.
 
 Since `tezos-node` and `tezos-signer` need multiple services they are provided
@@ -59,7 +59,7 @@ background services.
 
 Formulas with `tezos-node` background services:
 * `tezos-node-mainnet`
-* `tezos-node-hangzhounet`
+* `tezos-node-ithacanet`
 
 Formulas with `tezos-signer` background services:
 * `tezos-signer-http`

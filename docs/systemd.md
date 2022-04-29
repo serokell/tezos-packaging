@@ -8,7 +8,7 @@
 ## Systemd units on Ubuntu and Fedora
 
 `tezos-node`, `tezos-accuser-<proto>`, `tezos-baker-<proto>`,
-`tezos-endorser-<proto>`, and `tezos-signer` packages have systemd files included to the
+and `tezos-signer` packages have systemd files included to the
 Ubuntu and Fedora packages.
 
 Once you've installed one of these packages, you can run the service
@@ -25,10 +25,10 @@ Each service has its configuration file located in `/etc/default`. Default
 configurations can be found [here](../docker/package/defaults/).
 
 Files created by the services will be located in `/var/lib/tezos/` by default.
-`tezos-{accuser, baker, endorser}-<protocol>` services can have configurable
+`tezos-{accuser, baker}-<protocol>` services have a configurable
 data directory.
 
-`tezos-{accuser, endorser}` have configurable node address, so that they can be used with both
+`tezos-accuser` has a configurable node address, so that it can be used with both
 remote and local node.
 
 <a name="generic-linux"></a>
@@ -45,7 +45,7 @@ E.g.:
 ```
 ./gen_systemd_service_file.py tezos-node
 # or
-./gen_systemd_service_file.py tezos-baker-011-PtHangz2
+./gen_systemd_service_file.py tezos-baker-012-Psithaca
 ```
 After that you'll have `.service` files in the current directory.
 
@@ -67,8 +67,8 @@ It's possible to run multiple similar services, e.g. two `tezos-node`s that run 
 networks.
 
 `tezos-node` packages provide multiple services out of the box:
-`tezos-node-hangzhounet`, and `tezos-node-mainnet` that run
-`hangzhounet` and `mainnet` networks respectively.
+`tezos-node-ithacanet`, and `tezos-node-mainnet` that run
+`ithacanet` and `mainnet` networks respectively.
 
 In order to start it run:
 ```
@@ -81,7 +81,7 @@ TEZOS_NODE_DIR="<DATA_DIR from tezos-node-<network>.service>" tezos-node
 ```
 
 In addition to node services where the config is predefined to a specific network
-(e.g. `tezos-node-mainnet` or `tezos-node-hangzhounet`), it's possible to run `tezos-node-custom`
+(e.g. `tezos-node-mainnet` or `tezos-node-ithacanet`), it's possible to run `tezos-node-custom`
 service and provide a path to the custom node config file via the
 `CUSTOM_NODE_CONFIG` variable in the `tezos-node-custom.service` file.
 

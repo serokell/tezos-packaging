@@ -11,7 +11,7 @@ class TezosAdminClient < Formula
 
   url "https://gitlab.com/tezos/tezos.git", :tag => "v13.0-rc1", :shallow => false
 
-  version "v13.0-rc1-1"
+  version "v13.0-rc1-2"
 
   build_dependencies = %w[pkg-config autoconf rsync wget rustup-init]
   build_dependencies.each do |dependency|

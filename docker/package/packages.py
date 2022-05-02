@@ -252,7 +252,7 @@ packages.append(
         systemd_units=node_units,
         postinst_steps=node_postinst_steps,
         postrm_steps=node_postrm_steps,
-        additional_native_deps=["tezos-sapling-params"],
+        additional_native_deps=["tezos-sapling-params", {"ubuntu": "netbase"}],
         dune_filepath="src/bin_node/main.exe",
     )
 )

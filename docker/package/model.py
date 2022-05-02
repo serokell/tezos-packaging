@@ -202,6 +202,13 @@ class TezosBinaryPackage(AbstractPackage):
         self.meta = meta
         self.dune_filepath = dune_filepath
 
+    def __get_os_specific_native_deps(self, os_name):
+        return [
+            x[os_name] if (isinstance(x, dict)) else x
+            for x in self.additional_native_deps
+            if isinstance(x, str) or (isinstance(x, dict) and os_name in x.keys())
+        ]
+
     def fetch_sources(self, out_dir):
         os.makedirs(out_dir)
         os.chdir(out_dir)
@@ -233,7 +240,9 @@ class TezosBinaryPackage(AbstractPackage):
 
     def gen_control_file(self, deps, ubuntu_version, out):
         str_build_deps = ", ".join(deps)
-        str_additional_native_deps = ", ".join(self.additional_native_deps)
+        str_additional_native_deps = ", ".join(
+            self.__get_os_specific_native_deps("ubuntu")
+        )
         file_contents = f"""
 Source: {self.name.lower()}
 Section: utils
@@ -254,7 +263,9 @@ Description: {self.desc}
     def gen_spec_file(self, build_deps, run_deps, out):
         build_requires = " ".join(build_deps)
         requires = " ".join(run_deps)
-        str_additional_native_deps = ", ".join(self.additional_native_deps)
+        str_additional_native_deps = ", ".join(
+            self.__get_os_specific_native_deps("fedora")
+        )
         (
             systemd_deps,
             systemd_install,

@@ -37,6 +37,8 @@ in import "${nixpkgs}/nixos/tests/make-test-python.nix" ({ ... }:
     services.tezos-baker.instances.ithacanet = {
       enable = true;
       baseProtocol = "012-Psithaca";
+      bakerAccountAlias = "baker";
+      bakerSecretKey = "unencrypted:edsk3KaTNj1d8Xd3kMBrZkJrfkqsz4XwwiBXatuuVgTdPye2KpE98o";
     };
 
   };

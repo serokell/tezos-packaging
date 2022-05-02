@@ -39,7 +39,7 @@ rec {
 
   };
 
-  genDaemonConfig = instancesCfg: service-name: service-pkgs: service-script:
+  genDaemonConfig = { instancesCfg, service-name, service-pkgs, service-start-script, service-prestart-script ? (_: "")}:
     mkIf (instancesCfg != {}) {
       users = mkMerge (flip mapAttrsToList instancesCfg (node-name: node-cfg: genUsers node-name ));
       systemd = mkMerge (flip mapAttrsToList instancesCfg (node-name: node-cfg:
@@ -67,8 +67,8 @@ rec {
                   ${tezos-service} -d "$service_data_dir" -E "http://localhost:${toString node-cfg.rpcPort}" \
                   config update >/dev/null 2>&1
                 fi
-              '';
-            script = service-script node-cfg;
+              '' + service-prestart-script node-cfg;
+            script = service-start-script node-cfg;
           };
       }));
     };

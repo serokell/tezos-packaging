@@ -18,6 +18,7 @@ supported by Canonical.
 Currently, these are versions:
 * 18.04 LTS (Bionic Beaver)
 * 20.04 LTS (Focal Fossa)
+* 22.04 LTS (Jammy Jellyfish)
 
 There are packages for `arm64` and `amd64` architectures.
 

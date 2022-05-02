@@ -79,6 +79,7 @@ common_deps = run_deps + build_deps
 ubuntu_versions = [
     "bionic",  # 18.04
     "focal",  # 20.04
+    "jammy",  # 22.04
 ]
 
 pwd = os.getcwd()

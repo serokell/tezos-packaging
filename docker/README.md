@@ -104,7 +104,7 @@ the submitter info and signed.
 
 In order to update `*.changes` files with the proper signer info run the following:
 ```
-sed -i 's/^Changed-By: .*$/Changed-By: $signer_info/' ../out/*.changes
+sed -i "s/^Changed-By: .*$/Changed-By: $signer_info/" ../out/*.changes
 ```
 
 For example, `signer_info` can be the following: `Roman Melnikov <roman.melnikov@serokell.io>`

@@ -87,7 +87,7 @@ class TezosBaker013Ptjakart < Formula
           launch_baker "$BAKER_ACCOUNT"
       fi
     EOS
-    File.write("tezos-baker-013-PtJakart", startup_contents)
+    File.write("tezos-baker-013-PtJakart-start", startup_contents)
     bin.install "tezos-baker-013-PtJakart-start"
     make_deps
     install_template "src/proto_013_PtJakart/bin_baker/main_baker_013_PtJakart.exe",

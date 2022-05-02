@@ -9,12 +9,12 @@ let
   tezos-node-pkg = pkgs.ocamlPackages.tezos-node;
   cfg = config.services.tezos-node;
   sources = import ../nix/sources.nix;
-  genConfigCommand = historyMode: rpcPort: netPort: network: ''
+  genConfigCommand = historyMode: rpcPort: netPort: network: options: ''
     --data-dir "$node_data_dir" \
     --history-mode "${historyMode}" \
     --rpc-addr ":${toString rpcPort}" \
     --net-addr ":${toString netPort}" \
-    --network "${network}"
+    --network "${network}" ${builtins.concatStringsSep " " options}
   '';
   common = import ./common.nix { inherit lib; inherit pkgs; };
   instanceOptions = types.submodule ( {...} : {
@@ -62,6 +62,14 @@ let
         '';
       };
 
+      additionalOptions = mkOption {
+        type = types.listOf types.str;
+        default = [];
+        description = ''
+          Additional 'tezos-node' options that affect configuration file.
+        '';
+      };
+
       nodeConfig = mkOption {
         default = null;
         type = types.nullOr (import sources.serokell-nix).lib.types.jsonConfig;
@@ -98,10 +106,10 @@ in {
                 # Generate or update node config file
                 if [[ ! -f "$node_data_dir/config.json" ]]; then
                   ${node-cfg.package}/bin/tezos-node config init \
-                  ${genConfigCommand node-cfg.historyMode node-cfg.rpcPort node-cfg.netPort node-cfg.network}
+                  ${genConfigCommand node-cfg.historyMode node-cfg.rpcPort node-cfg.netPort node-cfg.network node-cfg.additionalOptions}
                 else
                   ${node-cfg.package}/bin/tezos-node config update \
-                  ${genConfigCommand node-cfg.historyMode node-cfg.rpcPort node-cfg.netPort node-cfg.network}
+                  ${genConfigCommand node-cfg.historyMode node-cfg.rpcPort node-cfg.netPort node-cfg.network node-cfg.additionalOptions}
                 fi
               ''
             else
@@ -110,8 +118,7 @@ in {
               ''
           );
         script = ''
-          ${node-cfg.package}/bin/tezos-node run --data-dir "$STATE_DIRECTORY/node/data" \
-          --connections 50 --bootstrap-threshold=1
+          ${node-cfg.package}/bin/tezos-node run --data-dir "$STATE_DIRECTORY/node/data"
         '';
       };
     }));

@@ -16,7 +16,13 @@ in import "${nixpkgs}/nixos/tests/make-test-python.nix" ({ ... }:
                 ../nix/modules/tezos-baker.nix
               ];
 
-    services.tezos-node.instances.ithacanet.enable = true;
+    services.tezos-node.instances.ithacanet = {
+      enable = true;
+      additionalOptions = [
+        "--bootstrap-threshold=1"
+        "--connections" "50"
+      ];
+    };
 
     services.tezos-signer.instances.ithacanet = {
       enable = true;

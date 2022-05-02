@@ -37,6 +37,15 @@ let
         '';
       };
 
+      liquidityBakingToggleVote = mkOption {
+        type = types.enum [ "on" "of" "pass" ];
+        default = "pass";
+        description = ''
+          Vote to continue (option 'on') or end (option 'off') the liquidity
+          baking subsidy. Or choose to pass (option 'pass')
+        '';
+      };
+
     };
   });
 
@@ -49,10 +58,15 @@ in {
     };
   };
   config =
-    let baker-start-script = node-cfg: ''
+    let baker-start-script = node-cfg:
+      let
+        voting-option = if node-cfg.baseProtocol == "012-Psithaca"
+          then if node-cfg.liquidityBakingToggleVote == "off" then "--liquidity-baking-escape-vote" else ""
+          else "--liquidity-baking-toggle-vote ${node-cfg.liquidityBakingToggleVote}";
+      in ''
         ${tezos-baker-pkgs.${node-cfg.baseProtocol}} -d "$STATE_DIRECTORY/client/data" \
         -E "http://localhost:${toString node-cfg.rpcPort}" \
-        run with local node "$STATE_DIRECTORY/node/data" ${node-cfg.bakerAccountAlias}
+        run with local node "$STATE_DIRECTORY/node/data" ${voting-option} ${node-cfg.bakerAccountAlias}
       '';
         baker-prestart-script = node-cfg: if node-cfg.bakerSecretKey != null then ''
           ${tezos-client} -d "$STATE_DIRECTORY/client/data" import secret key "${node-cfg.bakerAccountAlias}" ${node-cfg.bakerSecretKey} --force

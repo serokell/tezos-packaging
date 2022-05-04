@@ -31,10 +31,15 @@ in {
     };
   };
   config =
-    let accuser-script = node-cfg: ''
+    let accuser-start-script = node-cfg: ''
         ${tezos-accuser-pkgs.${node-cfg.baseProtocol}} -d "$STATE_DIRECTORY/client/data" \
         -E "http://localhost:${toString node-cfg.rpcPort}" \
         run "$@"
       '';
-    in common.genDaemonConfig cfg.instances "accuser" tezos-accuser-pkgs accuser-script;
+    in common.genDaemonConfig {
+      instancesCfg = cfg.instances;
+      service-name = "accuser";
+      service-pkgs = tezos-accuser-pkgs;
+      service-start-script = accuser-start-script;
+    };
 }

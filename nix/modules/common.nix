@@ -37,6 +37,13 @@ rec {
       '';
     };
 
+    passwordFilename = mkOption {
+      type = types.nullOr types.path;
+      default = null;
+      description = ''
+        Path to the file with passwords that can be used to decrypt encrypted keys.
+      '';
+    };
   };
 
   genDaemonConfig = { instancesCfg, service-name, service-pkgs, service-start-script, service-prestart-script ? (_: "")}:
@@ -44,6 +51,7 @@ rec {
       users = mkMerge (flip mapAttrsToList instancesCfg (node-name: node-cfg: genUsers node-name ));
       systemd = mkMerge (flip mapAttrsToList instancesCfg (node-name: node-cfg:
         let tezos-service = service-pkgs."${node-cfg.baseProtocol}";
+            passwordFilenameArg = if node-cfg.passwordFilename != null then "-f ${node-cfg.passwordFilename}" else "";
         in {
           services."tezos-${node-name}-tezos-${service-name}" = genSystemdService node-name node-cfg service-name // rec {
             bindsTo = [ "network.target" "tezos-${node-name}-tezos-node.service" ];
@@ -61,10 +69,10 @@ rec {
 
                 # Generate or update service config file
                 if [[ ! -f "$service_data_dir/config" ]]; then
-                  ${tezos-service} -d "$service_data_dir" -E "http://localhost:${toString node-cfg.rpcPort}" \
+                  ${tezos-service} -d "$service_data_dir" -E "http://localhost:${toString node-cfg.rpcPort}" ${passwordFilenameArg} \
                   config init --output "$service_data_dir/config" >/dev/null 2>&1
                 else
-                  ${tezos-service} -d "$service_data_dir" -E "http://localhost:${toString node-cfg.rpcPort}" \
+                  ${tezos-service} -d "$service_data_dir" -E "http://localhost:${toString node-cfg.rpcPort}" ${passwordFilenameArg} \
                   config update >/dev/null 2>&1
                 fi
               '' + service-prestart-script node-cfg;

@@ -24,7 +24,7 @@ cd ..
 rm -rf upstream-repo
 
 git clone --bare https://gitlab.com/tezos/opam-repository.git upstream-opam-repository
-opam_repository_branch="$(git --git-dir=upstream-opam-repository for-each-ref --contains "$opam_repository_tag" --count=1 --sort='-refname' --format="%(refname:lstrip=3)" refs/remotes/origin)"
+opam_repository_branch="$(git --git-dir=upstream-opam-repository for-each-ref --contains "$opam_repository_tag" --count=1 --sort='-refname' --format="%(refname:short)" refs/)"
 rm -rf upstream-opam-repository
 
 branch_name="auto/$latest_upstream_tag-release"

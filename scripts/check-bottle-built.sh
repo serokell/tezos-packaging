@@ -13,7 +13,7 @@ if [ -z "$1" ] || [ -z "$2" ] ; then
 fi
 
 if [ ! -f "./Formula/$1.rb" ] ; then
-    echo "This formula doesn't exist."
+    echo "The formula for $1 doesn't exist."
     exit 2
 fi
 

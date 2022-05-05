@@ -26,6 +26,7 @@ class TezosAccuser012Psithaca < Formula
 
   bottle do
     root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosAccuser012Psithaca.version}/"
+    sha256 cellar: :any, catalina: "58c40f75b7f318975d17b1fa65797b9549ed5d407c8bdde2209d5a77f3a75123"
   end
 
   def make_deps

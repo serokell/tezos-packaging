@@ -26,6 +26,7 @@ class TezosClient < Formula
 
   bottle do
     root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosClient.version}/"
+    sha256 cellar: :any, catalina: "f778f17e333cf63f9ea4464fff418c0a4d0daae13f2b8c77b48f7cf362690076"
   end
 
   def make_deps

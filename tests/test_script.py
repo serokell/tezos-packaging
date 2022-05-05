@@ -80,11 +80,8 @@ def test_node_with_daemons_scenario(network, use_tls=False):
 with subtest("run node with daemons on ithacanet"):
     test_node_with_daemons_scenario("ithacanet")
 
-# Uncomment once '--network jakartanet' is supported by tezos-node.
-# Currently it's possible to get the network config from URL, but network
-# access is prohibited in NixOS tests:(
-# with subtest("run node with daemons on jakartanet"):
-#     test_node_with_daemons_scenario("jakartanet")
+with subtest("run node with daemons on jakartanet"):
+    test_node_with_daemons_scenario("jakartanet")
 
 with subtest("run node with daemons on mainnet"):
     test_node_with_daemons_scenario("mainnet")

@@ -17,7 +17,7 @@ from .systemd import Service, ServiceFile, SystemdUnit, Unit, Install
 networks = {
     "mainnet": "mainnet",
     "ithacanet": "ithacanet",
-    "jakartanet": "https://teztnets.xyz/jakartanet",
+    "jakartanet": "jakartanet",
 }
 networks_protos = {
     "mainnet": ["012-Psithaca"],

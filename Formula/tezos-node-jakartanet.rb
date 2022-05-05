@@ -26,14 +26,14 @@ class TezosNodeJakartanet < Formula
           "$node" config init \
                   --data-dir "$DATA_DIR" \
                   --rpc-addr "$NODE_RPC_ADDR" \
-                  --network="https://teztnets.xyz/jakartanet" \
+                  --network=jakartanet \
                   "$@"
       else
           echo "Updating the node configuration..."
           "$node" config update \
                   --data-dir "$DATA_DIR" \
                   --rpc-addr "$NODE_RPC_ADDR" \
-                  --network="https://teztnets.xyz/jakartanet" \
+                  --network=jakartanet \
                   "$@"
       fi
 
@@ -82,6 +82,6 @@ class TezosNodeJakartanet < Formula
   end
   def post_install
     mkdir_p "#{var}/lib/tezos/node-jakartanet"
-    system "tezos-node", "config", "init", "--data-dir" "#{var}/lib/tezos/node-jakartanet", "--network", "https://teztnets.xyz/jakartanet"
+    system "tezos-node", "config", "init", "--data-dir" "#{var}/lib/tezos/node-jakartanet", "--network", "jakartanet"
   end
 end

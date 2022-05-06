@@ -1,5 +1,6 @@
 #!/usr/bin/env nix-shell
 #!nix-shell shell.nix -i bash
+# shellcheck shell=bash
 # SPDX-FileCopyrightText: 2021 Oxhead Alpha
 # SPDX-License-Identifier: LicenseRef-MIT-OA
 
@@ -54,10 +55,10 @@ fi
 # Update the tag
 git fetch # So that the script can be run from an arbitrary checkout
 git tag -f "$tag"
-git push --force --tags
+git push origin "$tag" --force
 
 # Create release
-gh release create -F "$TEMPDIR"/"$project"/release-notes.md $mode_flag "$tag" --title "$tag"
+gh release create -F "$TEMPDIR"/"$project"/release-notes.md "$mode_flag" "$tag" --title "$tag"
 
 # Upload assets
 gh release upload "$tag" "$assets_dir"/*

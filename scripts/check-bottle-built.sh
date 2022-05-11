@@ -19,11 +19,10 @@ fi
 
 tag=$(sed -n "s/^\s\+version \"\(.*\)\"/\1/p" "./Formula/$1.rb")
 
-# Command below is allowed to fail
 set +e
-gh release view "$tag" | grep "$1.*\.$2.bottle.tar.gz"
 
-if [ $? -eq 0 ]; then
+# Command below is allowed to fail
+if gh release view "$tag" | grep "$1.*\.$2.bottle.tar.gz"; then
     echo "Bottle is already attached to the $tag release."
     exit 3
 else

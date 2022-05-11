@@ -18,7 +18,8 @@ git clone https://gitlab.com/tezos/tezos.git upstream-repo
 cd upstream-repo
 latest_upstream_tag_hash="$(git rev-list --tags --max-count=1)"
 latest_upstream_tag="$(git describe --tags "$latest_upstream_tag_hash")"
-git checkout $latest_upstream_tag
+opam_repository_tag='' # will be set by version.sh
+git checkout "$latest_upstream_tag"
 source scripts/version.sh
 cd ..
 rm -rf upstream-repo

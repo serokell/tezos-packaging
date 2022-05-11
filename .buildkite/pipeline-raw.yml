@@ -23,6 +23,8 @@ steps:
    soft_fail: true
  - label: lint python code
    command: nix run -f . pkgs.python39Packages.black -c black --check --diff --color .
+ - label: lint bash scripts
+   command: nix run -f . pkgs.shellcheck -c shellcheck --exclude=SC1008,SC2148,SC1091 -x $(find . -name '*.sh')
  - label: pipeline-filtering
    command: nix-shell .buildkite/shell.nix --run 'nix run -f . pkgs.bats -c ./tests/buildkite/filter-pipeline.bats'
    only_changes:

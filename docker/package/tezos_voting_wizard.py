@@ -22,6 +22,14 @@ ballot_outcomes = {
     "pass": "Submit a vote not influencing the result but contributing to quorum",
 }
 
+public_nodes = {
+    "https://rpc.tzbeta.net": "by Tezos Foundation",
+    "https://mainnet.api.tez.ie": "by ECAD Labs",
+    "https://mainnet.smartpy.io": "by SmartPy",
+    "https://teznode.letzbake.com": "by LetzBake!",
+    "https://mainnet-tezos.giganode.io": "by GigaNode",
+}
+
 # Command line argument parsing
 
 parser.add_argument(
@@ -118,17 +126,32 @@ ballot_outcome_query = Step(
 )
 
 
-def get_node_rpc_addr_query(default=None):
+def get_node_rpc_addr_query(network, default=None):
+    url_path = "chains/main/blocks/head/header"
+    node_is_alive = lambda host: url_is_reachable(mk_full_url(host, url_path))
+    custom_url_validator = reachable_url_validator(url_path)
+
+    relevant_nodes = {
+        url: provider
+        for url, provider in public_nodes.items()
+        if network == "mainnet" and node_is_alive(url)
+    }
     return Step(
         id="node_rpc_addr",
-        prompt="Provide the node's RPC address.",
+        prompt="Provide the node's RPC address."
+        if not relevant_nodes
+        else "Choose one of the public nodes or provide the node's RPC address.",
         help="The node's RPC address will be used by tezos-client to vote. If you have baking set up\n"
         "through systemd services, the address is usually 'http://localhost:8732' by default.",
-        default=default,
+        default="1" if relevant_nodes and default is None else default,
+        options=relevant_nodes,
         validator=Validator(
             [
                 required_field_validator,
-                reachable_url_validator("chains/main/blocks/head/header"),
+                or_validator(
+                    enum_range_validator(relevant_nodes),
+                    custom_url_validator,
+                ),
             ]
         ),
     )
@@ -212,7 +235,9 @@ class Setup(Setup):
 
             self.config["node_rpc_addr"] = self.search_client_config("endpoint", None)
             if self.config["node_rpc_addr"] is None:
-                self.query_and_update_config(get_node_rpc_addr_query())
+                self.query_and_update_config(
+                    get_node_rpc_addr_query(self.config["network"])
+                )
 
             key_import_modes.pop("json", None)
             self.get_baker_key()
@@ -222,7 +247,9 @@ class Setup(Setup):
 
         while not collected:
             self.query_and_update_config(
-                get_node_rpc_addr_query(self.config["node_rpc_addr"])
+                get_node_rpc_addr_query(
+                    self.config["network"], self.config["node_rpc_addr"]
+                )
             )
 
             replace_baker_key = self.check_baker_account()

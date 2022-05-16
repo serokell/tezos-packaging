@@ -34,8 +34,7 @@ def enum_range_validator(options):
         intrange = list(map(str, range(1, len(options) + 1)))
         if input not in intrange and input not in options:
             raise ValueError(
-                "Please choose one of the provided values or use their respective numbers: "
-                + ", ".join(options)
+                "Please choose one of the provided values or use their respective numbers."
             )
         try:
             opt = int(input) - 1
@@ -64,17 +63,11 @@ def filepath_validator(input):
 
 def reachable_url_validator(suffix=None):
     def _validator(input):
-        if input:
-            full_url = "/".join([input.rstrip("/"), suffix.lstrip("/")])
-            headers = {"User-Agent": "Mozilla/5.0"}
-            req = urllib.request.Request(full_url, headers=headers)
-            try:
-                urllib.request.urlopen(req)
-            except (urllib.error.URLError, ValueError):
-                raise ValueError(
-                    f"{full_url} is unreachable. Please input a valid URL."
-                )
-        return input
+        full_url = mk_full_url(input, suffix)
+        if url_is_reachable(full_url):
+            return input
+        else:
+            raise ValueError(f"{full_url} is unreachable. Please input a valid URL.")
 
     return _validator
 
@@ -227,6 +220,19 @@ def yes_or_no(prompt, default=None):
             print(color("Please provide a 'yes' or 'no' answer.", color_red))
 
 
+def mk_full_url(host_name, path):
+    return "/".join([host_name.rstrip("/"), path.lstrip("/")])
+
+
+def url_is_reachable(url):
+    req = urllib.request.Request(url, headers=http_request_headers)
+    try:
+        urllib.request.urlopen(req)
+        return True
+    except (urllib.error.URLError, ValueError):
+        return False
+
+
 # Global options
 
 key_import_modes = {
@@ -241,6 +247,8 @@ networks = {
     "ithacanet": "Test network using version 012 of Tezos protocol (Ithaca2)",
     "jakartanet": "Test network using version 013 of Tezos protocol (Jakarta2)",
 }
+
+http_request_headers = {"User-Agent": "Mozilla/5.0"}
 
 # Wizard CLI skeleton
 
@@ -416,10 +424,14 @@ class Step:
                     i += 1
         elif self.options and isinstance(self.options, dict):
             index_len = len(str(len(self.options)))
-            str_format = f"{{:{index_len}}}. {{:<26}}  {{}}"
+            max_option_len = max(map(len, self.options.keys()))
+            padding = max(26, max_option_len + 2)
+            indent_size = index_len + 4 + padding
+            str_format = f"{{:{index_len}}}. {{:<{padding}}}  {{}}"
             for o in self.options:
                 description = textwrap.indent(
-                    textwrap.fill(self.options[o], 60), " " * 31
+                    textwrap.fill(self.options[o], 60),
+                    " " * indent_size,
                 ).lstrip()
                 if def_i is not None and i == def_i:
                     print(str_format.format(i, o + " (default)", description))

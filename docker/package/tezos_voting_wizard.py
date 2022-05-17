@@ -12,7 +12,7 @@ import os, sys
 import readline
 import re
 
-from wizard_structure import *
+from .wizard_structure import *
 
 # Global options
 
@@ -451,7 +451,7 @@ class Setup(Setup):
         print("Thank you for voting!")
 
 
-if __name__ == "__main__":
+def main():
     readline.parse_and_bind("tab: complete")
     readline.set_completer_delims(" ")
 
@@ -471,3 +471,7 @@ if __name__ == "__main__":
             f.write(str(e) + "\n")
         print("The error has been logged to", os.path.abspath(logfile))
         sys.exit(1)
+
+
+if __name__ == "__main__":
+    main()

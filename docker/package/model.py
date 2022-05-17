@@ -19,6 +19,9 @@ from .systemd import (
 
 
 class AbstractPackage:
+
+    buildfile = "Makefile"
+
     @abstractmethod
     def fetch_sources(self, out_dir):
         pass
@@ -32,7 +35,7 @@ class AbstractPackage:
         pass
 
     @abstractmethod
-    def gen_makefile(self, out):
+    def gen_buildfile(self, out):
         pass
 
     def gen_changelog(self, ubuntu_version, maintainer, date, out):
@@ -149,6 +152,17 @@ mkdir -p %{{buildroot}}/%{{_unitdir}}
     return systemd_deps, systemd_install, systemd_files, systemd_macros
 
 
+def mk_dh_flags(package):
+    return " ".join(
+        [
+            "--with systemd" if len(package.systemd_units) > 0 else "",
+            "--with python3 --buildsystem=pybuild"
+            if package.buildfile == "setup.py"
+            else "",
+        ]
+    )
+
+
 def gen_systemd_rules_contents(package):
     override_dh_install_init = "override_dh_installinit:\n"
     package_name = package.name.lower()
@@ -170,9 +184,10 @@ export DEB_CFLAGS_APPEND=-fPIC
 # Disable usage of instructions from the ADX extension to avoid incompatibility
 # with old CPUs, see https://gitlab.com/dannywillems/ocaml-bls12-381/-/merge_requests/135/
 export BLST_PORTABLE=yes
+{f"export PYBUILD_NAME={package_name}" if package.buildfile == "setup.py" else ""}
 
 %:
-	dh $@ {"--with systemd" if len(package.systemd_units) > 0 else ""}
+	dh $@ {mk_dh_flags(package)}
 override_dh_systemd_start:
 	dh_systemd_start --no-start
 {override_dh_install_init if len(package.systemd_units) > 1 else ""}"""
@@ -307,7 +322,7 @@ install -m 0755 %{{name}} %{{buildroot}}/%{{_bindir}}
         with open(out, "w") as f:
             f.write(file_contents)
 
-    def gen_makefile(self, out):
+    def gen_buildfile(self, out):
         makefile_contents = f"""
 .PHONY: install
 
@@ -444,7 +459,7 @@ install -m 0755 sapling-output.params %{{buildroot}}/%{{_datadir}}/zcash-params
         with open(out, "w") as f:
             f.write(file_contents)
 
-    def gen_makefile(self, out):
+    def gen_buildfile(self, out):
         file_contents = """
 .PHONY: install
 
@@ -480,6 +495,8 @@ class TezosBakingServicesPackage(AbstractPackage):
     # the package.
     # This should be reset to "" whenever the native version is bumped.
     letter_version = ""
+
+    buildfile = "setup.py"
 
     def __gen_baking_systemd_unit(
         self, requires, description, environment_file, config_file, suffix
@@ -565,9 +582,11 @@ class TezosBakingServicesPackage(AbstractPackage):
 
     def fetch_sources(self, out_dir):
         os.makedirs(out_dir)
-        shutil.copy(f"{os.path.dirname(__file__)}/wizard_structure.py", out_dir)
-        shutil.copy(f"{os.path.dirname(__file__)}/tezos_setup_wizard.py", out_dir)
-        shutil.copy(f"{os.path.dirname(__file__)}/tezos_voting_wizard.py", out_dir)
+        package_dir = out_dir + "/tezos_baking"
+        os.makedirs(package_dir)
+        shutil.copy(f"{os.path.dirname(__file__)}/wizard_structure.py", package_dir)
+        shutil.copy(f"{os.path.dirname(__file__)}/tezos_setup_wizard.py", package_dir)
+        shutil.copy(f"{os.path.dirname(__file__)}/tezos_voting_wizard.py", package_dir)
 
     def gen_control_file(self, deps, ubuntu_version, out):
         run_deps_list = ["acl", "tezos-client", "tezos-node"]
@@ -579,13 +598,14 @@ Source: {self.name}
 Section: utils
 Priority: optional
 Maintainer: {self.meta.maintainer}
-Build-Depends: debhelper (>=9), {"dh-systemd (>= 1.5), " if ubuntu_version != "jammy" else ""} autotools-dev
+Build-Depends: debhelper (>=11), {"dh-systemd (>= 1.5), " if ubuntu_version != "jammy" else ""} autotools-dev, dh-python, python3-all, python3-setuptools
 Standards-Version: 3.9.6
 Homepage: https://gitlab.com/tezos/tezos/
+X-Python3-Version: >= 3.6
 
 Package: {self.name.lower()}
 Architecture: amd64 arm64
-Depends: ${{shlibs:Depends}}, ${{misc:Depends}}, {run_deps}
+Depends: ${{shlibs:Depends}}, ${{misc:Depends}}, {run_deps}, ${{python3:Depends}}
 Description: {self.desc}
 """
         with open(out, "w") as f:
@@ -614,18 +634,23 @@ License: MIT
 BuildArch: x86_64 aarch64
 Source0: {self.name}-{version}.tar.gz
 Source1: https://gitlab.com/tezos/tezos/tree/v{self.meta.version}/
-BuildRequires: {systemd_deps}
+BuildRequires: {systemd_deps}, python3-devel, python3-setuptools
 Requires: {run_deps}
 %description
 {self.desc}
 Maintainer: {self.meta.maintainer}
 %prep
-%setup -q
+%autosetup -n {self.name}-{version}
 %build
+%py3_build
 %install
-mkdir -p %{{buildroot}}/%{{_bindir}}
+%py3_install
 {systemd_install}
 %files
+%{{_bindir}}/tezos-setup-wizard
+%{{_bindir}}/tezos-voting-wizard
+%{{python3_sitelib}}/tezos_baking-*.egg-info/
+%{{python3_sitelib}}/tezos_baking/
 %license LICENSE
 {systemd_files}
 {systemd_macros}
@@ -633,27 +658,21 @@ mkdir -p %{{buildroot}}/%{{_bindir}}
         with open(out, "w") as f:
             f.write(file_contents)
 
-    def gen_makefile(self, out):
-        file_contents = """
-.PHONY: install
+    def gen_buildfile(self, out):
+        file_contents = f"""
+from setuptools import setup
 
-BINDIR=/usr/bin
-
-tezos-baking:
-
-tezos-setup-wizard:
-	mv $(CURDIR)/tezos_setup_wizard.py $(CURDIR)/tezos-setup-wizard
-	chmod +x $(CURDIR)/tezos-setup-wizard
-
-tezos-voting-wizard:
-	mv $(CURDIR)/tezos_voting_wizard.py $(CURDIR)/tezos-voting-wizard
-	chmod +x $(CURDIR)/tezos-voting-wizard
-
-install: tezos-baking tezos-setup-wizard tezos-voting-wizard
-	mkdir -p $(DESTDIR)$(BINDIR)
-	cp $(CURDIR)/wizard_structure.py $(DESTDIR)$(BINDIR)/wizard_structure.py
-	cp $(CURDIR)/tezos-setup-wizard $(DESTDIR)$(BINDIR)/tezos-setup-wizard
-	cp $(CURDIR)/tezos-voting-wizard $(DESTDIR)$(BINDIR)/tezos-voting-wizard
+setup(
+    name='tezos-baking',
+    packages=['tezos_baking'],
+    version={self.meta.version},
+    entry_points=dict(
+        console_scripts=[
+            'tezos-setup-wizard=tezos_baking.tezos_setup_wizard:main',
+            'tezos-voting-wizard=tezos_baking.tezos_voting_wizard:main',
+        ]
+    )
+)
 """
         with open(out, "w") as f:
             f.write(file_contents)

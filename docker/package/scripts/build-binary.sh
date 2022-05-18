@@ -15,8 +15,11 @@ cd tezos
 opam init local ../opam-repository --bare --disable-sandboxing
 opam switch create . --repositories=local
 eval "$(opam env)"
-opams="$(find ./vendors ./src ./tezt -name \*.opam -print)"
-opam install "$opams" --deps-only --criteria="-notuptodate,-changed,-removed"
+opams=()
+while IFS=  read -r -d $'\0'; do
+    opams+=("$REPLY")
+done < <(find ./vendors ./src ./tezt -name \*.opam -print0)
+opam install "${opams[@]}" --deps-only --criteria="-notuptodate,-changed,-removed"
 eval "$(opam env)"
 dune build "$dune_filepath"
 cp "./_build/default/$dune_filepath" "../$binary_name"

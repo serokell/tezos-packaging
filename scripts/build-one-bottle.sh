@@ -2,8 +2,8 @@
 # SPDX-FileCopyrightText: 2022 Oxhead Alpha
 # SPDX-License-Identifier: LicenseRef-MIT-OA
 
-# Newer brew versions fail when checking for a rebuild version of non-core taps.
-# So for now we skip the check with '--no-rebuild'
+# Note: if you modify this file, check if its usage in docs/distros/macos.md
+# needs to be updated too.
 
 set -eo pipefail
 
@@ -13,6 +13,8 @@ if [ -z "$1" ] ; then
 fi
 
 brew install --formula --build-bottle "./Formula/$1.rb"
+# Newer brew versions fail when checking for a rebuild version of non-core taps.
+# So for now we skip the check with '--no-rebuild'
 brew bottle --force-core-tap --no-rebuild "./Formula/$1.rb"
 brew uninstall --formula "./Formula/$1.rb"
 # https://github.com/Homebrew/brew/pull/4612#commitcomment-29995084

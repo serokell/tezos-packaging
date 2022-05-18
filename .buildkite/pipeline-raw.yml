@@ -37,6 +37,7 @@ steps:
 
  - label: build via nix
    commands:
+   # NOTE: if this changes, remember to update the instructions in the nix/README.md too
    - nix-build ./nix -A binaries -o binaries
    branches: "!master"
  - label: test nix-built binaries
@@ -153,6 +154,17 @@ steps:
    agents:
      queue: "docker"
    only_changes: *native_packaging_changes_regexes
+
+ - label: test gen_systemd_service_file.py script
+   commands:
+   - eval "$SET_VERSION"
+   - ./gen_systemd_service_file.py tezos-node
+   branches: "!master"
+   agents:
+     queue: "docker"
+   only_changes:
+   - gen_systemd_service_file.py
+   - docker/package/.*
 
  - label: create auto release/pre-release
    key: auto-release

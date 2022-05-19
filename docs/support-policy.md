@@ -22,6 +22,17 @@ Currently, these are versions:
 
 There are packages for `arm64` and `amd64` architectures.
 
+## Debian packages
+
+We aim to provide packages for all [debian releases](https://www.debian.org/releases/),
+which match the supported Ubuntu releases.
+
+Currently, these are versions:
+* Debian 11 (bullseye)
+* Debian 10 (buster)
+
+There are packages for `arm64` and `amd64` architectures.
+
 ## Fedora packages
 
 We aim to provide packages for all [currently supported Fedora releases](https://docs.fedoraproject.org/en-US/releases/).

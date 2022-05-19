@@ -158,7 +158,7 @@ steps:
  - label: test gen_systemd_service_file.py script
    commands:
    - eval "$SET_VERSION"
-   - nix run -f . pkgs.python3 -c ./gen_systemd_service_file.py tezos-node
+   - nix-shell scripts/shell.nix --run "./gen_systemd_service_file.py tezos-node"
    branches: "!master"
    agents:
      queue: "docker"

@@ -60,7 +60,7 @@ Once the configuration is updated, you should restart the service:
 In order to build bottles with Tezos binaries run the [`build-one-bottle.sh`](../../scripts/build-one-bottle.sh)
 script with the formula that you want to build. For example:
 ```
-./scripts/scripts/build-one-bottle.sh tezos-client
+./scripts/build-one-bottle.sh tezos-client
 ```
 
 Note that several formulae have `tezos-sapling-params` has a dependency, so you

@@ -38,10 +38,13 @@ If you're not using Ubuntu or Fedora you can still construct systemd units for b
 from scratch.
 
 For this you'll need a `.service` file to define each systemd service.
-The easiest way to get one is to run [`gen_systemd_service_file.py`](../gen_systemd_service_file.py).
-You should specify the binary name as an argument.
+The easiest way to get one is to generate one with `docker` by running [`gen_systemd_service_file.py`](../gen_systemd_service_file.py).
 
-E.g.:
+First you'll need to set the `TEZOS_VERSION` env variable, e.g.:
+```sh
+export TEZOS_VERSION="v7.3"
+```
+Then you can use the script, specifying the binary name as an argument, e.g.:
 ```
 ./gen_systemd_service_file.py tezos-node
 # or

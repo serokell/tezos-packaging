@@ -48,6 +48,7 @@ voting on custom networks.
 `tezos-packaging` supports several native distribution methods for convenience:
 
 - [**Ubuntu**](./docs/distros/ubuntu.md)
+- [**Debian**](./docs/distros/ubuntu.md#debian)
 - [**Raspberry Pi OS**](./docs/distros/ubuntu.md#raspberry)
 - [**Fedora**](./docs/distros/fedora.md)
 - [**macOS**](./docs/distros/macos.md)

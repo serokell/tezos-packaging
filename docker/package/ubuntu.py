@@ -25,7 +25,7 @@ def build_ubuntu_package(
     date = subprocess.check_output(["date", "-R"]).decode().strip()
     if source_archive_path is None:
         pkg.fetch_sources(dir)
-        pkg.gen_makefile(f"{dir}/Makefile")
+        pkg.gen_buildfile("/".join([dir, pkg.buildfile]))
         subprocess.run(["tar", "-czf", f"{dir}.tar.gz", dir], check=True)
     else:
         shutil.copy(f"{cwd}/../{source_archive_path}", f"{dir}.tar.gz")

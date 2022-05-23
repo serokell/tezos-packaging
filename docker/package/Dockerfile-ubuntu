@@ -4,7 +4,7 @@
 FROM ubuntu:20.04
 ENV DEBIAN_FRONTEND="noninteractive"
 RUN apt-get update && apt-get install -y libev-dev libgmp-dev libhidapi-dev libffi-dev zlib1g-dev libpq-dev m4 perl pkg-config \
-  debhelper dh-make dh-systemd devscripts autotools-dev python3 python3-distutils wget rsync
+  debhelper dh-make dh-systemd dh-python devscripts autotools-dev python3-all python3-setuptools wget rsync
 RUN apt-get install -y software-properties-common
 RUN add-apt-repository ppa:ubuntu-mozilla-security/rust-next -y && apt-get update && apt-get -y install cargo
 RUN add-apt-repository ppa:avsm/ppa -y && apt-get update && apt-get -y install opam

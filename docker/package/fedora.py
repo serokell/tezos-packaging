@@ -20,7 +20,7 @@ def build_fedora_package(
     home = os.environ["HOME"]
 
     pkg.fetch_sources(dir)
-    pkg.gen_makefile(f"{dir}/Makefile")
+    pkg.gen_buildfile("/".join([dir, pkg.buildfile]))
     pkg.gen_license(f"{dir}/LICENSE")
     for systemd_unit in pkg.systemd_units:
         if systemd_unit.service_file.service.environment_file is not None:

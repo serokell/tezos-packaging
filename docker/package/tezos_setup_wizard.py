@@ -382,12 +382,18 @@ class Setup(Setup):
 
             key_mode_query = get_key_mode_query(key_import_modes)
 
-            self.import_key(key_mode_query, "Baking")
+            ledger_set_up = False
+            while not ledger_set_up:
+                self.import_key(key_mode_query, "Baking")
 
-            proc_call(
-                f"sudo -u tezos {suppress_warning_text} tezos-client {tezos_client_options} "
-                f"setup ledger to bake for {baker_alias} --main-hwm {self.get_current_head_level()}"
-            )
+                try:
+                    proc_call(
+                        f"sudo -u tezos {suppress_warning_text} tezos-client {tezos_client_options} "
+                        f"setup ledger to bake for {baker_alias} --main-hwm {self.get_current_head_level()}"
+                    )
+                    ledger_set_up = True
+                except PermissionError:
+                    print("Going back to the import mode selection.")
 
     def register_baker(self):
         print()

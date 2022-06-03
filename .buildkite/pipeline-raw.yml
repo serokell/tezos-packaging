@@ -53,7 +53,7 @@ steps:
    - eval "$SET_VERSION"
    - cd docker
    - ./docker-static-build.sh
-   - nix shell -f.. pkgs.upx -c upx tezos-*
+   - nix run -f.. pkgs.upx -c upx tezos-*
    artifact_paths:
      - ./docker/tezos-*
    agents:

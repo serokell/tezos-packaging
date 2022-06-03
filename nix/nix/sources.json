@@ -36,8 +36,8 @@
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
     },
     "opam-repository": {
-        "branch": "static-layers-1",
-        "ref": "static-layers-1",
+        "branch": "master",
+        "ref": "master",
         "repo": "https://gitlab.com/tezos/opam-repository",
         "rev": "845375388d477153b36344f69a23a1b34b2bf82e",
         "type": "git"

@@ -24,5 +24,11 @@
   "active": [
     "012-Psithaca",
     "013-PtJakart"
+  ],
+  "sc_rollup": [
+    "alpha"
+  ],
+  "tx_rollup": [
+    "alpha"
   ]
 }

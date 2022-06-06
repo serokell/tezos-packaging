@@ -23,5 +23,5 @@ source "$HOME/.cargo/env"
 
 opam init --bare --disable-sandboxing
 make build-deps
-eval "$(opam env)" && PROFILE="static" make build && make build-sandbox
+eval "$(opam env)" && PROFILE="static" make build && make build-unreleased && make build-sandbox
 chmod +w tezos-*

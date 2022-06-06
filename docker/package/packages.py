@@ -122,6 +122,37 @@ ledger_udev_postinst = open(
     f"{os.path.dirname( __file__)}/scripts/udev-rules", "r"
 ).read()
 
+protocols_json = json.load(
+    open(f"{os.path.dirname( __file__)}/../../protocols.json", "r")
+)
+
+
+def mk_rollup_binaries():
+    def mk_desc(name, t):
+        return {
+            "node": f"Entry point for initializing, configuring and running a Tezos {t} rollup node",
+            "client": f"CLI {t} rollup client for interacting with tezos blockchain",
+        }[name]
+
+    def mk_rollup_binary(name, t, proto):
+        return TezosBinaryPackage(
+            f"tezos-{t}-rollup-{name}-{proto}",
+            mk_desc(name, t),
+            meta=packages_meta,
+            dune_filepath=f"src/proto_{proto.replace('-','_')}/bin_{t}_rollup_{name}/main_{t}_rollup_{name}_{proto.replace('-','_')}.exe",
+        )
+
+    types = ["tx", "sc"]
+    bins = ["node", "client"]
+
+    return [
+        mk_rollup_binary(name, t, proto)
+        for t in types
+        for name in bins
+        for proto in protocols_json[f"{t}_rollup"]
+    ]
+
+
 packages = [
     TezosBinaryPackage(
         "tezos-client",
@@ -152,7 +183,8 @@ packages = [
         meta=packages_meta,
         dune_filepath="src/bin_codec/codec.exe",
     ),
-]
+] + mk_rollup_binaries()
+
 
 postinst_steps_common = """
 useradd --home-dir /var/lib/tezos tezos || true
@@ -255,10 +287,6 @@ packages.append(
         additional_native_deps=["tezos-sapling-params", {"ubuntu": "netbase"}],
         dune_filepath="src/bin_node/main.exe",
     )
-)
-
-protocols_json = json.load(
-    open(f"{os.path.dirname( __file__)}/../../protocols.json", "r")
 )
 
 active_protocols = protocols_json["active"]

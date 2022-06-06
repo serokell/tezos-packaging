@@ -11,8 +11,17 @@ set -euo pipefail
 binaries=("tezos-admin-client" "tezos-client" "tezos-node" "tezos-signer" "tezos-codec" "tezos-sandbox")
 
 for proto in $(jq -r ".active | .[]" ../protocols.json); do
-    binaries+=("tezos-accuser-$proto" "tezos-baker-$proto" )
+    binaries+=("tezos-accuser-$proto" "tezos-baker-$proto")
 done
+
+add_rollup_binaries () {
+    for proto in $(jq -r ".$1_rollup | .[]" ../protocols.json); do
+        binaries+=("tezos-$1-rollup-node-$proto" "tezos-$1-rollup-client-$proto")
+    done
+}
+
+add_rollup_binaries "tx"
+add_rollup_binaries "sc"
 
 if [[ "${USE_PODMAN-}" == "True" ]]; then
     virtualisation_engine="podman"

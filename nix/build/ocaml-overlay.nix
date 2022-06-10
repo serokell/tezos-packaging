@@ -17,7 +17,7 @@ with opam-nix.lib.${pkgs.system}; let
     resolveArgs = { };
   } tezosSourcesResolved { };
 in {
-  ocamlPackages = tezosScope.overrideScope' (pkgs.lib.composeManyExtensions [
+  ocamlPackages = (tezosScope.overrideScope' (pkgs.lib.composeManyExtensions [
       (_: # Nullify all the ignored protocols so that we don't build them
         builtins.mapAttrs (name: pkg:
           if builtins.any
@@ -28,5 +28,5 @@ in {
             pkg))
       hacks
       zcash-overlay
-    ]);
+    ])) // pkgs.ocamlPackages;
 }

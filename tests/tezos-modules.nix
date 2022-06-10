@@ -1,9 +1,10 @@
 # SPDX-FileCopyrightText: 2021 Oxhead Alpha
 # SPDX-License-Identifier: LicenseRef-MIT-OA
+{ nixpkgs, pkgs, ... }:
 let
-  nixpkgs = (import ../nix/nix/sources.nix).nixpkgs;
-  pkgs = import ../nix/build/pkgs.nix {};
-in import "${nixpkgs}/nixos/tests/make-test-python.nix" ({ ... }:
+  inherit (pkgs) system;
+in
+import "${nixpkgs}/nixos/tests/make-test-python.nix" ({ ... }:
 {
   machine = { ... }: {
     virtualisation.memorySize = 1024;
@@ -66,4 +67,4 @@ in import "${nixpkgs}/nixos/tests/make-test-python.nix" ({ ... }:
         for s in services:
             machine.succeed(f"systemctl status tezos-jakartanet-{s}.service")
   '';
-})
+}) { inherit pkgs system; }

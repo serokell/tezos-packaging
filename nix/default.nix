@@ -2,16 +2,14 @@
 #
 # SPDX-License-Identifier: LicenseRef-MIT-TQ
 
-{ patches ? [ ] }:
+{ sources, pkgs, protocols, patches ? [ ], ... }:
 let
-  pkgs = import ./build/pkgs.nix { };
-  source = (import ./nix/sources.nix).tezos;
-  protocols = import ./protocols.nix;
+  source = sources.tezos;
   release-binaries = builtins.filter (elem: elem.name != "tezos-sandbox")
-    (import ./build/release-binaries.nix);
+    (import ./build/release-binaries.nix protocols);
   binaries = builtins.listToAttrs (map (meta: {
     inherit (meta) name;
-    value = pkgs.ocamlPackages.${meta.name} // { inherit meta; };
+    value = pkgs.tezosPackages.${meta.name} // { inherit meta; };
   }) release-binaries);
 
   # Bundle the contents of a package set together, leaving the original attrs intact
@@ -22,6 +20,10 @@ let
     });
 
   artifacts = { inherit binaries; };
-  bundled = builtins.mapAttrs bundle artifacts;
+  bundled = (builtins.mapAttrs bundle artifacts);
 
-in bundled
+in (d: with builtins;
+     listToAttrs (map (drv:
+       { name = drv; value = d.${drv}; }
+     ) (filter (name: substring 0 5 name == "tezos") (attrNames d)))
+   ) bundled.binaries // { inherit (bundled) binaries; }

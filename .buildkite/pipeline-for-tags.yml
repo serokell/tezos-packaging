@@ -1,11 +1,14 @@
 # SPDX-FileCopyrightText: 2022 Oxhead Alpha
 # SPDX-License-Identifier: LicenseRef-MIT-OA
 
+env:
+  USE_NEWER_NIX: 1
+
 steps:
  - label: Check for new Tezos release
    if: build.source == "schedule" && build.branch == "master"
    commands:
-   - nix-shell ./scripts/shell.nix --run ./scripts/update-tezos.sh
+   - nix develop .#autorelease -c ./scripts/update-tezos.sh
 
  - label: Build source packages
    key: build-source-packages
@@ -34,7 +37,7 @@ steps:
    agents:
      queue: "x86_64-rosetta-darwin"
    commands:
-   - nix develop -f ./scripts/macos-shell.nix -c ./scripts/build-all-bottles.sh "big_sur"
+   - nix develop .#autorelease-macos -c ./scripts/build-all-bottles.sh "big_sur"
    artifact_paths:
      - '*.bottle.*'
 
@@ -47,7 +50,7 @@ steps:
    agents:
      queue: "arm64-darwin"
    commands:
-   - nix develop -f ./scripts/macos-shell.nix -c ./scripts/build-all-bottles.sh "arm64_big_sur"
+   - nix develop .#autorelease-macos -c ./scripts/build-all-bottles.sh "arm64_big_sur"
    artifact_paths:
      - '*.bottle.*'
 
@@ -62,5 +65,4 @@ steps:
    commands:
    - mkdir -p "Big Sur"
    - buildkite-agent artifact download "*bottle.tar.gz" "Big Sur/"
-   - nix-shell ./scripts/shell.nix
-       --run './scripts/sync-bottle-hashes.sh "$BUILDKITE_TAG" "Big Sur"'
+   - nix develop .#autorelease -c ./scripts/sync-bottle-hashes.sh "$BUILDKITE_TAG" "Big Sur"

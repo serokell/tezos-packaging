@@ -1,20 +1,13 @@
-# SPDX-FileCopyrightText: 2019 TQ Tezos <https://tqtezos.com/>
-#
-# SPDX-License-Identifier: LicenseRef-MIT-TQ
+# SPDX-FileCopyrightText: 2022 Oxhead Alpha
+# SPDX-License-Identifier: LicenseRef-MIT-OA
 
-{ docker-binaries ? null, docker-arm-binaries ? null }:
-let
-  pkgs = import ./nix/build/pkgs.nix { };
-  source = (import ./nix/nix/sources.nix).tezos;
-  meta = builtins.fromJSON (builtins.readFile ./meta.json);
-  commonMeta = {
-    version = builtins.replaceStrings [ "refs/tags/v" ] [ "" ] source.ref;
-    license = "MIT";
-    dependencies = "";
-    branchName = source.ref;
-    licenseFile = "${source}/LICENSE";
-  } // meta;
-  release = pkgs.callPackage ./release.nix
-    { binaries = docker-binaries; arm-binaries = docker-arm-binaries; inherit commonMeta; inherit (pkgs.lib) replaceStrings; };
-
-in { inherit release commonMeta pkgs; }
+(import
+  (
+    let lock = builtins.fromJSON (builtins.readFile ./flake.lock); in
+    fetchTarball {
+      url = "https://github.com/edolstra/flake-compat/archive/${lock.nodes.flake-compat.locked.rev}.tar.gz";
+      sha256 = lock.nodes.flake-compat.locked.narHash;
+    }
+  )
+  { src = ./.; }
+).defaultNix

@@ -1,4 +1,5 @@
 {
     "release": "4",
-    "maintainer": "Serokell <hi@serokell.io>"
+    "maintainer": "Serokell <hi@serokell.io>",
+    "tezos_ref": "refs/tags/v13.0"
 }

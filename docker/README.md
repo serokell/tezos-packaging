@@ -70,7 +70,7 @@ will build source or binary packages depending on the passed argument (`source` 
 This script builds packages inside docker image defined in [Dockerfile-ubuntu](package/Dockerfile-ubuntu).
 This script uses [python script](package/package_generator.py) which generates meta information for
 tezos packages based on information defined in [meta.json](../meta.json) and current tezos
-version defined in [sources.json](../nix/nix/sources.json) and build native ubuntu packages.
+version defined in [meta.json](../meta.json) and build native ubuntu packages.
 
 ### `.deb` packages
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env nix-shell
-#!nix-shell shell.nix -i bash
+#!nix-shell .. -A devShells.x86_64-linux.autorelease -i bash
 # shellcheck shell=bash
 # SPDX-FileCopyrightText: 2021 Oxhead Alpha
 # SPDX-License-Identifier: LicenseRef-MIT-OA
@@ -20,8 +20,8 @@ trap finish EXIT
 
 assets_dir=$TEMPDIR/assets
 
-# Build release.nix
-nix-build -A release -o "$TEMPDIR"/"$project" --arg timestamp "$(date +\"%Y%m%d%H%M\")" \
+# Build tezos-release
+nix-build . -A tezos-release -o "$TEMPDIR"/"$project" \
           --arg docker-binaries ./binaries/docker --arg docker-arm-binaries ./arm-binaries/docker
 mkdir -p "$assets_dir"
 # Move archive with binaries and tezos license to assets

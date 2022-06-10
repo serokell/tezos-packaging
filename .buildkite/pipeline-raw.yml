@@ -2,31 +2,32 @@
 # SPDX-License-Identifier: LicenseRef-MIT-OA
 
 env:
-  SET_VERSION: "export TEZOS_VERSION=\"$(cat nix/nix/sources.json | jq -r '.tezos.ref' | cut -d'/' -f3)\""
+  SET_VERSION: "export TEZOS_VERSION=\"$(cat meta.json | jq -r '.tezos_ref' | cut -d'/' -f3)\""
+  USE_NEWER_NIX: 1
 
 steps:
  # We need to sign commits that update brew formulae separately
  - label: Sign formulae update commits
    if: build.branch =~ /^auto\/update-brew-formulae-.*/
    commands:
-   - nix-shell ./scripts/shell.nix
-       --run './scripts/sign-commits.sh'
+   - nix develop .#buildkite
+       --command './scripts/sign-commits.sh'
  # To avoid race-conditions for the gpg key between jobs which sometimes leads to weird errors
  - wait
 
  - label: reuse lint
-   command: nix run -f . pkgs.reuse -c reuse lint
+   command: nix shell .#reuse -c reuse lint
  - label: check trailing whitespace
    command: .buildkite/check-trailing-whitespace.sh
  - label: crossref-verify
-   command: "nix run -f https://github.com/serokell/crossref-verifier/archive/68a1f9d25b6e7835fea8299b18a3e6c61dbb2a5c.tar.gz -c crossref-verify"
+   command: nix shell -f https://github.com/serokell/crossref-verifier/archive/68a1f9d25b6e7835fea8299b18a3e6c61dbb2a5c.tar.gz -c crossref-verify
    soft_fail: true
  - label: lint python code
-   command: nix run -f . pkgs.python39Packages.black -c black --check --diff --color .
+   command: nix shell .#python39Packages.black -c black --check --diff --color .
  - label: lint bash scripts
-   command: nix run -f . pkgs.shellcheck -c shellcheck --shell=bash --exclude=SC1091 -x $(find . -name '*.sh')
+   command: nix shell .#shellcheck -c shellcheck --shell=bash --exclude=SC1091 -x $(find . -name '*.sh')
  - label: pipeline-filtering
-   command: nix-shell .buildkite/shell.nix --run 'nix run -f . pkgs.bats -c ./tests/buildkite/filter-pipeline.bats'
+   command: nix develop .#buildkite --command 'nix shell .#bats -c ./tests/buildkite/filter-pipeline.bats'
    only_changes:
    - .buildkite/filter-pipeline.py
    - tests/buildkite/.*
@@ -38,11 +39,11 @@ steps:
  - label: build via nix
    commands:
    # NOTE: if this changes, remember to update the instructions in the nix/README.md too
-   - nix-build ./nix -A binaries -o binaries
+   - nix build . -o binaries
    branches: "!master"
- - label: test nix-built binaries
+ - label: check flake
    commands:
-   - nix-build tests/tezos-nix-binaries.nix --no-out-link
+   - nix flake check
    branches: "!master"
    # nix builds are usually cached, so we don't care about only_changes setting for it
 
@@ -53,7 +54,7 @@ steps:
    - eval "$SET_VERSION"
    - cd docker
    - ./docker-static-build.sh
-   - nix run -f.. pkgs.upx -c upx tezos-*
+   - nix shell .#upx -c upx tezos-*
    artifact_paths:
      - ./docker/tezos-*
    agents:
@@ -63,7 +64,6 @@ steps:
    - docker/docker-static-build.sh
    - meta.json
    - protocols.json
-   - nix/nix/sources.json
  # arm builer is an ubuntu machine without nix
  - label: build-arm-via-docker
    # this step is used as a dependency, so we're defining 'key' explicitely
@@ -83,22 +83,18 @@ steps:
      queue: "arm64-build"
    only_changes: *static_binaries_changes_regexes
 
- - label: test nixos modules
-   commands:
-   - nix-build tests/tezos-modules.nix --no-out-link
-
  - label: test docker-built binaries
    commands:
    - buildkite-agent artifact download "docker/*" . --step "build-via-docker"
    - chmod +x ./docker/*
-   - nix-build tests/tezos-binaries.nix --no-out-link --arg path-to-binaries ./docker
+   - nix-build . -A binaries-test --no-out-link --arg path-to-binaries ./docker
    branches: "!master"
    depends_on:
     - "build-via-docker"
    only_changes:
    - tests/tezos-binaries.nix
    - tests/test_script.py
-   # files from nix/ are massively used in tests ifrastructure
+   # files from nix/ are massively used in tests infrastructure
    - nix/.*
 
  - label: test deb source packages via docker
@@ -116,7 +112,6 @@ steps:
    - docker/docker-tezos-packages.sh
    - meta.json
    - protocols.json
-   - nix/nix/sources.json
  - label: test deb binary packages via docker
    commands:
    - eval "$SET_VERSION"
@@ -158,7 +153,7 @@ steps:
  - label: test gen_systemd_service_file.py script
    commands:
    - eval "$SET_VERSION"
-   - nix-shell scripts/shell.nix --run "./gen_systemd_service_file.py tezos-node"
+   - nix develop .#autorelease -c ./gen_systemd_service_file.py tezos-node
    branches: "!master"
    agents:
      queue: "docker"
@@ -184,7 +179,7 @@ steps:
    - scripts/shell.nix
    # files from 'nix/' directory are used in the autorelease script
    - nix/.*
-   - default.nix
+   - tezos-release.nix
    - release.nix
 
  # Update mirror repositories on master if brew formulae have been updated or bottle hashes added

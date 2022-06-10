@@ -1,14 +1,13 @@
 # SPDX-FileCopyrightText: 2021 Oxhead Alpha
 # SPDX-License-Identifier: LicenseRef-MIT-OA
 
-{config, lib, pkgs, ...}:
+{ config, lib, pkgs, ... }:
 
 with lib;
 
 let
-  tezos-node-pkg = pkgs.ocamlPackages.tezos-node;
+  tezos-node-pkg = pkgs.tezosPackages.tezos-node;
   cfg = config.services.tezos-node;
-  sources = import ../nix/sources.nix;
   genConfigCommand = historyMode: rpcPort: netPort: network: options: ''
     --data-dir "$node_data_dir" \
     --history-mode "${historyMode}" \
@@ -72,7 +71,7 @@ let
 
       nodeConfig = mkOption {
         default = null;
-        type = types.nullOr (import sources.serokell-nix).lib.types.jsonConfig;
+        type = types.nullOr pkgs.serokell-nix.lib.types.jsonConfig;
         description = ''
           Custom node config.
           This option overrides the all other options that affect

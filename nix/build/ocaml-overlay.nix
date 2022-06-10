@@ -1,13 +1,12 @@
 # SPDX-FileCopyrightText: 2021-2022 Oxhead Alpha
 # SPDX-License-Identifier: LicenseRef-MIT-OA
 
-{ sources ? import ../nix/sources.nix
-, protocols ? builtins.fromJSON (builtins.readFile ../../protocols.json)
-, hacks ? import ./hacks.nix, zcash-overlay ? import ./zcash-overlay.nix
-, pkgs ? import sources.nixpkgs { }, opam-nix ? import sources.opam-nix }:
+{ sources, protocols, pkgs, opam-nix, ... }:
 
 self: super:
 with opam-nix.lib.${pkgs.system}; let
+  zcash-overlay = import ./zcash-overlay.nix;
+  hacks = import ./hacks.nix;
   tezosSourcesResolved =
     pkgs.runCommand "resolve-tezos-sources" {} "cp --no-preserve=all -Lr ${sources.tezos} $out";
   tezosScope = buildOpamProject' {
@@ -17,7 +16,7 @@ with opam-nix.lib.${pkgs.system}; let
     resolveArgs = { };
   } tezosSourcesResolved { };
 in {
-  ocamlPackages = tezosScope.overrideScope' (pkgs.lib.composeManyExtensions [
+  tezosPackages = (tezosScope.overrideScope' (pkgs.lib.composeManyExtensions [
       (_: # Nullify all the ignored protocols so that we don't build them
         builtins.mapAttrs (name: pkg:
           if builtins.any
@@ -28,5 +27,5 @@ in {
             pkg))
       hacks
       zcash-overlay
-    ]);
+    ]));
 }

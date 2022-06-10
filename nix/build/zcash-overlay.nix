@@ -3,7 +3,7 @@
 self: super:
 with self.nixpkgs;
 let
-  zcash = callPackage ./zcash.nix { };
+  zcash = callPackage ./zcash.nix { pkgs = self.nixpkgs; };
 
   inject-zcash = oa: {
     nativeBuildInputs = oa.nativeBuildInputs ++ [ makeWrapper ];

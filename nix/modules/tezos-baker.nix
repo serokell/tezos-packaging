@@ -8,9 +8,9 @@ with lib;
 let
   tezos-baker-pkgs = {
     "013-PtJakart" =
-      "${pkgs.ocamlPackages.tezos-baker-013-PtJakart}/bin/tezos-baker-013-PtJakart";
+      "${pkgs.tezosPackages.tezos-baker-013-PtJakart}/bin/tezos-baker-013-PtJakart";
   };
-  tezos-client = "${pkgs.ocamlPackages.tezos-client}/bin/tezos-client";
+  tezos-client = "${pkgs.tezosPackages.tezos-client}/bin/tezos-client";
   cfg = config.services.tezos-baker;
   common = import ./common.nix { inherit lib; inherit pkgs; };
   instanceOptions = types.submodule ( {...} : {

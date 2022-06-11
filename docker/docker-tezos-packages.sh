@@ -18,6 +18,8 @@ fi
 
 args=()
 
+docker_volumes=()
+
 while true;
 do
     arg="${1-}"
@@ -35,6 +37,14 @@ do
             source_archive="$2"
             source_archive_name="$(basename "$2")"
             args+=("$arg" "$source_archive_name")
+            docker_volumes+=("-v" "$PWD/$source_archive:/tezos-packaging/docker/$source_archive_name")
+            shift 2
+            ;;
+        --binaries-dir )
+            binaries_dir="$2"
+            binaries_dir_name="$(basename "$2")"
+            args+=("$arg" "$binaries_dir_name")
+            docker_volumes+=("-v" "$PWD/$binaries_dir:/tezos-packaging/docker/$binaries_dir_name")
             shift 2
             ;;
         * )
@@ -46,12 +56,7 @@ done
 
 "$virtualisation_engine" build -t tezos-"$target_os" -f docker/package/Dockerfile-"$target_os" .
 set +e
-if [[ -z ${source_archive-} ]]; then
-    container_id="$("$virtualisation_engine" create --env TEZOS_VERSION="$TEZOS_VERSION" --env OPAMSOLVERTIMEOUT=900 -t tezos-"$target_os" "${args[@]}")"
-else
-    container_id="$("$virtualisation_engine" create -v "$PWD/$source_archive:/tezos-packaging/docker/$source_archive_name" \
-     --env TEZOS_VERSION="$TEZOS_VERSION" --env OPAMSOLVERTIMEOUT=900 -t tezos-"$target_os" "${args[@]}")"
-fi
+container_id="$("$virtualisation_engine" create "${docker_volumes[@]}" --env TEZOS_VERSION="$TEZOS_VERSION" --env OPAMSOLVERTIMEOUT=900 -t tezos-"$target_os" "${args[@]}")"
 "$virtualisation_engine" start -a "$container_id"
 exit_code="$?"
 "$virtualisation_engine" cp "$container_id":/tezos-packaging/docker/out .

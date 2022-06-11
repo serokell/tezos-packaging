@@ -23,7 +23,7 @@ class AbstractPackage:
     buildfile = "Makefile"
 
     @abstractmethod
-    def fetch_sources(self, out_dir):
+    def fetch_sources(self, out_dir, binaries_dir=None):
         pass
 
     @abstractmethod
@@ -35,7 +35,7 @@ class AbstractPackage:
         pass
 
     @abstractmethod
-    def gen_buildfile(self, out):
+    def gen_buildfile(self, out, binaries_dir=None):
         pass
 
     def gen_changelog(self, ubuntu_version, maintainer, date, out):
@@ -48,7 +48,7 @@ class AbstractPackage:
             f.write(changelog_contents)
 
     @abstractmethod
-    def gen_rules(self, out):
+    def gen_rules(self, out, binaries_dir=None):
         pass
 
     def gen_install(self, out):
@@ -163,7 +163,7 @@ def mk_dh_flags(package):
     )
 
 
-def gen_systemd_rules_contents(package):
+def gen_systemd_rules_contents(package, binaries_dir):
     override_dh_install_init = "override_dh_installinit:\n"
     package_name = package.name.lower()
     for systemd_unit in package.systemd_units:
@@ -179,7 +179,7 @@ def gen_systemd_rules_contents(package):
                 unit_name = f"{package_name}@"
         override_dh_install_init += f"	dh_installinit --name={unit_name}\n"
     rules_contents = f"""#!/usr/bin/make -f
-
+{"export DEB_BUILD_OPTIONS=nostrip" if binaries_dir is not None else ""}
 export DEB_CFLAGS_APPEND=-fPIC
 # Disable usage of instructions from the ADX extension to avoid incompatibility
 # with old CPUs, see https://gitlab.com/dannywillems/ocaml-bls12-381/-/merge_requests/135/
@@ -224,9 +224,16 @@ class TezosBinaryPackage(AbstractPackage):
             if isinstance(x, str) or (isinstance(x, dict) and os_name in x.keys())
         ]
 
-    def fetch_sources(self, out_dir):
+    def fetch_sources(self, out_dir, binaries_dir=None):
         os.makedirs(out_dir)
         os.chdir(out_dir)
+
+        # We'll be using the pre-built binaries as source.
+        if binaries_dir:
+            shutil.copy(f"{binaries_dir}/{self.name}", self.name)
+            os.chdir("../")
+            return
+
         shutil.copy(
             f"{os.path.dirname(__file__)}/scripts/build-binary.sh", "build-binary.sh"
         )
@@ -322,7 +329,7 @@ install -m 0755 %{{name}} %{{buildroot}}/%{{_bindir}}
         with open(out, "w") as f:
             f.write(file_contents)
 
-    def gen_buildfile(self, out):
+    def gen_buildfile(self, out, binaries_dir=None):
         makefile_contents = f"""
 .PHONY: install
 
@@ -335,11 +342,23 @@ install: {self.name}
 	mkdir -p $(DESTDIR)$(BINDIR)
 	cp $(CURDIR)/{self.name} $(DESTDIR)$(BINDIR)
 """
+        if binaries_dir:
+            makefile_contents = f"""
+.PHONY: install
+
+BINDIR=/usr/bin
+
+{self.name}:
+
+install: {self.name}
+	mkdir -p $(DESTDIR)$(BINDIR)
+	cp $(CURDIR)/{self.name} $(DESTDIR)$(BINDIR)
+"""
         with open(out, "w") as f:
             f.write(makefile_contents)
 
-    def gen_rules(self, out):
-        rules_contents = gen_systemd_rules_contents(self)
+    def gen_rules(self, out, binaries_dir=None):
+        rules_contents = gen_systemd_rules_contents(self, binaries_dir)
         with open(out, "w") as f:
             f.write(rules_contents)
 
@@ -383,21 +402,22 @@ set -e
 
 
 class TezosSaplingParamsPackage(AbstractPackage):
-    def __init__(self, meta: PackagesMeta):
+    def __init__(self, meta: PackagesMeta, params_revision: str):
         self.name = "tezos-sapling-params"
         self.desc = "Sapling params required in the runtime by the Tezos binaries"
         self.systemd_units = []
         self.targetProto = None
         self.meta = meta
+        self.params_revision = params_revision
 
-    def fetch_sources(self, out_dir):
+    def fetch_sources(self, out_dir, binaries_dir=None):
         os.makedirs(out_dir)
         subprocess.run(
             [
                 "wget",
                 "-P",
                 out_dir,
-                f"https://gitlab.com/tezos/opam-repository/-/raw/v{self.meta.version}/zcash-params/sapling-spend.params",
+                f"https://gitlab.com/tezos/opam-repository/-/raw/{self.params_revision}/zcash-params/sapling-spend.params",
             ]
         )
         subprocess.run(
@@ -405,7 +425,7 @@ class TezosSaplingParamsPackage(AbstractPackage):
                 "wget",
                 "-P",
                 out_dir,
-                f"https://gitlab.com/tezos/opam-repository/-/raw/v{self.meta.version}/zcash-params/sapling-output.params",
+                f"https://gitlab.com/tezos/opam-repository/-/raw/{self.params_revision}/zcash-params/sapling-output.params",
             ]
         )
 
@@ -459,7 +479,7 @@ install -m 0755 sapling-output.params %{{buildroot}}/%{{_datadir}}/zcash-params
         with open(out, "w") as f:
             f.write(file_contents)
 
-    def gen_buildfile(self, out):
+    def gen_buildfile(self, out, binaries_dir=None):
         file_contents = """
 .PHONY: install
 
@@ -475,7 +495,7 @@ install: tezos-sapling-params
         with open(out, "w") as f:
             f.write(file_contents)
 
-    def gen_rules(self, out):
+    def gen_rules(self, out, binaries_dir=None):
         rules_contents = """#!/usr/bin/make -f
 
 %:
@@ -490,7 +510,7 @@ install: tezos-sapling-params
 
 class TezosBakingServicesPackage(AbstractPackage):
 
-    # Sometimes we need to update the tezos-baking package inbetween
+    # Sometimes we need to update the tezos-baking package in between
     # native releases, so we append an extra letter to the version of
     # the package.
     # This should be reset to "" whenever the native version is bumped.
@@ -590,7 +610,7 @@ echo ""
 """
         self.postrm_steps = ""
 
-    def fetch_sources(self, out_dir):
+    def fetch_sources(self, out_dir, binaries_dir=None):
         os.makedirs(out_dir)
         package_dir = out_dir + "/tezos_baking"
         os.makedirs(package_dir)
@@ -668,7 +688,7 @@ Maintainer: {self.meta.maintainer}
         with open(out, "w") as f:
             f.write(file_contents)
 
-    def gen_buildfile(self, out):
+    def gen_buildfile(self, out, binaries_dir=None):
         file_contents = f"""
 from setuptools import setup
 
@@ -687,7 +707,7 @@ setup(
         with open(out, "w") as f:
             f.write(file_contents)
 
-    def gen_rules(self, out):
+    def gen_rules(self, out, binaries_dir=None):
         rules_contents = gen_systemd_rules_contents(self)
         with open(out, "w") as f:
             f.write(rules_contents)

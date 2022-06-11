@@ -4,8 +4,66 @@
 import os, shutil, argparse
 
 from .fedora import build_fedora_package
-from .packages import packages
+from .packages import packages, sapling_package
 from .ubuntu import build_ubuntu_package
+
+
+def get_ubuntu_run_deps(args):
+    """
+    List all the ubuntu run dependencies. Return an empty list when using prebuilt static binaries.
+    """
+    if args.binaries_dir:
+        return []
+
+    return [
+        "libev-dev",
+        "libgmp-dev",
+        "libhidapi-dev",
+        "libffi-dev",
+        "zlib1g-dev",
+        "libpq-dev",
+    ]
+
+
+def get_fedora_run_deps(args):
+    """
+    List all the fedora run dependencies. Return an empty list when using prebuilt static binaries.
+    """
+    if args.binaries_dir:
+        return []
+
+    return [
+        "libev-devel",
+        "gmp-devel",
+        "hidapi-devel",
+        "libffi-devel",
+        "zlib-devel",
+        "libpq-devel",
+    ]
+
+
+def get_build_deps(args):
+    """
+    List all the common build dependencies. Return an empty list when using prebuilt static binaries.
+    """
+    if args.binaries_dir:
+        return ["make", "wget"]
+
+    return [
+        "make",
+        "m4",
+        "perl",
+        "pkg-config",
+        "wget",
+        "unzip",
+        "rsync",
+        "gcc",
+        "cargo",
+        "opam",
+        "git",
+        "autoconf",
+    ]
+
 
 is_ubuntu = None
 is_source = None
@@ -17,8 +75,24 @@ parser.add_argument("--os", required=True)
 parser.add_argument("--type", help="package type", required=True)
 parser.add_argument("--package", help="specify binary to package")
 parser.add_argument(
+    "--output-dir",
+    help="provide a directory to place the built packages",
+    default="out",
+)
+parser.add_argument(
+    "--binaries-dir",
+    help="provide a directory with exiting prebuilt binaries",
+    type=os.path.abspath,
+)
+parser.add_argument(
+    "--build-sapling-package",
+    help="whether to build the sapling-params package",
+    action="store_true",
+)
+parser.add_argument(
     "--sources", help="specify source archive for single ubuntu package"
 )
+parser.set_defaults(build_sapling_package=False)
 args = parser.parse_args()
 
 if args.os == "ubuntu":
@@ -43,37 +117,12 @@ package_to_build = args.package
 source_archive = args.sources
 
 if is_ubuntu:
-    run_deps = [
-        "libev-dev",
-        "libgmp-dev",
-        "libhidapi-dev",
-        "libffi-dev",
-        "zlib1g-dev",
-        "libpq-dev",
-    ]
+    run_deps = get_ubuntu_run_deps(args)
 else:
-    run_deps = [
-        "libev-devel",
-        "gmp-devel",
-        "hidapi-devel",
-        "libffi-devel",
-        "zlib-devel",
-        "libpq-devel",
-    ]
-build_deps = [
-    "make",
-    "m4",
-    "perl",
-    "pkg-config",
-    "wget",
-    "unzip",
-    "rsync",
-    "gcc",
-    "cargo",
-    "opam",
-    "git",
-    "autoconf",
-]
+    run_deps = get_fedora_run_deps(args)
+
+build_deps = get_build_deps(args)
+
 common_deps = run_deps + build_deps
 
 ubuntu_versions = [
@@ -85,16 +134,28 @@ ubuntu_versions = [
 pwd = os.getcwd()
 home = os.environ["HOME"]
 
-for package in packages:
+packages_to_build = packages
+
+if args.build_sapling_package:
+    packages.append(sapling_package)
+
+for package in packages_to_build:
     if package_to_build is None or package.name == package_to_build:
         if is_ubuntu:
             build_ubuntu_package(
-                package, ubuntu_versions, common_deps, is_source, source_archive
+                package,
+                ubuntu_versions,
+                common_deps,
+                is_source,
+                source_archive,
+                args.binaries_dir,
             )
         else:
-            build_fedora_package(package, build_deps, run_deps, is_source)
+            build_fedora_package(
+                package, build_deps, run_deps, is_source, args.binaries_dir
+            )
 
-os.mkdir("out")
+os.makedirs(args.output_dir, exist_ok=True)
 if not is_source:
     if is_ubuntu:
         exts = [".deb"]
@@ -113,4 +174,4 @@ else:
 for f in os.listdir(artifacts_dir):
     for ext in exts:
         if f.endswith(ext):
-            shutil.copy(f"{artifacts_dir}/{f}", os.path.join("out", f))
+            shutil.copy(f"{artifacts_dir}/{f}", os.path.join(args.output_dir, f))

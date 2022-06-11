@@ -43,6 +43,24 @@ Once this is done you should run the following command to build `aarch64` static
 ./docker-static-build.sh aarch64
 ```
 
+### Packages from statically linked binaries
+
+It's possible to create packages (ubuntu/debian & fedora) using already
+built binaries. This means that the build step of the package will be reduced
+to copying the binaries instead of building again from scratch.
+
+Using Ubuntu/Debian and assuming all Tezos binaries are located in the `binaries` directory:
+```sh
+cd .. && ./docker/docker-tezos-packages.sh --os ubuntu --type binary --binaries-dir binaries
+```
+
+Using Fedora and assuming all Tezos binaries are located in the `binaries` directory:
+```sh
+cd .. && ./docker/docker-tezos-packages.sh --os fedora --type binary --binaries-dir binaries
+```
+
+The resulting packages will be located in `../out` directory.
+
 ## Ubuntu packages
 
 We provide a way to build both binary and source native Ubuntu packages.
@@ -142,7 +160,7 @@ dput tezos-rc-serokell ../out/<package>.changes
 
 #### Updating release in scope of the same upstream version
 
-In case you're uploading the same version of the package but with the a different
+In case you're uploading the same version of the package but with a different
 release number, you'll highly likely have to use the same source archive (`.orig.tar.gz` archive)
 that was used for the first release in the scope of the same version, it can be downloaded from
 the launchpad package details (e.g. https://launchpad.net/~serokell/+archive/ubuntu/tezos/+sourcefiles/tezos-client/2:7.4-0ubuntu2/tezos-client_7.4.orig.tar.gz).

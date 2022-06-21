@@ -41,6 +41,7 @@ NODE_RPC_ENDPOINT="http://localhost:8732"
 BAKER_ADDRESS_ALIAS="baker"
 CUSTOM_NODE_CONFIG="<paste your path to the node config here>"
 RESET_ON_STOP=""
+LIQUIDITY_BAKING_TOGGLE_VOTE="pass"
 ```
 
 Additionally, you can set `RESET_ON_STOP="true"` to enable automatic node directory removal which will

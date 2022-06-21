@@ -155,6 +155,26 @@ sudo -u tezos tezos-client bootstrapped
 By default `tezos-baking-<network>.service` will use the `baker` alias for the
 key that will be used for baking and endorsing.
 
+### Setting the Liquidity Baking toggle vote option
+
+Since `013-PtJakart`, the `--liquidity-baking-toggle-vote` command line option for
+`tezos-baker` is now mandatory. In our systemd services, it is set to `pass` by
+default. You can change it as desired in the service config file at
+`/etc/defaults/tezos-baking-<network>`.
+
+If the baking service is running already, changing this options requires a restart.
+You can do so manually by running:
+```bash
+sudo systemctl restart tezos-baking-<network>.service
+```
+
+If using this option on Ithaca, the format in our configuration files stays the same
+but is transformed to the Ithaca-specific format: `off` is transformed to the
+`--liquidity-baking-escape-vote` command line options, whereas `pass` and `on` result
+in no command line argument and will only affect baking upon switching to Jakarta.
+
+You can also use the [Setup Wizard](#using-the-wizard) which will handle everything for you.
+
 <a name="import"></a>
 ### Importing the baker key
 

@@ -363,6 +363,18 @@ def search_json_with_default(json_filepath, field, default):
         return json_dict.pop(field, default)
 
 
+def replace_in_service_config(config_filepath, field, value):
+    with open(config_filepath, "r") as f:
+        config_contents = f.read()
+
+    old = re.search(f"{field}=.*", config_contents)
+    if old is None:
+        return None
+    else:
+        new = f"{field}={value}"
+        proc_call(f"sudo sed -i 's/{old.group(0)}/{new}/' {config_filepath}")
+
+
 class Step:
     def __init__(
         self,
@@ -548,9 +560,9 @@ class Setup:
                     validated = True
                     self.config[step.id] = answer
 
-    def systemctl_start_action(self, service):
+    def systemctl_simple_action(self, action, service):
         proc_call(
-            f"sudo systemctl start tezos-{service}-{self.config['network']}.service"
+            f"sudo systemctl {action} tezos-{service}-{self.config['network']}.service"
         )
 
     def systemctl_enable(self):
@@ -560,10 +572,7 @@ class Setup:
                     self.config["mode"], self.config["network"]
                 )
             )
-            proc_call(
-                f"sudo systemctl enable tezos-{self.config['mode']}-"
-                f"{self.config['network']}.service"
-            )
+            self.systemctl_simple_action("enable", self.config["mode"])
         else:
             print("The services won't restart on boot.")
 
@@ -584,7 +593,7 @@ class Setup:
             f"{self.config['tezos_client_options']} config update"
         )
 
-    def fill_baking_config(self):
+    def get_baking_config_filepath(self):
         net = self.config["network"]
         output = get_proc_output(f"systemctl show tezos-baking-{net}.service").stdout
         config_filepath = re.search(b"EnvironmentFiles=(.*) ", output)
@@ -596,7 +605,10 @@ class Setup:
             config_filepath = f"/etc/default/tezos-baking-{net}"
         else:
             config_filepath = config_filepath.group(1).decode().strip()
+        return config_filepath
 
+    def fill_baking_config(self):
+        config_filepath = self.get_baking_config_filepath()
         with open(config_filepath, "r") as f:
             config_contents = f.read()
             self.config["client_data_dir"] = search_baking_service_config(

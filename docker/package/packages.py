@@ -20,7 +20,7 @@ networks = {
     "jakartanet": "jakartanet",
 }
 networks_protos = {
-    "mainnet": ["012-Psithaca"],
+    "mainnet": ["012-Psithaca", "013-PtJakart"],
     "ithacanet": ["012-Psithaca"],
     "jakartanet": ["013-PtJakart"],
 }

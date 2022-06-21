@@ -494,7 +494,7 @@ class TezosBakingServicesPackage(AbstractPackage):
     # native releases, so we append an extra letter to the version of
     # the package.
     # This should be reset to "" whenever the native version is bumped.
-    letter_version = ""
+    letter_version = "a"
 
     buildfile = "setup.py"
 
@@ -577,7 +577,11 @@ class TezosBakingServicesPackage(AbstractPackage):
         custom_unit.poststop_script = "tezos-baking-custom-poststop"
         custom_unit.instances = []
         self.systemd_units.append(custom_unit)
-        self.postinst_steps = ""
+        # TODO: we will likely need to remove this once toggle vote isn't new anymore
+        self.postinst_steps = """echo "Please note that the liquidity baking toggle vote option"
+echo "is now mandatory when baking. You can read more about it here:"
+echo "https://tezos.gitlab.io/jakarta/liquidity_baking.html#toggle-vote"
+"""
         self.postrm_steps = ""
 
     def fetch_sources(self, out_dir):
@@ -665,7 +669,7 @@ from setuptools import setup
 setup(
     name='tezos-baking',
     packages=['tezos_baking'],
-    version={self.meta.version},
+    version='{self.meta.version}',
     entry_points=dict(
         console_scripts=[
             'tezos-setup-wizard=tezos_baking.tezos_setup_wizard:main',
@@ -684,3 +688,16 @@ setup(
 
     def gen_license(self, out):
         shutil.copy(f"{os.path.dirname(__file__)}/../../LICENSE", out)
+
+    def gen_postinst(self, out):
+        postinst_contents = f"""#!/bin/sh
+
+set -e
+
+#DEBHELPER#
+
+{self.postinst_steps}
+"""
+        postinst_contents = postinst_contents.replace(self.name, self.name.lower())
+        with open(out, "w") as f:
+            f.write(postinst_contents)

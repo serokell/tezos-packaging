@@ -494,7 +494,7 @@ class TezosBakingServicesPackage(AbstractPackage):
     # native releases, so we append an extra letter to the version of
     # the package.
     # This should be reset to "" whenever the native version is bumped.
-    letter_version = ""
+    letter_version = "a"
 
     buildfile = "setup.py"
 
@@ -669,7 +669,7 @@ from setuptools import setup
 setup(
     name='tezos-baking',
     packages=['tezos_baking'],
-    version={self.meta.version},
+    version='{self.meta.version}',
     entry_points=dict(
         console_scripts=[
             'tezos-setup-wizard=tezos_baking.tezos_setup_wizard:main',

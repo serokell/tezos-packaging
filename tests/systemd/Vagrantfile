@@ -1,0 +1,39 @@
+# SPDX-FileCopyrightText: 2022 Oxhead Alpha
+# SPDX-License-Identifier: LicenseRef-MIT-OA
+
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+require 'getoptlong'
+
+opts = GetoptLong.new(
+  [ '--packages-directory', GetoptLong::REQUIRED_ARGUMENT ]
+)
+
+packagesDirectory=''
+
+opts.ordering=(GetoptLong::REQUIRE_ORDER)
+
+opts.each do |opt, arg|
+  case opt
+    when '--packages-directory'
+      packagesDirectory=arg
+  end
+end
+
+Vagrant.configure("2") do |config|
+  config.vm.box = "generic/ubuntu2004"
+  config.vm.provision "shell", run: "once", inline: <<-SHELL
+    add-apt-repository -y ppa:serokell/tezos && apt-get update
+    apt-get install -y tezos-sapling-params acl python3-pystemd python3-pytest python3-psutil
+  SHELL
+  config.vm.provision "file", run: "always", source: "#{packagesDirectory}", destination: "$HOME/out"
+  config.vm.provision "file", run: "always", source: "services_tests.py", destination: "$HOME/services_tests.py"
+  config.vm.provision "shell", run: "always", path: "bootstrap.sh"
+  config.vm.provision "shell", run: "always", inline: <<-SHELL
+    pytest-3 services_tests.py
+  SHELL
+  config.vm.provider "qemu" do |qe|
+    qe.qemu_dir = "/tmp/qemu"
+  end
+end

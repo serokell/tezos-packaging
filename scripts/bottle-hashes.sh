@@ -17,10 +17,13 @@ then
                 bottle_hash=$(sha256sum "$bottle" | cut -d " " -f 1)
                 formula_name="${BASH_REMATCH[1]}"
                 os="${BASH_REMATCH[2]}"
-
-                if [[ -f "./Formula/$formula_name.rb" ]]; then
+                formula_file="./Formula/$formula_name.rb"
+                if [[ -f $formula_file ]]; then
                     line="\    sha256 cellar: :any, $os: \"$bottle_hash\""
-                    sed -i "/root_url.*/a $line" "./Formula/$formula_name.rb"
+                    # Update only when this formula doesn't have a hash for the bottle
+                    if ! grep "$line" "$formula_file" &> /dev/null; then
+                        sed -i "/root_url.*/a $line" "$formula_file"
+                    fi
                 fi
             fi
         done

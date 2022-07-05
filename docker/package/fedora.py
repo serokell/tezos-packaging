@@ -13,14 +13,15 @@ def build_fedora_package(
     build_deps: List[str],
     run_deps: List[str],
     is_source: bool,
+    binaries_dir: str = None,
 ):
     version = pkg.meta.version.replace("-", "")
     dir = f"{pkg.name}-{version}"
     cwd = os.path.dirname(__file__)
     home = os.environ["HOME"]
 
-    pkg.fetch_sources(dir)
-    pkg.gen_buildfile("/".join([dir, pkg.buildfile]))
+    pkg.fetch_sources(dir, binaries_dir)
+    pkg.gen_buildfile("/".join([dir, pkg.buildfile]), binaries_dir)
     pkg.gen_license(f"{dir}/LICENSE")
     for systemd_unit in pkg.systemd_units:
         if systemd_unit.service_file.service.environment_file is not None:

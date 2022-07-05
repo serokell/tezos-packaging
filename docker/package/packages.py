@@ -411,6 +411,10 @@ for proto in active_protocols:
         )
     )
 
+sapling_package = TezosSaplingParamsPackage(
+    meta=packages_meta, params_revision="95911b0639ff01807b8fd7b9e36d508e657d80a8"
+)
+
 packages.append(
     TezosBakingServicesPackage(
         target_networks=networks.keys(),

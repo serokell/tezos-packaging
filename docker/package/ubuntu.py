@@ -14,6 +14,7 @@ def build_ubuntu_package(
     build_deps: List[str],
     is_source: bool,
     source_archive_path: str = None,
+    binaries_dir: str = None,
 ):
     # ubuntu prohibits uppercase in packages names
     pkg_name = pkg.name.lower()
@@ -24,8 +25,8 @@ def build_ubuntu_package(
     cwd = os.path.dirname(__file__)
     date = subprocess.check_output(["date", "-R"]).decode().strip()
     if source_archive_path is None:
-        pkg.fetch_sources(dir)
-        pkg.gen_buildfile("/".join([dir, pkg.buildfile]))
+        pkg.fetch_sources(dir, binaries_dir)
+        pkg.gen_buildfile("/".join([dir, pkg.buildfile]), binaries_dir)
         subprocess.run(["tar", "-czf", f"{dir}.tar.gz", dir], check=True)
     else:
         shutil.copy(f"{cwd}/../{source_archive_path}", f"{dir}.tar.gz")
@@ -73,7 +74,7 @@ def build_ubuntu_package(
         with open("debian/compat", "w") as f:
             f.write("10")
         pkg.gen_install("debian/install")
-        pkg.gen_rules("debian/rules")
+        pkg.gen_rules("debian/rules", binaries_dir)
         pkg.gen_postinst("debian/postinst")
         pkg.gen_postrm("debian/postrm")
         pkg.gen_control_file(build_deps, ubuntu_version, "debian/control")

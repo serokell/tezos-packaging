@@ -16,12 +16,10 @@ from .systemd import Service, ServiceFile, SystemdUnit, Unit, Install
 # the config
 networks = {
     "mainnet": "mainnet",
-    "ithacanet": "ithacanet",
     "jakartanet": "jakartanet",
 }
 networks_protos = {
-    "mainnet": ["012-Psithaca", "013-PtJakart"],
-    "ithacanet": ["012-Psithaca"],
+    "mainnet": ["013-PtJakart"],
     "jakartanet": ["013-PtJakart"],
 }
 

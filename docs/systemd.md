@@ -48,7 +48,7 @@ Then you can use the script, specifying the binary name as an argument, e.g.:
 ```
 ./gen_systemd_service_file.py tezos-node
 # or
-./gen_systemd_service_file.py tezos-baker-012-Psithaca
+./gen_systemd_service_file.py tezos-baker-013-PtJakart
 ```
 After that you'll have `.service` files in the current directory.
 
@@ -70,8 +70,8 @@ It's possible to run multiple similar services, e.g. two `tezos-node`s that run 
 networks.
 
 `tezos-node` packages provide multiple services out of the box:
-`tezos-node-ithacanet`, and `tezos-node-mainnet` that run
-`ithacanet` and `mainnet` networks respectively.
+`tezos-node-jakartanet`, and `tezos-node-mainnet` that run
+`jakartanet` and `mainnet` networks respectively.
 
 In order to start it run:
 ```
@@ -84,7 +84,7 @@ TEZOS_NODE_DIR="<DATA_DIR from tezos-node-<network>.service>" tezos-node
 ```
 
 In addition to node services where the config is predefined to a specific network
-(e.g. `tezos-node-mainnet` or `tezos-node-ithacanet`), it's possible to run `tezos-node-custom`
+(e.g. `tezos-node-mainnet` or `tezos-node-jakartanet`), it's possible to run `tezos-node-custom`
 service and provide a path to the custom node config file via the
 `CUSTOM_NODE_CONFIG` variable in the `tezos-node-custom.service` file.
 

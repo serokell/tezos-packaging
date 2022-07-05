@@ -244,7 +244,6 @@ key_import_modes = {
 
 networks = {
     "mainnet": "Main Tezos network",
-    "ithacanet": "Test network using version 012 of Tezos protocol (Ithaca2)",
     "jakartanet": "Test network using version 013 of Tezos protocol (Jakarta2)",
 }
 

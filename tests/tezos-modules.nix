@@ -16,7 +16,7 @@ in import "${nixpkgs}/nixos/tests/make-test-python.nix" ({ ... }:
                 ../nix/modules/tezos-baker.nix
               ];
 
-    services.tezos-node.instances.ithacanet = {
+    services.tezos-node.instances.jakartanet = {
       enable = true;
       additionalOptions = [
         "--bootstrap-threshold=1"
@@ -24,19 +24,19 @@ in import "${nixpkgs}/nixos/tests/make-test-python.nix" ({ ... }:
       ];
     };
 
-    services.tezos-signer.instances.ithacanet = {
+    services.tezos-signer.instances.jakartanet = {
       enable = true;
       networkProtocol = "http";
     };
 
-    services.tezos-accuser.instances.ithacanet = {
+    services.tezos-accuser.instances.jakartanet = {
       enable = true;
-      baseProtocol = "012-Psithaca";
+      baseProtocol = "013-PtJakart";
     };
 
-    services.tezos-baker.instances.ithacanet = {
+    services.tezos-baker.instances.jakartanet = {
       enable = true;
-      baseProtocol = "012-Psithaca";
+      baseProtocol = "013-PtJakart";
       bakerAccountAlias = "baker";
       bakerSecretKey = "unencrypted:edsk3KaTNj1d8Xd3kMBrZkJrfkqsz4XwwiBXatuuVgTdPye2KpE98o";
     };
@@ -54,7 +54,7 @@ in import "${nixpkgs}/nixos/tests/make-test-python.nix" ({ ... }:
     ]
 
     for s in services:
-        machine.wait_for_unit(f"tezos-ithacanet-{s}.service")
+        machine.wait_for_unit(f"tezos-jakartanet-{s}.service")
 
     with subtest("check tezos-node rpc response"):
         machine.wait_for_open_port(8732)
@@ -64,6 +64,6 @@ in import "${nixpkgs}/nixos/tests/make-test-python.nix" ({ ... }:
 
     with subtest("service status sanity check"):
         for s in services:
-            machine.succeed(f"systemctl status tezos-ithacanet-{s}.service")
+            machine.succeed(f"systemctl status tezos-jakartanet-{s}.service")
   '';
 })

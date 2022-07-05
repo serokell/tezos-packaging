@@ -49,5 +49,5 @@ tezos-voting-wizard --network voting
 `tezos-voting-wizard` also supports voting on currently running testnets, for example:
 
 ```bash
-tezos-voting-wizard --network ithacanet
+tezos-voting-wizard --network jakartanet
 ```

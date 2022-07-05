@@ -163,7 +163,7 @@ def mk_dh_flags(package):
     )
 
 
-def gen_systemd_rules_contents(package, binaries_dir):
+def gen_systemd_rules_contents(package, binaries_dir=None):
     override_dh_install_init = "override_dh_installinit:\n"
     package_name = package.name.lower()
     for systemd_unit in package.systemd_units:

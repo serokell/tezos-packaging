@@ -33,13 +33,6 @@ snapshot_import_modes = {
     "skip": "Skip snapshot import and synchronize with the network from scratch",
 }
 
-key_import_modes = {
-    "ledger": "From a ledger",
-    "secret-key": "Either the unencrypted or password-encrypted secret key for your address",
-    "remote": "Remote key governed by a signer running on a different machine",
-    "json": "Faucet JSON file from https://teztnets.xyz/",
-}
-
 systemd_enable = {
     "yes": "Enable the services, running them both now and on every boot",
     "no": "Start the services this time only",
@@ -398,18 +391,21 @@ class Setup(Setup):
 
             key_mode_query = get_key_mode_query(key_import_modes)
 
-            ledger_set_up = False
-            while not ledger_set_up:
+            baker_set_up = False
+            while not baker_set_up:
                 self.import_key(key_mode_query, "Baking")
 
-                try:
-                    proc_call(
-                        f"sudo -u tezos {suppress_warning_text} tezos-client {tezos_client_options} "
-                        f"setup ledger to bake for {baker_alias} --main-hwm {self.get_current_head_level()}"
-                    )
-                    ledger_set_up = True
-                except PermissionError:
-                    print("Going back to the import mode selection.")
+                if self.config["key_import_mode"] == "ledger":
+                    try:
+                        proc_call(
+                            f"sudo -u tezos {suppress_warning_text} tezos-client {tezos_client_options} "
+                            f"setup ledger to bake for {baker_alias} --main-hwm {self.get_current_head_level()}"
+                        )
+                        baker_set_up = True
+                    except PermissionError:
+                        print("Going back to the import mode selection.")
+                else:
+                    baker_set_up = True
 
     def register_baker(self):
         print()

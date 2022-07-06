@@ -21,11 +21,11 @@ rec {
   daemonOptions = sharedOptions // {
 
     baseProtocol = mkOption {
-      type = types.enum [ "012-Psithaca" "013-PtJakart" ];
+      type = types.enum [ "013-PtJakart" ];
       description = ''
         Base protocol version.
       '';
-      example = "012-Psithaca";
+      example = "013-PtJakart";
     };
 
     rpcPort = mkOption {

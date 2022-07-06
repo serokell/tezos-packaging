@@ -7,8 +7,6 @@ with lib;
 
 let
   tezos-baker-pkgs = {
-    "012-Psithaca" =
-      "${pkgs.ocamlPackages.tezos-baker-012-Psithaca}/bin/tezos-baker-012-Psithaca";
     "013-PtJakart" =
       "${pkgs.ocamlPackages.tezos-baker-013-PtJakart}/bin/tezos-baker-013-PtJakart";
   };
@@ -60,9 +58,7 @@ in {
   config =
     let baker-start-script = node-cfg:
       let
-        voting-option = if node-cfg.baseProtocol == "012-Psithaca"
-          then if node-cfg.liquidityBakingToggleVote == "off" then "--liquidity-baking-escape-vote" else ""
-          else "--liquidity-baking-toggle-vote ${node-cfg.liquidityBakingToggleVote}";
+        voting-option = "--liquidity-baking-toggle-vote ${node-cfg.liquidityBakingToggleVote}";
       in ''
         ${tezos-baker-pkgs.${node-cfg.baseProtocol}} -d "$STATE_DIRECTORY/client/data" \
         -E "http://localhost:${toString node-cfg.rpcPort}" \

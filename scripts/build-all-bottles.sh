@@ -13,7 +13,7 @@ fi
 set -euo pipefail
 
 # we don't bottle meta-formulas that contain only services
-formulae=("tezos-accuser-012-Psithaca" "tezos-accuser-013-PtJakart" "tezos-admin-client" "tezos-baker-012-Psithaca" "tezos-baker-013-PtJakart" "tezos-client" "tezos-codec" "tezos-node" "tezos-sandbox" "tezos-signer")
+formulae=("tezos-accuser-013-PtJakart" "tezos-admin-client" "tezos-baker-013-PtJakart" "tezos-client" "tezos-codec" "tezos-node" "tezos-sandbox" "tezos-signer")
 
 # tezos-sapling-params is used as a dependency for some of the formulas
 # so we handle it separately.

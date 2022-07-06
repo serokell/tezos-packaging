@@ -30,8 +30,7 @@ that you can use by following the [installation instructions](https://www.raspbe
 In order to run a baking instance, you'll need the following Tezos binaries:
 `tezos-client`, `tezos-node`, `tezos-baker-<proto>`.
 
-The currently supported protocols are `012-Psithaca` (used on `ithacanet` and `mainnet`) and
-`013-PtJakart` (used on `jakartanet`).
+The currently supported protocol is `013-PtJakart` (used on `jakartanet` and `mainnet`)
 Also, note that the corresponding packages have protocol
 suffix in lowercase, e.g. the list of available baker packages can be found
 [here](https://launchpad.net/~serokell/+archive/ubuntu/tezos/+packages?field.name_filter=tezos-baker&field.status_filter=published).
@@ -168,11 +167,6 @@ You can do so manually by running:
 sudo systemctl restart tezos-baking-<network>.service
 ```
 
-If using this option on Ithaca, the format in our configuration files stays the same
-but is transformed to the Ithaca-specific format: `off` is transformed to the
-`--liquidity-baking-escape-vote` command line options, whereas `pass` and `on` result
-in no command line argument and will only affect baking upon switching to Jakarta.
-
 You can also use the [Setup Wizard](#using-the-wizard) which will handle everything for you.
 
 <a name="import"></a>
@@ -290,7 +284,7 @@ or official testnets, you can do so:
 4. Check that all parts are indeed running:
   ```bash
   systemctl status tezos-node-custom@<chain-name>
-  systemctl status tezos-baker-012-psithaca@custom@<chain-name>.service
+  systemctl status tezos-baker-013-ptjakart@custom@<chain-name>.service
 ```
 
 If at any point after that you want to reset the custom baking service, you can set

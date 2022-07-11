@@ -41,7 +41,7 @@ dd if=/dev/urandom of=$bottle_dir/$catalina_bottle count=2000 status=none
 dd if=/dev/urandom of=$bottle_dir/$big_sur_bottle count=2000 status=none
 
 # Run the hash inserting script
-../../scripts/bottle-hashes.sh $bottle_dir
+../../scripts/bottle-hashes.sh "$bottle_dir" "v0.0-1"
 
 # Assert the info was inserted correctly
 catalina_hash="$(sha256sum $bottle_dir/$catalina_bottle | cut -d " " -f 1)"

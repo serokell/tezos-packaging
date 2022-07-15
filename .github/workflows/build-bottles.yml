@@ -17,7 +17,7 @@ jobs:
       matrix:
         os: [ { id: macos-10.15, name: "catalina" } ]
         # we don't bottle meta-formulas that contain only services
-        formula: [tezos-accuser-013-PtJakart, tezos-admin-client, tezos-baker-013-PtJakart, tezos-client, tezos-codec, tezos-node, tezos-sandbox, tezos-signer]
+        formula: [tezos-accuser-013-PtJakart, tezos-accuser-014-PtKathma, tezos-admin-client, tezos-baker-013-PtJakart, tezos-baker-014-PtKathma, tezos-client, tezos-codec, tezos-node, tezos-signer]
 
     steps:
       - name: Checkout

@@ -1,13 +1,13 @@
 # SPDX-FileCopyrightText: 2022 Oxhead Alpha
 # SPDX-License-Identifier: LicenseRef-MIT-OA
 
-class TezosNodeJakartanet < Formula
+class TezosNodeKathmandunet < Formula
   url "file:///dev/null"
   version "v14.0-rc1-1"
 
   depends_on "tezos-node"
 
-  desc "Meta formula that provides background tezos-node service that runs on jakartanet"
+  desc "Meta formula that provides background tezos-node service that runs on kathmandunet"
 
   def install
     startup_contents =
@@ -26,14 +26,14 @@ class TezosNodeJakartanet < Formula
           "$node" config init \
                   --data-dir "$DATA_DIR" \
                   --rpc-addr "$NODE_RPC_ADDR" \
-                  --network=jakartanet \
+                  --network=https://teztnets.xyz/kathmandunet \
                   "$@"
       else
           echo "Updating the node configuration..."
           "$node" config update \
                   --data-dir "$DATA_DIR" \
                   --rpc-addr "$NODE_RPC_ADDR" \
-                  --network=jakartanet \
+                  --network=https://teztnets.xyz/kathmandunet \
                   "$@"
       fi
 
@@ -45,9 +45,9 @@ class TezosNodeJakartanet < Formula
               --rpc-tls="$CERT_PATH","$KEY_PATH"
       fi
     EOS
-    File.write("tezos-node-jakartanet-start", startup_contents)
-    bin.install "tezos-node-jakartanet-start"
-    print "Installing tezos-node-jakartanet service"
+    File.write("tezos-node-kathmandunet-start", startup_contents)
+    bin.install "tezos-node-kathmandunet-start"
+    print "Installing tezos-node-kathmandunet service"
   end
   def plist
     <<~EOS
@@ -59,11 +59,11 @@ class TezosNodeJakartanet < Formula
           <key>Label</key>
           <string>#{plist_name}</string>
           <key>Program</key>
-          <string>#{opt_bin}/tezos-node-jakartanet-start</string>
+          <string>#{opt_bin}/tezos-node-kathmandunet-start</string>
           <key>EnvironmentVariables</key>
             <dict>
               <key>DATA_DIR</key>
-              <string>#{var}/lib/tezos/node-jakartanet</string>
+              <string>#{var}/lib/tezos/node-kathmandunet</string>
               <key>NODE_RPC_ADDR</key>
               <string>127.0.0.1:8732</string>
               <key>CERT_PATH</key>
@@ -81,7 +81,7 @@ class TezosNodeJakartanet < Formula
     EOS
   end
   def post_install
-    mkdir_p "#{var}/lib/tezos/node-jakartanet"
-    system "tezos-node", "config", "init", "--data-dir" "#{var}/lib/tezos/node-jakartanet", "--network", "jakartanet"
+    mkdir_p "#{var}/lib/tezos/node-kathmandunet"
+    system "tezos-node", "config", "init", "--data-dir" "#{var}/lib/tezos/node-kathmandunet", "--network", "https://teztnets.xyz/kathmandunet"
   end
 end

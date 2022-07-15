@@ -11,7 +11,6 @@ tezos_version="$1"
 git clone --single-branch --branch "$tezos_version" https://gitlab.com/tezos/tezos.git --depth 1
 cd tezos
 
-git apply ../static.patch
 export OPAMYES="true"
 # Disable usage of instructions from the ADX extension to avoid incompatibility
 # with old CPUs, see https://gitlab.com/dannywillems/ocaml-bls12-381/-/merge_requests/135/

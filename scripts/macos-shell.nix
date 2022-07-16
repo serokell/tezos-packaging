@@ -3,7 +3,7 @@
 
 # This shell is supposed to be used on macOS machines
 
-{ pkgs ? import (import ../nix/nix/sources.nix {}).nixpkgs { } }:
+{ pkgs, ...}:
 with pkgs;
 mkShell {
   buildInputs = [

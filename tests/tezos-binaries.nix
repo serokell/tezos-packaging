@@ -1,17 +1,15 @@
 # SPDX-FileCopyrightText: 2021 Oxhead Alpha
 # SPDX-License-Identifier: LicenseRef-MIT-OA
-{ path-to-binaries ? null } @ args:
+
+{ nixpkgs, pkgs, ... }: { path-to-binaries } @ args:
 let
-  nixpkgs = (import ../nix/nix/sources.nix).nixpkgs;
-  pkgs = import ../nix/build/pkgs.nix {};
-  zcash = import ../nix/build/zcash.nix {};
 in import "${nixpkgs}/nixos/tests/make-test-python.nix" ({ ... }:
 {
   nodes.machine = { ... }: {
     virtualisation.memorySize = 1024;
     virtualisation.diskSize = 1024;
     environment.sessionVariables.XDG_DATA_DIRS =
-      [ "${zcash}" ];
+      [ "${pkgs.zcash}" ];
     security.pki.certificateFiles = [ ./ca.cert ];
   };
 

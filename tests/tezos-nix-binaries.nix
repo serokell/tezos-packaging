@@ -1,9 +1,9 @@
 # SPDX-FileCopyrightText: 2021 Oxhead Alpha
 # SPDX-License-Identifier: LicenseRef-MIT-OA
+{ nixpkgs, pkgs, ... }:
 let
-  nixpkgs = (import ../nix/nix/sources.nix).nixpkgs;
-  pkgs = import ../nix/build/pkgs.nix {};
-  inherit (pkgs.ocamlPackages) tezos-client tezos-admin-client tezos-node tezos-signer tezos-codec
+  inherit (pkgs) system;
+  inherit (pkgs.tezosPackages) tezos-client tezos-admin-client tezos-node tezos-signer tezos-codec
     tezos-accuser-013-PtJakart tezos-baker-013-PtJakart;
 in import "${nixpkgs}/nixos/tests/make-test-python.nix" ({ ... }:
 {
@@ -43,4 +43,4 @@ in import "${nixpkgs}/nixos/tests/make-test-python.nix" ({ ... }:
         tezos_codec,
     ]
     ${builtins.readFile ./test_script.py}'';
-})
+}) { inherit pkgs system; }

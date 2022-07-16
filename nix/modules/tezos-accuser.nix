@@ -8,7 +8,7 @@ with lib;
 let
   tezos-accuser-pkgs = {
     "013-PtJakart" =
-      "${pkgs.ocamlPackages.tezos-accuser-013-PtJakart}/bin/tezos-accuser-013-PtJakart";
+      "${pkgs.tezosPackages.tezos-accuser-013-PtJakart}/bin/tezos-accuser-013-PtJakart";
   };
   cfg = config.services.tezos-accuser;
   common = import ./common.nix { inherit lib; inherit pkgs; };

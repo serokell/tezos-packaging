@@ -1,11 +1,25 @@
 # SPDX-FileCopyrightText: 2021 Oxhead Alpha
 # SPDX-License-Identifier: LicenseRef-MIT-OA
 
-{ pkgs ? import (import ../nix/nix/sources.nix {}).nixpkgs { } }:
+{ pkgs, ...}:
 with pkgs;
 mkShell {
   buildInputs = [
-    coreutils gnused gh git rename gnupg dput rpm debian-devscripts which util-linux perl
-    jq niv
+    # NOTE using the most recent nix for sticky nix flake lock update feature
+    nix
+    python3
+    coreutils
+    gnused
+    gh
+    git
+    rename
+    gnupg
+    dput
+    rpm
+    debian-devscripts
+    which
+    util-linux
+    perl
+    jq
   ];
 }

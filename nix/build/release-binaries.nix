@@ -1,7 +1,8 @@
 # SPDX-FileCopyrightText: 2021 Oxhead Alpha
 # SPDX-License-Identifier: LicenseRef-MIT-OA
+
+protocols:
 let
-  protocols = import ../protocols.nix;
   protocolsFormatted =
     builtins.concatStringsSep ", " (protocols.allowed ++ protocols.active);
 in [

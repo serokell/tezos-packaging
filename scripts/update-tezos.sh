@@ -1,5 +1,5 @@
 #! /usr/bin/env nix-shell
-#! nix-shell shell.nix -i bash
+#! nix-shell .. -A devShells.x86_64-linux.autorelease -i bash
 # SPDX-FileCopyrightText: 2021 Oxhead Alpha
 # SPDX-License-Identifier: LicenseRef-MIT-OA
 
@@ -24,13 +24,12 @@ source scripts/version.sh
 cd ..
 rm -rf upstream-repo
 
-git clone --bare https://gitlab.com/tezos/opam-repository.git upstream-opam-repository
-opam_repository_branch="$(git --git-dir=upstream-opam-repository for-each-ref --contains "$opam_repository_tag" --count=1 --sort='-refname' --format="%(refname:short)" refs/)"
-rm -rf upstream-opam-repository
-
 branch_name="auto/$latest_upstream_tag-release"
 
-our_tezos_tag="$(jq -r '.tezos.ref' nix/nix/sources.json | cut -d'/' -f3)"
+our_tezos_tag="$(jq -r '.tezos_ref' meta.json | cut -d'/' -f3)"
+
+new_meta=$(jq ".tezos_ref=\"$latest_upstream_tag\"" meta.json)
+echo "$new_meta" > meta.json
 
 if [[ "$latest_upstream_tag" != "$our_tezos_tag" ]]; then
   # If corresponding branch doesn't exist yet, then the release PR
@@ -39,12 +38,10 @@ if [[ "$latest_upstream_tag" != "$our_tezos_tag" ]]; then
     git switch -c "$branch_name"
     echo "Updating Tezos to $latest_upstream_tag"
 
-    cd nix
-    niv update tezos -a ref="refs/tags/$latest_upstream_tag" -a rev="$latest_upstream_tag_hash"
-    niv update opam-repository -a rev="$opam_repository_tag" -a ref="$opam_repository_branch" -b "$opam_repository_branch"
+    ./update-input.py tezos "$latest_upstream_tag_hash"
+    ./update-input.py opam-repository "$opam_repository_tag"
     git commit -a -m "[Chore] Bump Tezos sources to $latest_upstream_tag" --gpg-sign="tezos-packaging@serokell.io"
 
-    cd ..
     ./scripts/update-brew-formulae.sh "$latest_upstream_tag-1"
     git commit -a -m "[Chore] Update brew formulae for $latest_upstream_tag" --gpg-sign="tezos-packaging@serokell.io"
 

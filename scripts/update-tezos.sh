@@ -38,8 +38,8 @@ if [[ "$latest_upstream_tag" != "$our_tezos_tag" ]]; then
     git switch -c "$branch_name"
     echo "Updating Tezos to $latest_upstream_tag"
 
-    ./update-input.py tezos "$latest_upstream_tag_hash"
-    ./update-input.py opam-repository "$opam_repository_tag"
+    ./scripts/update-input.py tezos "$latest_upstream_tag_hash"
+    ./scripts/update-input.py opam-repository "$opam_repository_tag"
     git commit -a -m "[Chore] Bump Tezos sources to $latest_upstream_tag" --gpg-sign="tezos-packaging@serokell.io"
 
     ./scripts/update-brew-formulae.sh "$latest_upstream_tag-1"

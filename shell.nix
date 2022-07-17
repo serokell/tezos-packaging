@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2022 Oxhead Alpha
 # SPDX-License-Identifier: LicenseRef-MIT-OA
 
-{ pkgs, ...  }:
+{ pkgs, meta, ...  }:
 with pkgs; mkShell {
   buildInputs = [
     nix
@@ -12,6 +12,10 @@ with pkgs; mkShell {
     python3Packages.black
     shellcheck
     vagrant
+    libvirt
+    qemu
+    jq
+    buildkite-agent
   ];
-  TEZOS_VERSION="v13.1";
+  TEZOS_VERSION= with pkgs.lib; lists.last (strings.splitString "/" (meta.tezos_ref));
 }

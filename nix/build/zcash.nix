@@ -4,7 +4,7 @@
 
 # zcash-params required for building some of the tezos binaries
 # and for running tests
-{ pkgs }:
+{ pkgs, ... }:
 with pkgs;
 let
   sapling-spend-params = fetchurl {

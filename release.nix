@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: LicenseRef-MIT-TQ
 
-{ pkgs, sources, meta, protocols, ... }:
+{ pkgs, sources, meta, protocols, ... }: { docker-binaries, docker-arm-binaries }:
 let
   source = sources.tezos;
   commonMeta = {
@@ -13,9 +13,9 @@ let
     licenseFile = "${source}/LICENSE";
   } // meta;
   release = pkgs.callPackage ./tezos-release.nix {
-    binaries = ./binaries/docker;
-    arm-binaries = ./arm-binaries/docker;
+    binaries = docker-binaries;
+    arm-binaries = docker-arm-binaries;
     inherit commonMeta protocols; inherit (pkgs.lib) replaceStrings;
   };
 
-in { tezos-release = release; }
+in release

@@ -23,8 +23,8 @@
     tezos.flake = false;
   };
 
-  outputs = inputs@{ self, nixpkgs, flake-utils, serokell-nix, nix, ... }: {
-
+  outputs = inputs@{ self, nixpkgs, nixpkgs-unstable, flake-utils, serokell-nix, nix, ... }:
+  {
       nixosModules = {
         tezos-node = import ./nix/modules/tezos-node.nix;
         tezos-accuser = import ./nix/modules/tezos-accuser.nix;
@@ -39,21 +39,27 @@
 
       ocaml-overlay = callPackage ./nix/build/ocaml-overlay.nix {};
 
+      overlay = final: prev: {
+        inherit (inputs) serokell-nix;
+        nix = nix.packages.${system}.default;
+        zcash-params = callPackage ./nix/build/zcash.nix {};
+      };
+
       pkgs = import nixpkgs {
         inherit system;
         overlays = [
+          overlay
           serokell-nix.overlay
           ocaml-overlay
-          (_: _: { inherit serokell-nix;
-                   nix = nix.packages.${system}.default;
-                 })
         ];
       };
 
-      unstable = import inputs.nixpkgs-unstable {
+      unstable = import nixpkgs-unstable {
         inherit system;
         overlays = [(_: _: { nix = nix.packages.${system}.default; })];
       };
+
+      pkgs-darwin = nixpkgs-unstable.legacyPackages."aarch64-darwin";
 
       callPackage = pkg: input:
         import pkg (inputs // { inherit sources protocols meta pkgs; } // input);
@@ -68,23 +74,18 @@
 
       tezos-release = callPackage ./release.nix {};
 
-    in rec {
+    in {
 
-      legacyPackages = pkgs;
+      legacyPackages = unstable;
 
-      inherit tezos-release;
+      release = tezos-release;
 
-      apps.tezos-client = {
-        type = "app";
-        program = "${packages.tezos-client}/bin/tezos-client";
-      };
-
-      packages = binaries // { default = packages.binaries; };
+      packages = binaries // { default = self.packages.${system}.binaries; };
 
       devShells = {
         buildkite = callPackage ./.buildkite/shell.nix {};
         autorelease = callPackage ./scripts/shell.nix {};
-        autorelease-macos = callPackage ./scripts/macos-shell.nix {};
+        autorelease-macos = callPackage ./scripts/macos-shell.nix { pkgs = pkgs-darwin; };
         dev = callPackage ./shell.nix { pkgs = unstable; };
       };
 

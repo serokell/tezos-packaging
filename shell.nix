@@ -12,6 +12,8 @@ with pkgs; mkShell {
     python3Packages.black
     shellcheck
     vagrant
+    jq
+    buildkite-agent
   ];
-  TEZOS_VERSION="v13.1";
+  TEZOS_VERSION="v13.0";
 }

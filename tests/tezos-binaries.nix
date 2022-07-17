@@ -9,7 +9,7 @@ in import "${nixpkgs}/nixos/tests/make-test-python.nix" ({ ... }:
     virtualisation.memorySize = 1024;
     virtualisation.diskSize = 1024;
     environment.sessionVariables.XDG_DATA_DIRS =
-      [ "${pkgs.zcash}" ];
+      [ "${pkgs.zcash-params}" ];
     security.pki.certificateFiles = [ ./ca.cert ];
   };
 

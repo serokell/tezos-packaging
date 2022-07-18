@@ -23,74 +23,77 @@
     tezos.flake = false;
   };
 
-  outputs = inputs@{ self, nixpkgs, nixpkgs-unstable, serokell-nix, nix, ... }:
-  let
-    system = "x86_64-linux";
-
-    ocaml-overlay = callPackage ./nix/build/ocaml-overlay.nix {};
-
-    overlay = final: prev: {
-      inherit (inputs) serokell-nix;
-      nix = nix.packages.${system}.default;
-      zcash-params = callPackage ./nix/build/zcash.nix {};
-    };
-
-    pkgs = import nixpkgs {
-      inherit system;
-      overlays = [
-        overlay
-        serokell-nix.overlay
-        ocaml-overlay
-      ];
-    };
-
-    unstable = import nixpkgs-unstable {
-      inherit system;
-      overlays = [(_: _: { nix = nix.packages.${system}.default; })];
-    };
-
-    pkgs-darwin = nixpkgs-unstable.legacyPackages."aarch64-darwin";
-
-    callPackage = pkg: input:
-      import pkg (inputs // { inherit sources protocols meta pkgs; } // input);
-
-    protocols = pkgs.lib.importJSON ./protocols.json;
-
-    meta = pkgs.lib.importJSON ./meta.json;
-
-    sources = { inherit (inputs) tezos opam-repository; };
-
-    binaries = callPackage ./nix {};
-
-    tezos-release = callPackage ./release.nix {};
-
-  in
+  outputs = inputs@{ self, nixpkgs, nixpkgs-unstable, flake-utils, serokell-nix, nix, ... }:
   {
-    nixosModules = {
-      tezos-node = import ./nix/modules/tezos-node.nix;
-      tezos-accuser = import ./nix/modules/tezos-accuser.nix;
-      tezos-baker = import ./nix/modules/tezos-baker.nix;
-      tezos-signer = import ./nix/modules/tezos-signer.nix;
-    };
+      nixosModules = {
+        tezos-node = import ./nix/modules/tezos-node.nix;
+        tezos-accuser = import ./nix/modules/tezos-accuser.nix;
+        tezos-baker = import ./nix/modules/tezos-baker.nix;
+        tezos-signer = import ./nix/modules/tezos-signer.nix;
+      };
 
-    legacyPackages.${system} = unstable;
+    } // flake-utils.lib.eachSystem [
+      "x86_64-linux"
+    ] (system:
+    let
 
-    release = tezos-release;
+      ocaml-overlay = callPackage ./nix/build/ocaml-overlay.nix {};
 
-    packages.${system} = binaries // { default = self.packages.${system}.binaries; };
+      overlay = final: prev: {
+        inherit (inputs) serokell-nix;
+        nix = nix.packages.${system}.default;
+        zcash-params = callPackage ./nix/build/zcash.nix {};
+      };
 
-    devShells.${system} = {
-      buildkite = callPackage ./.buildkite/shell.nix {};
-      autorelease = callPackage ./scripts/shell.nix {};
-      autorelease-macos = callPackage ./scripts/macos-shell.nix { pkgs = pkgs-darwin; };
-      dev = callPackage ./shell.nix { pkgs = unstable; };
-    };
+      pkgs = import nixpkgs {
+        inherit system;
+        overlays = [
+          overlay
+          serokell-nix.overlay
+          ocaml-overlay
+        ];
+      };
 
-    checks.${system} = {
-      tezos-nix-binaries = callPackage ./tests/tezos-nix-binaries.nix {};
-      tezos-modules = callPackage ./tests/tezos-modules.nix {};
-    };
+      unstable = import nixpkgs-unstable {
+        inherit system;
+        overlays = [(_: _: { nix = nix.packages.${system}.default; })];
+      };
 
-    binaries-test = callPackage ./tests/tezos-binaries.nix {};
-  };
+      pkgs-darwin = nixpkgs-unstable.legacyPackages."aarch64-darwin";
+
+      callPackage = pkg: input:
+        import pkg (inputs // { inherit sources protocols meta pkgs; } // input);
+
+      protocols = pkgs.lib.importJSON ./protocols.json;
+
+      meta = pkgs.lib.importJSON ./meta.json;
+
+      sources = { inherit (inputs) tezos opam-repository; };
+
+      binaries = callPackage ./nix {};
+
+      tezos-release = callPackage ./release.nix {};
+
+    in {
+
+      legacyPackages = unstable;
+
+      release = tezos-release;
+
+      packages = binaries // { default = self.packages.${system}.binaries; };
+
+      devShells = {
+        buildkite = callPackage ./.buildkite/shell.nix {};
+        autorelease = callPackage ./scripts/shell.nix {};
+        autorelease-macos = callPackage ./scripts/macos-shell.nix { pkgs = pkgs-darwin; };
+        dev = callPackage ./shell.nix { pkgs = unstable; };
+      };
+
+      checks = {
+        tezos-nix-binaries = callPackage ./tests/tezos-nix-binaries.nix {};
+        tezos-modules = callPackage ./tests/tezos-modules.nix {};
+      };
+
+      binaries-test = callPackage ./tests/tezos-binaries.nix {};
+    });
 }

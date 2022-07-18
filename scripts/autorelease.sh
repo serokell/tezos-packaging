@@ -21,7 +21,7 @@ trap finish EXIT
 assets_dir=$TEMPDIR/assets
 
 # Build tezos-release
-nix-build . -A release -o "$TEMPDIR"/"$project" \
+nix-build . -A release.x86_64-linux -o "$TEMPDIR"/"$project" \
           --arg docker-binaries ./binaries/docker --arg docker-arm-binaries ./arm-binaries/docker
 mkdir -p "$assets_dir"
 # Move archive with binaries and tezos license to assets

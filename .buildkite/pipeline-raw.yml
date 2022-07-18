@@ -170,7 +170,7 @@ steps:
    - buildkite-agent artifact download "docker/*" arm-binaries --step "build-arm-via-docker"
    - ls binaries
    - ./scripts/autorelease.sh "$BUILDKITE_MESSAGE"
-   branches: master
+   #branches: master
    depends_on:
     - "build-via-docker"
     - "build-arm-via-docker"

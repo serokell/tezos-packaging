@@ -87,7 +87,7 @@ steps:
    commands:
    - buildkite-agent artifact download "docker/*" . --step "build-via-docker"
    - chmod +x ./docker/*
-   - nix-build . -A binaries-test.x86_64-linux --no-out-link --arg path-to-binaries ./docker
+   - nix-build . -A binaries-test --no-out-link --arg path-to-binaries ./docker
    branches: "!master"
    depends_on:
     - "build-via-docker"

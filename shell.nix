@@ -12,6 +12,8 @@ with pkgs; mkShell {
     python3Packages.black
     shellcheck
     vagrant
+    libvirt
+    qemu
     jq
     buildkite-agent
   ];

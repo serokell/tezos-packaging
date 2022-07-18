@@ -1,5 +1,5 @@
 #! /usr/bin/env nix-shell
-#! nix-shell .. -A devShells.x86_64-linux.autorelease-macos -i bash
+#! nix-shell .. -A autorelease-macos -i bash
 # shellcheck shell=bash
 
 # SPDX-FileCopyrightText: 2022 Oxhead Alpha

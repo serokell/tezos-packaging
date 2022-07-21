@@ -17,10 +17,14 @@ from .systemd import Service, ServiceFile, SystemdUnit, Unit, Install
 networks = {
     "mainnet": "mainnet",
     "jakartanet": "jakartanet",
+    "ghostnet": "ghostnet",
+    "kathmandunet": "https://teztnets.xyz/kathmandunet",
 }
 networks_protos = {
     "mainnet": ["013-PtJakart"],
     "jakartanet": ["013-PtJakart"],
+    "ghostnet": ["013-PtJakart"],
+    "kathmandunet": ["014-PtKathma"]
 }
 
 signer_units = [

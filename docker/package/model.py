@@ -395,7 +395,7 @@ set -e
                 "-q",
                 "-O",
                 out,
-                f"https://gitlab.com/tezos/tezos/-/raw/v{self.meta.version}/LICENSE",
+                f"https://gitlab.com/tezos/tezos/-/raw/{self.meta.license_version}/LICENSE",
             ],
             check=True,
         )

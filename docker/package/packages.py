@@ -24,7 +24,7 @@ networks_protos = {
     "mainnet": ["013-PtJakart"],
     "jakartanet": ["013-PtJakart"],
     "ghostnet": ["013-PtJakart"],
-    "kathmandunet": ["014-PtKathma"]
+    "kathmandunet": ["014-PtKathma"],
 }
 
 signer_units = [

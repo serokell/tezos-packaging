@@ -6,7 +6,7 @@ let
 in import "${nixpkgs}/nixos/tests/make-test-python.nix" ({ ... }:
 {
   nodes.machine = { ... }: {
-    virtualisation.memorySize = 1024;
+    virtualisation.memorySize = 2048;
     virtualisation.diskSize = 1024;
     environment.sessionVariables.XDG_DATA_DIRS =
       [ "${pkgs.zcash-params}" ];

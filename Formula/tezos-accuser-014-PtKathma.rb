@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2022 Oxhead Alpha
 # SPDX-License-Identifier: LicenseRef-MIT-OA
 
-class TezosAccuser014PtKathma < Formula
+class TezosAccuser014Ptkathma < Formula
   @all_bins = []
 
   class << self
@@ -25,7 +25,7 @@ class TezosAccuser014PtKathma < Formula
   desc "Daemon for accusing"
 
   bottle do
-    root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosAccuser014PtKathma.version}/"
+    root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosAccuser014Ptkathma.version}/"
   end
 
   def make_deps

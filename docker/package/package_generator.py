@@ -62,6 +62,7 @@ def get_build_deps(args):
         "opam",
         "git",
         "autoconf",
+        "coreutils",
     ]
 
 

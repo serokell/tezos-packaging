@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2022 Oxhead Alpha
 # SPDX-License-Identifier: LicenseRef-MIT-OA
 
-class TezosBaker014PtKathma < Formula
+class TezosBaker014Ptkathma < Formula
   @all_bins = []
 
   class << self
@@ -13,7 +13,7 @@ class TezosBaker014PtKathma < Formula
 
   version "v14.0-rc1-1"
 
-  build_dependencies = %w[pkg-config autoconf rsync wget rustup-init]
+  build_dependencies = %w[pkg-config coreutils autoconf rsync wget rustup-init]
   build_dependencies.each do |dependency|
     depends_on dependency => :build
   end
@@ -25,7 +25,7 @@ class TezosBaker014PtKathma < Formula
   desc "Daemon for baking"
 
   bottle do
-    root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosBaker014PtKathma.version}/"
+    root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosBaker014Ptkathma.version}/"
   end
 
   def make_deps

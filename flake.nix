@@ -25,6 +25,9 @@
   };
 
   outputs = inputs@{ self, nixpkgs, nixpkgs-unstable, flake-utils, serokell-nix, nix, ... }:
+  let
+    pkgs-darwin = nixpkgs-unstable.legacyPackages."aarch64-darwin";
+  in pkgs-darwin.lib.recursiveUpdate
   {
       nixosModules = {
         tezos-node = import ./nix/modules/tezos-node.nix;
@@ -33,7 +36,10 @@
         tezos-signer = import ./nix/modules/tezos-signer.nix;
       };
 
-    } // flake-utils.lib.eachSystem [
+      devShells."aarch64-darwin".autorelease-macos =
+        import ./scripts/macos-shell.nix { pkgs = pkgs-darwin; };
+
+  } (flake-utils.lib.eachSystem [
       "x86_64-linux"
     ] (system:
     let
@@ -60,8 +66,6 @@
         overlays = [(_: _: { nix = nix.packages.${system}.default; })];
       };
 
-      pkgs-darwin = nixpkgs-unstable.legacyPackages."aarch64-darwin";
-
       callPackage = pkg: input:
         import pkg (inputs // { inherit sources protocols meta pkgs; } // input);
 
@@ -73,20 +77,19 @@
 
       binaries = callPackage ./nix {};
 
-      tezos-release = callPackage ./release.nix {};
+      release = callPackage ./release.nix {};
 
     in {
 
       legacyPackages = unstable;
 
-      release = tezos-release;
+      inherit release;
 
       packages = binaries // { default = self.packages.${system}.binaries; };
 
       devShells = {
         buildkite = callPackage ./.buildkite/shell.nix {};
         autorelease = callPackage ./scripts/shell.nix {};
-        autorelease-macos = callPackage ./scripts/macos-shell.nix { pkgs = pkgs-darwin; };
         dev = callPackage ./shell.nix { pkgs = unstable; };
       };
 
@@ -96,5 +99,5 @@
       };
 
       binaries-test = callPackage ./tests/tezos-binaries.nix {};
-    });
+    }));
 }

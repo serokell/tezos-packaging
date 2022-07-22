@@ -325,15 +325,17 @@
         "flake-compat": "flake-compat_2",
         "flake-utils": "flake-utils_2",
         "nixpkgs": "nixpkgs_3",
-        "opam-repository": "opam-repository",
+        "opam-repository": [
+          "opam-repository"
+        ],
         "opam2json": "opam2json"
       },
       "locked": {
-        "lastModified": 1651063114,
-        "narHash": "sha256-rB+5No8Tc77T9nj5TAX/WhNZH+aZv+HTWfxPUZ+bmB0=",
+        "lastModified": 1657909029,
+        "narHash": "sha256-dsNIoNA4C2hu/5TllM89+7RUqchVjp8CUUSmG69Z2w0=",
         "owner": "tweag",
         "repo": "opam-nix",
-        "rev": "44b97c71a379bb9517135600c7d5e83d941e65d9",
+        "rev": "ac7ba6e749c01379c748eda43ae715e1a8fa671f",
         "type": "github"
       },
       "original": {
@@ -345,27 +347,11 @@
     "opam-repository": {
       "flake": false,
       "locked": {
-        "lastModified": 1643196577,
-        "narHash": "sha256-w8lV9xEGqwpr/LtGBpDFSha+7XA1Zv+Cw7977bqqZNk=",
-        "owner": "ocaml",
-        "repo": "opam-repository",
-        "rev": "4b471f489a7199ec4dfb67363243c64caac9306c",
-        "type": "github"
-      },
-      "original": {
-        "owner": "ocaml",
-        "repo": "opam-repository",
-        "type": "github"
-      }
-    },
-    "opam-repository_2": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1651666905,
-        "narHash": "sha256-iHpY6tD0E3yqds07Lzhx77QkCFm61nuJceoeuUO77O0=",
+        "lastModified": 1657872079,
+        "narHash": "sha256-HKQOL+vBLwy8Wdy7/yeK2EcKwJnr7r8rh2pT6TPfMdw=",
         "owner": "tezos",
         "repo": "opam-repository",
-        "rev": "845375388d477153b36344f69a23a1b34b2bf82e",
+        "rev": "b2bd9e9176c256069b00a697c75eda9c43d388b5",
         "type": "gitlab"
       },
       "original": {
@@ -400,7 +386,7 @@
         "nixpkgs": "nixpkgs_2",
         "nixpkgs-unstable": "nixpkgs-unstable",
         "opam-nix": "opam-nix",
-        "opam-repository": "opam-repository_2",
+        "opam-repository": "opam-repository",
         "serokell-nix": "serokell-nix",
         "tezos": "tezos"
       }
@@ -429,11 +415,11 @@
     "tezos": {
       "flake": false,
       "locked": {
-        "lastModified": 1651744524,
-        "narHash": "sha256-AEY/m3c+6Yo/gqzO+4vzExQ20ICleIUsSFO1qWTO/OI=",
+        "lastModified": 1657888570,
+        "narHash": "sha256-K4OlGRwyU0gpnM9uzJT2UuIhW/sBuDOIVZYe43rCNK0=",
         "owner": "tezos",
         "repo": "tezos",
-        "rev": "cb9f439e58c761e76ade589d1cdbd2abb737dc68",
+        "rev": "e0871e19f4ff9acd52dc8458bc46a90b7fd20a1d",
         "type": "gitlab"
       },
       "original": {

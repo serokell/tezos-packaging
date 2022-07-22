@@ -21,7 +21,7 @@ rec {
   daemonOptions = sharedOptions // {
 
     baseProtocol = mkOption {
-      type = types.enum [ "013-PtJakart" ];
+      type = types.enum [ "013-PtJakart" "014-PtKathma" ];
       description = ''
         Base protocol version.
       '';

@@ -13,6 +13,7 @@
     nix.url = "github:nixos/nix";
 
     opam-nix.url = "github:tweag/opam-nix";
+    opam-nix.inputs.opam-repository.follows = "opam-repository";
 
     flake-compat.flake = false;
 

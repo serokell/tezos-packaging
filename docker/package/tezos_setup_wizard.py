@@ -98,8 +98,9 @@ network_query = Step(
     id="network",
     prompt="Which Tezos network would you like to use?\nCurrently supported:",
     help="The selected network will be used to set up all required services.\n"
-    "The currently supported protocol is 013-PtJakart (used on jakartanet and mainnet).\n"
-    "Keep in mind that you must select the test network (jakartanet)\n"
+    "The currently supported protocol is 013-PtJakart (used on jakartanet, ghostnet and mainnet)\n"
+    "and 014-PtKathma (used on kathmandunet)"
+    "Keep in mind that you must select the test network (e.g. jakartanet)\n"
     "if you plan on baking with a faucet JSON file.\n",
     options=networks,
     validator=Validator(enum_range_validator(networks)),

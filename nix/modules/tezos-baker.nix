@@ -9,6 +9,8 @@ let
   tezos-baker-pkgs = {
     "013-PtJakart" =
       "${pkgs.tezosPackages.tezos-baker-013-PtJakart}/bin/tezos-baker-013-PtJakart";
+    "014-PtKathma" =
+      "${pkgs.tezosPackages.tezos-baker-014-PtKathma}/bin/tezos-baker-014-PtKathma";
   };
   tezos-client = "${pkgs.tezosPackages.tezos-client}/bin/tezos-client";
   cfg = config.services.tezos-baker;

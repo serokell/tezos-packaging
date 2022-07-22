@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2022 Oxhead Alpha
 # SPDX-License-Identifier: LicenseRef-MIT-OA
 
-class TezosBaker013Ptjakart < Formula
+class TezosBaker014PtKathma < Formula
   @all_bins = []
 
   class << self
@@ -25,7 +25,7 @@ class TezosBaker013Ptjakart < Formula
   desc "Daemon for baking"
 
   bottle do
-    root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosBaker013Ptjakart.version}/"
+    root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosBaker014PtKathma.version}/"
   end
 
   def make_deps
@@ -58,7 +58,7 @@ class TezosBaker013Ptjakart < Formula
 
       set -euo pipefail
 
-      baker="#{bin}/tezos-baker-013-PtJakart"
+      baker="#{bin}/tezos-baker-014-PtKathma"
 
       baker_dir="$DATA_DIR"
 
@@ -87,14 +87,14 @@ class TezosBaker013Ptjakart < Formula
           launch_baker "$BAKER_ACCOUNT"
       fi
     EOS
-    File.write("tezos-baker-013-PtJakart-start", startup_contents)
-    bin.install "tezos-baker-013-PtJakart-start"
+    File.write("tezos-baker-014-PtKathma-start", startup_contents)
+    bin.install "tezos-baker-014-PtKathma-start"
     make_deps
-    install_template "src/proto_013_PtJakart/bin_baker/main_baker_013_PtJakart.exe",
-                     "_build/default/src/proto_013_PtJakart/bin_baker/main_baker_013_PtJakart.exe",
-                     "tezos-baker-013-PtJakart"
+    install_template "src/proto_014_PtKathma/bin_baker/main_baker_014_PtKathma.exe",
+                     "_build/default/src/proto_014_PtKathma/bin_baker/main_baker_014_PtKathma.exe",
+                     "tezos-baker-014-PtKathma"
   end
-  plist_options manual: "tezos-baker-013-PtJakart run with local node"
+  plist_options manual: "tezos-baker-014-PtKathma run with local node"
   def plist
     <<~EOS
       <?xml version="1.0" encoding="UTF-8"?>
@@ -105,7 +105,7 @@ class TezosBaker013Ptjakart < Formula
           <key>Label</key>
           <string>#{plist_name}</string>
           <key>Program</key>
-          <string>#{opt_bin}/tezos-baker-013-PtJakart-start</string>
+          <string>#{opt_bin}/tezos-baker-014-PtKathma-start</string>
           <key>EnvironmentVariables</key>
             <dict>
               <key>DATA_DIR</key>

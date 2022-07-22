@@ -8,7 +8,7 @@
 
 set -euo pipefail
 
-binaries=("tezos-admin-client" "tezos-client" "tezos-node" "tezos-signer" "tezos-codec" "tezos-sandbox")
+binaries=("tezos-admin-client" "tezos-client" "tezos-node" "tezos-signer" "tezos-codec")
 
 for proto in $(jq -r ".active | .[]" ../protocols.json); do
     binaries+=("tezos-accuser-$proto" "tezos-baker-$proto" )

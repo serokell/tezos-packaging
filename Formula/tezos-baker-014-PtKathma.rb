@@ -13,7 +13,7 @@ class TezosBaker014PtKathma < Formula
 
   version "v14.0-rc1-1"
 
-  build_dependencies = %w[pkg-config autoconf rsync wget rustup-init]
+  build_dependencies = %w[pkg-config coreutils autoconf rsync wget rustup-init]
   build_dependencies.each do |dependency|
     depends_on dependency => :build
   end

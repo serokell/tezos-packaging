@@ -3,6 +3,8 @@
 
 env:
   USE_NEWER_NIX: 1
+  SET_VERSION: "export TEZOS_VERSION=\"$(cat meta.json | jq -r '.tezos_ref' | cut -d'/' -f3)\""
+
 
 steps:
  - label: Check for new Tezos release
@@ -16,7 +18,7 @@ steps:
    agents:
      queue: "docker"
    commands:
-   - export TEZOS_VERSION="$(cat nix/nix/sources.json | jq -r '.tezos.ref' | cut -d'/' -f3)"
+   - eval "$SET_VERSION"
    - ./docker/docker-tezos-packages.sh --os ubuntu --type source
    - ./docker/docker-tezos-packages.sh --os fedora --type source
    artifact_paths:
@@ -27,7 +29,7 @@ steps:
    depends_on:
    - "build-source-packages"
    commands:
-   - export TEZOS_VERSION="$(cat nix/nix/sources.json | jq -r '.tezos.ref' | cut -d'/' -f3)"
+   - eval "$SET_VERSION"
    - buildkite-agent artifact download "out/*" . --step build-source-packages
    - ./scripts/publish-native-packages.sh out
 

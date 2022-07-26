@@ -1,6 +1,7 @@
 # SPDX-FileCopyrightText: 2021 Oxhead Alpha
 # SPDX-License-Identifier: LicenseRef-MIT-OA
 import os, json
+from unittest.mock import patch
 
 from .meta import packages_meta
 
@@ -132,12 +133,16 @@ packages = [
         additional_native_deps=["tezos-sapling-params", "udev"],
         postinst_steps=ledger_udev_postinst,
         dune_filepath="src/bin_client/main_client.exe",
+        # TODO: remove on the next upstream release
+        patches=["build-binary.sh.patch"],
     ),
     TezosBinaryPackage(
         "tezos-admin-client",
         "Administration tool for the node",
         meta=packages_meta,
         dune_filepath="src/bin_client/main_admin.exe",
+        # TODO: remove on the next upstream release
+        patches=["build-binary.sh.patch"],
     ),
     TezosBinaryPackage(
         "tezos-signer",
@@ -147,12 +152,16 @@ packages = [
         systemd_units=signer_units,
         postinst_steps=ledger_udev_postinst,
         dune_filepath="src/bin_signer/main_signer.exe",
+        # TODO: remove on the next upstream release
+        patches=["build-binary.sh.patch"],
     ),
     TezosBinaryPackage(
         "tezos-codec",
         "A client to decode and encode JSON",
         meta=packages_meta,
         dune_filepath="src/bin_codec/codec.exe",
+        # TODO: remove on the next upstream release
+        patches=["build-binary.sh.patch"],
     ),
 ]
 
@@ -256,6 +265,8 @@ packages.append(
         postrm_steps=node_postrm_steps,
         additional_native_deps=["tezos-sapling-params", {"ubuntu": "netbase"}],
         dune_filepath="src/bin_node/main.exe",
+        # TODO: remove on the next upstream release
+        patches=["build-binary.sh.patch"],
     )
 )
 
@@ -385,6 +396,8 @@ for proto in active_protocols:
                 "udev",
             ],
             dune_filepath=f"src/proto_{proto_snake_case}/bin_baker/main_baker_{proto_snake_case}.exe",
+            # TODO: remove on the next upstream release
+            patches=["build-binary.sh.patch"],
         )
     )
     packages.append(
@@ -410,6 +423,8 @@ for proto in active_protocols:
             additional_native_deps=["udev"],
             postinst_steps=daemon_postinst_common + ledger_udev_postinst,
             dune_filepath=f"src/proto_{proto_snake_case}/bin_accuser/main_accuser_{proto_snake_case}.exe",
+            # TODO: remove on the next upstream release
+            patches=["build-binary.sh.patch"],
         )
     )
 

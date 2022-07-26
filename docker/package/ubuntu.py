@@ -71,6 +71,17 @@ def build_ubuntu_package(
                     )
                     source_path = f"{cwd}/scripts/{source_script_name}"
                     shutil.copy(source_path, dest_path)
+        # Patches only make sense when we're reusing the old sources that are not static binary
+        if (
+            len(pkg.patches) > 0
+            and source_archive_path is not None
+            and binaries_dir is None
+        ):
+            os.makedirs("debian/patches")
+            with open("debian/patches/series", "w") as f:
+                for patch in pkg.patches:
+                    shutil.copy(f"{cwd}/patches/{patch}", f"debian/patches/{patch}")
+                    f.write(patch)
         with open("debian/compat", "w") as f:
             f.write("10")
         pkg.gen_install("debian/install")

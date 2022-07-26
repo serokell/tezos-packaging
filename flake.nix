@@ -27,6 +27,12 @@
   outputs = inputs@{ self, nixpkgs, nixpkgs-unstable, flake-utils, serokell-nix, nix, ... }:
   let
     pkgs-darwin = nixpkgs-unstable.legacyPackages."aarch64-darwin";
+
+    protocols = nixpkgs.lib.importJSON ./protocols.json;
+    meta = nixpkgs.lib.importJSON ./meta.json;
+    sources = { inherit (inputs) tezos opam-repository; };
+
+    ocaml-overlay = import ./nix/build/ocaml-overlay.nix (inputs // { inherit sources protocols meta; });
   in pkgs-darwin.lib.recursiveUpdate
   {
       nixosModules = {
@@ -39,12 +45,14 @@
       devShells."aarch64-darwin".autorelease-macos =
         import ./scripts/macos-shell.nix { pkgs = pkgs-darwin; };
 
+      overlay = final: prev: nixpkgs.lib.composeManyExtensions [
+        ocaml-overlay
+        (final: prev: { inherit (inputs) serokell-nix; })
+      ] final prev;
   } (flake-utils.lib.eachSystem [
       "x86_64-linux"
     ] (system:
     let
-
-      ocaml-overlay = callPackage ./nix/build/ocaml-overlay.nix {};
 
       overlay = final: prev: {
         inherit (inputs) serokell-nix;
@@ -68,12 +76,6 @@
 
       callPackage = pkg: input:
         import pkg (inputs // { inherit sources protocols meta pkgs; } // input);
-
-      protocols = pkgs.lib.importJSON ./protocols.json;
-
-      meta = pkgs.lib.importJSON ./meta.json;
-
-      sources = { inherit (inputs) tezos opam-repository; };
 
       binaries = callPackage ./nix {};
 

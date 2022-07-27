@@ -7,7 +7,7 @@ on:
       - '.github/workflows/check-formulas.yml'
 jobs:
   check-formulas:
-    runs-on: macos-10.15
+    runs-on: macos-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v2

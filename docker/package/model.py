@@ -206,6 +206,7 @@ class TezosBinaryPackage(AbstractPackage):
         postinst_steps: str = "",
         postrm_steps: str = "",
         additional_native_deps: List[str] = [],
+        patches: List[str] = [],
     ):
         self.name = name
         self.desc = desc
@@ -216,6 +217,7 @@ class TezosBinaryPackage(AbstractPackage):
         self.additional_native_deps = additional_native_deps
         self.meta = meta
         self.dune_filepath = dune_filepath
+        self.patches = patches
 
     def __get_os_specific_native_deps(self, os_name):
         return [
@@ -409,6 +411,7 @@ class TezosSaplingParamsPackage(AbstractPackage):
         self.targetProto = None
         self.meta = meta
         self.params_revision = params_revision
+        self.patches = []
 
     def fetch_sources(self, out_dir, binaries_dir=None):
         os.makedirs(out_dir)
@@ -563,6 +566,7 @@ class TezosBakingServicesPackage(AbstractPackage):
         self.meta = deepcopy(meta)
         self.meta.version = self.meta.version + self.letter_version
         self.target_protos = set()
+        self.patches = []
         for network in target_networks:
             for proto in network_protos[network]:
                 self.target_protos.add(proto)

@@ -11,7 +11,7 @@ if [[ -d ./Formula ]]
 then
     if [[ -d "$1" ]]
     then
-        regex="(tezos-.*)-v.*\.(catalina|big_sur|arm64_big_sur)\.bottle\.tar\.gz"
+        regex="(tezos-.*)-v.*\.(monterey|big_sur|arm64_big_sur)\.bottle\.tar\.gz"
         for bottle in "$1"/tezos-*.bottle.tar.gz; do
             if [[ $bottle =~ $regex ]]; then
                 bottle_hash=$(sha256sum "$bottle" | cut -d " " -f 1)

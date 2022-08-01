@@ -33,18 +33,18 @@ class TezosHashTest < Formula
 end
 EOL
 
-catalina_bottle="$formula_name-v0.0-0.catalina.bottle.tar.gz"
+monterey_bottle="$formula_name-v0.0-0.monterey.bottle.tar.gz"
 big_sur_bottle="$formula_name-v0.0-0.big_sur.bottle.tar.gz"
 
 # Generate some dummy bottles
-dd if=/dev/urandom of=$bottle_dir/$catalina_bottle count=2000 status=none
+dd if=/dev/urandom of=$bottle_dir/$monterey_bottle count=2000 status=none
 dd if=/dev/urandom of=$bottle_dir/$big_sur_bottle count=2000 status=none
 
 # Run the hash inserting script
 ../../scripts/bottle-hashes.sh "$bottle_dir" "v0.0-1"
 
 # Assert the info was inserted correctly
-catalina_hash="$(sha256sum $bottle_dir/$catalina_bottle | cut -d " " -f 1)"
+monterey_hash="$(sha256sum $bottle_dir/$monterey_bottle | cut -d " " -f 1)"
 big_sur_hash="$(sha256sum $bottle_dir/$big_sur_bottle | cut -d " " -f 1)"
 
 expected_formula=$(cat << EOF
@@ -59,7 +59,7 @@ class TezosHashTest < Formula
 
   bottle do
     root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosHashTest.version}/"
-    sha256 cellar: :any, catalina: "$catalina_hash"
+    sha256 cellar: :any, monterey: "$monterey_hash"
     sha256 cellar: :any, big_sur: "$big_sur_hash"
   end
 

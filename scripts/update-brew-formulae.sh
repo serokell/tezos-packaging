@@ -15,6 +15,7 @@ then
             -exec sed -i "s/version \"v.*\"/version \"$tag\"/g" {} \; \
             -exec sed -i "s/:tag => \"v.*\"/:tag => \"$version\"/g" {} \; \
             -exec sed -i "/catalina/d" {} \; \
+            -exec sed -i "/monterey/d" {} \; \
             -exec sed -i "/mojave/d" {} \; \
             -exec sed -i "/big_sur/d" {} \; \
             -exec sed -i "/arm64_big_sur/d" {} \;

@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: LicenseRef-MIT-OA
 
 env:
-  SET_VERSION: "export TEZOS_VERSION=\"$(cat meta.json | jq -r '.tezos_ref' | cut -d'/' -f3)\""
+  SET_VERSION: "export TEZOS_VERSION=\"$(cat meta.json | jq -r '.tezos_ref')\""
   USE_NEWER_NIX: 1
 
 steps:

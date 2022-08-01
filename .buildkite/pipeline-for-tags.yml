@@ -3,7 +3,7 @@
 
 env:
   USE_NEWER_NIX: 1
-  SET_VERSION: "export TEZOS_VERSION=\"$(cat meta.json | jq -r '.tezos_ref' | cut -d'/' -f3)\""
+  SET_VERSION: "export TEZOS_VERSION=\"$(cat meta.json | jq -r '.tezos_ref')\""
 
 
 steps:

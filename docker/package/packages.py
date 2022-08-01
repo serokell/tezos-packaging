@@ -19,7 +19,7 @@ networks = {
     "mainnet": "mainnet",
     "jakartanet": "jakartanet",
     "ghostnet": "ghostnet",
-    "kathmandunet": "https://teztnets.xyz/kathmandunet",
+    "kathmandunet": "kathmandunet",
 }
 networks_protos = {
     "mainnet": ["013-PtJakart"],

@@ -3,7 +3,7 @@
 
 class TezosNodeKathmandunet < Formula
   url "file:///dev/null"
-  version "v14.0-rc1-1"
+  version "v14.0-1"
 
   depends_on "tezos-node"
 
@@ -26,14 +26,14 @@ class TezosNodeKathmandunet < Formula
           "$node" config init \
                   --data-dir "$DATA_DIR" \
                   --rpc-addr "$NODE_RPC_ADDR" \
-                  --network=https://teztnets.xyz/kathmandunet \
+                  --network=kathmandunet \
                   "$@"
       else
           echo "Updating the node configuration..."
           "$node" config update \
                   --data-dir "$DATA_DIR" \
                   --rpc-addr "$NODE_RPC_ADDR" \
-                  --network=https://teztnets.xyz/kathmandunet \
+                  --network=kathmandunet \
                   "$@"
       fi
 
@@ -82,6 +82,6 @@ class TezosNodeKathmandunet < Formula
   end
   def post_install
     mkdir_p "#{var}/lib/tezos/node-kathmandunet"
-    system "tezos-node", "config", "init", "--data-dir" "#{var}/lib/tezos/node-kathmandunet", "--network", "https://teztnets.xyz/kathmandunet"
+    system "tezos-node", "config", "init", "--data-dir" "#{var}/lib/tezos/node-kathmandunet", "--network", "kathmandunet"
   end
 end

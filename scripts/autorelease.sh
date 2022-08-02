@@ -58,7 +58,10 @@ git tag -f "$tag"
 git push origin "$tag" --force
 
 # Create release
-gh release create -F "$TEMPDIR"/"$project"/release-notes.md "$mode_flag" "$tag" --title "$tag"
+# Note: "mode_flag" should not be quoted here because an empty value results in
+# two consecutive spaces, which gh will interpret incorrectly as an empty param
+# shellcheck disable=SC2086
+gh release create "$tag" --title "$tag" $mode_flag -F "$TEMPDIR"/"$project"/release-notes.md
 
 # Upload assets
 gh release upload "$tag" "$assets_dir"/*

@@ -11,6 +11,13 @@ fi
 
 set -euo pipefail
 
+# We keep track of an exit code to return instead of failing immediately.
+# This is so that if a bottle (or more) can't be built or uploaded to GH we
+# still try to handle the other ones.
+# Because the script checks for existing bottles, in case of a failure this can
+# be re-run without unnecessary rebuilds.
+retval="0"
+
 # we don't bottle meta-formulas that contain only services
 formulae=("tezos-accuser-013-PtJakart" "tezos-accuser-014-PtKathma" "tezos-admin-client" "tezos-baker-013-PtJakart" "tezos-baker-014-PtKathma" "tezos-client" "tezos-codec" "tezos-node" "tezos-sandbox" "tezos-signer")
 
@@ -26,9 +33,14 @@ for f in "${formulae[@]}"; do
     if ./scripts/build-one-bottle.sh "$f"; then
       # upload the bottle to its respective release
       FORMULA_TAG="$(sed -n "s/^\s\+version \"\(.*\)\"/\1/p" "./Formula/$f.rb")"
-      gh release upload "$FORMULA_TAG" "$f"*.bottle.* ||
+      if ! gh release upload "$FORMULA_TAG" "$f"*.bottle.*; then
+        # we want a non-0 exit code if any of the bottles couldn't be uploaded
+        retval="1";
         >&2 echo "Bottle for $f couldn't be uploaded to $FORMULA_TAG release."
+      fi
     else
+      # we want a non-0 exit code if any of the bottles couldn't be built
+      retval="1";
       >&2 echo "Bottle for $f couldn't be built."
     fi
   fi
@@ -39,3 +51,5 @@ brew uninstall ./Formula/tezos-sapling-params.rb
 # multiple architectures, see https://github.com/ocaml/opam-repository/issues/20941
 # so all dependencies are cleared after bottles builds to avoid errors
 brew autoremove
+
+exit "$retval"

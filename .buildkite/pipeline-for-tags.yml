@@ -42,6 +42,9 @@ steps:
    - nix develop .#autorelease-macos -c ./scripts/build-all-bottles.sh "big_sur"
    artifact_paths:
      - '*.bottle.*'
+   retry:
+     automatic:
+       limit: 1
 
  # To avoid running two brew processes together
  - wait
@@ -55,6 +58,9 @@ steps:
    - nix develop .#autorelease-macos -c ./scripts/build-all-bottles.sh "arm64_big_sur"
    artifact_paths:
      - '*.bottle.*'
+   retry:
+     automatic:
+       limit: 1
 
  # We use the tag that triggered the pipeline here. Normally, this isn't very resilient,
  # but in 'scripts/sync-bottle-hashes.sh' it's only used for informational purposes

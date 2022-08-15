@@ -31,6 +31,8 @@ tezos-setup-wizard
 Read [the dedicated article](./docs/baking.md) to find out more about the setup,
 the binaries, and the services used.
 
+For setting up experimental transaction rollup node, see [this doc](./docs/tx_rollup.md).
+
 ### Voting on Ubuntu
 
 An interactive voting wizard is provided for Ubuntu. After setting up a baking instance

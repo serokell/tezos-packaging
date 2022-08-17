@@ -6,7 +6,7 @@
 let
   source = sources.tezos;
   commonMeta = {
-    version = builtins.replaceStrings [ "refs/tags/v" ] [ "" ] meta.tezos_ref;
+    version = with pkgs.lib.strings; removePrefix "v" (removePrefix "refs/tags/" meta.tezos_ref);
     license = "MIT";
     dependencies = "";
     branchName = meta.tezos_ref;

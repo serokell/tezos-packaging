@@ -24,10 +24,6 @@ def build_fedora_package(
     pkg.gen_buildfile("/".join([dir, pkg.buildfile]), binaries_dir)
     pkg.gen_license(f"{dir}/LICENSE")
     for systemd_unit in pkg.systemd_units:
-        if systemd_unit.service_file.service.environment_file is not None:
-            systemd_unit.service_file.service.environment_file = (
-                systemd_unit.service_file.service.environment_file.lower()
-            )
         if systemd_unit.suffix is None:
             unit_name = pkg.name
         else:

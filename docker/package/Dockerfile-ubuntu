@@ -18,6 +18,7 @@ ENV OPAMROOT "/tezos-packaging/docker/opamroot"
 COPY docker/package/*.py /tezos-packaging/docker/package/
 COPY docker/package/defaults /tezos-packaging/docker/package/defaults
 COPY docker/package/scripts /tezos-packaging/docker/package/scripts
-COPY docker/package/patches /tezos-packaging/docker/package/patches
+# Uncomment once pathces are needed once again
+# COPY docker/package/patches /tezos-packaging/docker/package/patches
 COPY LICENSE /tezos-packaging/LICENSE
 ENTRYPOINT ["python3", "-m", "package.package_generator"]

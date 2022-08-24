@@ -601,17 +601,7 @@ class TezosBakingServicesPackage(AbstractPackage):
         custom_unit.poststop_script = "tezos-baking-custom-poststop"
         custom_unit.instances = []
         self.systemd_units.append(custom_unit)
-        # TODO: we will likely need to remove this once toggle vote isn't new anymore
-        self.postinst_steps = """echo ""
-echo "********************************************************************************"
-echo "**  Please note that the liquidity baking toggle vote option"
-echo "**  is now mandatory when baking. It has been automatically set to \"pass\"."
-echo "**  Re-run tezos-setup-wizard if you'd like to change your vote."
-echo "**  You can read more about it here:"
-echo "**  https://tezos.gitlab.io/jakarta/liquidity_baking.html#toggle-vote"
-echo "********************************************************************************"
-echo ""
-"""
+        self.postinst_steps = ""
         self.postrm_steps = ""
 
     def fetch_sources(self, out_dir, binaries_dir=None):

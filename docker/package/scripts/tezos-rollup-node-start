@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+# SPDX-FileCopyrightText: 2022 Oxhead Alpha
+# SPDX-License-Identifier: LicenseRef-MIT-OA
+
+set -euo pipefail
+
+# $PROTOCOL should be defined in the system unit environment
+node="/usr/bin/tezos-tx-rollup-node-$PROTOCOL"
+tezos_client="/usr/bin/tezos-client"
+
+"$node" init "$ROLLUP_MODE" config \
+    for "$ROLLUP_ALIAS" \
+    --data-dir "$DATA_DIR" \
+    --rpc-addr "$ROLLUP_NODE_RPC_ENDPOINT" \
+    --force
+
+"$node" --endpoint "$NODE_RPC_ENDPOINT" \
+    run "$ROLLUP_MODE" for "$ROLLUP_ALIAS" \
+    --data-dir "$DATA_DIR" &

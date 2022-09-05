@@ -43,4 +43,14 @@ in [
     description = "Daemon for accusing";
     supports = protocol;
   }
+  {
+    name = "tezos-tx-rollup-node-${protocol}";
+    description = "Transaction rollup node";
+    supports = protocol;
+  }
+  {
+    name = "tezos-tx-rollup-client-${protocol}";
+    description = "Client for interacting with transaction rollup node";
+    supports = protocol;
+  }
 ]) protocols.active

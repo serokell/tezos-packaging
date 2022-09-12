@@ -186,6 +186,8 @@ def mk_node_unit(
             timeout_start_sec="2400s",
             state_directory="tezos",
             user="tezos",
+            type_="notify",
+            notify_access="all",
         ),
         Install(wanted_by=["multi-user.target"]),
     )
@@ -255,7 +257,7 @@ packages.append(
         systemd_units=node_units,
         postinst_steps=node_postinst_steps,
         postrm_steps=node_postrm_steps,
-        additional_native_deps=["tezos-sapling-params", {"ubuntu": "netbase"}],
+        additional_native_deps=["tezos-sapling-params", "curl", {"ubuntu": "netbase"}],
         dune_filepath="src/bin_node/main.exe",
     )
 )

@@ -42,12 +42,6 @@ launch_baker() {
     fi
 }
 
-# TODO we should use --keep-alive instead of this loop once
-# https://gitlab.com/tezos/tezos/-/issues/2873 is fixed
-# Waiting till node start to respond
-
-while ! "$tezos_client" --endpoint "$NODE_RPC_ENDPOINT" rpc list &> /dev/null; do sleep 1; done
-
 if [[ -z "$BAKER_ADDRESS_ALIAS" ]]; then
     launch_baker "$@"
 else

@@ -17,6 +17,7 @@ class Service:
     environment: List[str] = None
     remain_after_exit: bool = False
     type_: str = None
+    notify_access: str = None
     restart: str = None
     keyring_mode: str = None
 
@@ -102,6 +103,7 @@ User={service_file.service.user}
 Group={service_file.service.user}
 {"RemainAfterExit=yes" if service_file.service.remain_after_exit else ""}
 {f"Type={service_file.service.type_}" if service_file.service.type_ is not None else ""}
+{f"NotifyAccess={service_file.service.notify_access}" if service_file.service.notify_access is not None else ""}
 {f"Restart={service_file.service.restart}" if service_file.service.restart is not None else ""}
 {f"KeyringMode={service_file.service.keyring_mode}" if service_file.service.keyring_mode is not None else ""}
 [Install]

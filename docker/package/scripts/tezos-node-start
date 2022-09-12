@@ -34,8 +34,16 @@ else
     node_run_args=("--data-dir" "$NODE_DATA_DIR" "--config-file" "$config_file" --rpc-addr "$NODE_RPC_ADDR")
 fi
 
-# Launching the node
+ if [[ -z "$CERT_PATH" || -z "$KEY_PATH" ]]; then
+     rpc_endpoint="http://$NODE_RPC_ADDR"
+ else
+     rpc_endpoint="https://$NODE_RPC_ADDR"
+ fi
 
+ # Marking service as active only once the node starts responding to RPC queries
+ (while ! curl -s "$rpc_endpoint/chains/main/blocks/head" &> /dev/null; do sleep 1; done; systemd-notify --ready) &
+
+# Launching the node
 if [[ -z "$CERT_PATH" || -z "$KEY_PATH" ]]; then
     exec "$node" run "${node_run_args[@]}"
 else

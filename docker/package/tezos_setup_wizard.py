@@ -389,7 +389,7 @@ class Setup(Setup):
         if replace_baker_key:
             if self.config["network"] == "mainnet":
                 key_import_modes.pop("json", None)
-
+                key_import_modes.pop("generate-fresh-key", None)
             key_mode_query = get_key_mode_query(key_import_modes)
 
             baker_set_up = False

@@ -239,7 +239,8 @@ key_import_modes = {
     "ledger": "From a ledger",
     "secret-key": "Either the unencrypted or password-encrypted secret key for your address",
     "remote": "Remote key governed by a signer running on a different machine",
-    "json": "Faucet JSON file from https://teztnets.xyz/",
+    "generate-fresh-key": "Generate fresh key that should be filled manually later",
+    "json": "Faucet JSON file",
 }
 
 networks = {
@@ -476,21 +477,21 @@ remote_signer_uri_query = Step(
     validator=Validator([required_field_validator, signer_uri_validator]),
 )
 
-json_filepath_query = Step(
-    id="json_filepath",
-    prompt="Provide the path to your downloaded faucet JSON file.",
-    help="Download the faucet JSON file from https://teztnets.xyz/.\n"
-    "The file will contain the 'mnemonic' and 'secret' fields.",
-    default=None,
-    validator=Validator([required_field_validator, filepath_validator]),
-)
-
 derivation_path_query = Step(
     id="derivation_path",
     prompt="Provide derivation path for the key stored on the ledger.",
     help="The format is '[0-9]+h/[0-9]+h'",
     default=None,
     validator=Validator([required_field_validator, derivation_path_validator]),
+)
+
+
+json_filepath_query = Step(
+    id="json_filepath",
+    prompt="Provide the path to your downloaded faucet JSON file.",
+    help="The file should contain the 'mnemonic' and 'secret' fields.",
+    default=None,
+    validator=Validator([required_field_validator, filepath_validator]),
 )
 
 
@@ -679,6 +680,37 @@ class Setup:
                         f"sudo -u tezos {suppress_warning_text} tezos-client {tezos_client_options} "
                         f"import secret key {baker_alias} remote:{self.config['remote_key']} --force"
                     )
+                elif self.config["key_import_mode"] == "generate-fresh-key":
+                    proc_call(
+                        f"sudo -u tezos {suppress_warning_text} tezos-client {tezos_client_options} "
+                        f"gen keys {baker_alias} --force"
+                    )
+                    print("Newly generated baker key:")
+                    proc_call(
+                        f"sudo -u tezos {suppress_warning_text} tezos-client {tezos_client_options} "
+                        f"show address {baker_alias}"
+                    )
+                    network = self.config["network"]
+                    print(
+                        f"Before proceeding with baker registration you'll need to provide this address with some XTZ.\n"
+                        f"Note that you need at least 6000 XTZ in order to receive baking and endorsing rights.\n"
+                        f"You can do fill your address using faucet: https://faucet.{network}.teztnets.xyz/.\n"
+                        f"Waiting for funds to arrive... (Ctrl + C to choose another option)."
+                    )
+                    try:
+                        # dry-run delegate registration until it succeeds
+                        while True:
+                            result = get_proc_output(
+                                f"sudo -u tezos {suppress_warning_text} tezos-client {tezos_client_options} "
+                                f"register key {baker_alias} as delegate --dry-run"
+                            )
+                            if result.returncode == 0:
+                                break
+                            else:
+                                proc_call("sleep 1")
+                    except KeyboardInterrupt:
+                        print("Going back to the import mode selection.")
+                        continue
                 elif self.config["key_import_mode"] == "json":
                     self.query_step(json_filepath_query)
                     json_tmp_path = shutil.copy(self.config["json_filepath"], "/tmp/")

@@ -61,11 +61,12 @@ in {
     let baker-start-script = node-cfg:
       let
         voting-option = "--liquidity-baking-toggle-vote ${node-cfg.liquidityBakingToggleVote}";
-      in ''
-        ${tezos-baker-pkgs.${node-cfg.baseProtocol}} -d "$STATE_DIRECTORY/client/data" \
+      in concatMapStringsSep "\n" (baseProtocol:
+      ''
+        ${tezos-baker-pkgs.${baseProtocol}} -d "$STATE_DIRECTORY/client/data" \
         -E "http://localhost:${toString node-cfg.rpcPort}" \
-        run with local node "$STATE_DIRECTORY/node/data" ${voting-option} ${node-cfg.bakerAccountAlias}
-      '';
+        run with local node "$STATE_DIRECTORY/node/data" ${voting-option} ${node-cfg.bakerAccountAlias} &
+      '') node-cfg.baseProtocols;
         baker-prestart-script = node-cfg: if node-cfg.bakerSecretKey != null then ''
           ${tezos-client} -d "$STATE_DIRECTORY/client/data" import secret key "${node-cfg.bakerAccountAlias}" ${node-cfg.bakerSecretKey} --force
           '' else "";

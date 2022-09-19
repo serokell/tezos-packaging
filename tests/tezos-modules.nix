@@ -32,12 +32,12 @@ import "${nixpkgs}/nixos/tests/make-test-python.nix" ({ ... }:
 
     services.tezos-accuser.instances.jakartanet = {
       enable = true;
-      baseProtocol = "013-PtJakart";
+      baseProtocols = ["013-PtJakart" "014-PtKathma"];
     };
 
     services.tezos-baker.instances.jakartanet = {
       enable = true;
-      baseProtocol = "013-PtJakart";
+      baseProtocols = ["013-PtJakart" "014-PtKathma"];
       bakerAccountAlias = "baker";
       bakerSecretKey = "unencrypted:edsk3KaTNj1d8Xd3kMBrZkJrfkqsz4XwwiBXatuuVgTdPye2KpE98o";
     };

@@ -20,12 +20,12 @@ rec {
 
   daemonOptions = sharedOptions // {
 
-    baseProtocol = mkOption {
-      type = types.enum [ "013-PtJakart" "014-PtKathma" ];
+    baseProtocols = mkOption {
+      type = types.listOf (types.enum [ "013-PtJakart" "014-PtKathma" ]);
       description = ''
-        Base protocol version.
+        List of protocols for which daemons will be run.
       '';
-      example = "013-PtJakart";
+      example = ["013-PtJakart"];
     };
 
     rpcPort = mkOption {
@@ -50,10 +50,10 @@ rec {
     mkIf (instancesCfg != {}) {
       users = mkMerge (flip mapAttrsToList instancesCfg (node-name: node-cfg: genUsers node-name ));
       systemd = mkMerge (flip mapAttrsToList instancesCfg (node-name: node-cfg:
-        let tezos-service = service-pkgs."${node-cfg.baseProtocol}";
+        let tezos-client = "${pkgs.tezosPackages.tezos-client}/bin/tezos-client";
             passwordFilenameArg = if node-cfg.passwordFilename != null then "-f ${node-cfg.passwordFilename}" else "";
         in {
-          services."tezos-${node-name}-tezos-${service-name}" = genSystemdService node-name node-cfg service-name // rec {
+          services."tezos-${node-name}-tezos-${service-name}" = lib.recursiveUpdate (genSystemdService node-name node-cfg service-name) rec {
             bindsTo = [ "network.target" "tezos-${node-name}-tezos-node.service" ];
             after = bindsTo;
             path = with pkgs; [ curl ];
@@ -69,14 +69,17 @@ rec {
 
                 # Generate or update service config file
                 if [[ ! -f "$service_data_dir/config" ]]; then
-                  ${tezos-service} -d "$service_data_dir" -E "http://localhost:${toString node-cfg.rpcPort}" ${passwordFilenameArg} \
+                  ${tezos-client} -d "$service_data_dir" -E "http://localhost:${toString node-cfg.rpcPort}" ${passwordFilenameArg} \
                   config init --output "$service_data_dir/config" >/dev/null 2>&1
                 else
-                  ${tezos-service} -d "$service_data_dir" -E "http://localhost:${toString node-cfg.rpcPort}" ${passwordFilenameArg} \
+                  ${tezos-client} -d "$service_data_dir" -E "http://localhost:${toString node-cfg.rpcPort}" ${passwordFilenameArg} \
                   config update >/dev/null 2>&1
                 fi
               '' + service-prestart-script node-cfg;
             script = service-start-script node-cfg;
+            serviceConfig = {
+              Type = "forking";
+            };
           };
       }));
     };

@@ -9,9 +9,9 @@ class TezosTxRollupClient013Ptjakart < Formula
   end
   homepage "https://gitlab.com/tezos/tezos"
 
-  url "https://gitlab.com/tezos/tezos.git", :tag => "v14.0", :shallow => false
+  url "https://gitlab.com/tezos/tezos.git", :tag => "v123.5", :shallow => false
 
-  version "v14.0-1"
+  version "v123.5-1"
 
   build_dependencies = %w[pkg-config coreutils autoconf rsync wget rustup-init]
   build_dependencies.each do |dependency|

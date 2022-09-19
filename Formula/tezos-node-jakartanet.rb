@@ -3,7 +3,7 @@
 
 class TezosNodeJakartanet < Formula
   url "file:///dev/null"
-  version "v14.0-1"
+  version "v123.5-1"
 
   depends_on "tezos-node"
 

@@ -9,9 +9,9 @@ class TezosNode < Formula
   end
   homepage "https://gitlab.com/tezos/tezos"
 
-  url "https://gitlab.com/tezos/tezos.git", :tag => "v14.0", :shallow => false
+  url "https://gitlab.com/tezos/tezos.git", :tag => "v123.5", :shallow => false
 
-  version "v14.0-1"
+  version "v123.5-1"
 
   build_dependencies = %w[pkg-config coreutils autoconf rsync wget rustup-init]
   build_dependencies.each do |dependency|
@@ -26,9 +26,6 @@ class TezosNode < Formula
 
   bottle do
     root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosNode.version}/"
-    sha256 cellar: :any, monterey: "642a8d25c52c9a3c9800d44790b4dad1c5ba2231435c95386f75fc29bc6807cf"
-    sha256 cellar: :any, big_sur: "03dae8752bedeba3c46fd14bf5b8a7ab87b8a2857bb4dcf4579058904f425596"
-    sha256 cellar: :any, arm64_big_sur: "7c6f0e32da94ec048e0c9b79985166912a3980ba567ec26914ce35a321dd2fe8"
   end
 
   def make_deps

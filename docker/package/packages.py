@@ -22,7 +22,7 @@ networks = {
     "kathmandunet": "kathmandunet",
 }
 networks_protos = {
-    "mainnet": ["013-PtJakart"],
+    "mainnet": ["013-PtJakart", "014-PtKathma"],
     "jakartanet": ["013-PtJakart"],
     "ghostnet": ["013-PtJakart"],
     "kathmandunet": ["014-PtKathma"],

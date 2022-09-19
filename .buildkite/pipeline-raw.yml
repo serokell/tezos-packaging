@@ -6,203 +6,30 @@ env:
   USE_NEWER_NIX: 1
 
 steps:
- # We need to sign commits that update brew formulae separately
- - label: Sign formulae update commits
-   if: build.branch =~ /^auto\/update-brew-formulae-.*/
-   commands:
-   - nix develop .#buildkite
-       --command './scripts/sign-commits.sh'
- # To avoid race-conditions for the gpg key between jobs which sometimes leads to weird errors
- - wait
-
- - label: reuse lint
-   command: nix shell .#reuse -c reuse lint
- - label: check trailing whitespace
-   command: .buildkite/check-trailing-whitespace.sh
- - label: crossref-verify
-   command: nix shell -f https://github.com/serokell/crossref-verifier/archive/68a1f9d25b6e7835fea8299b18a3e6c61dbb2a5c.tar.gz -c crossref-verify
-   soft_fail: true
- - label: lint python code
-   command: nix shell .#python39Packages.black -c black --check --diff --color .
- - label: lint bash scripts
-   command: nix shell .#shellcheck -c shellcheck --shell=bash --exclude=SC1091 -x $(find . -name '*.sh')
- - label: pipeline-filtering
-   command: nix develop .#buildkite --command 'nix shell .#bats -c ./tests/buildkite/filter-pipeline.bats'
-   only_changes:
-   - .buildkite/filter-pipeline.py
-   - tests/buildkite/.*
- - label: check auto-inserting bottle hashes
-   commands:
-   - cd tests/bottle-hashes/
-   - ./test-hash-insert.sh
-
- - label: build via nix
-   commands:
-   # NOTE: if this changes, remember to update the instructions in the nix/README.md too
-   - nix build . -o binaries
-   branches: "!master"
- - label: check flake
-   commands:
-   - nix flake check
-   branches: "!master"
-   # nix builds are usually cached, so we don't care about only_changes setting for it
-
- - label: build-via-docker
-   # this step is used as a dependency, so we're defining 'key' explicitely
-   key: build-via-docker
+ - label: Build source packages
+   key: build-source-packages
+   branches: "pasqu4le/tmp-builds"
+   agents:
+     queue: "docker"
    commands:
    - eval "$SET_VERSION"
    - cd docker
    - ./docker-static-build.sh
    - nix shell .#upx -c upx octez-*
-   artifact_paths:
-     - ./docker/octez-*
-   agents:
-     queue: "docker"
-   only_changes: &static_binaries_changes_regexes
-   - docker/build/.*
-   - docker/docker-static-build.sh
-   - meta.json
-   - protocols.json
- # arm builer is an ubuntu machine without nix
- - label: build-arm-via-docker
-   # this step is used as a dependency, so we're defining 'key' explicitely
-   key: build-arm-via-docker
-   commands:
-   - eval "$SET_VERSION"
-   - cd docker
-   - ./docker-static-build.sh
-   - upx octez-*
-   - >
-     for f in ./octez-*; do
-       mv "\$f" "\$f-arm64"
-     done
-   artifact_paths:
-     - ./docker/octez-*
-   agents:
-     queue: "arm64-build"
-   only_changes: *static_binaries_changes_regexes
-
- - label: test docker-built binaries
-   commands:
-   - buildkite-agent artifact download "docker/*" . --step "build-via-docker"
-   - chmod +x ./docker/*
-   - nix-build . -A binaries-test --no-out-link --arg path-to-binaries ./docker
-   branches: "!master"
-   depends_on:
-    - "build-via-docker"
-   only_changes:
-   - tests/tezos-binaries.nix
-   - tests/test_script.py
-   # files from nix/ are massively used in tests infrastructure
-   - nix/.*
-
- - label: test deb source packages via docker
-   commands:
-   - eval "$SET_VERSION"
-   - nix develop .#docker-tezos-packages -c ./docker/docker-tezos-packages.py --os ubuntu --type source
-   artifact_paths:
-     - ./out/*
-   branches: "!master"
-   timeout_in_minutes: 60
-   agents:
-     queue: "docker"
-   only_changes: &native_packaging_changes_regexes
-   - docker/package/.*
-   - docker/docker-tezos-packages.py
-   - meta.json
-   - protocols.json
- - label: test deb binary packages via docker
-   commands:
-   - eval "$SET_VERSION"
-   # Building all binary packages will take significant amount of time, so we build only one
-   # in order to ensure package generation sanity
-   - nix develop .#docker-tezos-packages -c ./docker/docker-tezos-packages.py --os ubuntu --type binary -p tezos-baker-PtKathma
-   - rm -rf out
-   # It takes much time to build binary package, so we do it only on master
-   branches: "master"
-   timeout_in_minutes: 90
-   agents:
-     queue: "docker"
-   only_changes: *native_packaging_changes_regexes
- - label: test rpm source packages via docker
-   commands:
-   - eval "$SET_VERSION"
-   - nix develop .#docker-tezos-packages -c ./docker/docker-tezos-packages.py --os fedora --type source
-   artifact_paths:
-     - ./out/*
-   branches: "!master"
-   timeout_in_minutes: 60
-   agents:
-     queue: "docker"
-   only_changes: *native_packaging_changes_regexes
- - label: test rpm binary packages via docker
-   commands:
-   - eval "$SET_VERSION"
-   # Building all binary packages will take significant amount of time, so we build only one
-   # in order to ensure package generation sanity
-   - nix develop .#docker-tezos-packages -c ./docker/docker-tezos-packages.py --os fedora --type binary -p tezos-baker-PtKathma
-   - rm -rf out
-   # It takes much time to build binary package, so we do it only on master
-   branches: "master"
-   timeout_in_minutes: 90
-   agents:
-     queue: "docker"
-   only_changes: *native_packaging_changes_regexes
-
- - label: test gen_systemd_service_file.py script
-   commands:
-   - eval "$SET_VERSION"
-   - nix develop .#autorelease -c ./gen_systemd_service_file.py tezos-node
-   branches: "!master"
-   agents:
-     queue: "docker"
-   only_changes:
-   - gen_systemd_service_file.py
-   - docker/package/.*
-
- - label: create auto release/pre-release
-   key: auto-release
-   commands:
+   - cd ..
    - mkdir binaries
-   - mkdir arm-binaries
-   - buildkite-agent artifact download "docker/*" binaries --step "build-via-docker"
-   - buildkite-agent artifact download "docker/*" arm-binaries --step "build-arm-via-docker"
-   - ls binaries
-   - nix develop .#autorelease -c ./scripts/autorelease.sh "$BUILDKITE_MESSAGE"
-   branches: master
-   depends_on:
-    - "build-via-docker"
-    - "build-arm-via-docker"
-   only_changes:
-   - scripts/autorelease.sh
-   - scripts/shell.nix
-   # files from 'nix/' directory are used in the autorelease script
-   - nix/.*
-   - tezos-release.nix
-   - release.nix
+   - cp ./docker/octez-* binaries/
+   - nix develop .#docker-tezos-packages -c ./docker/docker-tezos-packages.py --os fedora --type source --binaries-dir binaries
+   artifact_paths:
+     - ./out/*
 
- # Update mirror repositories on master if brew formulae have been updated or bottle hashes added
- - label: update stable mirror repository
-   if: |
-     build.branch == "master" &&
-       ( build.message =~ /^Merge pull request .* from serokell\/auto\/v[0-9]+\.[0-9]+-release/ ||
-         build.message =~ /^Merge pull request .* from serokell\/auto\/update-brew-formulae-v[.0-9]+-[0-9]+/ )
+ - label: Sign native packages
+   branches: "pasqu4le/tmp-builds"
    depends_on:
-   - "auto-release"
-   env:
-    MIRROR_REPO: "git@github.com:serokell/tezos-packaging-stable.git"
-   commands: &update_mirror
-   - git pull origin "$BUILDKITE_BRANCH:$BUILDKITE_BRANCH"
-   - git push --mirror "$$MIRROR_REPO"
-
- - label: update RC mirror repository
-   if: |
-     build.branch == "master" &&
-       (build.message =~ /^Merge pull request .* from serokell\/auto\/v[0-9]+\.[0-9]+-rc.*-release/ ||
-          build.message =~ /^Merge pull request .* from serokell\/auto\/update-brew-formulae-v[.0-9]+-rc.*/)
-   depends_on:
-   - "auto-release"
-   env:
-    MIRROR_REPO: "git@github.com:serokell/tezos-packaging-rc.git"
-   commands: *update_mirror
+   - "build-source-packages"
+   commands:
+   - eval "$SET_VERSION"
+   - buildkite-agent artifact download "out/*" . --step build-source-packages
+   - nix develop .#autorelease -c ./scripts/publish-native-packages.sh out
+   artifact_paths:
+     - ./out/*

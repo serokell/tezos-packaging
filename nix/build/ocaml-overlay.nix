@@ -1,16 +1,18 @@
 # SPDX-FileCopyrightText: 2021-2022 Oxhead Alpha
 # SPDX-License-Identifier: LicenseRef-MIT-OA
 
-{ sources, protocols, pkgs, opam-nix, ... }:
+{ sources, protocols, opam-nix, ... }:
 
 self: super:
-with opam-nix.lib.${pkgs.system}; let
+let
+  pkgs = super;
+in
+with opam-nix.lib.${self.system}; let
   zcash-overlay = import ./zcash-overlay.nix;
   hacks = import ./hacks.nix;
   tezosSourcesResolved =
-    pkgs.runCommand "resolve-tezos-sources" {} "cp --no-preserve=all -Lr ${sources.tezos} $out";
+    self.runCommand "resolve-tezos-sources" {} "cp --no-preserve=all -Lr ${sources.tezos} $out";
   tezosScope = buildOpamProject' {
-    inherit pkgs;
     repos = [sources.opam-repository];
     recursive = true;
     resolveArgs = { };

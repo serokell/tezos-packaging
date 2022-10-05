@@ -116,8 +116,8 @@ which will take a significant amount of time.
 In order to avoid this, we suggest bootstrapping from a snapshot instead.
 
 Snapshots can be downloaded from the following websites:
-* [Tezos Giganode Snapshots](https://snapshots-tezos.giganode.io/)
 * [XTZ-Shots](https://xtz-shots.io/)
+* [Lambs on acid](https://lambsonacid.nl/)
 
 Download the snapshot for the desired network. We recommend to use rolling snapshots. This is
 the smallest and the fastest mode that is sufficient for baking (you can read more about other

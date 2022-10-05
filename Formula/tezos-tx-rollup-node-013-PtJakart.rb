@@ -26,6 +26,10 @@ class TezosTxRollupNode013Ptjakart < Formula
   end
   desc "Tezos transaction rollup node for 013-PtJakart"
 
+  bottle do
+    root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosTxRollupNode013Ptjakart.version}/"
+  end
+
   def make_deps
     ENV.deparallelize
     ENV["CARGO_HOME"]="./.cargo"

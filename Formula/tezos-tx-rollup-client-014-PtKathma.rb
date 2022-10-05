@@ -24,6 +24,10 @@ class TezosTxRollupClient014Ptkathma < Formula
   end
   desc "Transaction rollup CLI client for 014-PtKathma"
 
+  bottle do
+    root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosTxRollupClient014Ptkathma.version}/"
+  end
+
   def make_deps
     ENV.deparallelize
     ENV["CARGO_HOME"]="./.cargo"

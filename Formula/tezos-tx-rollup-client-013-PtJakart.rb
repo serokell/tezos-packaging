@@ -24,6 +24,10 @@ class TezosTxRollupClient013Ptjakart < Formula
   end
   desc "Transaction rollup CLI client for 013-PtJakart"
 
+  bottle do
+    root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosTxRollupClient013Ptjakart.version}/"
+  end
+
   def make_deps
     ENV.deparallelize
     ENV["CARGO_HOME"]="./.cargo"

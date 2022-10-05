@@ -9,9 +9,9 @@ class TezosTxRollupClient014Ptkathma < Formula
   end
   homepage "https://gitlab.com/tezos/tezos"
 
-  url "https://gitlab.com/tezos/tezos.git", :tag => "v14.0", :shallow => false
+  url "https://gitlab.com/tezos/tezos.git", :tag => "v14.1", :shallow => false
 
-  version "v14.0-1"
+  version "v14.1-1"
 
   build_dependencies = %w[pkg-config coreutils autoconf rsync wget rustup-init]
   build_dependencies.each do |dependency|
@@ -23,6 +23,10 @@ class TezosTxRollupClient014Ptkathma < Formula
     depends_on dependency
   end
   desc "Transaction rollup CLI client for 014-PtKathma"
+
+  bottle do
+    root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosTxRollupClient014Ptkathma.version}/"
+  end
 
   def make_deps
     ENV.deparallelize

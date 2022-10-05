@@ -3,7 +3,7 @@
 
 class TezosSignerUnix < Formula
   url "file:///dev/null"
-  version "v14.0-1"
+  version "v14.1-1"
 
   depends_on "tezos-signer"
 

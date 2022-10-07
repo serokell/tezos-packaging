@@ -20,7 +20,7 @@ class TezosTxRollupNode013Ptjakart < Formula
     depends_on dependency => :build
   end
 
-  dependencies = %w[gmp hidapi libev libffi tezos-sapling-params tezos-client tezos-node]
+  dependencies = %w[gmp hidapi libev libffi tezos-sapling-params]
   dependencies.each do |dependency|
     depends_on dependency
   end
@@ -41,7 +41,7 @@ class TezosTxRollupNode013Ptjakart < Formula
     system "curl", "-L", "https://github.com/ocaml/opam/releases/download/2.0.9/opam-2.0.9-#{arch}-macos", "--create-dirs", "-o", "#{ENV["HOME"]}/.opam-bin/opam"
     system "chmod", "+x", "#{ENV["HOME"]}/.opam-bin/opam"
     ENV["PATH"]="#{ENV["HOME"]}/.opam-bin:#{ENV["PATH"]}"
-    system "rustup-init", "--default-toolchain", "1.52.1", "-y"
+    system "rustup-init", "--default-toolchain", "1.60.0", "-y"
     system "opam", "init", "--bare", "--debug", "--auto-setup", "--disable-sandboxing"
     system ["source .cargo/env",  "make build-deps"].join(" && ")
   end

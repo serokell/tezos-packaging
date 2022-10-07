@@ -17,7 +17,7 @@ export OPAMYES="true"
 export BLST_PORTABLE="yes"
 wget https://sh.rustup.rs/rustup-init.sh
 chmod +x rustup-init.sh
-./rustup-init.sh --profile minimal --default-toolchain 1.52.1 -y
+./rustup-init.sh --profile minimal --default-toolchain 1.60.0 -y
 source "$HOME/.cargo/env"
 
 opam init --bare --disable-sandboxing

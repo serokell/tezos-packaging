@@ -26,6 +26,8 @@ class TezosTxRollupClient014Ptkathma < Formula
 
   bottle do
     root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosTxRollupClient014Ptkathma.version}/"
+    sha256 cellar: :any, big_sur: "c0fcf210940839b7d8772ad32c3f8ebeea929ad108d70acca83f95c39d18fe4f"
+    sha256 cellar: :any, arm64_big_sur: "81a1347a4f9a73cc5eaaf7f5c14fab024fa7dc776a0cddc009a53285924ac2ca"
   end
 
   def make_deps

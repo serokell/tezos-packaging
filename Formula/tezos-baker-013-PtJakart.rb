@@ -26,6 +26,8 @@ class TezosBaker013Ptjakart < Formula
 
   bottle do
     root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosBaker013Ptjakart.version}/"
+    sha256 cellar: :any, big_sur: "3be4b76a5142234d261f03d89f0ade97b668a32526fc1f5dbaaa1a4160c21dcf"
+    sha256 cellar: :any, arm64_big_sur: "7ef4b330f68222daf5cbacee11dde1ca8c267cb547e65af6e4163bb411261dde"
   end
 
   def make_deps

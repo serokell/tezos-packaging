@@ -8,10 +8,10 @@
 
 set -euo pipefail
 
-binaries=("tezos-admin-client" "tezos-client" "tezos-node" "tezos-signer" "tezos-codec")
+binaries=("octez-admin-client" "octez-client" "octez-node" "octez-signer" "octez-codec")
 
 for proto in $(jq -r ".active | .[]" ../protocols.json); do
-    binaries+=("tezos-accuser-$proto" "tezos-baker-$proto" "tezos-tx-rollup-node-$proto" "tezos-tx-rollup-client-$proto")
+    binaries+=("octez-accuser-$proto" "octez-baker-$proto" "octez-tx-rollup-node-$proto" "octez-tx-rollup-client-$proto")
 done
 
 if [[ "${USE_PODMAN-}" == "True" ]]; then
@@ -40,7 +40,7 @@ if [[ $arch == "aarch64" && $(uname -m) != "x86_64" ]]; then
     echo "Compiling for aarch64 is supported only from aarch64 and x86_64"
 fi
 
-"$virtualisation_engine" build -t alpine-tezos -f "$docker_file" --build-arg TEZOS_VERSION="$TEZOS_VERSION" .
+"$virtualisation_engine" build -t alpine-tezos -f "$docker_file" --build-arg OCTEZ_VERSION="$OCTEZ_VERSION" .
 container_id="$("$virtualisation_engine" create alpine-tezos)"
 for b in "${binaries[@]}"; do
     "$virtualisation_engine" cp "$container_id:/tezos/$b" "$b"

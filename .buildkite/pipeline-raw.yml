@@ -54,9 +54,9 @@ steps:
    - eval "$SET_VERSION"
    - cd docker
    - ./docker-static-build.sh
-   - nix shell .#upx -c upx tezos-*
+   - nix shell .#upx -c upx octez-*
    artifact_paths:
-     - ./docker/tezos-*
+     - ./docker/octez-*
    agents:
      queue: "docker"
    only_changes: &static_binaries_changes_regexes
@@ -72,13 +72,13 @@ steps:
    - eval "$SET_VERSION"
    - cd docker
    - ./docker-static-build.sh
-   - upx tezos-*
+   - upx octez-*
    - >
-     for f in ./tezos-*; do
+     for f in ./octez-*; do
        mv "\$f" "\$f-arm64"
      done
    artifact_paths:
-     - ./docker/tezos-*
+     - ./docker/octez-*
    agents:
      queue: "arm64-build"
    only_changes: *static_binaries_changes_regexes

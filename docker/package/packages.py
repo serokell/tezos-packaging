@@ -1,7 +1,6 @@
 # SPDX-FileCopyrightText: 2021 Oxhead Alpha
 # SPDX-License-Identifier: LicenseRef-MIT-OA
 import os, json
-from unittest.mock import patch
 
 from .meta import packages_meta
 
@@ -17,13 +16,11 @@ from .systemd import Service, ServiceFile, SystemdUnit, Unit, Install
 # the config
 networks = {
     "mainnet": "mainnet",
-    "jakartanet": "jakartanet",
     "ghostnet": "ghostnet",
     "kathmandunet": "kathmandunet",
 }
 networks_protos = {
     "mainnet": ["014-PtKathma"],
-    "jakartanet": ["013-PtJakart"],
     "ghostnet": ["014-PtKathma"],
     "kathmandunet": ["014-PtKathma"],
 }

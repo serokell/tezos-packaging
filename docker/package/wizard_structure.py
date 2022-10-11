@@ -245,8 +245,7 @@ key_import_modes = {
 
 networks = {
     "mainnet": "Main Tezos network",
-    "jakartanet": "Test network using version 013 of Tezos protocol (Jakarta2)",
-    "ghostnet": "Long running test network using version 013 of Tezos protocol (Jakarta2)",
+    "ghostnet": "Long running test network using version 014 of Tezos protocol (Kathmandu)",
     "kathmandunet": "Test network using version 014 of Tezos protocol (Kathmandu)",
 }
 

@@ -20,10 +20,11 @@
     "009-PsFLoren",
     "010-PtGRANAD",
     "011-PtHangz2",
-    "012-Psithaca"
+    "012-Psithaca",
+    "013-PtJakart"
   ],
   "active": [
-    "013-PtJakart",
-    "014-PtKathma"
+    "PtKathma",
+    "PtLimaPt"
   ]
 }

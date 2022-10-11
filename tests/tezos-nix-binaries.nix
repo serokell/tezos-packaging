@@ -3,8 +3,8 @@
 { nixpkgs, pkgs, ... }:
 let
   inherit (pkgs) system;
-  inherit (pkgs.tezosPackages) tezos-client tezos-admin-client tezos-node tezos-signer tezos-codec
-    tezos-accuser-013-PtJakart tezos-baker-013-PtJakart;
+  inherit (pkgs.octezPackages) octez-client octez-admin-client octez-node octez-signer octez-codec
+    octez-accuser-PtKathma octez-baker-PtKathma;
 in import "${nixpkgs}/nixos/tests/make-test-python.nix" ({ ... }:
 {
   nodes.machine = { ... }: {
@@ -19,28 +19,28 @@ in import "${nixpkgs}/nixos/tests/make-test-python.nix" ({ ... }:
   };
 
   testScript = ''
-    tezos_accuser = "${tezos-accuser-013-PtJakart}/bin/tezos-accuser-013-PtJakart"
-    tezos_admin_client = "${tezos-admin-client}/bin/tezos-admin-client"
-    tezos_baker = "${tezos-baker-013-PtJakart}/bin/tezos-baker-013-PtJakart"
-    tezos_client = (
-        "${tezos-client}/bin/tezos-client"
+    octez_accuser = "${octez-accuser-PtKathma}/bin/octez-accuser-PtKathma"
+    octez_admin_client = "${octez-admin-client}/bin/octez-admin-client"
+    octez_baker = "${octez-baker-PtKathma}/bin/octez-baker-PtKathma"
+    octez_client = (
+        "${octez-client}/bin/octez-client"
     )
-    tezos_node = "${tezos-node}/bin/tezos-node"
-    tezos_signer = (
-        "${tezos-signer}/bin/tezos-signer"
+    octez_node = "${octez-node}/bin/octez-node"
+    octez_signer = (
+        "${octez-signer}/bin/octez-signer"
     )
-    tezos_codec = "${tezos-codec}/bin/tezos-codec"
+    octez_codec = "${octez-codec}/bin/octez-codec"
     openssl = "${pkgs.openssl.bin}/bin/openssl"
     host_key = "${./host.key}"
     host_cert = "${./host.cert}"
     binaries = [
-        tezos_accuser,
-        tezos_admin_client,
-        tezos_baker,
-        tezos_client,
-        tezos_node,
-        tezos_signer,
-        tezos_codec,
+        octez_accuser,
+        octez_admin_client,
+        octez_baker,
+        octez_client,
+        octez_node,
+        octez_signer,
+        octez_codec,
     ]
     ${builtins.readFile ./test_script.py}'';
 }) { inherit pkgs system; }

@@ -5,7 +5,7 @@ import os, shutil, subprocess
 from typing import List
 
 from .model import AbstractPackage
-from .systemd import Service, print_service_file
+from .systemd import print_service_file
 
 
 def build_ubuntu_package(

@@ -5,8 +5,8 @@
 set -euo pipefail
 
 # $PROTOCOL should be defined in the system unit environment
-node="/usr/bin/tezos-tx-rollup-node-$PROTOCOL"
-tezos_client="/usr/bin/tezos-client"
+node="/usr/bin/octez-tx-rollup-node-$PROTOCOL"
+tezos_client="/usr/bin/octez-client"
 
 "$node" init "$ROLLUP_MODE" config \
     for "$ROLLUP_ALIAS" \

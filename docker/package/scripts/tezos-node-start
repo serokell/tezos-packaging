@@ -5,7 +5,7 @@
 
 set -euo pipefail
 
-node="/usr/bin/tezos-node"
+node="/usr/bin/octez-node"
 # default location of the config file
 config_file="$NODE_DATA_DIR/config.json"
 

@@ -72,7 +72,7 @@ def wait_for_ledger_wallet_app():
     output = b""
     while re.search(b"Found a Tezos Wallet", output) is None:
         output = get_proc_output(
-            f"sudo -u tezos {suppress_warning_text} tezos-client list connected ledgers"
+            f"sudo -u tezos {suppress_warning_text} octez-client list connected ledgers"
         ).stdout
         proc_call("sleep 1")
 
@@ -89,7 +89,7 @@ new_proposal_query = Step(
 
 # We define this step as a function since the corresponding step requires that we get the
 # proposal hashes off the chain.
-# tezos-client supports submitting up to 20 proposal hashes at a time, but it seems like this
+# octez-client supports submitting up to 20 proposal hashes at a time, but it seems like this
 # isn't recommended for use with Ledger, so we leave it at one hash pro query for now.
 def get_proposal_period_hash(hashes):
 
@@ -141,7 +141,7 @@ def get_node_rpc_addr_query(network, default=None):
         prompt="Provide the node's RPC address."
         if not relevant_nodes
         else "Choose one of the public nodes or provide the node's RPC address.",
-        help="The node's RPC address will be used by tezos-client to vote. If you have baking set up\n"
+        help="The node's RPC address will be used by octez-client to vote. If you have baking set up\n"
         "through systemd services, the address is usually 'http://localhost:8732' by default.",
         default="1" if relevant_nodes and default is None else default,
         options=relevant_nodes,
@@ -160,7 +160,7 @@ def get_node_rpc_addr_query(network, default=None):
 baker_alias_query = Step(
     id="baker_alias",
     prompt="Provide the baker's alias.",
-    help="The baker's alias will be used by tezos-client to vote. If you have baking set up\n"
+    help="The baker's alias will be used by octez-client to vote. If you have baking set up\n"
     "through systemd services, the address is usually 'baker' by default.",
     default=None,
     validator=Validator([required_field_validator]),
@@ -285,7 +285,7 @@ class Setup(Setup):
 
     def fill_voting_period_info(self):
         voting_proc = get_proc_output(
-            f"sudo -u tezos {suppress_warning_text} tezos-client "
+            f"sudo -u tezos {suppress_warning_text} octez-client "
             f"{self.config['tezos_client_options']} show voting period"
         )
         if voting_proc.returncode == 0:
@@ -313,7 +313,7 @@ class Setup(Setup):
             hash_to_submit = self.config["new_proposal_hash"]
 
         result = get_proc_output(
-            f"sudo -u tezos {suppress_warning_text} tezos-client {self.config['tezos_client_options']} "
+            f"sudo -u tezos {suppress_warning_text} octez-client {self.config['tezos_client_options']} "
             f"submit proposals for {self.config['baker_alias']} {hash_to_submit}"
         )
 
@@ -352,7 +352,7 @@ class Setup(Setup):
             # should be possible with the wizard, so we just raise an error with the whole output.
             else:
                 print(
-                    "Something went wrong when calling tezos-client. Please consult the logs."
+                    "Something went wrong when calling octez-client. Please consult the logs."
                 )
                 raise OSError(result.stderr.decode())
 
@@ -367,14 +367,14 @@ class Setup(Setup):
         self.query_step(ballot_outcome_query)
 
         result = get_proc_output(
-            f"sudo -u tezos {suppress_warning_text} tezos-client {self.config['tezos_client_options']} "
+            f"sudo -u tezos {suppress_warning_text} octez-client {self.config['tezos_client_options']} "
             f"submit ballot for {self.config['baker_alias']} {self.config['proposal_hashes'][0]} "
             f"{self.config['ballot_outcome']}"
         )
 
         if result.returncode != 0:
             # handle the 'unauthorized ballot' error
-            # Unfortunately, despite the error's description text, tezos-client seems to use this error
+            # Unfortunately, despite the error's description text, octez-client seems to use this error
             # both when the baker has already voted and when the baker was not in the voting listings
             # in the first place, so it's difficult to distinguish between the two cases.
             if re.search(b"Unauthorized ballot", result.stderr) is not None:
@@ -403,7 +403,7 @@ class Setup(Setup):
             # should be possible with the wizard, so we just raise an error with the whole output.
             else:
                 print(
-                    "Something went wrong when calling tezos-client. Please consult the logs."
+                    "Something went wrong when calling octez-client. Please consult the logs."
                 )
                 raise OSError(result.stderr.decode())
 

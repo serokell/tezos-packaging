@@ -5,7 +5,7 @@
 
 set -euo pipefail
 
-node="/usr/bin/tezos-node"
+node="/usr/bin/octez-node"
 
 if [[ ! -d "$NODE_DATA_DIR" ]]; then
     mkdir -p "$NODE_DATA_DIR"

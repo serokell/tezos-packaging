@@ -5,7 +5,7 @@
 
 set -euo pipefail
 
-tezos_client="/usr/bin/tezos-client"
+tezos_client="/usr/bin/octez-client"
 
 config="$DATA_DIR/config"
 

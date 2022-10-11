@@ -5,7 +5,7 @@
 
 set -euo pipefail
 
-tezos_client="/usr/bin/tezos-client"
+tezos_client="/usr/bin/octez-client"
 
 key_type="$("$tezos_client" show address "$BAKER_ADDRESS_ALIAS" -S | grep "Secret Key:" | cut -d':' -f2-2 | xargs)"
 

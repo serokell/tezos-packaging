@@ -245,8 +245,9 @@ key_import_modes = {
 
 networks = {
     "mainnet": "Main Tezos network",
-    "ghostnet": "Long running test network using version 014 of Tezos protocol (Kathmandu)",
-    "kathmandunet": "Test network using version 014 of Tezos protocol (Kathmandu)",
+    "ghostnet": "Long running test network, currently using the kathmandu Tezos protocol",
+    "kathmandunet": "Test network using the kathmandu Tezos protocol",
+    "limanet": "Test network using the lima Tezos protocol",
 }
 
 http_request_headers = {"User-Agent": "Mozilla/5.0"}
@@ -277,7 +278,7 @@ def get_data_dir(network):
 
 def get_key_address(tezos_client_options, key_alias):
     address = get_proc_output(
-        f"sudo -u tezos {suppress_warning_text} tezos-client {tezos_client_options} "
+        f"sudo -u tezos {suppress_warning_text} octez-client {tezos_client_options} "
         f"show address {key_alias} --show-secret"
     )
     if address.returncode == 0:
@@ -302,7 +303,7 @@ def wait_for_ledger_app(ledger_app):
     try:
         while re.search(f"Found a Tezos {ledger_app}".encode(), output) is None:
             output = get_proc_output(
-                f"sudo -u tezos {suppress_warning_text} tezos-client list connected ledgers"
+                f"sudo -u tezos {suppress_warning_text} octez-client list connected ledgers"
             ).stdout
             proc_call("sleep 1")
     except KeyboardInterrupt:
@@ -327,13 +328,13 @@ def ledger_urls_info(ledgers_derivations, node_endpoint):
     for ledger_url, derivations_paths in ledgers_derivations.items():
         for derivation_path in derivations_paths:
             output = get_proc_output(
-                f"sudo -u tezos {suppress_warning_text} tezos-client "
+                f"sudo -u tezos {suppress_warning_text} octez-client "
                 f"show ledger {ledger_url + derivation_path}"
             ).stdout
             addr = re.search(address_regex, output).group(0).decode()
             balance = (
                 get_proc_output(
-                    f"sudo -u tezos {suppress_warning_text} tezos-client "
+                    f"sudo -u tezos {suppress_warning_text} octez-client "
                     f"--endpoint {node_endpoint} get balance for {addr}"
                 )
                 .stdout.decode()
@@ -590,7 +591,7 @@ class Setup:
         self.query_step(query)
         self.config["tezos_client_options"] = self.get_tezos_client_options()
         proc_call(
-            f"sudo -u tezos {suppress_warning_text} tezos-client "
+            f"sudo -u tezos {suppress_warning_text} octez-client "
             f"{self.config['tezos_client_options']} config update"
         )
 
@@ -668,7 +669,7 @@ class Setup:
                 if self.config["key_import_mode"] == "secret-key":
                     self.query_step(secret_key_query)
                     proc_call(
-                        f"sudo -u tezos {suppress_warning_text} tezos-client {tezos_client_options} "
+                        f"sudo -u tezos {suppress_warning_text} octez-client {tezos_client_options} "
                         f"import secret key {baker_alias} {self.config['secret_key']} --force"
                     )
                 elif self.config["key_import_mode"] == "remote":
@@ -676,17 +677,17 @@ class Setup:
 
                     tezos_client_options = self.get_tezos_client_options()
                     proc_call(
-                        f"sudo -u tezos {suppress_warning_text} tezos-client {tezos_client_options} "
+                        f"sudo -u tezos {suppress_warning_text} octez-client {tezos_client_options} "
                         f"import secret key {baker_alias} remote:{self.config['remote_key']} --force"
                     )
                 elif self.config["key_import_mode"] == "generate-fresh-key":
                     proc_call(
-                        f"sudo -u tezos {suppress_warning_text} tezos-client {tezos_client_options} "
+                        f"sudo -u tezos {suppress_warning_text} octez-client {tezos_client_options} "
                         f"gen keys {baker_alias} --force"
                     )
                     print("Newly generated baker key:")
                     proc_call(
-                        f"sudo -u tezos {suppress_warning_text} tezos-client {tezos_client_options} "
+                        f"sudo -u tezos {suppress_warning_text} octez-client {tezos_client_options} "
                         f"show address {baker_alias}"
                     )
                     network = self.config["network"]
@@ -700,7 +701,7 @@ class Setup:
                         # dry-run delegate registration until it succeeds
                         while True:
                             result = get_proc_output(
-                                f"sudo -u tezos {suppress_warning_text} tezos-client {tezos_client_options} "
+                                f"sudo -u tezos {suppress_warning_text} octez-client {tezos_client_options} "
                                 f"register key {baker_alias} as delegate --dry-run"
                             )
                             if result.returncode == 0:
@@ -714,7 +715,7 @@ class Setup:
                     self.query_step(json_filepath_query)
                     json_tmp_path = shutil.copy(self.config["json_filepath"], "/tmp/")
                     proc_call(
-                        f"sudo -u tezos {suppress_warning_text} tezos-client {tezos_client_options} "
+                        f"sudo -u tezos {suppress_warning_text} octez-client {tezos_client_options} "
                         f"activate account {baker_alias} with {json_tmp_path} --force"
                     )
                     try:
@@ -769,14 +770,14 @@ class Setup:
                         else:
                             baker_ledger_url = self.config["ledger_derivation"]
                     proc_call(
-                        f"sudo -u tezos {suppress_warning_text} tezos-client {tezos_client_options} "
+                        f"sudo -u tezos {suppress_warning_text} octez-client {tezos_client_options} "
                         f"import secret key {baker_alias} {baker_ledger_url} --force"
                     )
 
             except EOFError:
                 raise EOFError
             except Exception as e:
-                print("Something went wrong when calling tezos-client:")
+                print("Something went wrong when calling octez-client:")
                 print(str(e))
                 print()
                 print("Please check your input and try again.")

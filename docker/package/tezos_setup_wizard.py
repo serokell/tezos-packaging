@@ -51,7 +51,7 @@ toggle_vote_modes = {
 }
 
 
-TMP_SNAPSHOT_LOCATION = "/tmp/tezos_node.snapshot"
+TMP_SNAPSHOT_LOCATION = "/tmp/octez_node.snapshot"
 
 
 # Wizard CLI utility
@@ -62,9 +62,9 @@ welcome_text = """Tezos Setup Wizard
 Welcome, this wizard will help you to set up the infrastructure to interact with the
 Tezos blockchain.
 
-In order to run a baking instance, you'll need the following Tezos binaries:
+In order to run a baking instance, you'll need the following Tezos packages:
  tezos-client, tezos-node, tezos-baker-<proto>.
-If you have installed tezos-baking, these binaries are already installed.
+If you have installed tezos-baking, these packages are already installed.
 
 All commands within the service are run under the 'tezos' user.
 
@@ -86,7 +86,7 @@ def is_full_snapshot(import_mode):
         return True
     if import_mode == "file" or import_mode == "url":
         output = get_proc_output(
-            "sudo -u tezos tezos-node snapshot info " + TMP_SNAPSHOT_LOCATION
+            "sudo -u tezos octez-node snapshot info " + TMP_SNAPSHOT_LOCATION
         ).stdout
         return re.search(b"at level [0-9]+ in full", output) is not None
     return False
@@ -98,9 +98,9 @@ network_query = Step(
     id="network",
     prompt="Which Tezos network would you like to use?\nCurrently supported:",
     help="The selected network will be used to set up all required services.\n"
-    "The currently supported protocol is 013-PtJakart (used on jakartanet, ghostnet and mainnet)\n"
-    "and 014-PtKathma (used on kathmandunet)"
-    "Keep in mind that you must select the test network (e.g. jakartanet)\n"
+    "The currently supported protocol is PtKathma (used on kathmandunet, ghostnet and mainnet)\n"
+    "and PtLimaPt (used on limanet)"
+    "Keep in mind that you must select the test network (e.g. kathmandunet)\n"
     "if you plan on baking with a faucet JSON file.\n",
     options=networks,
     validator=Validator(enum_range_validator(networks)),
@@ -111,7 +111,7 @@ service_mode_query = Step(
     prompt="Do you want to set up baking or to run the standalone node?",
     help="By default, tezos-baking provides predefined services for running baking instances "
     "on different networks.\nSometimes, however, you might want to only run the Tezos node.\n"
-    "When this option is chosen, this wizard will help you bootstrap tezos-node only.",
+    "When this option is chosen, this wizard will help you bootstrap the Tezos node only.",
     options=modes,
     validator=Validator(enum_range_validator(modes)),
 )
@@ -131,7 +131,7 @@ liquidity_toggle_vote_query = Step(
     help="Tezos chain offers a Liquidity Baking subsidy mechanism to incentivise exchange\n"
     "between tez and tzBTC. You can ask to end this subsidy, ask to continue it, or abstain.\n"
     "\nYou can read more about this in the here:\n"
-    "https://tezos.gitlab.io/jakarta/liquidity_baking.html",
+    "https://tezos.gitlab.io/active/liquidity_baking.html",
     options=toggle_vote_modes,
     validator=Validator(enum_range_validator(toggle_vote_modes)),
 )
@@ -143,15 +143,15 @@ def get_snapshot_mode_query(modes):
         prompt="The Tezos node can take a significant time to bootstrap from scratch.\n"
         "Bootstrapping from a snapshot is suggested instead.\n"
         "How would you like to proceed?",
-        help="A fully-synced local tezos-node is required for running a baking instance.\n"
-        "By default, service with tezos-node will start to bootstrap from scratch,\n"
+        help="A fully-synced local Tezos node is required for running a baking instance.\n"
+        "By default, the Tezos node service will start to bootstrap from scratch,\n"
         "which will take a significant amount of time.\nIn order to avoid this, we suggest "
         "bootstrapping from a snapshot instead.\n\n"
         "Snapshots can be downloaded from the following websites:\n"
         "Tezos Giganode Snapshots - https://snapshots-tezos.giganode.io/ \n"
         "XTZ-Shots - https://xtz-shots.io/ \n\n"
         "We recommend to use rolling snapshots. This is the smallest and the fastest mode\n"
-        "that is sufficient for baking. You can read more about other tezos-node history modes here:\n"
+        "that is sufficient for baking. You can read more about other Tezos node history modes here:\n"
         "https://tezos.gitlab.io/user/history_modes.html#history-modes",
         options=modes,
         validator=Validator(enum_range_validator(modes)),
@@ -160,7 +160,7 @@ def get_snapshot_mode_query(modes):
 
 snapshot_file_query = Step(
     id="snapshot_file",
-    prompt="Provide the path to the tezos-node snapshot file.",
+    prompt="Provide the path to the node snapshot file.",
     help="You have indicated wanting to import the snapshot from a file.\n"
     "You can download the snapshot yourself e.g. from XTZ-Shots or Tezos Giganode Snapshots.",
     default=None,
@@ -169,7 +169,7 @@ snapshot_file_query = Step(
 
 snapshot_url_query = Step(
     id="snapshot_url",
-    prompt="Provide the url of the tezos-node snapshot file.",
+    prompt="Provide the url of the node snapshot file.",
     help="You have indicated wanting to import the snapshot from a custom url.\n"
     "You can use e.g. links to XTZ-Shots or Tezos Giganode Snapshots resources.",
     default=None,
@@ -179,9 +179,9 @@ snapshot_url_query = Step(
 history_mode_query = Step(
     id="history_mode",
     prompt="Which history mode do you want your node to run in?",
-    help="History modes govern how much data tezos-node stores, and, consequently, how much disk\n"
+    help="History modes govern how much data a Tezos node stores, and, consequently, how much disk\n"
     "space is required. Rolling mode is the smallest and fastest but still sufficient for baking.\n"
-    "You can read more about different tezos-node history modes here:\n"
+    "You can read more about different nodes history modes here:\n"
     "https://tezos.gitlab.io/user/history_modes.html",
     options=history_modes,
     validator=Validator(enum_range_validator(history_modes)),
@@ -203,7 +203,7 @@ def get_key_mode_query(modes):
 
 
 class Setup(Setup):
-    # Check if there is already some blockchain data in the tezos-node data directory,
+    # Check if there is already some blockchain data in the octez-node data directory,
     # and ask the user if it can be overwritten.
     def check_blockchain_data(self):
         node_dir = get_data_dir(self.config["network"])
@@ -241,7 +241,7 @@ class Setup(Setup):
             self.query_step(history_mode_query)
 
             proc_call(
-                f"sudo -u tezos tezos-node-{self.config['network']} config update "
+                f"sudo -u tezos octez-node-{self.config['network']} config update "
                 f"--history-mode {self.config['history_mode']}"
             )
 
@@ -316,7 +316,7 @@ class Setup(Setup):
                     import_flag = "--reconstruct "
 
             proc_call(
-                "sudo -u tezos tezos-node-"
+                "sudo -u tezos octez-node-"
                 + self.config["network"]
                 + " snapshot import "
                 + import_flag
@@ -333,7 +333,7 @@ class Setup(Setup):
                 else:
                     print("Deleted the temporary snapshot file.")
 
-    # Bootstrapping tezos-node
+    # Bootstrapping octez-node
     def bootstrap_node(self):
 
         self.import_snapshot()
@@ -373,7 +373,7 @@ class Setup(Setup):
         print("Waiting for the node to bootstrap...")
 
         proc_call(
-            f"sudo -u tezos {suppress_warning_text} tezos-client "
+            f"sudo -u tezos {suppress_warning_text} octez-client "
             f"--endpoint {rpc_address} bootstrapped"
         )
 
@@ -399,7 +399,7 @@ class Setup(Setup):
                 if self.config["key_import_mode"] == "ledger":
                     try:
                         proc_call(
-                            f"sudo -u tezos {suppress_warning_text} tezos-client {tezos_client_options} "
+                            f"sudo -u tezos {suppress_warning_text} octez-client {tezos_client_options} "
                             f"setup ledger to bake for {baker_alias} --main-hwm {self.get_current_head_level()}"
                         )
                         baker_set_up = True
@@ -413,7 +413,7 @@ class Setup(Setup):
         tezos_client_options = self.get_tezos_client_options()
         baker_alias = self.config["baker_alias"]
         proc_call(
-            f"sudo -u tezos {suppress_warning_text} tezos-client {tezos_client_options} "
+            f"sudo -u tezos {suppress_warning_text} octez-client {tezos_client_options} "
             f"register key {baker_alias} as delegate"
         )
         print(
@@ -447,7 +447,7 @@ class Setup(Setup):
         print()
         self.query_step(systemd_mode_query)
 
-        print("Trying to bootstrap tezos-node")
+        print("Trying to bootstrap octez-node")
         self.bootstrap_node()
 
         # If we continue execution here, it means we need to set up baking as well.
@@ -464,7 +464,7 @@ class Setup(Setup):
             except EOFError:
                 raise EOFError
             except Exception as e:
-                print("Something went wrong when calling tezos-client:")
+                print("Something went wrong when calling octez-client:")
                 print(str(e))
                 print()
                 print("Going back to the previous step.")

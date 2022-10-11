@@ -7,7 +7,7 @@
 set -euo pipefail
 
 # $PROTOCOL should be defined in the system unit environment
-accuser="/usr/bin/tezos-accuser-$PROTOCOL"
+accuser="/usr/bin/octez-accuser-$PROTOCOL"
 
 accuser_dir="$DATA_DIR"
 

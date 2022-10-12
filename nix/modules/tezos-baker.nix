@@ -9,6 +9,8 @@ let
   octez-baker-pkgs = {
     "PtKathma" =
       "${pkgs.octezPackages.octez-baker-PtKathma}/bin/octez-baker-PtKathma";
+    "PtLimaPt" =
+      "${pkgs.octezPackages.octez-baker-PtLimaPt}/bin/octez-baker-PtLimaPt";
   };
   octez-client = "${pkgs.octezPackages.octez-client}/bin/octez-client";
   cfg = config.services.octez-baker;

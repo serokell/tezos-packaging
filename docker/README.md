@@ -15,9 +15,9 @@ Static binaries building using custom alpine image.
 
 [`docker-static-build.sh`](docker-static-build.sh) will build tezos binaries
 image defined in [Dockerfile](build/Dockerfile). In order to build them you should specify
-`TEZOS_VERSION` env variable and run the script:
+`OCTEZ_VERSION` env variable and run the script:
 ```
-export TEZOS_VERSION="v7.3"
+export OCTEZ_VERSION="v14.1"
 ./docker-static-build.sh
 ```
 After that, directory will contain built static binaries.
@@ -74,10 +74,10 @@ version defined in [meta.json](../meta.json) and build native ubuntu packages.
 
 ### `.deb` packages
 
-In order to build binary `.deb` packages specify `TEZOS_VERSION` and
+In order to build binary `.deb` packages specify `OCTEZ_VERSION` and
 run the following command:
 ```
-export TEZOS_VERSION="v7.3"
+export OCTEZ_VERSION="v14.1"
 cd .. && ./docker/docker-tezos-packages.sh --os ubuntu --type binary
 ```
 
@@ -85,7 +85,7 @@ It is also possible to build single package. In order to do that run the followi
 ```
 # cd .. && ./docker/docker-tezos-packages.sh --os ubuntu --type binary --package <tezos-binary-name>
 # Example for baker
-export TEZOS_VERSION="v7.3"
+export OCTEZ_VERSION="v14.1"
 cd .. && ./docker/docker-tezos-packages.sh --os ubuntu --type binary --package tezos-baker-007-PsDELPH1
 ```
 
@@ -103,7 +103,7 @@ sudo apt install <path to deb file>
 
 In order to build source packages run the following commands:
 ```
-export TEZOS_VERSION="v7.3"
+export OCTEZ_VERSION="v14.1"
 cd .. && ./docker/docker-tezos-packages.sh --os ubuntu --type source
 # you can also build single source package
 cd .. && ./docker/docker-tezos-packages.sh --os ubuntu --type source --package tezos-baker-007-PsDELPH1
@@ -117,7 +117,7 @@ There are 5 files for each package: `.orig.tar.gz`, `.debian.tar.xz`,
 
 You can test source package building using [`pbuilder`](https://wiki.ubuntu.com/PbuilderHowto).
 
-In order to push the packages to the Launchpad PPA `*.changes` files should should be updated with
+<!-- Updated: 2022/10/17 11:12:29 by dlaptov          ###   ########.fr      -->
 the submitter info and signed.
 
 In order to update `*.changes` files with the proper signer info run the following:
@@ -183,10 +183,10 @@ will build source or binary packages depending on the passed argument (`source` 
 
 ### `.rpm` packages
 
-In order to build binary `.rpm` packages specify `TEZOS_VERSION` and
+In order to build binary `.rpm` packages specify `OCTEZ_VERSION` and
 run the following command:
 ```
-export TEZOS_VERSION="v7.3"
+export OCTEZ_VERSION="v14.1"
 cd .. && ./docker/docker-tezos-packages.sh --os fedora --type binary
 ```
 
@@ -194,7 +194,7 @@ It is also possible to build single package. In order to do that run the followi
 ```
 # cd .. && ./docker/docker-tezos-packages.sh --os fedora --type binary --package <tezos-binary-name>
 # Example for baker
-export TEZOS_VERSION="v7.3"
+export OCTEZ_VERSION="v14.1"
 cd .. && ./docker/docker-tezos-packages.sh --os fedora --type binary --package tezos-baker-007-PsDELPH1
 ```
 
@@ -212,7 +212,7 @@ sudo yum localinstall <path to rpm file>
 
 In order to build source packages run the following commands:
 ```
-export TEZOS_VERSION="v7.3"
+export OCTEZ_VERSION="v14.1"
 cd .. && ./docker/docker-tezos-packages.sh --os fedora --type source
 # you can also build single source package
 cd .. && ./docker/docker-tezos-packages.sh --os fedora --type source --package tezos-baker-007-PsDELPH1

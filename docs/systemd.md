@@ -40,9 +40,9 @@ from scratch.
 For this you'll need a `.service` file to define each systemd service.
 The easiest way to get one is to generate one with `docker` by running [`gen_systemd_service_file.py`](../gen_systemd_service_file.py).
 
-First you'll need to set the `TEZOS_VERSION` env variable, e.g.:
+First you'll need to set the `OCTEZ_VERSION` env variable, e.g.:
 ```sh
-export TEZOS_VERSION="v7.3"
+export OCTEZ_VERSION="v14.1"
 ```
 Then you can use the script, specifying the binary name as an argument, e.g.:
 ```

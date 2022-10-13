@@ -3,11 +3,11 @@
 
 env:
   USE_NEWER_NIX: 1
-  SET_VERSION: "export TEZOS_VERSION=\"$(cat meta.json | jq -r '.tezos_ref' | cut -d'/' -f3)\""
+  SET_VERSION: "export OCTEZ_VERSION=\"$(cat meta.json | jq -r '.tezos_ref' | cut -d'/' -f3)\""
 
 
 steps:
- - label: Check for new Tezos release
+ - label: Check for new Octez release
    if: build.source == "schedule" && build.branch == "master"
    commands:
    - nix develop .#autorelease -c ./scripts/update-tezos.sh

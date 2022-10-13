@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2022 Oxhead Alpha
 # SPDX-License-Identifier: LicenseRef-MIT-OA
 
-class TezosTxRollupClient014Ptkathma < Formula
+class TezosTxRollupClientPtkathma < Formula
   @all_bins = []
 
   class << self
@@ -22,10 +22,10 @@ class TezosTxRollupClient014Ptkathma < Formula
   dependencies.each do |dependency|
     depends_on dependency
   end
-  desc "Transaction rollup CLI client for 014-PtKathma"
+  desc "Transaction rollup CLI client for PtKathma"
 
   bottle do
-    root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosTxRollupClient014Ptkathma.version}/"
+    root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosTxRollupClientPtkathma.version}/"
   end
 
   def make_deps
@@ -49,12 +49,13 @@ class TezosTxRollupClient014Ptkathma < Formula
     self.class.all_bins << name
     system ["eval $(opam env)", "dune build #{dune_path}", "cp #{exec_path} #{name}"].join(" && ")
     bin.install name
+    ln_sf "#{bin}/#{name}", "#{bin}/#{name.gsub("octez", "tezos")}"
   end
 
   def install
     make_deps
     install_template "src/proto_014_PtKathma/bin_tx_rollup_client/main_tx_rollup_client_014_PtKathma.exe",
                      "_build/default/src/proto_014_PtKathma/bin_tx_rollup_client/main_tx_rollup_client_014_PtKathma.exe",
-                     "tezos-tx-rollup-client-014-PtKathma"
+                     "octez-tx-rollup-client-PtKathma"
   end
 end

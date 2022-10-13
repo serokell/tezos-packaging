@@ -49,12 +49,13 @@ class TezosCodec < Formula
     self.class.all_bins << name
     system ["eval $(opam env)", "dune build #{dune_path}", "cp #{exec_path} #{name}"].join(" && ")
     bin.install name
+    ln_sf "#{bin}/#{name}", "#{bin}/#{name.gsub("octez", "tezos")}"
   end
 
   def install
     make_deps
     install_template "src/bin_codec/codec.exe",
                      "_build/default/src/bin_codec/codec.exe",
-                     "tezos-codec"
+                     "octez-codec"
   end
 end

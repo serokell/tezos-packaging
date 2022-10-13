@@ -3,7 +3,7 @@
 # SPDX-FileCopyrightText: 2022 Oxhead Alpha
 # SPDX-License-Identifier: LicenseRef-MIT-OA
 
-class TezosTxRollupNode014Ptkathma < Formula
+class TezosTxRollupNodePtkathma < Formula
   @all_bins = []
 
   class << self
@@ -24,10 +24,10 @@ class TezosTxRollupNode014Ptkathma < Formula
   dependencies.each do |dependency|
     depends_on dependency
   end
-  desc "Tezos transaction rollup node for 014-PtKathma"
+  desc "Tezos transaction rollup node for PtKathma"
 
   bottle do
-    root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosTxRollupNode014Ptkathma.version}/"
+    root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosTxRollupNodePtkathma.version}/"
   end
 
   def make_deps
@@ -51,6 +51,7 @@ class TezosTxRollupNode014Ptkathma < Formula
     self.class.all_bins << name
     system ["eval $(opam env)", "dune build #{dune_path}", "cp #{exec_path} #{name}"].join(" && ")
     bin.install name
+    ln_sf "#{bin}/#{name}", "#{bin}/#{name.gsub("octez", "tezos")}"
   end
 
   def install
@@ -60,7 +61,7 @@ class TezosTxRollupNode014Ptkathma < Formula
 
       set -euo pipefail
 
-      node="#{bin}/tezos-tx-rollup-node-014-PtKathma"
+      node="#{bin}/octez-tx-rollup-node-PtKathma"
 
       "$node" init "$ROLLUP_MODE" config \
           for "$ROLLUP_ALIAS" \
@@ -73,14 +74,14 @@ class TezosTxRollupNode014Ptkathma < Formula
           --data-dir "$DATA_DIR"
 
       EOS
-    File.write("tezos-tx-rollup-node-014-PtKathma-start", startup_contents)
-    bin.install "tezos-tx-rollup-node-014-PtKathma-start"
+    File.write("tezos-tx-rollup-node-PtKathma-start", startup_contents)
+    bin.install "tezos-tx-rollup-node-PtKathma-start"
     make_deps
     install_template "src/proto_014_PtKathma/bin_tx_rollup_node/main_tx_rollup_node_014_PtKathma.exe",
                      "_build/default/src/proto_014_PtKathma/bin_tx_rollup_node/main_tx_rollup_node_014_PtKathma.exe",
-                     "tezos-tx-rollup-node-014-PtKathma"
+                     "octez-tx-rollup-node-PtKathma"
   end
-  plist_options manual: "tezos-tx-rollup-node-014-PtKathma run for"
+  plist_options manual: "tezos-tx-rollup-node-PtKathma run for"
   def plist
     <<~EOS
       <?xml version="1.0" encoding="UTF-8"?>
@@ -91,7 +92,7 @@ class TezosTxRollupNode014Ptkathma < Formula
           <key>Label</key>
           <string>#{plist_name}</string>
           <key>Program</key>
-          <string>#{opt_bin}/tezos-tx-rollup-node-014-PtKathma-start</string>
+          <string>#{opt_bin}/tezos-tx-rollup-node-PtKathma-start</string>
           <key>EnvironmentVariables</key>
             <dict>
               <key>DATA_DIR</key>

@@ -16,7 +16,7 @@ class TezosNodeGhostnet < Formula
 
       set -euo pipefail
 
-      node="/usr/local/bin/tezos-node"
+      node="/usr/local/bin/octez-node"
       # default location of the config file
       config_file="$DATA_DIR/config.json"
 
@@ -82,6 +82,6 @@ class TezosNodeGhostnet < Formula
   end
   def post_install
     mkdir_p "#{var}/lib/tezos/node-ghostnet"
-    system "tezos-node", "config", "init", "--data-dir" "#{var}/lib/tezos/node-ghostnet", "--network", "ghostnet"
+    system "octez-node", "config", "init", "--data-dir" "#{var}/lib/tezos/node-ghostnet", "--network", "ghostnet"
   end
 end

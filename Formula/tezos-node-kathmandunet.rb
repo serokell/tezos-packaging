@@ -16,7 +16,7 @@ class TezosNodeKathmandunet < Formula
 
       set -euo pipefail
 
-      node="/usr/local/bin/tezos-node"
+      node="/usr/local/bin/octez-node"
       # default location of the config file
       config_file="$DATA_DIR/config.json"
 
@@ -82,6 +82,6 @@ class TezosNodeKathmandunet < Formula
   end
   def post_install
     mkdir_p "#{var}/lib/tezos/node-kathmandunet"
-    system "tezos-node", "config", "init", "--data-dir" "#{var}/lib/tezos/node-kathmandunet", "--network", "kathmandunet"
+    system "octez-node", "config", "init", "--data-dir" "#{var}/lib/tezos/node-kathmandunet", "--network", "kathmandunet"
   end
 end

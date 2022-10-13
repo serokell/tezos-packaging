@@ -49,12 +49,13 @@ class TezosClient < Formula
     self.class.all_bins << name
     system ["eval $(opam env)", "dune build #{dune_path}", "cp #{exec_path} #{name}"].join(" && ")
     bin.install name
+    ln_sf "#{bin}/#{name}", "#{bin}/#{name.gsub("octez", "tezos")}"
   end
 
   def install
     make_deps
     install_template "src/bin_client/main_client.exe",
                      "_build/default/src/bin_client/main_client.exe",
-                     "tezos-client"
+                     "octez-client"
   end
 end

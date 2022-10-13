@@ -16,7 +16,7 @@ class TezosSignerTcp < Formula
 
       set -euo pipefail
 
-      signer="/usr/local/bin/tezos-signer"
+      signer="/usr/local/bin/octez-signer"
 
       if [[ -n $PIDFILE ]]; then
         pid_file_args=("--pid-file" "$PIDFILE")

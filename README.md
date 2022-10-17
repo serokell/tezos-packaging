@@ -8,7 +8,7 @@
 
 [![Build status](https://badge.buildkite.com/e899e9e54babcd14139e3bd4381bad39b5d680e08e7b7766d4.svg?branch=master)](https://buildkite.com/serokell/tezos-packaging)
 
-This repo provides various forms of distribution for [Tezos](http://tezos.gitlab.io/) executables.
+This repo provides various forms of distribution for [Tezos](http://tezos.gitlab.io/) executables based on the [Octez](https://gitlab.com/tezos/tezos) implementation.
 
 See the [official documentation](http://tezos.gitlab.io/introduction/howtouse.html)
 for information about the binaries, their usage, and concepts about the Tezos networks.

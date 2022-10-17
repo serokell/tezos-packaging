@@ -86,7 +86,7 @@ It is also possible to build single package. In order to do that run the followi
 # cd .. && ./docker/docker-tezos-packages.sh --os ubuntu --type binary --package <tezos-binary-name>
 # Example for baker
 export OCTEZ_VERSION="v14.1"
-cd .. && ./docker/docker-tezos-packages.sh --os ubuntu --type binary --package tezos-baker-007-PsDELPH1
+cd .. && ./docker/docker-tezos-packages.sh --os ubuntu --type binary --package tezos-baker-PtKathma
 ```
 
 The build can take some time due to the fact that we build tezos and its dependencies
@@ -106,7 +106,7 @@ In order to build source packages run the following commands:
 export OCTEZ_VERSION="v14.1"
 cd .. && ./docker/docker-tezos-packages.sh --os ubuntu --type source
 # you can also build single source package
-cd .. && ./docker/docker-tezos-packages.sh --os ubuntu --type source --package tezos-baker-007-PsDELPH1
+cd .. && ./docker/docker-tezos-packages.sh --os ubuntu --type source --package tezos-baker-PtKathma
 ```
 
 Once the packages build is complete `../out` directory will contain files required
@@ -117,7 +117,7 @@ There are 5 files for each package: `.orig.tar.gz`, `.debian.tar.xz`,
 
 You can test source package building using [`pbuilder`](https://wiki.ubuntu.com/PbuilderHowto).
 
-<!-- Updated: 2022/10/17 11:12:29 by dlaptov          ###   ########.fr      -->
+In order to push the packages to the Launchpad PPA `*.changes` files should should be updated with
 the submitter info and signed.
 
 In order to update `*.changes` files with the proper signer info run the following:
@@ -195,7 +195,7 @@ It is also possible to build single package. In order to do that run the followi
 # cd .. && ./docker/docker-tezos-packages.sh --os fedora --type binary --package <tezos-binary-name>
 # Example for baker
 export OCTEZ_VERSION="v14.1"
-cd .. && ./docker/docker-tezos-packages.sh --os fedora --type binary --package tezos-baker-007-PsDELPH1
+cd .. && ./docker/docker-tezos-packages.sh --os fedora --type binary --package tezos-baker-PtKathma
 ```
 
 The build can take some time due to the fact that we build tezos and its dependencies
@@ -215,7 +215,7 @@ In order to build source packages run the following commands:
 export OCTEZ_VERSION="v14.1"
 cd .. && ./docker/docker-tezos-packages.sh --os fedora --type source
 # you can also build single source package
-cd .. && ./docker/docker-tezos-packages.sh --os fedora --type source --package tezos-baker-007-PsDELPH1
+cd .. && ./docker/docker-tezos-packages.sh --os fedora --type source --package tezos-baker-PtKathma
 ```
 
 Sign source packages:

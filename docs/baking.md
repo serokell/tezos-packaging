@@ -30,8 +30,8 @@ that you can use by following the [installation instructions](https://www.raspbe
 In order to run a baking instance, you'll need the following Tezos binaries:
 `tezos-client`, `tezos-node`, `tezos-baker-<proto>`.
 
-The currently supported protocol is `013-PtJakart` (used on `jakartanet`, `ghostnet` and `mainnet`)
-and `014-PtKathma` (used on `kathmandunet`).
+The currently supported protocol is `PtKathma` (used on `kathmandunet`, `ghostnet` and `mainnet`)
+and `PtLimaPt` (used on `limanet`).
 Also, note that the corresponding packages have protocol
 suffix in lowercase, e.g. the list of available baker packages can be found
 [here](https://launchpad.net/~serokell/+archive/ubuntu/tezos/+packages?field.name_filter=tezos-baker&field.status_filter=published).
@@ -157,7 +157,7 @@ key that will be used for baking and endorsing.
 
 ### Setting the Liquidity Baking toggle vote option
 
-Since `013-PtJakart`, the `--liquidity-baking-toggle-vote` command line option for
+Since `PtJakart`, the `--liquidity-baking-toggle-vote` command line option for
 `tezos-baker` is now mandatory. In our systemd services, it is set to `pass` by
 default. You can change it as desired in the service config file at
 `/etc/defaults/tezos-baking-<network>`.
@@ -288,7 +288,7 @@ or official testnets, you can do so:
 4. Check that all parts are indeed running:
   ```bash
   systemctl status tezos-node-custom@<chain-name>
-  systemctl status tezos-baker-013-ptjakart@custom@<chain-name>.service
+  systemctl status tezos-baker-ptkathma@custom@<chain-name>.service
 ```
 
 If at any point after that you want to reset the custom baking service, you can set

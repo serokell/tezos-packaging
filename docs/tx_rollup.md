@@ -5,7 +5,7 @@
 
 # Setting up transaction rollup node on Ubuntu
 
-`proto` variable can hold every active protocol, currently `013-PtJakart` and `014-PtKathma`.
+`proto` variable can hold every active protocol, currently `PtKatham` and `PtLimaPt`.
 
 By default, `tezos-tx-rollup-node-$proto.service` will use:
 * `/var/lib/tezos/.tezos-client` as the `tezos-client` data directory, set in `DATA_DIR`

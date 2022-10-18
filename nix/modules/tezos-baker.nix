@@ -6,19 +6,19 @@
 with lib;
 
 let
-  tezos-baker-pkgs = {
-    "013-PtJakart" =
-      "${pkgs.tezosPackages.tezos-baker-013-PtJakart}/bin/tezos-baker-013-PtJakart";
-    "014-PtKathma" =
-      "${pkgs.tezosPackages.tezos-baker-014-PtKathma}/bin/tezos-baker-014-PtKathma";
+  octez-baker-pkgs = {
+    "PtKathma" =
+      "${pkgs.octezPackages.octez-baker-PtKathma}/bin/octez-baker-PtKathma";
+    "PtLimaPt" =
+      "${pkgs.octezPackages.octez-baker-PtLimaPt}/bin/octez-baker-PtLimaPt";
   };
-  tezos-client = "${pkgs.tezosPackages.tezos-client}/bin/tezos-client";
-  cfg = config.services.tezos-baker;
+  octez-client = "${pkgs.octezPackages.octez-client}/bin/octez-client";
+  cfg = config.services.octez-baker;
   common = import ./common.nix { inherit lib; inherit pkgs; };
   instanceOptions = types.submodule ( {...} : {
     options = common.daemonOptions // {
 
-      enable = mkEnableOption "Tezos baker service";
+      enable = mkEnableOption "Octez baker service";
 
       bakerSecretKey = mkOption {
         type = types.nullOr types.str;
@@ -33,7 +33,7 @@ let
         type = types.str;
         default = "";
         description = ''
-          Alias for the tezos-baker account.
+          Alias for the octez-baker account.
         '';
       };
 
@@ -50,7 +50,7 @@ let
   });
 
 in {
-  options.services.tezos-baker = {
+  options.services.octez-baker = {
     instances = mkOption {
       type = types.attrsOf instanceOptions;
       description = "Configuration options";
@@ -63,17 +63,17 @@ in {
         voting-option = "--liquidity-baking-toggle-vote ${node-cfg.liquidityBakingToggleVote}";
       in concatMapStringsSep "\n" (baseProtocol:
       ''
-        ${tezos-baker-pkgs.${baseProtocol}} -d "$STATE_DIRECTORY/client/data" \
+        ${octez-baker-pkgs.${baseProtocol}} -d "$STATE_DIRECTORY/client/data" \
         -E "http://localhost:${toString node-cfg.rpcPort}" \
         run with local node "$STATE_DIRECTORY/node/data" ${voting-option} ${node-cfg.bakerAccountAlias} &
       '') node-cfg.baseProtocols;
         baker-prestart-script = node-cfg: if node-cfg.bakerSecretKey != null then ''
-          ${tezos-client} -d "$STATE_DIRECTORY/client/data" import secret key "${node-cfg.bakerAccountAlias}" ${node-cfg.bakerSecretKey} --force
+          ${octez-client} -d "$STATE_DIRECTORY/client/data" import secret key "${node-cfg.bakerAccountAlias}" ${node-cfg.bakerSecretKey} --force
           '' else "";
     in common.genDaemonConfig {
       instancesCfg = cfg.instances;
       service-name = "baker";
-      service-pkgs = tezos-baker-pkgs;
+      service-pkgs = octez-baker-pkgs;
       service-start-script = baker-start-script;
       service-prestart-script = baker-prestart-script;
     };

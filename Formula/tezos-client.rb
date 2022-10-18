@@ -9,9 +9,9 @@ class TezosClient < Formula
   end
   homepage "https://gitlab.com/tezos/tezos"
 
-  url "https://gitlab.com/tezos/tezos.git", :tag => "v14.1", :shallow => false
+  url "https://gitlab.com/tezos/tezos.git", :tag => "v15.0-rc1", :shallow => false
 
-  version "v14.1-1"
+  version "v15.0-rc1-1"
 
   build_dependencies = %w[pkg-config coreutils autoconf rsync wget rustup-init]
   build_dependencies.each do |dependency|
@@ -26,8 +26,6 @@ class TezosClient < Formula
 
   bottle do
     root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosClient.version}/"
-    sha256 cellar: :any, big_sur: "3ca4cf28961226f4af5661c28e04bd4b8c7316cd748bf93134636ab71c664c12"
-    sha256 cellar: :any, arm64_big_sur: "d3cdc02f0e4fd0730185fe7f3bcca106215ceabf9514f1f98b1d48a17c16cd62"
   end
 
   def make_deps
@@ -51,12 +49,13 @@ class TezosClient < Formula
     self.class.all_bins << name
     system ["eval $(opam env)", "dune build #{dune_path}", "cp #{exec_path} #{name}"].join(" && ")
     bin.install name
+    ln_sf "#{bin}/#{name}", "#{bin}/#{name.gsub("octez", "tezos")}"
   end
 
   def install
     make_deps
     install_template "src/bin_client/main_client.exe",
                      "_build/default/src/bin_client/main_client.exe",
-                     "tezos-client"
+                     "octez-client"
   end
 end

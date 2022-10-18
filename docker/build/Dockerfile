@@ -8,6 +8,8 @@ RUN apk --no-cache --virtual add rsync git m4 build-base patch unzip \
   autoconf automake libtool linux-headers cargo libffi-dev zlib-static coreutils
 COPY ./build/build-libusb-and-hidapi.sh /build-libusb-and-hidapi.sh
 RUN /build-libusb-and-hidapi.sh
-ARG TEZOS_VERSION
+COPY ./build/build-rust.sh /build-rust.sh
+RUN /build-rust.sh
+ARG OCTEZ_VERSION
 COPY ./build/build-tezos.sh /build-tezos.sh
-RUN /build-tezos.sh ${TEZOS_VERSION}
+RUN /build-tezos.sh ${OCTEZ_VERSION}

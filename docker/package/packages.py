@@ -1,7 +1,6 @@
 # SPDX-FileCopyrightText: 2021 Oxhead Alpha
 # SPDX-License-Identifier: LicenseRef-MIT-OA
 import os, json
-from unittest.mock import patch
 
 from .meta import packages_meta
 
@@ -17,15 +16,20 @@ from .systemd import Service, ServiceFile, SystemdUnit, Unit, Install
 # the config
 networks = {
     "mainnet": "mainnet",
-    "jakartanet": "jakartanet",
     "ghostnet": "ghostnet",
+    "limanet": "https://teztnets.xyz/limanet",
     "kathmandunet": "kathmandunet",
 }
 networks_protos = {
-    "mainnet": ["014-PtKathma"],
-    "jakartanet": ["013-PtJakart"],
-    "ghostnet": ["014-PtKathma"],
-    "kathmandunet": ["014-PtKathma"],
+    "mainnet": ["PtKathma"],
+    "ghostnet": ["PtKathma"],
+    "limanet": ["PtLimaPt"],
+    "kathmandunet": ["PtKathma"],
+}
+
+protocol_numbers = {
+    "PtKathma": "014",
+    "PtLimaPt": "015",
 }
 
 signer_units = [
@@ -213,18 +217,19 @@ for network, network_config in networks.items():
         mk_node_unit(suffix=network, env=env, desc=f"Tezos node {network}")
     )
     node_postinst_steps += f"""mkdir -p /var/lib/tezos/node-{network}
-[ ! -f /var/lib/tezos/node-{network}/config.json ] && tezos-node config init --data-dir /var/lib/tezos/node-{network} --network {network_config}
+[ ! -f /var/lib/tezos/node-{network}/config.json ] && octez-node config init --data-dir /var/lib/tezos/node-{network} --network {network_config}
 chown -R tezos:tezos /var/lib/tezos/node-{network}
 
-cat > /usr/bin/tezos-node-{network} <<- 'EOM'
+cat > /usr/bin/octez-node-{network} <<- 'EOM'
 #! /usr/bin/env bash
 
-TEZOS_NODE_DIR="$(cat $(systemctl show -p FragmentPath tezos-node-{network}.service | cut -d'=' -f2) | grep 'DATA_DIR' | cut -d '=' -f3 | cut -d '"' -f1)" tezos-node "$@"
+TEZOS_NODE_DIR="$(cat $(systemctl show -p FragmentPath tezos-node-{network}.service | cut -d'=' -f2) | grep 'DATA_DIR' | cut -d '=' -f3 | cut -d '"' -f1)" octez-node "$@"
 EOM
-chmod +x /usr/bin/tezos-node-{network}
+chmod +x /usr/bin/octez-node-{network}
+ln -s /usr/bin/octez-node-{network} /usr/bin/tezos-node-{network}
 """
     node_postrm_steps += f"""
-rm -f /usr/bin/tezos-node-{network}
+rm -f /usr/bin/octez-node-{network} /usr/bin/tezos-node-{network}
 """
 
 # Add custom config service
@@ -282,7 +287,7 @@ daemon_postinst_common = (
 
 
 for proto in active_protocols:
-    proto_snake_case = proto.replace("-", "_")
+    proto_snake_case = protocol_numbers[proto] + "_" + proto
     daemons_instances = [
         network for network, protos in networks_protos.items() if proto in protos
     ]
@@ -461,7 +466,7 @@ def mk_rollup_packages():
         ]
 
     def mk_rollup_package(name, type, proto):
-        proto_snake_case = proto.replace("-", "_")
+        proto_snake_case = protocol_numbers[proto] + "_" + proto
         return TezosBinaryPackage(
             f"tezos-{type}-rollup-{name}-{proto}",
             f"Tezos {type} rollup {name} using {proto}",

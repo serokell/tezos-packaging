@@ -45,7 +45,7 @@
       devShells."aarch64-darwin".autorelease-macos =
         import ./scripts/macos-shell.nix { pkgs = pkgs-darwin; };
 
-      overlay = final: prev: nixpkgs.lib.composeManyExtensions [
+      overlays.default = final: prev: nixpkgs.lib.composeManyExtensions [
         ocaml-overlay
         (final: prev: { inherit (inputs) serokell-nix; })
       ] final prev;

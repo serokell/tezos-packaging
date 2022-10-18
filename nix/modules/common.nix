@@ -21,11 +21,11 @@ rec {
   daemonOptions = sharedOptions // {
 
     baseProtocols = mkOption {
-      type = types.listOf (types.enum [ "013-PtJakart" "014-PtKathma" ]);
+      type = types.listOf (types.enum [ "PtKathma" "PtLimaPt" ]);
       description = ''
         List of protocols for which daemons will be run.
       '';
-      example = ["013-PtJakart"];
+      example = ["PtKathma"];
     };
 
     rpcPort = mkOption {
@@ -33,7 +33,7 @@ rec {
       default = 8732;
       example = 8732;
       description = ''
-        Tezos node RPC port.
+        Octez node RPC port.
       '';
     };
 
@@ -50,17 +50,17 @@ rec {
     mkIf (instancesCfg != {}) {
       users = mkMerge (flip mapAttrsToList instancesCfg (node-name: node-cfg: genUsers node-name ));
       systemd = mkMerge (flip mapAttrsToList instancesCfg (node-name: node-cfg:
-        let tezos-client = "${pkgs.tezosPackages.tezos-client}/bin/tezos-client";
+        let octez-client = "${pkgs.octezPackages.octez-client}/bin/octez-client";
             passwordFilenameArg = if node-cfg.passwordFilename != null then "-f ${node-cfg.passwordFilename}" else "";
         in {
-          services."tezos-${node-name}-tezos-${service-name}" = lib.recursiveUpdate (genSystemdService node-name node-cfg service-name) rec {
-            bindsTo = [ "network.target" "tezos-${node-name}-tezos-node.service" ];
+          services."tezos-${node-name}-octez-${service-name}" = lib.recursiveUpdate (genSystemdService node-name node-cfg service-name) rec {
+            bindsTo = [ "network.target" "tezos-${node-name}-octez-node.service" ];
             after = bindsTo;
             path = with pkgs; [ curl ];
             preStart =
               ''
                 while ! _="$(curl --silent http://localhost:${toString node-cfg.rpcPort}/chains/main/blocks/head/)"; do
-                  echo "Trying to connect to tezos-node"
+                  echo "Trying to connect to octez-node"
                   sleep 1s
                 done
 
@@ -69,10 +69,10 @@ rec {
 
                 # Generate or update service config file
                 if [[ ! -f "$service_data_dir/config" ]]; then
-                  ${tezos-client} -d "$service_data_dir" -E "http://localhost:${toString node-cfg.rpcPort}" ${passwordFilenameArg} \
+                  ${octez-client} -d "$service_data_dir" -E "http://localhost:${toString node-cfg.rpcPort}" ${passwordFilenameArg} \
                   config init --output "$service_data_dir/config" >/dev/null 2>&1
                 else
-                  ${tezos-client} -d "$service_data_dir" -E "http://localhost:${toString node-cfg.rpcPort}" ${passwordFilenameArg} \
+                  ${octez-client} -d "$service_data_dir" -E "http://localhost:${toString node-cfg.rpcPort}" ${passwordFilenameArg} \
                   config update >/dev/null 2>&1
                 fi
               '' + service-prestart-script node-cfg;
@@ -91,9 +91,9 @@ rec {
 
   genSystemdService = node-name: node-cfg: service-name: {
     wantedBy = [ "multi-user.target" ];
-    description = "Tezos ${service-name}";
+    description = "Octez ${service-name}";
     environment = {
-      TEZOS_LOG = "* -> ${node-cfg.logVerbosity}";
+      OCTEZ_LOG = "* -> ${node-cfg.logVerbosity}";
     };
     serviceConfig = {
       User = "tezos-${node-name}";

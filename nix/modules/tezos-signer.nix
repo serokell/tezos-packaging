@@ -7,13 +7,13 @@
 with lib;
 
 let
-  tezos-signer-launch = "${pkgs.tezosPackages.tezos-signer}/bin/tezos-signer launch";
+  octez-signer-launch = "${pkgs.octezPackages.octez-signer}/bin/octez-signer launch";
   common = import ./common.nix { inherit lib; inherit pkgs; };
-  cfg = config.services.tezos-signer;
+  cfg = config.services.octez-signer;
   instanceOptions = types.submodule ( {...} : {
     options = common.sharedOptions // {
 
-      enable = mkEnableOption "Tezos signer service";
+      enable = mkEnableOption "Octez signer service";
 
       networkProtocol = mkOption {
         type = types.enum [ "http" "https" "tcp" "unix" ];
@@ -28,7 +28,7 @@ let
         default = "127.0.0.1";
         example = "127.0.0.1";
         description = ''
-          Tezos signer net address.
+          Octez signer net address.
         '';
       };
 
@@ -37,7 +37,7 @@ let
         default = 8080;
         example = 8080;
         description = ''
-          Tezos signer net port.
+          Octez signer net port.
         '';
       };
 
@@ -45,7 +45,7 @@ let
         type = types.str;
         default = null;
         description = ''
-          Path of the SSL certificate to use for https Tezos signer.
+          Path of the SSL certificate to use for https Octez signer.
         '';
       };
 
@@ -53,7 +53,7 @@ let
         type = types.str;
         default = null;
         description = ''
-          Key path to use for https Tezos signer.
+          Key path to use for https Octez signer.
         '';
       };
 
@@ -61,7 +61,7 @@ let
         type = types.str;
         default = null;
         description = ''
-          Socket to use for Tezos signer running over UNIX socket.
+          Socket to use for Octez signer running over UNIX socket.
         '';
       };
 
@@ -70,14 +70,14 @@ let
         default = 1;
         example = 1;
         description = ''
-          Timeout for Tezos signer.
+          Timeout for Octez signer.
         '';
       };
 
     };
   });
 in {
-  options.services.tezos-signer = {
+  options.services.octez-signer = {
     instances = mkOption {
       type = types.attrsOf instanceOptions;
       description = "Configuration options";
@@ -87,21 +87,21 @@ in {
   config = mkIf (cfg.instances != {}) {
     users = mkMerge (flip mapAttrsToList cfg.instances (node-name: node-cfg: common.genUsers node-name ));
     systemd = mkMerge (flip mapAttrsToList cfg.instances (node-name: node-cfg:
-      let tezos-signers = {
+      let octez-signers = {
         "http" =
-          "${tezos-signer-launch} http signer --address ${node-cfg.netAddress} --port ${toString node-cfg.netPort}";
+          "${octez-signer-launch} http signer --address ${node-cfg.netAddress} --port ${toString node-cfg.netPort}";
         "https" =
-          "${tezos-signer-launch} https signer ${node-cfg.certPath} ${node-cfg.keyPath} --address ${node-cfg.netAddress} --port ${toString node-cfg.netPort}";
+          "${octez-signer-launch} https signer ${node-cfg.certPath} ${node-cfg.keyPath} --address ${node-cfg.netAddress} --port ${toString node-cfg.netPort}";
         "tcp" =
-          "${tezos-signer-launch} socket signer --address ${node-cfg.netAddress} --port ${toString node-cfg.netPort} --timeout ${toString node-cfg.timeout}";
+          "${octez-signer-launch} socket signer --address ${node-cfg.netAddress} --port ${toString node-cfg.netPort} --timeout ${toString node-cfg.timeout}";
         "unix" =
-          "${tezos-signer-launch} local signer --socket ${node-cfg.unixSocket}";
+          "${octez-signer-launch} local signer --socket ${node-cfg.unixSocket}";
       };
       in {
-      services."tezos-${node-name}-tezos-signer" = common.genSystemdService node-name node-cfg "signer" // {
+      services."tezos-${node-name}-octez-signer" = common.genSystemdService node-name node-cfg "signer" // {
         after = [ "network.target" ];
         script = ''
-          ${tezos-signers.${node-cfg.networkProtocol}}
+          ${octez-signers.${node-cfg.networkProtocol}}
         '';
       };
     }));

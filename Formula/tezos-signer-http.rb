@@ -3,7 +3,7 @@
 
 class TezosSignerHttp < Formula
   url "file:///dev/null"
-  version "v14.1-1"
+  version "v15.0-rc1-1"
 
   depends_on "tezos-signer"
 
@@ -16,7 +16,7 @@ class TezosSignerHttp < Formula
 
       set -euo pipefail
 
-      signer="/usr/local/bin/tezos-signer"
+      signer="/usr/local/bin/octez-signer"
 
       if [[ -n $PIDFILE ]]; then
         pid_file_args=("--pid-file" "$PIDFILE")

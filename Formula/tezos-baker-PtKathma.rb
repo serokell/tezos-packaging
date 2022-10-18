@@ -1,9 +1,7 @@
-#!/usr/bin/env ruby
-
 # SPDX-FileCopyrightText: 2022 Oxhead Alpha
 # SPDX-License-Identifier: LicenseRef-MIT-OA
 
-class TezosTxRollupNode014Ptkathma < Formula
+class TezosBakerPtkathma < Formula
   @all_bins = []
 
   class << self
@@ -11,9 +9,9 @@ class TezosTxRollupNode014Ptkathma < Formula
   end
   homepage "https://gitlab.com/tezos/tezos"
 
-  url "https://gitlab.com/tezos/tezos.git", :tag => "v14.1", :shallow => false
+  url "https://gitlab.com/tezos/tezos.git", :tag => "v15.0-rc1", :shallow => false
 
-  version "v14.1-1"
+  version "v15.0-rc1-1"
 
   build_dependencies = %w[pkg-config coreutils autoconf rsync wget rustup-init]
   build_dependencies.each do |dependency|
@@ -24,12 +22,10 @@ class TezosTxRollupNode014Ptkathma < Formula
   dependencies.each do |dependency|
     depends_on dependency
   end
-  desc "Tezos transaction rollup node for 014-PtKathma"
+  desc "Daemon for baking"
 
   bottle do
-    root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosTxRollupNode014Ptkathma.version}/"
-    sha256 cellar: :any, big_sur: "fc6d54ccb15bcb3b6d5a10a4cec1cf692e228efc8fab98eb9d62f1968b22fd9c"
-    sha256 cellar: :any, arm64_big_sur: "9dbb7e78e77abdfc172b29b2f58d17462d266818035a931bed8c5cf4f41fae67"
+    root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosBakerPtkathma.version}/"
   end
 
   def make_deps
@@ -53,6 +49,7 @@ class TezosTxRollupNode014Ptkathma < Formula
     self.class.all_bins << name
     system ["eval $(opam env)", "dune build #{dune_path}", "cp #{exec_path} #{name}"].join(" && ")
     bin.install name
+    ln_sf "#{bin}/#{name}", "#{bin}/#{name.gsub("octez", "tezos")}"
   end
 
   def install
@@ -62,27 +59,43 @@ class TezosTxRollupNode014Ptkathma < Formula
 
       set -euo pipefail
 
-      node="#{bin}/tezos-tx-rollup-node-014-PtKathma"
+      baker="#{bin}/octez-baker-PtKathma"
 
-      "$node" init "$ROLLUP_MODE" config \
-          for "$ROLLUP_ALIAS" \
-          --data-dir "$DATA_DIR" \
-          --rpc-addr "$ROLLUP_NODE_RPC_ENDPOINT" \
-          --force
+      baker_dir="$DATA_DIR"
 
-      "$node" --endpoint "$NODE_RPC_ENDPOINT" \
-          run "$ROLLUP_MODE" for "$ROLLUP_ALIAS" \
-          --data-dir "$DATA_DIR"
+      baker_config="$baker_dir/config"
+      mkdir -p "$baker_dir"
 
-      EOS
-    File.write("tezos-tx-rollup-node-014-PtKathma-start", startup_contents)
-    bin.install "tezos-tx-rollup-node-014-PtKathma-start"
+      if [ ! -f "$baker_config" ]; then
+          "$baker" --base-dir "$baker_dir" \
+                  --endpoint "$NODE_RPC_ENDPOINT" \
+                  config init --output "$baker_config" >/dev/null 2>&1
+      else
+          "$baker" --base-dir "$baker_dir" \
+                  --endpoint "$NODE_RPC_ENDPOINT" \
+                  config update >/dev/null 2>&1
+      fi
+
+      launch_baker() {
+          exec "$baker" \
+              --base-dir "$baker_dir" --endpoint "$NODE_RPC_ENDPOINT" \
+              run with local node "$NODE_DATA_DIR" "$@"
+      }
+
+      if [[ -z "$BAKER_ACCOUNT" ]]; then
+          launch_baker
+      else
+          launch_baker "$BAKER_ACCOUNT"
+      fi
+    EOS
+    File.write("tezos-baker-PtKathma-start", startup_contents)
+    bin.install "tezos-baker-PtKathma-start"
     make_deps
-    install_template "src/proto_014_PtKathma/bin_tx_rollup_node/main_tx_rollup_node_014_PtKathma.exe",
-                     "_build/default/src/proto_014_PtKathma/bin_tx_rollup_node/main_tx_rollup_node_014_PtKathma.exe",
-                     "tezos-tx-rollup-node-014-PtKathma"
+    install_template "src/proto_014_PtKathma/bin_baker/main_baker_014_PtKathma.exe",
+                     "_build/default/src/proto_014_PtKathma/bin_baker/main_baker_014_PtKathma.exe",
+                     "octez-baker-PtKathma"
   end
-  plist_options manual: "tezos-tx-rollup-node-014-PtKathma run for"
+  plist_options manual: "tezos-baker-PtKathma run with local node"
   def plist
     <<~EOS
       <?xml version="1.0" encoding="UTF-8"?>
@@ -93,19 +106,17 @@ class TezosTxRollupNode014Ptkathma < Formula
           <key>Label</key>
           <string>#{plist_name}</string>
           <key>Program</key>
-          <string>#{opt_bin}/tezos-tx-rollup-node-014-PtKathma-start</string>
+          <string>#{opt_bin}/tezos-baker-PtKathma-start</string>
           <key>EnvironmentVariables</key>
             <dict>
               <key>DATA_DIR</key>
               <string>#{var}/lib/tezos/client</string>
+              <key>NODE_DATA_DIR</key>
+              <string></string>
               <key>NODE_RPC_ENDPOINT</key>
               <string>http://localhost:8732</string>
-              <key>ROLLUP_NODE_RPC_ENDPOINT</key>
-              <string>127.0.0.1:8472</string>
-              <key>ROLLUP_MODE</key>
-              <string>observer</string>
-              <key>ROLLUP_ALIAS</key>
-              <string>rollup</string>
+              <key>BAKER_ACCOUNT</key>
+              <string></string>
           </dict>
           <key>RunAtLoad</key><true/>
           <key>StandardOutPath</key>

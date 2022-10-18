@@ -1,7 +1,9 @@
+#!/usr/bin/env ruby
+
 # SPDX-FileCopyrightText: 2022 Oxhead Alpha
 # SPDX-License-Identifier: LicenseRef-MIT-OA
 
-class TezosBaker013Ptjakart < Formula
+class TezosTxRollupNodePtlimapt < Formula
   @all_bins = []
 
   class << self
@@ -9,9 +11,9 @@ class TezosBaker013Ptjakart < Formula
   end
   homepage "https://gitlab.com/tezos/tezos"
 
-  url "https://gitlab.com/tezos/tezos.git", :tag => "v14.1", :shallow => false
+  url "https://gitlab.com/tezos/tezos.git", :tag => "v15.0-rc1", :shallow => false
 
-  version "v14.1-1"
+  version "v15.0-rc1-1"
 
   build_dependencies = %w[pkg-config coreutils autoconf rsync wget rustup-init]
   build_dependencies.each do |dependency|
@@ -22,12 +24,10 @@ class TezosBaker013Ptjakart < Formula
   dependencies.each do |dependency|
     depends_on dependency
   end
-  desc "Daemon for baking"
+  desc "Tezos transaction rollup node for PtLimaPt"
 
   bottle do
-    root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosBaker013Ptjakart.version}/"
-    sha256 cellar: :any, big_sur: "3be4b76a5142234d261f03d89f0ade97b668a32526fc1f5dbaaa1a4160c21dcf"
-    sha256 cellar: :any, arm64_big_sur: "7ef4b330f68222daf5cbacee11dde1ca8c267cb547e65af6e4163bb411261dde"
+    root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosTxRollupNodePtlimapt.version}/"
   end
 
   def make_deps
@@ -51,6 +51,7 @@ class TezosBaker013Ptjakart < Formula
     self.class.all_bins << name
     system ["eval $(opam env)", "dune build #{dune_path}", "cp #{exec_path} #{name}"].join(" && ")
     bin.install name
+    ln_sf "#{bin}/#{name}", "#{bin}/#{name.gsub("octez", "tezos")}"
   end
 
   def install
@@ -60,43 +61,27 @@ class TezosBaker013Ptjakart < Formula
 
       set -euo pipefail
 
-      baker="#{bin}/tezos-baker-013-PtJakart"
+      node="#{bin}/octez-tx-rollup-node-PtLimaPt"
 
-      baker_dir="$DATA_DIR"
+      "$node" init "$ROLLUP_MODE" config \
+          for "$ROLLUP_ALIAS" \
+          --data-dir "$DATA_DIR" \
+          --rpc-addr "$ROLLUP_NODE_RPC_ENDPOINT" \
+          --force
 
-      baker_config="$baker_dir/config"
-      mkdir -p "$baker_dir"
+      "$node" --endpoint "$NODE_RPC_ENDPOINT" \
+          run "$ROLLUP_MODE" for "$ROLLUP_ALIAS" \
+          --data-dir "$DATA_DIR"
 
-      if [ ! -f "$baker_config" ]; then
-          "$baker" --base-dir "$baker_dir" \
-                  --endpoint "$NODE_RPC_ENDPOINT" \
-                  config init --output "$baker_config" >/dev/null 2>&1
-      else
-          "$baker" --base-dir "$baker_dir" \
-                  --endpoint "$NODE_RPC_ENDPOINT" \
-                  config update >/dev/null 2>&1
-      fi
-
-      launch_baker() {
-          exec "$baker" \
-              --base-dir "$baker_dir" --endpoint "$NODE_RPC_ENDPOINT" \
-              run with local node "$NODE_DATA_DIR" "$@"
-      }
-
-      if [[ -z "$BAKER_ACCOUNT" ]]; then
-          launch_baker
-      else
-          launch_baker "$BAKER_ACCOUNT"
-      fi
-    EOS
-    File.write("tezos-baker-013-PtJakart-start", startup_contents)
-    bin.install "tezos-baker-013-PtJakart-start"
+      EOS
+    File.write("tezos-tx-rollup-node-PtLimaPt-start", startup_contents)
+    bin.install "tezos-tx-rollup-node-PtLimaPt-start"
     make_deps
-    install_template "src/proto_013_PtJakart/bin_baker/main_baker_013_PtJakart.exe",
-                     "_build/default/src/proto_013_PtJakart/bin_baker/main_baker_013_PtJakart.exe",
-                     "tezos-baker-013-PtJakart"
+    install_template "src/proto_015_PtLimaPt/bin_tx_rollup_node/main_tx_rollup_node_015_PtLimaPt.exe",
+                     "_build/default/src/proto_015_PtLimaPt/bin_tx_rollup_node/main_tx_rollup_node_015_PtLimaPt.exe",
+                     "octez-tx-rollup-node-PtLimaPt"
   end
-  plist_options manual: "tezos-baker-013-PtJakart run with local node"
+  plist_options manual: "tezos-tx-rollup-node-PtLimaPt run for"
   def plist
     <<~EOS
       <?xml version="1.0" encoding="UTF-8"?>
@@ -107,17 +92,19 @@ class TezosBaker013Ptjakart < Formula
           <key>Label</key>
           <string>#{plist_name}</string>
           <key>Program</key>
-          <string>#{opt_bin}/tezos-baker-013-PtJakart-start</string>
+          <string>#{opt_bin}/tezos-tx-rollup-node-PtLimaPt-start</string>
           <key>EnvironmentVariables</key>
             <dict>
               <key>DATA_DIR</key>
               <string>#{var}/lib/tezos/client</string>
-              <key>NODE_DATA_DIR</key>
-              <string></string>
               <key>NODE_RPC_ENDPOINT</key>
               <string>http://localhost:8732</string>
-              <key>BAKER_ACCOUNT</key>
-              <string></string>
+              <key>ROLLUP_NODE_RPC_ENDPOINT</key>
+              <string>127.0.0.1:8472</string>
+              <key>ROLLUP_MODE</key>
+              <string>observer</string>
+              <key>ROLLUP_ALIAS</key>
+              <string>rollup</string>
           </dict>
           <key>RunAtLoad</key><true/>
           <key>StandardOutPath</key>

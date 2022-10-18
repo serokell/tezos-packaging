@@ -7,8 +7,8 @@
 set -euo pipefail
 
 # $PROTOCOL should be defined in the system unit environment
-baker="/usr/bin/tezos-baker-$PROTOCOL"
-tezos_client="/usr/bin/tezos-client"
+baker="/usr/bin/octez-baker-$PROTOCOL"
+tezos_client="/usr/bin/octez-client"
 
 baker_dir="$DATA_DIR"
 

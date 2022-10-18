@@ -3,19 +3,29 @@
 
 # This file needs to become empty.
 self: super: rec {
-  tezos-protocol-compiler = super.tezos-protocol-compiler.overrideAttrs (_: {
+  octez-protocol-compiler = super.octez-protocol-compiler.overrideAttrs (_: {
     postFixup = ''
-      ln -s $OCAMLFIND_DESTDIR/tezos-protocol-compiler/* $OCAMLFIND_DESTDIR
+      ln -s $OCAMLFIND_DESTDIR/octez-protocol-compiler/* $OCAMLFIND_DESTDIR
     '';
   });
-  tezos-admin-client = super.tezos-client.overrideAttrs (_ : {
-    name = "tezos-admin-client";
-    postInstall = "rm $out/bin/tezos-client $out/bin/*.sh";
+  # For some reason octez-protocol-compiler wants some docs to be present in tezos-protocol-environment
+  tezos-protocol-environment = super.tezos-protocol-environment.overrideAttrs (o: {
+    postFixup = ''
+      DUMMY_DOCS_DIR="$OCAMLFIND_DESTDIR/../doc/${o.pname}"
+      mkdir -p "$DUMMY_DOCS_DIR"
+      for doc in "README.md" "CHANGES.rst" "LICENSE"; do
+        touch "$DUMMY_DOCS_DIR/$doc"
+      done
+    '';
   });
-  tezos-client = super.tezos-client.overrideAttrs (_ : {
-    postInstall = "rm $out/bin/tezos-admin-client $out/bin/*.sh";
+  octez-admin-client = super.octez-client.overrideAttrs (_ : {
+    name = "octez-admin-client";
+    postInstall = "rm $out/bin/octez-client $out/bin/*.sh";
   });
-  tezos-node = super.tezos-node.overrideAttrs (_ : {
+  octez-client = super.octez-client.overrideAttrs (_ : {
+    postInstall = "rm $out/bin/octez-admin-client $out/bin/*.sh";
+  });
+  octez-node = super.octez-node.overrideAttrs (_ : {
     postInstall = "rm $out/bin/*.sh";
   });
 }

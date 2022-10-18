@@ -38,7 +38,7 @@ incoming    = ~serokell/ubuntu/tezos-rc
 login       = anonymous
 EOL
 
-if [[ $TEZOS_VERSION =~ v.*-rc[0-9]* ]]; then
+if [[ $OCTEZ_VERSION =~ v.*-rc[0-9]* ]]; then
   launchpad_ppa="tezos-rc-serokell"
   copr_project="@Serokell/Tezos-rc"
 else

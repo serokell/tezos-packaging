@@ -7,49 +7,49 @@ let
     builtins.concatStringsSep ", " (protocols.allowed ++ protocols.active);
 in [
   {
-    name = "tezos-client";
-    description = "CLI client for interacting with tezos blockchain";
+    name = "octez-client";
+    description = "CLI client for interacting with octez blockchain";
     supports = protocolsFormatted;
   }
   {
-    name = "tezos-admin-client";
+    name = "octez-admin-client";
     description = "Administration tool for the node";
     supports = protocolsFormatted;
   }
   {
-    name = "tezos-node";
+    name = "octez-node";
     description =
-      "Entry point for initializing, configuring and running a Tezos node";
+      "Entry point for initializing, configuring and running a Octez node";
     supports = protocolsFormatted;
   }
   {
-    name = "tezos-signer";
+    name = "octez-signer";
     description = "A client to remotely sign operations or blocks";
     supports = protocolsFormatted;
   }
   {
-    name = "tezos-codec";
+    name = "octez-codec";
     description = "A client to decode and encode JSON";
     supports = protocolsFormatted;
   }
 ] ++ builtins.concatMap (protocol: [
   {
-    name = "tezos-baker-${protocol}";
+    name = "octez-baker-${protocol}";
     description = "Daemon for baking";
     supports = protocol;
   }
   {
-    name = "tezos-accuser-${protocol}";
+    name = "octez-accuser-${protocol}";
     description = "Daemon for accusing";
     supports = protocol;
   }
   {
-    name = "tezos-tx-rollup-node-${protocol}";
+    name = "octez-tx-rollup-node-${protocol}";
     description = "Transaction rollup node";
     supports = protocol;
   }
   {
-    name = "tezos-tx-rollup-client-${protocol}";
+    name = "octez-tx-rollup-client-${protocol}";
     description = "Client for interacting with transaction rollup node";
     supports = protocol;
   }

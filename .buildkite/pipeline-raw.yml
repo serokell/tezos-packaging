@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: LicenseRef-MIT-OA
 
 env:
-  SET_VERSION: "export TEZOS_VERSION=\"$(cat meta.json | jq -r '.tezos_ref' | cut -d'/' -f3)\""
+  SET_VERSION: "export OCTEZ_VERSION=\"$(cat meta.json | jq -r '.tezos_ref' | cut -d'/' -f3)\""
   USE_NEWER_NIX: 1
 
 steps:
@@ -54,9 +54,9 @@ steps:
    - eval "$SET_VERSION"
    - cd docker
    - ./docker-static-build.sh
-   - nix shell .#upx -c upx tezos-*
+   - nix shell .#upx -c upx octez-*
    artifact_paths:
-     - ./docker/tezos-*
+     - ./docker/octez-*
    agents:
      queue: "docker"
    only_changes: &static_binaries_changes_regexes
@@ -72,13 +72,13 @@ steps:
    - eval "$SET_VERSION"
    - cd docker
    - ./docker-static-build.sh
-   - upx tezos-*
+   - upx octez-*
    - >
-     for f in ./tezos-*; do
+     for f in ./octez-*; do
        mv "\$f" "\$f-arm64"
      done
    artifact_paths:
-     - ./docker/tezos-*
+     - ./docker/octez-*
    agents:
      queue: "arm64-build"
    only_changes: *static_binaries_changes_regexes

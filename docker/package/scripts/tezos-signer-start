@@ -7,7 +7,7 @@
 set -euo pipefail
 
 # $PROTOCOL should be defined in the system unit environment
-signer="/usr/bin/tezos-signer"
+signer="/usr/bin/octez-signer"
 
 if [[ -n $PIDFILE ]]; then
    pid_file_args=("--pid-file" "$PIDFILE")

@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2022 Oxhead Alpha
 # SPDX-License-Identifier: LicenseRef-MIT-OA
 
-class TezosAccuser013Ptjakart < Formula
+class TezosAccuserPtlimapt < Formula
   @all_bins = []
 
   class << self
@@ -9,9 +9,9 @@ class TezosAccuser013Ptjakart < Formula
   end
   homepage "https://gitlab.com/tezos/tezos"
 
-  url "https://gitlab.com/tezos/tezos.git", :tag => "v14.1", :shallow => false
+  url "https://gitlab.com/tezos/tezos.git", :tag => "v15.0-rc1", :shallow => false
 
-  version "v14.1-1"
+  version "v15.0-rc1-1"
 
   build_dependencies = %w[pkg-config coreutils autoconf rsync wget rustup-init]
   build_dependencies.each do |dependency|
@@ -25,9 +25,7 @@ class TezosAccuser013Ptjakart < Formula
   desc "Daemon for accusing"
 
   bottle do
-    root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosAccuser013Ptjakart.version}/"
-    sha256 cellar: :any, big_sur: "23c9f6f1bc24f48d31bb748825428f05933d2629fe84b17c33c9f61d37afebee"
-    sha256 cellar: :any, arm64_big_sur: "6b64d5f76edc01471f58e4fe2aa7217f865be994fa20e5721eefc8b4ecea24cb"
+    root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosAccuserPtlimapt.version}/"
   end
 
   def make_deps
@@ -51,6 +49,7 @@ class TezosAccuser013Ptjakart < Formula
     self.class.all_bins << name
     system ["eval $(opam env)", "dune build #{dune_path}", "cp #{exec_path} #{name}"].join(" && ")
     bin.install name
+    ln_sf "#{bin}/#{name}", "#{bin}/#{name.gsub("octez", "tezos")}"
   end
 
   def install
@@ -60,7 +59,7 @@ class TezosAccuser013Ptjakart < Formula
 
       set -euo pipefail
 
-      accuser="#{bin}/tezos-accuser-013-PtJakart"
+      accuser="#{bin}/octez-accuser-PtLimaPt"
 
       accuser_dir="$DATA_DIR"
 
@@ -81,15 +80,15 @@ class TezosAccuser013Ptjakart < Formula
           --endpoint "$NODE_RPC_ENDPOINT" \
           run
     EOS
-    File.write("tezos-accuser-013-PtJakart-start", startup_contents)
-    bin.install "tezos-accuser-013-PtJakart-start"
+    File.write("tezos-accuser-PtLimaPt-start", startup_contents)
+    bin.install "tezos-accuser-PtLimaPt-start"
     make_deps
-    install_template "src/proto_013_PtJakart/bin_accuser/main_accuser_013_PtJakart.exe",
-                     "_build/default/src/proto_013_PtJakart/bin_accuser/main_accuser_013_PtJakart.exe",
-                     "tezos-accuser-013-PtJakart"
+    install_template "src/proto_015_PtLimaPt/bin_accuser/main_accuser_015_PtLimaPt.exe",
+                     "_build/default/src/proto_015_PtLimaPt/bin_accuser/main_accuser_015_PtLimaPt.exe",
+                     "octez-accuser-PtLimaPt"
   end
 
-  plist_options manual: "tezos-accuser-013-PtJakart run"
+  plist_options manual: "tezos-accuser-PtLimaPt run"
   def plist
     <<~EOS
       <?xml version="1.0" encoding="UTF-8"?>
@@ -100,7 +99,7 @@ class TezosAccuser013Ptjakart < Formula
           <key>Label</key>
           <string>#{plist_name}</string>
           <key>Program</key>
-          <string>#{opt_bin}/tezos-accuser-013-PtJakart-start</string>
+          <string>#{opt_bin}/tezos-accuser-PtLimaPt-start</string>
           <key>EnvironmentVariables</key>
             <dict>
               <key>DATA_DIR</key>

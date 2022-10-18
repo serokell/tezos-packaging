@@ -17,7 +17,7 @@ class PackagesMeta:
         self.license_version = license_version
 
 
-version = os.environ["TEZOS_VERSION"][1:]
+version = os.environ["OCTEZ_VERSION"][1:]
 
 meta_json_contents = json.load(
     open(f"{os.path.dirname(__file__)}/../../meta.json", "r")

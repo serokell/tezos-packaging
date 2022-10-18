@@ -1,7 +1,9 @@
+#!/usr/bin/env ruby
+
 # SPDX-FileCopyrightText: 2022 Oxhead Alpha
 # SPDX-License-Identifier: LicenseRef-MIT-OA
 
-class TezosAccuser014Ptkathma < Formula
+class TezosTxRollupNodePtkathma < Formula
   @all_bins = []
 
   class << self
@@ -9,25 +11,23 @@ class TezosAccuser014Ptkathma < Formula
   end
   homepage "https://gitlab.com/tezos/tezos"
 
-  url "https://gitlab.com/tezos/tezos.git", :tag => "v14.1", :shallow => false
+  url "https://gitlab.com/tezos/tezos.git", :tag => "v15.0-rc1", :shallow => false
 
-  version "v14.1-1"
+  version "v15.0-rc1-1"
 
   build_dependencies = %w[pkg-config coreutils autoconf rsync wget rustup-init]
   build_dependencies.each do |dependency|
     depends_on dependency => :build
   end
 
-  dependencies = %w[gmp hidapi libev libffi]
+  dependencies = %w[gmp hidapi libev libffi tezos-sapling-params]
   dependencies.each do |dependency|
     depends_on dependency
   end
-  desc "Daemon for accusing"
+  desc "Tezos transaction rollup node for PtKathma"
 
   bottle do
-    root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosAccuser014Ptkathma.version}/"
-    sha256 cellar: :any, big_sur: "73f136f796e5758f35a2d9396ef53ffbff1ab5d99c92d5bb3d86cb57e579dc15"
-    sha256 cellar: :any, arm64_big_sur: "311591d5e862767daf3a89f954fc8538a68a788953101a545ff3af77cf9ab202"
+    root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosTxRollupNodePtkathma.version}/"
   end
 
   def make_deps
@@ -36,7 +36,7 @@ class TezosAccuser014Ptkathma < Formula
     # Disable usage of instructions from the ADX extension to avoid incompatibility
     # with old CPUs, see https://gitlab.com/dannywillems/ocaml-bls12-381/-/merge_requests/135/
     ENV["BLST_PORTABLE"]="yes"
-    # Here is the workaround to use opam 2.0 because Tezos is currently not compatible with opam 2.1.0 and newer
+    # Here is the workaround to use opam 2.0.9 because Tezos is currently not compatible with opam 2.1.0 and newer
     arch = RUBY_PLATFORM.include?("arm64") ? "arm64" : "x86_64"
     system "curl", "-L", "https://github.com/ocaml/opam/releases/download/2.0.9/opam-2.0.9-#{arch}-macos", "--create-dirs", "-o", "#{ENV["HOME"]}/.opam-bin/opam"
     system "chmod", "+x", "#{ENV["HOME"]}/.opam-bin/opam"
@@ -51,6 +51,7 @@ class TezosAccuser014Ptkathma < Formula
     self.class.all_bins << name
     system ["eval $(opam env)", "dune build #{dune_path}", "cp #{exec_path} #{name}"].join(" && ")
     bin.install name
+    ln_sf "#{bin}/#{name}", "#{bin}/#{name.gsub("octez", "tezos")}"
   end
 
   def install
@@ -60,36 +61,27 @@ class TezosAccuser014Ptkathma < Formula
 
       set -euo pipefail
 
-      accuser="#{bin}/tezos-accuser-014-PtKathma"
+      node="#{bin}/octez-tx-rollup-node-PtKathma"
 
-      accuser_dir="$DATA_DIR"
+      "$node" init "$ROLLUP_MODE" config \
+          for "$ROLLUP_ALIAS" \
+          --data-dir "$DATA_DIR" \
+          --rpc-addr "$ROLLUP_NODE_RPC_ENDPOINT" \
+          --force
 
-      accuser_config="$accuser_dir/config"
-      mkdir -p "$accuser_dir"
+      "$node" --endpoint "$NODE_RPC_ENDPOINT" \
+          run "$ROLLUP_MODE" for "$ROLLUP_ALIAS" \
+          --data-dir "$DATA_DIR"
 
-      if [ ! -f "$accuser_config" ]; then
-          "$accuser" --base-dir "$accuser_dir" \
-                    --endpoint "$NODE_RPC_ENDPOINT" \
-                    config init --output "$accuser_config" >/dev/null 2>&1
-      else
-          "$accuser" --base-dir "$accuser_dir" \
-                    --endpoint "$NODE_RPC_ENDPOINT" \
-                    config update >/dev/null 2>&1
-      fi
-
-      exec "$accuser" --base-dir "$accuser_dir" \
-          --endpoint "$NODE_RPC_ENDPOINT" \
-          run
-    EOS
-    File.write("tezos-accuser-014-PtKathma-start", startup_contents)
-    bin.install "tezos-accuser-014-PtKathma-start"
+      EOS
+    File.write("tezos-tx-rollup-node-PtKathma-start", startup_contents)
+    bin.install "tezos-tx-rollup-node-PtKathma-start"
     make_deps
-    install_template "src/proto_014_PtKathma/bin_accuser/main_accuser_014_PtKathma.exe",
-                     "_build/default/src/proto_014_PtKathma/bin_accuser/main_accuser_014_PtKathma.exe",
-                     "tezos-accuser-014-PtKathma"
+    install_template "src/proto_014_PtKathma/bin_tx_rollup_node/main_tx_rollup_node_014_PtKathma.exe",
+                     "_build/default/src/proto_014_PtKathma/bin_tx_rollup_node/main_tx_rollup_node_014_PtKathma.exe",
+                     "octez-tx-rollup-node-PtKathma"
   end
-
-  plist_options manual: "tezos-accuser-014-PtKathma run"
+  plist_options manual: "tezos-tx-rollup-node-PtKathma run for"
   def plist
     <<~EOS
       <?xml version="1.0" encoding="UTF-8"?>
@@ -100,13 +92,19 @@ class TezosAccuser014Ptkathma < Formula
           <key>Label</key>
           <string>#{plist_name}</string>
           <key>Program</key>
-          <string>#{opt_bin}/tezos-accuser-014-PtKathma-start</string>
+          <string>#{opt_bin}/tezos-tx-rollup-node-PtKathma-start</string>
           <key>EnvironmentVariables</key>
             <dict>
               <key>DATA_DIR</key>
               <string>#{var}/lib/tezos/client</string>
               <key>NODE_RPC_ENDPOINT</key>
               <string>http://localhost:8732</string>
+              <key>ROLLUP_NODE_RPC_ENDPOINT</key>
+              <string>127.0.0.1:8472</string>
+              <key>ROLLUP_MODE</key>
+              <string>observer</string>
+              <key>ROLLUP_ALIAS</key>
+              <string>rollup</string>
           </dict>
           <key>RunAtLoad</key><true/>
           <key>StandardOutPath</key>

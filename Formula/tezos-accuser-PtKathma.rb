@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2022 Oxhead Alpha
 # SPDX-License-Identifier: LicenseRef-MIT-OA
 
-class TezosBaker014Ptkathma < Formula
+class TezosAccuserPtkathma < Formula
   @all_bins = []
 
   class << self
@@ -9,25 +9,23 @@ class TezosBaker014Ptkathma < Formula
   end
   homepage "https://gitlab.com/tezos/tezos"
 
-  url "https://gitlab.com/tezos/tezos.git", :tag => "v14.1", :shallow => false
+  url "https://gitlab.com/tezos/tezos.git", :tag => "v15.0-rc1", :shallow => false
 
-  version "v14.1-1"
+  version "v15.0-rc1-1"
 
   build_dependencies = %w[pkg-config coreutils autoconf rsync wget rustup-init]
   build_dependencies.each do |dependency|
     depends_on dependency => :build
   end
 
-  dependencies = %w[gmp hidapi libev libffi tezos-sapling-params]
+  dependencies = %w[gmp hidapi libev libffi]
   dependencies.each do |dependency|
     depends_on dependency
   end
-  desc "Daemon for baking"
+  desc "Daemon for accusing"
 
   bottle do
-    root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosBaker014Ptkathma.version}/"
-    sha256 cellar: :any, big_sur: "a4e564f535546eb0d7815a2cb4c3895a4b3d53aa312704c3395a6ed7ce271bd0"
-    sha256 cellar: :any, arm64_big_sur: "f68300a31a68d6c43935297de24ee1c180d58bf5cee0bd1c0b74d174d11021dd"
+    root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosAccuserPtkathma.version}/"
   end
 
   def make_deps
@@ -36,7 +34,7 @@ class TezosBaker014Ptkathma < Formula
     # Disable usage of instructions from the ADX extension to avoid incompatibility
     # with old CPUs, see https://gitlab.com/dannywillems/ocaml-bls12-381/-/merge_requests/135/
     ENV["BLST_PORTABLE"]="yes"
-    # Here is the workaround to use opam 2.0.9 because Tezos is currently not compatible with opam 2.1.0 and newer
+    # Here is the workaround to use opam 2.0 because Tezos is currently not compatible with opam 2.1.0 and newer
     arch = RUBY_PLATFORM.include?("arm64") ? "arm64" : "x86_64"
     system "curl", "-L", "https://github.com/ocaml/opam/releases/download/2.0.9/opam-2.0.9-#{arch}-macos", "--create-dirs", "-o", "#{ENV["HOME"]}/.opam-bin/opam"
     system "chmod", "+x", "#{ENV["HOME"]}/.opam-bin/opam"
@@ -51,6 +49,7 @@ class TezosBaker014Ptkathma < Formula
     self.class.all_bins << name
     system ["eval $(opam env)", "dune build #{dune_path}", "cp #{exec_path} #{name}"].join(" && ")
     bin.install name
+    ln_sf "#{bin}/#{name}", "#{bin}/#{name.gsub("octez", "tezos")}"
   end
 
   def install
@@ -60,43 +59,36 @@ class TezosBaker014Ptkathma < Formula
 
       set -euo pipefail
 
-      baker="#{bin}/tezos-baker-014-PtKathma"
+      accuser="#{bin}/octez-accuser-PtKathma"
 
-      baker_dir="$DATA_DIR"
+      accuser_dir="$DATA_DIR"
 
-      baker_config="$baker_dir/config"
-      mkdir -p "$baker_dir"
+      accuser_config="$accuser_dir/config"
+      mkdir -p "$accuser_dir"
 
-      if [ ! -f "$baker_config" ]; then
-          "$baker" --base-dir "$baker_dir" \
-                  --endpoint "$NODE_RPC_ENDPOINT" \
-                  config init --output "$baker_config" >/dev/null 2>&1
+      if [ ! -f "$accuser_config" ]; then
+          "$accuser" --base-dir "$accuser_dir" \
+                    --endpoint "$NODE_RPC_ENDPOINT" \
+                    config init --output "$accuser_config" >/dev/null 2>&1
       else
-          "$baker" --base-dir "$baker_dir" \
-                  --endpoint "$NODE_RPC_ENDPOINT" \
-                  config update >/dev/null 2>&1
+          "$accuser" --base-dir "$accuser_dir" \
+                    --endpoint "$NODE_RPC_ENDPOINT" \
+                    config update >/dev/null 2>&1
       fi
 
-      launch_baker() {
-          exec "$baker" \
-              --base-dir "$baker_dir" --endpoint "$NODE_RPC_ENDPOINT" \
-              run with local node "$NODE_DATA_DIR" "$@"
-      }
-
-      if [[ -z "$BAKER_ACCOUNT" ]]; then
-          launch_baker
-      else
-          launch_baker "$BAKER_ACCOUNT"
-      fi
+      exec "$accuser" --base-dir "$accuser_dir" \
+          --endpoint "$NODE_RPC_ENDPOINT" \
+          run
     EOS
-    File.write("tezos-baker-014-PtKathma-start", startup_contents)
-    bin.install "tezos-baker-014-PtKathma-start"
+    File.write("tezos-accuser-PtKathma-start", startup_contents)
+    bin.install "tezos-accuser-PtKathma-start"
     make_deps
-    install_template "src/proto_014_PtKathma/bin_baker/main_baker_014_PtKathma.exe",
-                     "_build/default/src/proto_014_PtKathma/bin_baker/main_baker_014_PtKathma.exe",
-                     "tezos-baker-014-PtKathma"
+    install_template "src/proto_014_PtKathma/bin_accuser/main_accuser_014_PtKathma.exe",
+                     "_build/default/src/proto_014_PtKathma/bin_accuser/main_accuser_014_PtKathma.exe",
+                     "octez-accuser-PtKathma"
   end
-  plist_options manual: "tezos-baker-014-PtKathma run with local node"
+
+  plist_options manual: "tezos-accuser-PtKathma run"
   def plist
     <<~EOS
       <?xml version="1.0" encoding="UTF-8"?>
@@ -107,17 +99,13 @@ class TezosBaker014Ptkathma < Formula
           <key>Label</key>
           <string>#{plist_name}</string>
           <key>Program</key>
-          <string>#{opt_bin}/tezos-baker-014-PtKathma-start</string>
+          <string>#{opt_bin}/tezos-accuser-PtKathma-start</string>
           <key>EnvironmentVariables</key>
             <dict>
               <key>DATA_DIR</key>
               <string>#{var}/lib/tezos/client</string>
-              <key>NODE_DATA_DIR</key>
-              <string></string>
               <key>NODE_RPC_ENDPOINT</key>
               <string>http://localhost:8732</string>
-              <key>BAKER_ACCOUNT</key>
-              <string></string>
           </dict>
           <key>RunAtLoad</key><true/>
           <key>StandardOutPath</key>

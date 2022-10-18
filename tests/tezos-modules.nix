@@ -17,7 +17,7 @@ import "${nixpkgs}/nixos/tests/make-test-python.nix" ({ ... }:
                 ../nix/modules/tezos-baker.nix
               ];
 
-    services.tezos-node.instances.jakartanet = {
+    services.octez-node.instances.kathmandunet = {
       enable = true;
       additionalOptions = [
         "--bootstrap-threshold=1"
@@ -25,19 +25,19 @@ import "${nixpkgs}/nixos/tests/make-test-python.nix" ({ ... }:
       ];
     };
 
-    services.tezos-signer.instances.jakartanet = {
+    services.octez-signer.instances.kathmandunet = {
       enable = true;
       networkProtocol = "http";
     };
 
-    services.tezos-accuser.instances.jakartanet = {
+    services.octez-accuser.instances.kathmandunet = {
       enable = true;
-      baseProtocols = ["013-PtJakart" "014-PtKathma"];
+      baseProtocols = ["PtKathma"];
     };
 
-    services.tezos-baker.instances.jakartanet = {
+    services.octez-baker.instances.kathmandunet = {
       enable = true;
-      baseProtocols = ["013-PtJakart" "014-PtKathma"];
+      baseProtocols = ["PtKathma"];
       bakerAccountAlias = "baker";
       bakerSecretKey = "unencrypted:edsk3KaTNj1d8Xd3kMBrZkJrfkqsz4XwwiBXatuuVgTdPye2KpE98o";
     };
@@ -48,16 +48,16 @@ import "${nixpkgs}/nixos/tests/make-test-python.nix" ({ ... }:
     start_all()
 
     services = [
-        "tezos-node",
-        "tezos-signer",
-        "tezos-baker",
-        "tezos-accuser",
+        "octez-node",
+        "octez-signer",
+        "octez-baker",
+        "octez-accuser",
     ]
 
     for s in services:
-        machine.wait_for_unit(f"tezos-jakartanet-{s}.service")
+        machine.wait_for_unit(f"tezos-kathmandunet-{s}.service")
 
-    with subtest("check tezos-node rpc response"):
+    with subtest("check octez-node rpc response"):
         machine.wait_for_open_port(8732)
         machine.wait_until_succeeds(
             "curl --silent http://localhost:8732/chains/main/blocks/head/header | grep level"
@@ -65,6 +65,6 @@ import "${nixpkgs}/nixos/tests/make-test-python.nix" ({ ... }:
 
     with subtest("service status sanity check"):
         for s in services:
-            machine.succeed(f"systemctl status tezos-jakartanet-{s}.service")
+            machine.succeed(f"systemctl status tezos-kathmandunet-{s}.service")
   '';
 }) { inherit pkgs system; }

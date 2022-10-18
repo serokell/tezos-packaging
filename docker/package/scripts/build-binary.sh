@@ -21,6 +21,11 @@ while IFS=  read -r -d $'\0'; do
 done < <(find ./vendors ./src ./tezt ./opam -name \*.opam -print0)
 opam install "${opams[@]}" --deps-only --criteria="-notuptodate,-changed,-removed"
 eval "$(opam env)"
+
+# TODO remove on next upstream release
+# see https://gitlab.com/tezos/tezos/-/issues/4005#note_1134995654
+opam install ledgerwallet-tezos --criteria=-changed
+
 dune build "$dune_filepath"
 cp "./_build/default/$dune_filepath" "../$binary_name"
 cd ..

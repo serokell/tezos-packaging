@@ -232,7 +232,8 @@ class TezosBinaryPackage(AbstractPackage):
 
         # We'll be using the pre-built binaries as source.
         if binaries_dir:
-            shutil.copy(f"{binaries_dir}/{self.name}", self.name)
+            binary_name = self.name.replace("tezos", "octez")
+            shutil.copy(f"{binaries_dir}/{binary_name}", binary_name)
             os.chdir("../")
             return
 
@@ -332,29 +333,22 @@ install -m 0755 %{{name}} %{{buildroot}}/%{{_bindir}}
             f.write(file_contents)
 
     def gen_buildfile(self, out, binaries_dir=None):
+        binary_name = self.name.replace("tezos", "octez")
         makefile_contents = f"""
 .PHONY: install
 
 BINDIR=/usr/bin
 
-{self.name}:
-	./build-binary.sh {self.dune_filepath} {self.name}
+{binary_name}:
+{f"	./build-binary.sh {self.dune_filepath} {binary_name}"
+        if not binaries_dir
+        else ""}
 
-install: {self.name}
+
+install: {binary_name}
 	mkdir -p $(DESTDIR)$(BINDIR)
-	cp $(CURDIR)/{self.name} $(DESTDIR)$(BINDIR)
-"""
-        if binaries_dir:
-            makefile_contents = f"""
-.PHONY: install
-
-BINDIR=/usr/bin
-
-{self.name}:
-
-install: {self.name}
-	mkdir -p $(DESTDIR)$(BINDIR)
-	cp $(CURDIR)/{self.name} $(DESTDIR)$(BINDIR)
+	cp $(CURDIR)/{binary_name} $(DESTDIR)$(BINDIR)
+	ln -s $(BINDIR)/{binary_name} $(DESTDIR)$(BINDIR)/{self.name}
 """
         with open(out, "w") as f:
             f.write(makefile_contents)
@@ -517,7 +511,7 @@ class TezosBakingServicesPackage(AbstractPackage):
     # native releases, so we append an extra letter to the version of
     # the package.
     # This should be reset to "" whenever the native version is bumped.
-    letter_version = "a"
+    letter_version = ""
 
     buildfile = "setup.py"
 
@@ -613,7 +607,7 @@ class TezosBakingServicesPackage(AbstractPackage):
         shutil.copy(f"{os.path.dirname(__file__)}/tezos_voting_wizard.py", package_dir)
 
     def gen_control_file(self, deps, ubuntu_version, out):
-        run_deps_list = ["acl", "tezos-client", "tezos-node"]
+        run_deps_list = ["acl"]
         for proto in self.target_protos:
             run_deps_list.append(f"tezos-baker-{proto.lower()}")
         run_deps = ", ".join(run_deps_list)
@@ -637,8 +631,7 @@ Description: {self.desc}
 
     def gen_spec_file(self, build_deps, run_deps, out):
         run_deps = ", ".join(
-            ["acl", "tezos-client", "tezos-node"]
-            + [f"tezos-baker-{proto}" for proto in self.target_protos],
+            ["acl"] + [f"tezos-baker-{proto}" for proto in self.target_protos],
         )
         (
             systemd_deps,

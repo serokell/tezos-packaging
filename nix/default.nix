@@ -5,11 +5,10 @@
 { sources, pkgs, protocols, patches ? [ ], ... }:
 let
   source = sources.tezos;
-  release-binaries = builtins.filter (elem: elem.name != "tezos-sandbox")
-    (import ./build/release-binaries.nix protocols);
+  release-binaries = import ./build/release-binaries.nix protocols;
   binaries = builtins.listToAttrs (map (meta: {
     inherit (meta) name;
-    value = pkgs.tezosPackages.${meta.name} // { inherit meta; };
+    value = pkgs.octezPackages.${meta.name} // { inherit meta; };
   }) release-binaries);
 
   # Bundle the contents of a package set together, leaving the original attrs intact
@@ -25,5 +24,5 @@ let
 in (d: with builtins;
      listToAttrs (map (drv:
        { name = drv; value = d.${drv}; }
-     ) (filter (name: substring 0 5 name == "tezos") (attrNames d)))
+     ) (filter (name: substring 0 5 name == "octez") (attrNames d)))
    ) bundled.binaries // { inherit (bundled) binaries; }

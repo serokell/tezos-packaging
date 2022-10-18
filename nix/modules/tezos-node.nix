@@ -6,8 +6,8 @@
 with lib;
 
 let
-  tezos-node-pkg = pkgs.tezosPackages.tezos-node;
-  cfg = config.services.tezos-node;
+  octez-node-pkg = pkgs.octezPackages.octez-node;
+  cfg = config.services.octez-node;
   genConfigCommand = historyMode: rpcPort: netPort: network: options: ''
     --data-dir "$node_data_dir" \
     --history-mode "${historyMode}" \
@@ -18,10 +18,10 @@ let
   common = import ./common.nix { inherit lib; inherit pkgs; };
   instanceOptions = types.submodule ( {...} : {
     options = common.sharedOptions // {
-      enable = mkEnableOption "Tezos node service";
+      enable = mkEnableOption "Octez node service";
 
       package = mkOption {
-        default = tezos-node-pkg;
+        default = octez-node-pkg;
         type = types.package;
       };
 
@@ -30,7 +30,7 @@ let
         default = 8732;
         example = 8732;
         description = ''
-          Tezos node RPC port.
+          Octez node RPC port.
         '';
       };
 
@@ -39,13 +39,13 @@ let
         default = 9732;
         example = 9732;
         description = ''
-          Tezos node net port.
+          Octez node net port.
         '';
       };
 
       network = mkOption {
         type = types.str;
-        default = "jakartanet";
+        default = "kathmandunet";
         description = ''
           Network which node will be running on.
           Can be either a predefined network name or a URL to the network config.
@@ -65,7 +65,7 @@ let
         type = types.listOf types.str;
         default = [];
         description = ''
-          Additional 'tezos-node' options that affect configuration file.
+          Additional 'octez-node' options that affect configuration file.
         '';
       };
 
@@ -75,14 +75,14 @@ let
         description = ''
           Custom node config.
           This option overrides the all other options that affect
-          tezos-node config.
+          octez-node config.
         '';
       };
     };
   });
 in {
 
-  options.services.tezos-node = {
+  options.services.octez-node = {
     instances = mkOption {
       type = types.attrsOf instanceOptions;
       description = "Configuration options";
@@ -92,7 +92,7 @@ in {
   config = mkIf (cfg.instances != {}) {
     users = mkMerge (flip mapAttrsToList cfg.instances (node-name: node-cfg: common.genUsers node-name ));
     systemd = mkMerge (flip mapAttrsToList cfg.instances (node-name: node-cfg: {
-      services."tezos-${node-name}-tezos-node" = common.genSystemdService node-name node-cfg "node" // {
+      services."tezos-${node-name}-octez-node" = common.genSystemdService node-name node-cfg "node" // {
         after = [ "network.target" ];
         preStart =
           ''
@@ -104,10 +104,10 @@ in {
               ''
                 # Generate or update node config file
                 if [[ ! -f "$node_data_dir/config.json" ]]; then
-                  ${node-cfg.package}/bin/tezos-node config init \
+                  ${node-cfg.package}/bin/octez-node config init \
                   ${genConfigCommand node-cfg.historyMode node-cfg.rpcPort node-cfg.netPort node-cfg.network node-cfg.additionalOptions}
                 else
-                  ${node-cfg.package}/bin/tezos-node config update \
+                  ${node-cfg.package}/bin/octez-node config update \
                   ${genConfigCommand node-cfg.historyMode node-cfg.rpcPort node-cfg.netPort node-cfg.network node-cfg.additionalOptions}
                 fi
               ''
@@ -117,7 +117,7 @@ in {
               ''
           );
         script = ''
-          ${node-cfg.package}/bin/tezos-node run --data-dir "$STATE_DIRECTORY/node/data"
+          ${node-cfg.package}/bin/octez-node run --data-dir "$STATE_DIRECTORY/node/data"
         '';
       };
     }));

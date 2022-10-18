@@ -286,6 +286,7 @@ Description: {self.desc}
             f.write(file_contents)
 
     def gen_spec_file(self, build_deps, run_deps, out):
+        binary_name = self.name.replace("tezos", "octez")
         build_requires = " ".join(build_deps)
         requires = " ".join(run_deps)
         str_additional_native_deps = ", ".join(
@@ -319,13 +320,13 @@ Maintainer: {self.meta.maintainer}
 %setup -q
 %build
 %install
-make %{{name}}
+make {binary_name}
 mkdir -p %{{buildroot}}/%{{_bindir}}
-install -m 0755 %{{name}} %{{buildroot}}/%{{_bindir}}
+install -m 0755 {binary_name} %{{buildroot}}/%{{_bindir}}
 {systemd_install}
 %files
 %license LICENSE
-%{{_bindir}}/%{{name}}
+%{{_bindir}}/{binary_name}
 {systemd_files}
 {systemd_macros}
 """

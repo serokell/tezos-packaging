@@ -26,6 +26,8 @@ class TezosBakerPtlimapt < Formula
 
   bottle do
     root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosBakerPtlimapt.version}/"
+    sha256 cellar: :any, big_sur: "939bfe5d0ec3a8d5d2638d45809caf3b57e2ffc80e604456f5a8113f190f430f"
+    sha256 cellar: :any, arm64_big_sur: "fbdf31c68573afd8b8713449fa2a3954e6688d016a071f9f8b61a5c02a1065c0"
   end
 
   def make_deps

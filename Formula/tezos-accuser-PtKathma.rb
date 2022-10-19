@@ -26,6 +26,8 @@ class TezosAccuserPtkathma < Formula
 
   bottle do
     root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosAccuserPtkathma.version}/"
+    sha256 cellar: :any, big_sur: "e1032d7081220df826ff5d12bdf007a42d4f2de41c431c270c5c99899d0a1185"
+    sha256 cellar: :any, arm64_big_sur: "06a50267abe27e62b458662e30bef00d31d4a58f99bc170841ee31d62fc93e4f"
   end
 
   def make_deps

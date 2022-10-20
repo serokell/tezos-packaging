@@ -226,7 +226,7 @@ cat > /usr/bin/octez-node-{network} <<- 'EOM'
 TEZOS_NODE_DIR="$(cat $(systemctl show -p FragmentPath tezos-node-{network}.service | cut -d'=' -f2) | grep 'DATA_DIR' | cut -d '=' -f3 | cut -d '"' -f1)" octez-node "$@"
 EOM
 chmod +x /usr/bin/octez-node-{network}
-ln -s /usr/bin/octez-node-{network} /usr/bin/tezos-node-{network}
+ln -sf /usr/bin/octez-node-{network} /usr/bin/tezos-node-{network}
 """
     node_postrm_steps += f"""
 rm -f /usr/bin/octez-node-{network} /usr/bin/tezos-node-{network}

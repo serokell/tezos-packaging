@@ -323,7 +323,7 @@ Maintainer: {self.meta.maintainer}
 make {binary_name}
 mkdir -p %{{buildroot}}/%{{_bindir}}
 install -m 0755 {binary_name} %{{buildroot}}/%{{_bindir}}
-ln -s %{{_bindir}}/{binary_name} %{{buildroot}}/%{{_bindir}}/{self.name}
+ln -sf %{{_bindir}}/{binary_name} %{{buildroot}}/%{{_bindir}}/{self.name}
 {systemd_install}
 %files
 %license LICENSE

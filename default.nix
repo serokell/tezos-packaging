@@ -11,7 +11,5 @@ let
     }
   ) { src = ./.; })
   defaultNix;
-in defaultNix // defaultNix.devShells.${__currentSystem}
-             // { binaries-test = defaultNix.binaries-test.${__currentSystem};
-                  release = defaultNix.release.${__currentSystem};
-                }
+  pkgs = defaultNix.legacyPackages.${__currentSystem};
+in with pkgs.lib; recursiveUpdate defaultNix (attrsets.mapAttrs (_: val: val.${__currentSystem}) defaultNix)

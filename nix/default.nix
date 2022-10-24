@@ -6,23 +6,22 @@
 let
   source = sources.tezos;
   release-binaries = import ./build/release-binaries.nix protocols;
-  binaries = builtins.listToAttrs (map (meta: {
+in {
+  octez-binaries = builtins.listToAttrs (map (meta: {
     inherit (meta) name;
     value = pkgs.octezPackages.${meta.name} // { inherit meta; };
   }) release-binaries);
 
-  # Bundle the contents of a package set together, leaving the original attrs intact
-  bundle = name: pkgSet:
-    pkgSet // (pkgs.buildEnv {
-      inherit name;
-      paths = builtins.attrValues pkgSet;
-    });
-
-  artifacts = { inherit binaries; };
-  bundled = (builtins.mapAttrs bundle artifacts);
-
-in (d: with builtins;
-     listToAttrs (map (drv:
-       { name = drv; value = d.${drv}; }
-     ) (filter (name: substring 0 5 name == "octez") (attrNames d)))
-   ) bundled.binaries // { inherit (bundled) binaries; }
+  tezos-binaries = builtins.listToAttrs (map (meta:
+    let
+      newMeta = meta // { name = builtins.replaceStrings [ "octez" ] [ "tezos" ] meta.name; };
+    in {
+      inherit (newMeta) name;
+      value = { inherit newMeta; } // (pkgs.octezPackages.${meta.name}.overrideAttrs (pkg: {
+        inherit (newMeta) name;
+        postInstall = ''
+          ln -s $out/bin/${meta.name} $out/bin/${newMeta.name}
+        '';
+    }));
+  }) release-binaries);
+}

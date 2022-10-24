@@ -77,7 +77,7 @@
       callPackage = pkg: input:
         import pkg (inputs // { inherit sources protocols meta pkgs; } // input);
 
-      binaries = callPackage ./nix {};
+      inherit (callPackage ./nix {}) octez-binaries tezos-binaries;
 
       release = callPackage ./release.nix {};
 
@@ -87,7 +87,8 @@
 
       inherit release;
 
-      packages = binaries // { default = self.packages.${system}.binaries; };
+      packages = octez-binaries // tezos-binaries
+        // { default = pkgs.linkFarmFromDrvs "binaries" (builtins.attrValues octez-binaries); };
 
       devShells = {
         buildkite = callPackage ./.buildkite/shell.nix {};

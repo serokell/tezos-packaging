@@ -11,6 +11,7 @@ from .model import (
 )
 
 from .systemd import Service, ServiceFile, SystemdUnit, Unit, Install
+from collections import ChainMap
 
 # Testnets are either supported by the tezos-node directly or have known URL with
 # the config
@@ -130,35 +131,43 @@ ledger_udev_postinst = open(
 ).read()
 
 packages = [
-    TezosBinaryPackage(
-        "tezos-client",
-        "CLI client for interacting with tezos blockchain",
-        meta=packages_meta,
-        additional_native_deps=["tezos-sapling-params", "udev"],
-        postinst_steps=ledger_udev_postinst,
-        dune_filepath="src/bin_client/main_client.exe",
-    ),
-    TezosBinaryPackage(
-        "tezos-admin-client",
-        "Administration tool for the node",
-        meta=packages_meta,
-        dune_filepath="src/bin_client/main_admin.exe",
-    ),
-    TezosBinaryPackage(
-        "tezos-signer",
-        "A client to remotely sign operations or blocks",
-        meta=packages_meta,
-        additional_native_deps=["udev"],
-        systemd_units=signer_units,
-        postinst_steps=ledger_udev_postinst,
-        dune_filepath="src/bin_signer/main_signer.exe",
-    ),
-    TezosBinaryPackage(
-        "tezos-codec",
-        "A client to decode and encode JSON",
-        meta=packages_meta,
-        dune_filepath="src/bin_codec/codec.exe",
-    ),
+    {
+        "tezos-client": TezosBinaryPackage(
+            "tezos-client",
+            "CLI client for interacting with tezos blockchain",
+            meta=packages_meta,
+            additional_native_deps=["tezos-sapling-params", "udev"],
+            postinst_steps=ledger_udev_postinst,
+            dune_filepath="src/bin_client/main_client.exe",
+        )
+    },
+    {
+        "tezos-admin-client": TezosBinaryPackage(
+            "tezos-admin-client",
+            "Administration tool for the node",
+            meta=packages_meta,
+            dune_filepath="src/bin_client/main_admin.exe",
+        )
+    },
+    {
+        "tezos-signer": TezosBinaryPackage(
+            "tezos-signer",
+            "A client to remotely sign operations or blocks",
+            meta=packages_meta,
+            additional_native_deps=["udev"],
+            systemd_units=signer_units,
+            postinst_steps=ledger_udev_postinst,
+            dune_filepath="src/bin_signer/main_signer.exe",
+        )
+    },
+    {
+        "tezos-codec": TezosBinaryPackage(
+            "tezos-codec",
+            "A client to decode and encode JSON",
+            meta=packages_meta,
+            dune_filepath="src/bin_codec/codec.exe",
+        )
+    },
 ]
 
 postinst_steps_common = """
@@ -266,16 +275,22 @@ custom_node_instantiated.poststop_script = "tezos-node-custom-poststop"
 node_units.append(custom_node_instantiated)
 
 packages.append(
-    TezosBinaryPackage(
-        "tezos-node",
-        "Entry point for initializing, configuring and running a Tezos node",
-        meta=packages_meta,
-        systemd_units=node_units,
-        postinst_steps=node_postinst_steps,
-        postrm_steps=node_postrm_steps,
-        additional_native_deps=["tezos-sapling-params", "curl", {"ubuntu": "netbase"}],
-        dune_filepath="src/bin_node/main.exe",
-    )
+    {
+        "tezos-node": TezosBinaryPackage(
+            "tezos-node",
+            "Entry point for initializing, configuring and running a Tezos node",
+            meta=packages_meta,
+            systemd_units=node_units,
+            postinst_steps=node_postinst_steps,
+            postrm_steps=node_postrm_steps,
+            additional_native_deps=[
+                "tezos-sapling-params",
+                "curl",
+                {"ubuntu": "netbase"},
+            ],
+            dune_filepath="src/bin_node/main.exe",
+        )
+    }
 )
 
 protocols_json = json.load(
@@ -383,59 +398,63 @@ for proto in active_protocols:
         Install(wanted_by=["multi-user.target"]),
     )
     packages.append(
-        TezosBinaryPackage(
-            f"tezos-baker-{proto}",
-            "Daemon for baking",
-            meta=packages_meta,
-            systemd_units=[
-                SystemdUnit(
-                    service_file=service_file_baker,
-                    startup_script=baker_startup_script.split("/")[-1],
-                    startup_script_source="tezos-baker-start",
-                    config_file="tezos-baker.conf",
-                ),
-                SystemdUnit(
-                    service_file=service_file_baker_instantiated,
-                    startup_script=baker_startup_script.split("/")[-1],
-                    startup_script_source="tezos-baker-start",
-                    instances=daemons_instances,
-                ),
-            ],
-            target_proto=proto,
-            postinst_steps=daemon_postinst_common,
-            additional_native_deps=[
-                "tezos-sapling-params",
-                "tezos-client",
-                "acl",
-                "udev",
-            ],
-            dune_filepath=f"src/proto_{proto_snake_case}/bin_baker/main_baker_{proto_snake_case}.exe",
-        )
+        {
+            f"tezos-baker-{proto}": TezosBinaryPackage(
+                f"tezos-baker-{proto}",
+                "Daemon for baking",
+                meta=packages_meta,
+                systemd_units=[
+                    SystemdUnit(
+                        service_file=service_file_baker,
+                        startup_script=baker_startup_script.split("/")[-1],
+                        startup_script_source="tezos-baker-start",
+                        config_file="tezos-baker.conf",
+                    ),
+                    SystemdUnit(
+                        service_file=service_file_baker_instantiated,
+                        startup_script=baker_startup_script.split("/")[-1],
+                        startup_script_source="tezos-baker-start",
+                        instances=daemons_instances,
+                    ),
+                ],
+                target_proto=proto,
+                postinst_steps=daemon_postinst_common,
+                additional_native_deps=[
+                    "tezos-sapling-params",
+                    "tezos-client",
+                    "acl",
+                    "udev",
+                ],
+                dune_filepath=f"src/proto_{proto_snake_case}/bin_baker/main_baker_{proto_snake_case}.exe",
+            )
+        }
     )
     packages.append(
-        TezosBinaryPackage(
-            f"tezos-accuser-{proto}",
-            "Daemon for accusing",
-            meta=packages_meta,
-            systemd_units=[
-                SystemdUnit(
-                    service_file=service_file_accuser,
-                    startup_script=accuser_startup_script.split("/")[-1],
-                    startup_script_source="tezos-accuser-start",
-                    config_file="tezos-accuser.conf",
-                ),
-                SystemdUnit(
-                    service_file=service_file_accuser_instantiated,
-                    startup_script=accuser_startup_script.split("/")[-1],
-                    startup_script_source="tezos-accuser-start",
-                    instances=daemons_instances,
-                ),
-            ],
-            target_proto=proto,
-            additional_native_deps=["udev"],
-            postinst_steps=daemon_postinst_common,
-            dune_filepath=f"src/proto_{proto_snake_case}/bin_accuser/main_accuser_{proto_snake_case}.exe",
-        )
+        {
+            f"tezos-accuser-{proto}": TezosBinaryPackage(
+                f"tezos-accuser-{proto}",
+                "Daemon for accusing",
+                meta=packages_meta,
+                systemd_units=[
+                    SystemdUnit(
+                        service_file=service_file_accuser,
+                        startup_script=accuser_startup_script.split("/")[-1],
+                        startup_script_source="tezos-accuser-start",
+                        config_file="tezos-accuser.conf",
+                    ),
+                    SystemdUnit(
+                        service_file=service_file_accuser_instantiated,
+                        startup_script=accuser_startup_script.split("/")[-1],
+                        startup_script_source="tezos-accuser-start",
+                        instances=daemons_instances,
+                    ),
+                ],
+                target_proto=proto,
+                additional_native_deps=["udev"],
+                postinst_steps=daemon_postinst_common,
+                dune_filepath=f"src/proto_{proto_snake_case}/bin_accuser/main_accuser_{proto_snake_case}.exe",
+            )
+        }
     )
 
 sapling_package = TezosSaplingParamsPackage(
@@ -443,13 +462,17 @@ sapling_package = TezosSaplingParamsPackage(
 )
 
 packages.append(
-    TezosBakingServicesPackage(
-        target_networks=networks.keys(),
-        network_protos=networks_protos,
-        meta=packages_meta,
-        additional_native_deps=[f"tezos-baker-{proto}" for proto in active_protocols]
-        + ["tezos-node", "acl"],
-    )
+    {
+        "tezos-baking": TezosBakingServicesPackage(
+            target_networks=networks.keys(),
+            network_protos=networks_protos,
+            meta=packages_meta,
+            additional_native_deps=[
+                f"tezos-baker-{proto}" for proto in active_protocols
+            ]
+            + ["tezos-node", "acl"],
+        )
+    }
 )
 
 
@@ -505,7 +528,7 @@ def mk_rollup_packages():
     types = ["tx"]
     packages = ["node", "client"]
     return [
-        mk_rollup_package(name, type, proto)
+        {f"tezos-{type}-rollup-{name}-{proto}": mk_rollup_package(name, type, proto)}
         for name in packages
         for type in types
         for proto in active_protocols
@@ -513,3 +536,5 @@ def mk_rollup_packages():
 
 
 packages.extend(mk_rollup_packages())
+
+packages = dict(ChainMap(*packages))

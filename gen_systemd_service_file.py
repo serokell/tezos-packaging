@@ -12,7 +12,7 @@ import sys
 
 if len(sys.argv) > 1:
     binary_name = sys.argv[1]
-    for package in packages:
+    for package in packages.values():
         if binary_name == package.name:
             for systemd_unit in package.systemd_units:
                 if systemd_unit.suffix is None:

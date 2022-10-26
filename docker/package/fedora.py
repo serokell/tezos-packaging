@@ -13,9 +13,11 @@ def build_fedora_package(
     build_deps: List[str],
     run_deps: List[str],
     is_source: bool,
+    fedora_versions: List[str],
     binaries_dir: str = None,
 ):
     version = pkg.meta.version.replace("-", "")
+    release_version = pkg.meta.release
     dir = f"{pkg.name}-{version}"
     cwd = os.path.dirname(__file__)
     home = os.environ["HOME"]
@@ -67,13 +69,39 @@ def build_fedora_package(
         build_deps + run_deps, run_deps, f"{home}/rpmbuild/SPECS/{pkg.name}.spec"
     )
     os.rename(f"{dir}.tar.gz", f"{home}/rpmbuild/SOURCES/{dir}.tar.gz")
-    subprocess.run(
-        [
-            "rpmbuild",
-            "-bs" if is_source else "-bb",
-            f"{home}/rpmbuild/SPECS/{pkg.name}.spec",
-        ],
-        check=True,
-    )
+    for dist in fedora_versions:
+        if not is_source and dist == "native":
+            subprocess.run(
+                [
+                    "rpmbuild",
+                    "-bb",
+                    f"{home}/rpmbuild/SPECS/{pkg.name}.spec",
+                ],
+                check=True,
+            )
+        else:
+            subprocess.run(
+                ["rpmbuild", "-bs", f"{home}/rpmbuild/SPECS/{pkg.name}.spec"],
+                check=True,
+            )
+            if not is_source:
+                os.makedirs(f"{home}/rpmbuild/RPMS/x86_64", exist_ok=True)
+                subprocess.run(
+                    [
+                        "mock",
+                        "--resultdir",
+                        f"{home}/rpmbuild/RPMS/x86_64",
+                        "-r",
+                        f"/etc/mock/fedora-{dist}-x86_64.cfg",
+                        f"{home}/rpmbuild/SRPMS/{pkg.name}-{version}-{release_version}.src.rpm",
+                    ],
+                )
+                os.rename(
+                    f"{home}/rpmbuild/RPMS/x86_64/{pkg.name}-{version}-{release_version}.x86_64.rpm",
+                    f"{home}/rpmbuild/RPMS/x86_64/{pkg.name}-{version}-{release_version}.fedora-{dist}-x86_64.rpm",
+                )
+                os.remove(
+                    f"{home}/rpmbuild/RPMS/x86_64/{pkg.name}-{version}-{release_version}.src.rpm"
+                )
 
     subprocess.run(f"rm -rf {dir}", shell=True, check=True)

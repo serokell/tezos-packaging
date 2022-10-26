@@ -1,18 +1,50 @@
 # SPDX-FileCopyrightText: 2021 Oxhead Alpha
 # SPDX-License-Identifier: LicenseRef-MIT-OA
 
-import os, shutil, argparse
-
+import os
+import shutil
+import argparse
 from .fedora import build_fedora_package
-from .packages import packages, sapling_package
 from .ubuntu import build_ubuntu_package
+from .packages import packages as all_packages
+
+# fixed output dir in container
+output_dir = "out"
+
+parser = argparse.ArgumentParser()
+parser.add_argument("--os", required=True, choices=["ubuntu", "fedora"])
+parser.add_argument(
+    "-t", "--type", help="package type", required=True, choices=["source", "binary"]
+)
+parser.add_argument(
+    "-p",
+    "--packages",
+    help="specify binaries to package",
+    nargs="+",
+)
+parser.add_argument(
+    "-d",
+    "--distributions",
+    help="specify distributions to package for",
+    nargs="+",
+)
+parser.add_argument(
+    "--binaries-dir",
+    help="provide a directory with exiting prebuilt binaries",
+    type=os.path.abspath,
+)
+parser.add_argument(
+    "--sources",
+    help="specify source archive for single ubuntu package",
+    type=os.path.abspath,
+)
 
 
-def get_ubuntu_run_deps(args):
+def get_ubuntu_run_deps(binaries_dir):
     """
     List all the ubuntu run dependencies. Return an empty list when using prebuilt static binaries.
     """
-    if args.binaries_dir:
+    if binaries_dir:
         return []
 
     return [
@@ -25,11 +57,11 @@ def get_ubuntu_run_deps(args):
     ]
 
 
-def get_fedora_run_deps(args):
+def get_fedora_run_deps(binaries_dir):
     """
     List all the fedora run dependencies. Return an empty list when using prebuilt static binaries.
     """
-    if args.binaries_dir:
+    if binaries_dir:
         return []
 
     return [
@@ -42,11 +74,11 @@ def get_fedora_run_deps(args):
     ]
 
 
-def get_build_deps(args):
+def get_build_deps(binaries_dir):
     """
     List all the common build dependencies. Return an empty list when using prebuilt static binaries.
     """
-    if args.binaries_dir:
+    if binaries_dir:
         return ["make", "wget"]
 
     return [
@@ -66,113 +98,77 @@ def get_build_deps(args):
     ]
 
 
-is_ubuntu = None
-is_source = None
-package_to_build = None
-source_archive = None
+def main():
 
-parser = argparse.ArgumentParser()
-parser.add_argument("--os", required=True)
-parser.add_argument("--type", help="package type", required=True)
-parser.add_argument("--package", help="specify binary to package")
-parser.add_argument(
-    "--output-dir",
-    help="provide a directory to place the built packages",
-    default="out",
-)
-parser.add_argument(
-    "--binaries-dir",
-    help="provide a directory with exiting prebuilt binaries",
-    type=os.path.abspath,
-)
-parser.add_argument(
-    "--build-sapling-package",
-    help="whether to build the sapling-params package",
-    action="store_true",
-)
-parser.add_argument(
-    "--sources", help="specify source archive for single ubuntu package"
-)
-parser.set_defaults(build_sapling_package=False)
-args = parser.parse_args()
+    args = parser.parse_args()
 
-if args.os == "ubuntu":
-    is_ubuntu = True
-elif args.os == "fedora":
-    is_ubuntu = False
-else:
-    raise Exception(
-        "Unexpected package target OS, only 'ubuntu' and 'fedora' are supported."
-    )
+    target_os = args.os
 
-if args.type == "source":
-    is_source = True
-elif args.type == "binary":
-    is_source = False
-else:
-    raise Exception(
-        "Unexpected package format, only 'source' and 'binary' are supported."
-    )
+    is_source = args.type == "source"
 
-package_to_build = args.package
-source_archive = args.sources
+    source_archive = args.sources
 
-if is_ubuntu:
-    run_deps = get_ubuntu_run_deps(args)
-else:
-    run_deps = get_fedora_run_deps(args)
+    binaries_dir = args.binaries_dir
 
-build_deps = get_build_deps(args)
+    if target_os == "ubuntu":
+        run_deps = get_ubuntu_run_deps(binaries_dir)
+    elif target_os == "fedora":
+        run_deps = get_fedora_run_deps(binaries_dir)
 
-common_deps = run_deps + build_deps
+    build_deps = get_build_deps(binaries_dir)
 
-ubuntu_versions = [
-    "bionic",  # 18.04
-    "focal",  # 20.04
-    "jammy",  # 22.04
-]
+    common_deps = run_deps + build_deps
 
-pwd = os.getcwd()
-home = os.environ["HOME"]
+    home = os.environ["HOME"]
 
-packages_to_build = packages
+    os.makedirs(output_dir, exist_ok=True)
 
-if args.build_sapling_package:
-    packages.append(sapling_package)
+    distributions = list(args.distributions)
 
-for package in packages_to_build:
-    if package_to_build is None or package.name == package_to_build:
-        if is_ubuntu:
+    packages = []
+
+    for package_name in args.packages:
+        packages.append(all_packages[package_name])
+
+    if target_os == "ubuntu":
+        for package in packages:
             build_ubuntu_package(
                 package,
-                ubuntu_versions,
+                distributions,
                 common_deps,
                 is_source,
                 source_archive,
-                args.binaries_dir,
-            )
-        else:
-            build_fedora_package(
-                package, build_deps, run_deps, is_source, args.binaries_dir
+                binaries_dir,
             )
 
-os.makedirs(args.output_dir, exist_ok=True)
-if not is_source:
-    if is_ubuntu:
-        exts = [".deb"]
-    else:
-        exts = [".rpm"]
-else:
-    if is_ubuntu:
-        exts = [".orig.tar.gz", ".dsc", ".changes", ".debian.tar.xz", ".buildinfo"]
-    else:
-        exts = [".src.rpm"]
-if is_ubuntu:
-    artifacts_dir = "."
-else:
-    subdir = "SRPMS" if is_source else "RPMS/x86_64"
-    artifacts_dir = f"{home}/rpmbuild/{subdir}"
-for f in os.listdir(artifacts_dir):
-    for ext in exts:
-        if f.endswith(ext):
-            shutil.copy(f"{artifacts_dir}/{f}", os.path.join(args.output_dir, f))
+        if not is_source:
+            exts = [".deb"]
+        else:
+            exts = [".orig.tar.gz", ".dsc", ".changes", ".debian.tar.xz", ".buildinfo"]
+
+        artifacts_dir = "."
+
+    elif target_os == "fedora":
+        for package in packages:
+            build_fedora_package(
+                package,
+                build_deps,
+                run_deps,
+                is_source,
+                distributions,
+                binaries_dir,
+            )
+
+        exts = [".src.rpm"] if is_source else [".rpm"]
+
+        subdir = "SRPMS" if is_source else "RPMS/x86_64"
+        artifacts_dir = f"{home}/rpmbuild/{subdir}"
+
+    for f in os.listdir(artifacts_dir):
+        for ext in exts:
+            if f.endswith(ext):
+                shutil.copy(f"{artifacts_dir}/{f}", os.path.join(output_dir, f))
+
+
+if __name__ == "__main__":
+    main()

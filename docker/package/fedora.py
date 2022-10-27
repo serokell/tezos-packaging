@@ -26,10 +26,10 @@ def build_fedora_package(
     for systemd_unit in pkg.systemd_units:
         # lowercase package name for consistency between different os
         name_lower = pkg.name.lower()
-        if systemd_unit.service_file.service.environment_file is not None:
-            systemd_unit.service_file.service.environment_file = (
-                systemd_unit.service_file.service.environment_file.lower()
-            )
+        if systemd_unit.service_file.service.environment_files is not None:
+            systemd_unit.service_file.service.environment_files = [
+                x.lower() for x in systemd_unit.service_file.service.environment_files
+            ]
         if systemd_unit.suffix is None:
             unit_name = name_lower
         else:

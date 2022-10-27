@@ -37,10 +37,11 @@ def build_ubuntu_package(
         subprocess.run(["rm", "-r", "debian"])
         subprocess.run(["dh_make", "-syf" f"../{dir}.tar.gz"], check=True)
         for systemd_unit in pkg.systemd_units:
-            if systemd_unit.service_file.service.environment_file is not None:
-                systemd_unit.service_file.service.environment_file = (
-                    systemd_unit.service_file.service.environment_file.lower()
-                )
+            if systemd_unit.service_file.service.environment_files is not None:
+                systemd_unit.service_file.service.environment_files = [
+                    x.lower()
+                    for x in systemd_unit.service_file.service.environment_files
+                ]
             if systemd_unit.suffix is None:
                 unit_name = pkg_name
             else:

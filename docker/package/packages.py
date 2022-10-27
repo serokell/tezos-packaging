@@ -40,7 +40,7 @@ signer_units = [
                 description="Tezos signer daemon running over TCP socket",
             ),
             Service(
-                environment_file="/etc/default/tezos-signer-tcp",
+                environment_files=["/etc/default/tezos-signer-tcp"],
                 environment=["ADDRESS=127.0.0.1", "PORT=8000", "TIMEOUT=1"],
                 exec_start="/usr/bin/tezos-signer-start launch socket signer "
                 + " --address ${ADDRESS} --port ${PORT} --timeout ${TIMEOUT}",
@@ -60,7 +60,7 @@ signer_units = [
                 description="Tezos signer daemon running over UNIX socket",
             ),
             Service(
-                environment_file="/etc/default/tezos-signer-unix",
+                environment_files=["/etc/default/tezos-signer-unix"],
                 environment=["SOCKET="],
                 exec_start="/usr/bin/tezos-signer-start launch local signer "
                 + "--socket ${SOCKET}",
@@ -80,7 +80,7 @@ signer_units = [
                 description="Tezos signer daemon running over HTTP",
             ),
             Service(
-                environment_file="/etc/default/tezos-signer-http",
+                environment_files=["/etc/default/tezos-signer-http"],
                 environment=[
                     "CERT_PATH=",
                     "KEY_PATH=",
@@ -105,7 +105,7 @@ signer_units = [
                 description="Tezos signer daemon running over HTTPs",
             ),
             Service(
-                environment_file="/etc/default/tezos-signer-https",
+                environment_files=["/etc/default/tezos-signer-https"],
                 environment=[
                     "CERT_PATH=",
                     "KEY_PATH=",
@@ -173,7 +173,7 @@ def mk_node_unit(
     desc,
     instantiated=False,
     dependencies_suffix=None,
-    environment_file=None,
+    environment_files=None,
 ):
     dependencies_suffix = suffix if dependencies_suffix is None else dependencies_suffix
     service_file = ServiceFile(
@@ -185,7 +185,7 @@ def mk_node_unit(
         ),
         Service(
             environment=env,
-            environment_file=environment_file,
+            environment_files=environment_files,
             exec_start="/usr/bin/tezos-node-start",
             exec_start_pre=["/usr/bin/tezos-node-prestart"],
             timeout_start_sec="2400s",
@@ -248,7 +248,7 @@ node_units.append(
     mk_node_unit(
         suffix="custom",
         env=["NODE_DATA_DIR=/var/lib/tezos/node-custom@%i"] + common_node_env,
-        environment_file="/etc/default/tezos-baking-custom@%i",
+        environment_files=["/etc/default/tezos-baking-custom@%i"],
         desc="Tezos node with custom config",
         instantiated=True,
         dependencies_suffix="custom@%i",
@@ -297,7 +297,7 @@ for proto in active_protocols:
     service_file_baker = ServiceFile(
         Unit(after=["network.target"], description="Tezos baker"),
         Service(
-            environment_file=f"/etc/default/tezos-baker-{proto}",
+            environment_files=[f"/etc/default/tezos-baker-{proto}"],
             environment=[f"PROTOCOL={proto}", "NODE_DATA_DIR="],
             exec_start_pre=[
                 "+/usr/bin/setfacl -m u:tezos:rwx /run/systemd/ask-password"
@@ -323,7 +323,7 @@ for proto in active_protocols:
             description="Instantiated tezos baker daemon service",
         ),
         Service(
-            environment_file="/etc/default/tezos-baking-%i",
+            environment_files=["/etc/default/tezos-baking-%i"],
             environment=[f"PROTOCOL={proto}", "NODE_DATA_DIR=/var/lib/tezos/node-%i"],
             exec_start=baker_startup_script,
             state_directory="tezos",
@@ -337,7 +337,7 @@ for proto in active_protocols:
     service_file_accuser = ServiceFile(
         Unit(after=["network.target"], description="Tezos accuser"),
         Service(
-            environment_file=f"/etc/default/tezos-accuser-{proto}",
+            environment_files=[f"/etc/default/tezos-accuser-{proto}"],
             environment=[f"PROTOCOL={proto}"],
             exec_start=accuser_startup_script,
             state_directory="tezos",
@@ -357,7 +357,7 @@ for proto in active_protocols:
             description="Instantiated tezos accuser daemon service",
         ),
         Service(
-            environment_file="/etc/default/tezos-baking-%i",
+            environment_files=["/etc/default/tezos-baking-%i"],
             environment=[f"PROTOCOL={proto}"],
             exec_start=accuser_startup_script,
             state_directory="tezos",
@@ -443,7 +443,7 @@ def mk_rollup_packages():
         service_file = ServiceFile(
             Unit(after=["network.target"], description=f"Tezos {type} rollup node"),
             Service(
-                environment_file=f"/etc/default/tezos-{type}-rollup-node-{proto}",
+                environment_files=[f"/etc/default/tezos-{type}-rollup-node-{proto}"],
                 environment=[f"PROTOCOL={proto}"],
                 exec_start_pre=[
                     "+/usr/bin/setfacl -m u:tezos:rwx /run/systemd/ask-password"

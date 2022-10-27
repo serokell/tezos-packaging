@@ -169,11 +169,10 @@ useradd --home-dir /var/lib/tezos tezos || true
 
 def mk_node_unit(
     suffix,
-    env,
+    config_file_append,
     desc,
     instantiated=False,
     dependencies_suffix=None,
-    environment_files=None,
 ):
     dependencies_suffix = suffix if dependencies_suffix is None else dependencies_suffix
     service_file = ServiceFile(
@@ -184,8 +183,7 @@ def mk_node_unit(
             part_of=[f"tezos-baking-{dependencies_suffix}.service"],
         ),
         Service(
-            environment=env,
-            environment_files=environment_files,
+            environment_files=[f"/etc/default/tezos-node-{suffix}"],
             exec_start="/usr/bin/tezos-node-start",
             exec_start_pre=["/usr/bin/tezos-node-prestart"],
             timeout_start_sec="2400s",
@@ -202,20 +200,25 @@ def mk_node_unit(
         startup_script="tezos-node-start",
         prestart_script="tezos-node-prestart",
         instances=[] if instantiated else None,
+        config_file="tezos-node.conf",
+        config_file_append=config_file_append,
     )
 
 
 node_units = []
 node_postinst_steps = postinst_steps_common
 node_postrm_steps = ""
-common_node_env = ["NODE_RPC_ADDR=127.0.0.1:8732", "CERT_PATH=", "KEY_PATH="]
 for network, network_config in networks.items():
-    env = [
-        f"NODE_DATA_DIR=/var/lib/tezos/node-{network}",
-        f"NETWORK={network_config}",
-    ] + common_node_env
+    config_file_append = [
+        f'NODE_DATA_DIR="/var/lib/tezos/node-{network}"',
+        f'NETWORK="{network_config}"',
+    ]
     node_units.append(
-        mk_node_unit(suffix=network, env=env, desc=f"Tezos node {network}")
+        mk_node_unit(
+            suffix=network,
+            config_file_append=config_file_append,
+            desc=f"Tezos node {network}",
+        )
     )
     node_postinst_steps += f"""mkdir -p /var/lib/tezos/node-{network}
 [ ! -f /var/lib/tezos/node-{network}/config.json ] && octez-node config init --data-dir /var/lib/tezos/node-{network} --network {network_config}
@@ -237,8 +240,10 @@ rm -f /usr/bin/octez-node-{network} /usr/bin/tezos-node-{network}
 node_units.append(
     mk_node_unit(
         suffix="custom",
-        env=["NODE_DATA_DIR=/var/lib/tezos/node-custom", "CUSTOM_NODE_CONFIG="]
-        + common_node_env,
+        config_file_append=[
+            'NODE_DATA_DIR="/var/lib/tezos/node-custom"',
+            'CUSTOM_NODE_CONFIG=""',
+        ],
         desc="Tezos node with custom config",
     )
 )
@@ -247,8 +252,10 @@ node_postinst_steps += "mkdir -p /var/lib/tezos/node-custom\n"
 node_units.append(
     mk_node_unit(
         suffix="custom",
-        env=["NODE_DATA_DIR=/var/lib/tezos/node-custom@%i"] + common_node_env,
-        environment_files=["/etc/default/tezos-baking-custom@%i"],
+        config_file_append=[
+            'NODE_DATA_DIR="/var/lib/tezos/node-custom@%i"',
+            'CUSTOM_NODE_CONFIG=""',
+        ],
         desc="Tezos node with custom config",
         instantiated=True,
         dependencies_suffix="custom@%i",

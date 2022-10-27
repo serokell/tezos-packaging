@@ -101,6 +101,7 @@ def gen_spec_systemd_part(package):
     # 2. the default files of a systemd unit in another package
     # 3. files that we don't create during installation (e.g. for instantiated services)
     default_files = ""
+    environment_files = ""
     for systemd_unit in package.systemd_units:
         if systemd_unit.suffix is None:
             service_name = f"{package.name.lower()}"

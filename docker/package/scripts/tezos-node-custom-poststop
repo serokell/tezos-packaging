@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+# SPDX-FileCopyrightText: 2022 Oxhead Alpha
+# SPDX-License-Identifier: LicenseRef-MIT-OA
+
+set -euo pipefail
+
+if [[ -n ${RESET_ON_STOP} ]]; then
+    rm -rf "$NODE_DATA_DIR"
+fi

@@ -237,30 +237,31 @@ rm -f /usr/bin/octez-node-{network} /usr/bin/tezos-node-{network}
 """
 
 # Add custom config service
-node_units.append(
-    mk_node_unit(
-        suffix="custom",
-        config_file_append=[
-            'NODE_DATA_DIR="/var/lib/tezos/node-custom"',
-            'CUSTOM_NODE_CONFIG=""',
-        ],
-        desc="Tezos node with custom config",
-    )
+custom_node_unit = mk_node_unit(
+    suffix="custom",
+    config_file_append=[
+        'NODE_DATA_DIR="/var/lib/tezos/node-custom"',
+        'CUSTOM_NODE_CONFIG=""',
+    ],
+    desc="Tezos node with custom config",
 )
+custom_node_unit.poststop_script = "tezos-node-custom-poststop"
+node_units.append(custom_node_unit)
 node_postinst_steps += "mkdir -p /var/lib/tezos/node-custom\n"
 # Add instantiated custom config service
-node_units.append(
-    mk_node_unit(
-        suffix="custom",
-        config_file_append=[
-            'NODE_DATA_DIR="/var/lib/tezos/node-custom@%i"',
-            'CUSTOM_NODE_CONFIG=""',
-        ],
-        desc="Tezos node with custom config",
-        instantiated=True,
-        dependencies_suffix="custom@%i",
-    )
+custom_node_instantiated = mk_node_unit(
+    suffix="custom",
+    config_file_append=[
+        "NODE_DATA_DIR=/var/lib/tezos/node-custom@%i",
+        "CUSTOM_NODE_CONFIG=",
+        'RESET_ON_STOP=""',
+    ],
+    desc="Tezos node with custom config",
+    instantiated=True,
+    dependencies_suffix="custom@%i",
 )
+custom_node_instantiated.poststop_script = "tezos-node-custom-poststop"
+node_units.append(custom_node_instantiated)
 
 packages.append(
     TezosBinaryPackage(
@@ -304,8 +305,11 @@ for proto in active_protocols:
     service_file_baker = ServiceFile(
         Unit(after=["network.target"], description="Tezos baker"),
         Service(
+            # The node settings for a generic baker are defined in its own
+            # 'EnvironmentFile', as we can't tell the network from the protocol
+            # alone, nor what node this might connect to
             environment_files=[f"/etc/default/tezos-baker-{proto}"],
-            environment=[f"PROTOCOL={proto}", "NODE_DATA_DIR="],
+            environment=[f"PROTOCOL={proto}"],
             exec_start_pre=[
                 "+/usr/bin/setfacl -m u:tezos:rwx /run/systemd/ask-password"
             ],
@@ -330,8 +334,11 @@ for proto in active_protocols:
             description="Instantiated tezos baker daemon service",
         ),
         Service(
-            environment_files=["/etc/default/tezos-baking-%i"],
-            environment=[f"PROTOCOL={proto}", "NODE_DATA_DIR=/var/lib/tezos/node-%i"],
+            environment_files=[
+                "/etc/default/tezos-baking-%i",
+                "/etc/default/tezos-node-%i",
+            ],
+            environment=[f"PROTOCOL={proto}"],
             exec_start=baker_startup_script,
             state_directory="tezos",
             user="tezos",

@@ -19,6 +19,7 @@ opams=()
 while IFS=  read -r -d $'\0'; do
     opams+=("$REPLY")
 done < <(find ./vendors ./src ./tezt ./opam -name \*.opam -print0)
+export CFLAGS="-fPIC ${CFLAGS:-}"
 opam install "${opams[@]}" --deps-only --criteria="-notuptodate,-changed,-removed"
 eval "$(opam env)"
 

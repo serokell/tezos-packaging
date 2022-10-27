@@ -1,5 +1,4 @@
-#! /usr/bin/env nix-shell
-#! nix-shell .. -A autorelease -i bash
+#! /usr/bin/env bash
 # SPDX-FileCopyrightText: 2021 Oxhead Alpha
 # SPDX-License-Identifier: LicenseRef-MIT-OA
 

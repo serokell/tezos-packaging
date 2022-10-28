@@ -31,7 +31,7 @@ steps:
    commands:
    - eval "$SET_VERSION"
    - buildkite-agent artifact download "out/*" . --step build-source-packages
-   - ./scripts/publish-native-packages.sh out
+   - nix develop .#autorelease -c ./scripts/publish-native-packages.sh out
 
  - label: Build Big Sur x86_64 bottles
    key: build-bottles-big-sur-x86_64

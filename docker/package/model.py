@@ -99,9 +99,9 @@ def gen_spec_systemd_part(package):
     default_files = ""
     for systemd_unit in package.systemd_units:
         if systemd_unit.suffix is None:
-            service_name = "%{name}"
+            service_name = f"{package.name.lower()}"
         else:
-            service_name = f"%{{name}}-{systemd_unit.suffix}"
+            service_name = f"{package.name.lower()}-{systemd_unit.suffix}"
         if systemd_unit.instances is not None:
             service_name = f"{service_name}@"
         install_unit_files += (

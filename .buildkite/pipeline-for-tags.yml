@@ -19,8 +19,8 @@ steps:
      queue: "docker"
    commands:
    - eval "$SET_VERSION"
-   - ./docker/docker-tezos-packages.sh --os ubuntu --type source
-   - ./docker/docker-tezos-packages.sh --os fedora --type source
+   - nix develop .#docker-tezos-packages -c ./docker/docker-tezos-packages.py --os ubuntu --type source
+   - nix develop .#docker-tezos-packages -c ./docker/docker-tezos-packages.py --os fedora --type source
    artifact_paths:
      - ./out/*
 

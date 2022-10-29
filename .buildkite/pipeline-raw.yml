@@ -100,7 +100,7 @@ steps:
  - label: test deb source packages via docker
    commands:
    - eval "$SET_VERSION"
-   - ./docker/docker-tezos-packages.sh --os ubuntu --type source
+   - nix develop .#docker-tezos-packages -c ./docker/docker-tezos-packages.py --os ubuntu --type source
    artifact_paths:
      - ./out/*
    branches: "!master"
@@ -109,7 +109,7 @@ steps:
      queue: "docker"
    only_changes: &native_packaging_changes_regexes
    - docker/package/.*
-   - docker/docker-tezos-packages.sh
+   - docker/docker-tezos-packages.py
    - meta.json
    - protocols.json
  - label: test deb binary packages via docker
@@ -117,7 +117,7 @@ steps:
    - eval "$SET_VERSION"
    # Building all binary packages will take significant amount of time, so we build only one
    # in order to ensure package generation sanity
-   - ./docker/docker-tezos-packages.sh --os ubuntu --type binary --package tezos-baker-PtKathma
+   - nix develop .#docker-tezos-packages -c ./docker/docker-tezos-packages.py --os ubuntu --type binary -p tezos-baker-PtKathma
    - rm -rf out
    # It takes much time to build binary package, so we do it only on master
    branches: "master"
@@ -128,7 +128,7 @@ steps:
  - label: test rpm source packages via docker
    commands:
    - eval "$SET_VERSION"
-   - ./docker/docker-tezos-packages.sh --os fedora --type source
+   - nix develop .#docker-tezos-packages -c ./docker/docker-tezos-packages.py --os fedora --type source
    artifact_paths:
      - ./out/*
    branches: "!master"
@@ -141,7 +141,7 @@ steps:
    - eval "$SET_VERSION"
    # Building all binary packages will take significant amount of time, so we build only one
    # in order to ensure package generation sanity
-   - ./docker/docker-tezos-packages.sh --os fedora --type binary --package tezos-baker-PtKathma
+   - nix develop .#docker-tezos-packages -c ./docker/docker-tezos-packages.py --os fedora --type binary -p tezos-baker-PtKathma
    - rm -rf out
    # It takes much time to build binary package, so we do it only on master
    branches: "master"

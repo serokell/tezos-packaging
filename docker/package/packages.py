@@ -126,7 +126,7 @@ signer_units = [
 ]
 
 ledger_udev_postinst = open(
-    f"{os.path.dirname( __file__)}/scripts/udev-rules", "r"
+    f"{os.path.dirname(__file__)}/scripts/udev-rules", "r"
 ).read()
 
 packages = [
@@ -162,6 +162,7 @@ packages = [
 ]
 
 postinst_steps_common = """
+mkdir -p -m755 /var/lib/tezos || true
 useradd --home-dir /var/lib/tezos tezos || true
 """
 

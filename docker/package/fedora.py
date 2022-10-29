@@ -62,6 +62,14 @@ def build_fedora_package(
                 source_script_name = script if script_source is None else script_source
                 source_path = f"{cwd}/scripts/{source_script_name}"
                 shutil.copy(source_path, dest_path)
+
+        for script in pkg.additional_scripts:
+            dest_path = f"{dir}/{script.name}"
+            source_path = f"{cwd}/scripts/{script.local_file_name}"
+            with open(source_path, "r") as src:
+                with open(dest_path, "w") as dst:
+                    dst.write(script.transform(src.read()))
+
     subprocess.run(["tar", "-czf", f"{dir}.tar.gz", dir], check=True)
     os.makedirs(f"{home}/rpmbuild/SPECS", exist_ok=True)
     os.makedirs(f"{home}/rpmbuild/SOURCES", exist_ok=True)

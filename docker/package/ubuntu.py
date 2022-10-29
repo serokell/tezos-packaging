@@ -74,6 +74,14 @@ def build_ubuntu_package(
                     )
                     source_path = f"{cwd}/scripts/{source_script_name}"
                     shutil.copy(source_path, dest_path)
+
+            for script in pkg.additional_scripts:
+                dest_path = f"debian/{script.name}"
+                source_path = f"{cwd}/scripts/{script.local_file_name}"
+                with open(source_path, "r") as src:
+                    with open(dest_path, "w") as dst:
+                        dst.write(script.transform(src.read()))
+
         # Patches only make sense when we're reusing the old sources that are not static binary
         if (
             len(pkg.patches) > 0
@@ -88,6 +96,7 @@ def build_ubuntu_package(
         with open("debian/compat", "w") as f:
             f.write("10")
         pkg.gen_install("debian/install")
+        pkg.gen_links("debian/links")
         pkg.gen_rules("debian/rules", binaries_dir)
         pkg.gen_postinst("debian/postinst")
         pkg.gen_postrm("debian/postrm")

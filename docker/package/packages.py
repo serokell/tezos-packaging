@@ -431,6 +431,8 @@ packages.append(
         target_networks=networks.keys(),
         network_protos=networks_protos,
         meta=packages_meta,
+        additional_native_deps=[f"tezos-baker-{proto}" for proto in active_protocols]
+        + ["tezos-node", "acl"],
     )
 )
 

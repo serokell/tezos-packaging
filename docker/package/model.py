@@ -514,7 +514,7 @@ class TezosBakingServicesPackage(AbstractPackage):
     # native releases, so we append an extra letter to the version of
     # the package.
     # This should be reset to "" whenever the native version is bumped.
-    letter_version = ""
+    letter_version = "a"
 
     buildfile = "setup.py"
 
@@ -557,10 +557,12 @@ class TezosBakingServicesPackage(AbstractPackage):
         target_networks: List[str],
         network_protos: Dict[str, List[str]],
         meta: PackagesMeta,
+        additional_native_deps: List[str],
     ):
         self.name = "tezos-baking"
         self.desc = "Package that provides systemd services that orchestrate other services from Tezos packages"
         self.meta = deepcopy(meta)
+        self.additional_native_deps = additional_native_deps
         self.meta.version = self.meta.version + self.letter_version
         self.target_protos = set()
         self.patches = []
@@ -610,9 +612,7 @@ class TezosBakingServicesPackage(AbstractPackage):
         shutil.copy(f"{os.path.dirname(__file__)}/tezos_voting_wizard.py", package_dir)
 
     def gen_control_file(self, deps, ubuntu_version, out):
-        run_deps_list = ["acl"]
-        for proto in self.target_protos:
-            run_deps_list.append(f"tezos-baker-{proto.lower()}")
+        run_deps_list = map(lambda x: x.lower(), self.additional_native_deps)
         run_deps = ", ".join(run_deps_list)
         file_contents = f"""
 Source: {self.name}
@@ -633,9 +633,7 @@ Description: {self.desc}
             f.write(file_contents)
 
     def gen_spec_file(self, build_deps, run_deps, out):
-        run_deps = ", ".join(
-            ["acl"] + [f"tezos-baker-{proto}" for proto in self.target_protos],
-        )
+        run_deps = ", ".join(self.additional_native_deps)
         (
             systemd_deps,
             systemd_install,

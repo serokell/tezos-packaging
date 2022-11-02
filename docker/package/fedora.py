@@ -24,10 +24,16 @@ def build_fedora_package(
     pkg.gen_buildfile("/".join([dir, pkg.buildfile]), binaries_dir)
     pkg.gen_license(f"{dir}/LICENSE")
     for systemd_unit in pkg.systemd_units:
+        # lowercase package name for consistency between different os
+        name_lower = pkg.name.lower()
+        if systemd_unit.service_file.service.environment_file is not None:
+            systemd_unit.service_file.service.environment_file = (
+                systemd_unit.service_file.service.environment_file.lower()
+            )
         if systemd_unit.suffix is None:
-            unit_name = pkg.name
+            unit_name = name_lower
         else:
-            unit_name = f"{pkg.name}-{systemd_unit.suffix}"
+            unit_name = f"{name_lower}-{systemd_unit.suffix}"
         out_path = (
             f"{dir}/{unit_name}@.service"
             if systemd_unit.instances is not None

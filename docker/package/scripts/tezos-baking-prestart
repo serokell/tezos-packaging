@@ -7,10 +7,10 @@ set -euo pipefail
 
 tezos_client="/usr/bin/octez-client"
 
-config="$DATA_DIR/config"
+config="$TEZOS_CLIENT_DIR/config"
 
-mkdir -p "$DATA_DIR"
+mkdir -p "$TEZOS_CLIENT_DIR"
 
-"$tezos_client" --base-dir "$DATA_DIR" \
+"$tezos_client" --base-dir "$TEZOS_CLIENT_DIR" \
                 --endpoint "$NODE_RPC_SCHEME://$NODE_RPC_ADDR" \
                 config "$([[ -f $config ]] && echo "update" || echo "init")"

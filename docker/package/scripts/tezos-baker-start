@@ -10,7 +10,7 @@ set -euo pipefail
 baker="/usr/bin/octez-baker-$PROTOCOL"
 tezos_client="/usr/bin/octez-client"
 
-baker_dir="$DATA_DIR"
+baker_dir="$TEZOS_CLIENT_DIR"
 
 baker_config="$baker_dir/config"
 mkdir -p "$baker_dir"
@@ -35,10 +35,10 @@ launch_baker() {
         password="$(systemd-ask-password --keyname="tezos-$BAKER_ADDRESS_ALIAS" --accept-cached \
             "Enter password for $BAKER_ADDRESS_ALIAS key:")"
         "$baker" --base-dir "$baker_dir" --endpoint "$NODE_RPC_SCHEME://$NODE_RPC_ADDR" \
-            run with local node "$NODE_DATA_DIR" "${vote_args[@]}" "$@" <<< "$password" &
+            run with local node "$TEZOS_NODE_DIR" "${vote_args[@]}" "$@" <<< "$password" &
     else
         "$baker" --base-dir "$baker_dir" --endpoint "$NODE_RPC_SCHEME://$NODE_RPC_ADDR" \
-            run with local node "$NODE_DATA_DIR" "${vote_args[@]}" "$@" &
+            run with local node "$TEZOS_NODE_DIR" "${vote_args[@]}" "$@" &
     fi
 }
 

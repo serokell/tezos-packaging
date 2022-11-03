@@ -36,7 +36,7 @@ class TezosSignerUnix < Formula
         check_high_watermark_args=()
       fi
 
-      "$signer" -d "$DATA_DIR" launch local signer --socket "$SOCKET" \
+      "$signer" -d "$TEZOS_CLIENT_DIR" launch local signer --socket "$SOCKET" \
         ${pid_file_args[@]+"${pid_file_args[@]}"} ${magic_bytes_args[@]+"${magic_bytes_args[@]}"} \
         ${check_high_watermark_args[@]+"${check_high_watermark_args[@]}"} "$@"
     EOS

@@ -64,7 +64,7 @@ class TezosAccuserPtkathma < Formula
 
       accuser="#{bin}/octez-accuser-PtKathma"
 
-      accuser_dir="$DATA_DIR"
+      accuser_dir="$TEZOS_CLIENT_DIR"
 
       accuser_config="$accuser_dir/config"
       mkdir -p "$accuser_dir"
@@ -105,7 +105,7 @@ class TezosAccuserPtkathma < Formula
           <string>#{opt_bin}/tezos-accuser-PtKathma-start</string>
           <key>EnvironmentVariables</key>
             <dict>
-              <key>DATA_DIR</key>
+              <key>TEZOS_CLIENT_DIR</key>
               <string>#{var}/lib/tezos/client</string>
               <key>NODE_RPC_SCHEME</key>
               <string>http</string>

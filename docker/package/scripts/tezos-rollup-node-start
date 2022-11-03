@@ -10,10 +10,10 @@ tezos_client="/usr/bin/octez-client"
 
 "$node" init "$ROLLUP_MODE" config \
     for "$ROLLUP_ALIAS" \
-    --data-dir "$DATA_DIR" \
+    --data-dir "$TEZOS_CLIENT_DIR" \
     --rpc-addr "$ROLLUP_NODE_RPC_ENDPOINT" \
     --force
 
 "$node" --endpoint "$NODE_RPC_SCHEME://$NODE_RPC_ADDR" \
     run "$ROLLUP_MODE" for "$ROLLUP_ALIAS" \
-    --data-dir "$DATA_DIR" &
+    --data-dir "$TEZOS_CLIENT_DIR" &

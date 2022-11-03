@@ -36,7 +36,7 @@ class TezosSignerTcp < Formula
         check_high_watermark_args=()
       fi
 
-      "$signer" -d "$DATA_DIR" launch socket signer --address "$ADDRESS" --port "$PORT" --timeout "$TIMEOUT" \
+      "$signer" -d "$TEZOS_CLIENT_DIR" launch socket signer --address "$ADDRESS" --port "$PORT" --timeout "$TIMEOUT" \
         ${pid_file_args[@]+"${pid_file_args[@]}"} ${magic_bytes_args[@]+"${magic_bytes_args[@]}"} \
         ${check_high_watermark_args[@]+"${check_high_watermark_args[@]}"} "$@"
     EOS
@@ -62,7 +62,7 @@ class TezosSignerTcp < Formula
               <string>8000</string>
               <key>TIMEOUT</key>
               <string>1</string>
-              <key>DATA_DIR</key>
+              <key>TEZOS_CLIENT_DIR</key>
               <string>#{var}/lib/tezos/signer-tcp</string>
               <key>PIDFILE</key>
               <string></string>

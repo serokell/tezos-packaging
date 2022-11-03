@@ -7,15 +7,15 @@ set -euo pipefail
 
 node="/usr/bin/octez-node"
 
-if [[ ! -d "$NODE_DATA_DIR" ]]; then
-    mkdir -p "$NODE_DATA_DIR"
+if [[ ! -d "$TEZOS_NODE_DIR" ]]; then
+    mkdir -p "$TEZOS_NODE_DIR"
 fi
 
-if [[ -d "$NODE_DATA_DIR/store" ]]; then
-    "$node" upgrade --data-dir "$NODE_DATA_DIR" storage
-    rm -rf "$NODE_DATA_DIR/lmdb_store_to_remove"
+if [[ -d "$TEZOS_NODE_DIR/store" ]]; then
+    "$node" upgrade --data-dir "$TEZOS_NODE_DIR" storage
+    rm -rf "$TEZOS_NODE_DIR/lmdb_store_to_remove"
 fi
 
-if [[ ! -f "$NODE_DATA_DIR/identity.json" ]]; then
-    "$node" identity generate --data-dir "$NODE_DATA_DIR"
+if [[ ! -f "$TEZOS_NODE_DIR/identity.json" ]]; then
+    "$node" identity generate --data-dir "$TEZOS_NODE_DIR"
 fi

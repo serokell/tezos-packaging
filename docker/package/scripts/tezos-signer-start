@@ -27,5 +27,5 @@ else
    check_high_watermark_args=()
 fi
 
-"$signer" -d "$DATA_DIR" "${pid_file_args[@]}" "${magic_bytes_args[@]}" \
+"$signer" -d "$TEZOS_CLIENT_DIR" "${pid_file_args[@]}" "${magic_bytes_args[@]}" \
   "${check_high_watermark_args[@]}" "$@"

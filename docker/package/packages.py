@@ -210,7 +210,7 @@ node_postinst_steps = postinst_steps_common
 node_postrm_steps = ""
 for network, network_config in networks.items():
     config_file_append = [
-        f'NODE_DATA_DIR="/var/lib/tezos/node-{network}"',
+        f'TEZOS_NODE_DIR="/var/lib/tezos/node-{network}"',
         f'NETWORK="{network_config}"',
     ]
     node_units.append(
@@ -227,9 +227,9 @@ chown -R tezos:tezos /var/lib/tezos/node-{network}
 cat > /usr/bin/octez-node-{network} <<- 'EOM'
 #! /usr/bin/env bash
 
+# Most notably sets the TEZOS_NODE_DIR env variable:
 eval "source $(systemctl show -p EnvironmentFiles tezos-node-{network}.service | cut -d '=' -f2 | cut -d ' ' -f1 | tr '\n' ' ')"
-# TODO avoid this:
-TEZOS_NODE_DIR="$NODE_DATA_DIR" octez-node "$@"
+octez-node "$@"
 EOM
 chmod +x /usr/bin/octez-node-{network}
 ln -sf /usr/bin/octez-node-{network} /usr/bin/tezos-node-{network}
@@ -242,7 +242,7 @@ rm -f /usr/bin/octez-node-{network} /usr/bin/tezos-node-{network}
 custom_node_unit = mk_node_unit(
     suffix="custom",
     config_file_append=[
-        'NODE_DATA_DIR="/var/lib/tezos/node-custom"',
+        'TEZOS_NODE_DIR="/var/lib/tezos/node-custom"',
         'CUSTOM_NODE_CONFIG=""',
     ],
     desc="Tezos node with custom config",
@@ -254,7 +254,7 @@ node_postinst_steps += "mkdir -p /var/lib/tezos/node-custom\n"
 custom_node_instantiated = mk_node_unit(
     suffix="custom",
     config_file_append=[
-        "NODE_DATA_DIR=/var/lib/tezos/node-custom@%i",
+        "TEZOS_NODE_DIR=/var/lib/tezos/node-custom@%i",
         "CUSTOM_NODE_CONFIG=",
         'RESET_ON_STOP=""',
     ],

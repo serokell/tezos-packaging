@@ -68,13 +68,13 @@ class TezosTxRollupNodePtlimapt < Formula
 
       "$node" init "$ROLLUP_MODE" config \
           for "$ROLLUP_ALIAS" \
-          --data-dir "$DATA_DIR" \
+          --data-dir "$TEZOS_CLIENT_DIR" \
           --rpc-addr "$ROLLUP_NODE_RPC_ENDPOINT" \
           --force
 
       "$node" --endpoint "$NODE_RPC_SCHEME://$NODE_RPC_ADDR" \
           run "$ROLLUP_MODE" for "$ROLLUP_ALIAS" \
-          --data-dir "$DATA_DIR"
+          --data-dir "$TEZOS_CLIENT_DIR"
 
       EOS
     File.write("tezos-tx-rollup-node-PtLimaPt-start", startup_contents)
@@ -98,7 +98,7 @@ class TezosTxRollupNodePtlimapt < Formula
           <string>#{opt_bin}/tezos-tx-rollup-node-PtLimaPt-start</string>
           <key>EnvironmentVariables</key>
             <dict>
-              <key>DATA_DIR</key>
+              <key>TEZOS_CLIENT_DIR</key>
               <string>#{var}/lib/tezos/client</string>
               <key>NODE_RPC_ENDPOINT</key>
               <string>http://localhost:8732</string>

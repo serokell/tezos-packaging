@@ -8,7 +8,7 @@
 `proto` variable can hold every active protocol, currently `PtKatham` and `PtLimaPt`.
 
 By default, `tezos-tx-rollup-node-$proto.service` will use:
-* `/var/lib/tezos/.tezos-client` as the `tezos-client` data directory, set in `DATA_DIR`
+* `/var/lib/tezos/.tezos-client` as the `tezos-client` data directory, set in `TEZOS_CLIENT_DIR`
 * `http://localhost:8732` as the `tezos-node` RPC address, set in `NODE_RPC_ENDPOINT`
 * `127.0.0.1:8472` as the `tezos-tx-rollup-node-$proto` RPC address, set in `ROLLUP_NODE_RPC_ENDPOINT`
 * `observer` as the `tezos-tx-rollup-node-$proto` working mode, set in `ROLLUP_MODE`
@@ -27,7 +27,7 @@ systemctl start tezos-tx-rollup-node-$proto.service
 In order to change the defaults, open `/etc/default/tezos-tx-rollup-node-$proto` and modify the variables:
 
 ```
-DATA_DIR="/var/lib/tezos/.tezos-client"
+TEZOS_CLIENT_DIR="/var/lib/tezos/.tezos-client"
 NODE_RPC_ENDPOINT="http://localhost:8732"
 ROLLUP_NODE_RPC_ENDPOINT="127.0.0.1:8472"
 ROLLUP_MODE="operator"

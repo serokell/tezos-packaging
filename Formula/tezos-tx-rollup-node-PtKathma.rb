@@ -72,7 +72,7 @@ class TezosTxRollupNodePtkathma < Formula
           --rpc-addr "$ROLLUP_NODE_RPC_ENDPOINT" \
           --force
 
-      "$node" --endpoint "$NODE_RPC_ENDPOINT" \
+      "$node" --endpoint "$NODE_RPC_SCHEME://$NODE_RPC_ADDR" \
           run "$ROLLUP_MODE" for "$ROLLUP_ALIAS" \
           --data-dir "$DATA_DIR"
 
@@ -100,8 +100,10 @@ class TezosTxRollupNodePtkathma < Formula
             <dict>
               <key>DATA_DIR</key>
               <string>#{var}/lib/tezos/client</string>
-              <key>NODE_RPC_ENDPOINT</key>
-              <string>http://localhost:8732</string>
+              <key>NODE_RPC_SCHEME</key>
+              <string>http</string>
+              <key>NODE_RPC_ADDR</key>
+              <string>localhost:8732</string>
               <key>ROLLUP_NODE_RPC_ENDPOINT</key>
               <string>127.0.0.1:8472</string>
               <key>ROLLUP_MODE</key>

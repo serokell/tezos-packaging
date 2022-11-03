@@ -12,5 +12,5 @@ config="$DATA_DIR/config"
 mkdir -p "$DATA_DIR"
 
 "$tezos_client" --base-dir "$DATA_DIR" \
-                --endpoint "$NODE_RPC_ENDPOINT" \
+                --endpoint "$NODE_RPC_SCHEME://$NODE_RPC_ADDR" \
                 config "$([[ -f $config ]] && echo "update" || echo "init")"

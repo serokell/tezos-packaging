@@ -37,7 +37,7 @@ Edit with the config provided by the voting script on the second step:
 
 ```
 DATA_DIR="/var/lib/tezos/.tezos-client"
-NODE_RPC_ENDPOINT="http://localhost:8732"
+NODE_RPC_ADDR="http://localhost:8732"
 BAKER_ADDRESS_ALIAS="baker"
 CUSTOM_NODE_CONFIG="<paste your path to the node config here>"
 RESET_ON_STOP=""

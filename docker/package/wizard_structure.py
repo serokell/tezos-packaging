@@ -191,6 +191,61 @@ def get_proc_output(cmd):
         return subprocess.run(shlex.split(cmd), capture_output=True)
 
 
+def show_systemd_service(service_name):
+    return get_proc_output(f"systemctl show {service_name}.service").stdout
+
+
+def find_systemd_env_files(show_systemd_output):
+    return re.findall(b"EnvironmentFiles=(.*) ", show_systemd_output)
+
+
+def find_systemd_unit_env(show_systemd_output):
+    unit_env = re.search(b"Environment=(.*)(?:$|\n)", show_systemd_output)
+    if unit_env is not None:
+        return unit_env.group(1).decode("utf-8")
+    return ""
+
+
+# Returns all the environment variables of a systemd service unit
+# Note: definitions directly in the unit (not in environment files) take precedence
+def get_systemd_service_env(service_name):
+    result = dict()
+    sys_show = show_systemd_service(service_name)
+
+    for env_file in find_systemd_env_files(sys_show):
+        with open(env_file, "r") as f:
+            for line in f:
+                env_def = re.search("^(\w+)=(.*)\n", line)
+                if env_def is not None:
+                    env_var = env_def.group(1)
+                    var_val = env_def.group(2).strip('"')
+                    result[env_var] = var_val
+
+    env_matches = re.findall(
+        r'(\w+)=(("(?:\\.|[^"\\])*")|([\S]+))',
+        find_systemd_unit_env(sys_show),
+    )
+    for env_match in env_matches:
+        env_var = env_match[0]
+        var_val = env_match[1].strip('"')
+        result[env_var] = var_val
+
+    return result
+
+
+def replace_systemd_service_env(service_name, field, value):
+    for env_file in find_systemd_env_files(show_systemd_service(service_name)):
+        with open(env_file, "r") as f:
+            config_contents = f.read()
+
+        old = re.search(f"{field}=.*", config_contents)
+        if old is not None:
+            new = f"{field}={value}"
+            proc_call(
+                f"sudo sed -i 's/{old.group(0)}/{new}/' {env_file.decode('utf8')}"
+            )
+
+
 def progressbar_hook(chunk_number, chunk_size, total_size):
     done = chunk_number * chunk_size
     percent = min(int(done * 100 / total_size), 100)
@@ -259,21 +314,12 @@ suppress_warning_text = "TEZOS_CLIENT_UNSAFE_DISABLE_DISCLAIMER=YES"
 
 
 def get_data_dir(network):
-    output = get_proc_output("systemctl show tezos-node-" + network + ".service").stdout
-    config = re.search(b"Environment=(.*)(?:$|\n)", output)
-    if config is None:
-        print(
-            "tezos-node-" + network + ".service configuration not found, "
-            "defaulting to /var/lib/tezos/node-" + network
-        )
+    node_env = get_systemd_service_env(f"tezos-node-{network}")
+    data_dir = node_env.get("NODE_DATA_DIR")
+    if data_dir is None:
+        print("NODE_DATA_DIR is undefined, defaulting to /var/lib/tezos/node-" + network)
         return "/var/lib/tezos/node-" + network
-    config = config.group(1)
-    data_dir = re.search(b"DATA_DIR=(.*?)(?: |$|\n)", config)
-    if data_dir is not None:
-        return data_dir.group(1).decode("utf-8")
-    else:
-        print("DATA_DIR is undefined, defaulting to /var/lib/tezos/node-" + network)
-        return "/var/lib/tezos/node-" + network
+    return data_dir
 
 
 def get_key_address(tezos_client_options, key_alias):
@@ -348,14 +394,6 @@ def ledger_urls_info(ledgers_derivations, node_endpoint):
     return ledgers_info
 
 
-def search_baking_service_config(config_contents, regex, default):
-    res = re.search(regex, config_contents)
-    if res is None:
-        return default
-    else:
-        return res.group(1)
-
-
 def search_json_with_default(json_filepath, field, default):
     with open(json_filepath, "r") as f:
         try:
@@ -363,18 +401,6 @@ def search_json_with_default(json_filepath, field, default):
         except:
             return default
         return json_dict.pop(field, default)
-
-
-def replace_in_service_config(config_filepath, field, value):
-    with open(config_filepath, "r") as f:
-        config_contents = f.read()
-
-    old = re.search(f"{field}=.*", config_contents)
-    if old is None:
-        return None
-    else:
-        new = f"{field}={value}"
-        proc_call(f"sudo sed -i 's/{old.group(0)}/{new}/' {config_filepath}")
 
 
 class Step:
@@ -595,33 +621,19 @@ class Setup:
             f"{self.config['tezos_client_options']} config update"
         )
 
-    def get_baking_config_filepath(self):
-        net = self.config["network"]
-        output = get_proc_output(f"systemctl show tezos-baking-{net}.service").stdout
-        config_filepath = re.search(b"EnvironmentFiles=(.*) ", output)
-        if config_filepath is None:
-            print(
-                f"EnvironmentFiles not found in tezos-baking-{net}.service configuration,",
-                f"defaulting to /etc/default/tezos-baking-{net}",
-            )
-            config_filepath = f"/etc/default/tezos-baking-{net}"
-        else:
-            config_filepath = config_filepath.group(1).decode().strip()
-        return config_filepath
-
     def fill_baking_config(self):
-        config_filepath = self.get_baking_config_filepath()
-        with open(config_filepath, "r") as f:
-            config_contents = f.read()
-            self.config["client_data_dir"] = search_baking_service_config(
-                config_contents, 'DATA_DIR="(.*)"', "/var/lib/tezos/.tezos-client"
-            )
-            self.config["node_rpc_addr"] = search_baking_service_config(
-                config_contents, 'NODE_RPC_ENDPOINT="(.*)"', "http://localhost:8732"
-            )
-            self.config["baker_alias"] = search_baking_service_config(
-                config_contents, 'BAKER_ADDRESS_ALIAS="(.*)"', "baker"
-            )
+        net = self.config["network"]
+        baking_env = get_systemd_service_env(f"tezos-baking-{net}")
+
+        self.config["client_data_dir"] = baking_env.get(
+            "DATA_DIR",
+            "/var/lib/tezos/.tezos-client",
+        )
+        self.config["node_rpc_addr"] = baking_env.get(
+            "NODE_RPC_ADDR",
+            "http://localhost:8732",
+        )
+        self.config["baker_alias"] = baking_env.get("BAKER_ADDRESS_ALIAS", "baker")
 
     def fill_remote_signer_infos(self):
         self.query_step(remote_signer_uri_query)

@@ -72,7 +72,7 @@ class TezosTxRollupNodePtlimapt < Formula
           --rpc-addr "$ROLLUP_NODE_RPC_ENDPOINT" \
           --force
 
-      "$node" --endpoint "$NODE_RPC_ENDPOINT" \
+      "$node" --endpoint "$NODE_RPC_SCHEME://$NODE_RPC_ADDR" \
           run "$ROLLUP_MODE" for "$ROLLUP_ALIAS" \
           --data-dir "$DATA_DIR"
 

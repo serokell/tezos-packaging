@@ -17,11 +17,11 @@ mkdir -p "$baker_dir"
 
 if [ ! -f "$baker_config" ]; then
     "$baker" --base-dir "$baker_dir" \
-             --endpoint "$NODE_RPC_ENDPOINT" \
+             --endpoint "$NODE_RPC_SCHEME://$NODE_RPC_ADDR" \
              config init --output "$baker_config" >/dev/null 2>&1
 else
     "$baker" --base-dir "$baker_dir" \
-             --endpoint "$NODE_RPC_ENDPOINT" \
+             --endpoint "$NODE_RPC_SCHEME://$NODE_RPC_ADDR" \
              config update >/dev/null 2>&1
 fi
 
@@ -34,10 +34,10 @@ launch_baker() {
     if [[ ${key_type:-} == "encrypted" ]]; then
         password="$(systemd-ask-password --keyname="tezos-$BAKER_ADDRESS_ALIAS" --accept-cached \
             "Enter password for $BAKER_ADDRESS_ALIAS key:")"
-        "$baker" --base-dir "$baker_dir" --endpoint "$NODE_RPC_ENDPOINT" \
+        "$baker" --base-dir "$baker_dir" --endpoint "$NODE_RPC_SCHEME://$NODE_RPC_ADDR" \
             run with local node "$NODE_DATA_DIR" "${vote_args[@]}" "$@" <<< "$password" &
     else
-        "$baker" --base-dir "$baker_dir" --endpoint "$NODE_RPC_ENDPOINT" \
+        "$baker" --base-dir "$baker_dir" --endpoint "$NODE_RPC_SCHEME://$NODE_RPC_ADDR" \
             run with local node "$NODE_DATA_DIR" "${vote_args[@]}" "$@" &
     fi
 }

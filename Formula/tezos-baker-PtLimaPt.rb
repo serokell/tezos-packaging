@@ -71,17 +71,17 @@ class TezosBakerPtlimapt < Formula
 
       if [ ! -f "$baker_config" ]; then
           "$baker" --base-dir "$baker_dir" \
-                  --endpoint "$NODE_RPC_ENDPOINT" \
+                  --endpoint "$NODE_RPC_SCHEME://$NODE_RPC_ADDR" \
                   config init --output "$baker_config" >/dev/null 2>&1
       else
           "$baker" --base-dir "$baker_dir" \
-                  --endpoint "$NODE_RPC_ENDPOINT" \
+                  --endpoint "$NODE_RPC_SCHEME://$NODE_RPC_ADDR" \
                   config update >/dev/null 2>&1
       fi
 
       launch_baker() {
           exec "$baker" \
-              --base-dir "$baker_dir" --endpoint "$NODE_RPC_ENDPOINT" \
+              --base-dir "$baker_dir" --endpoint "$NODE_RPC_SCHEME://$NODE_RPC_ADDR" \
               run with local node "$NODE_DATA_DIR" "$@"
       }
 
@@ -116,8 +116,10 @@ class TezosBakerPtlimapt < Formula
               <string>#{var}/lib/tezos/client</string>
               <key>NODE_DATA_DIR</key>
               <string></string>
-              <key>NODE_RPC_ENDPOINT</key>
-              <string>http://localhost:8732</string>
+              <key>NODE_RPC_SCHEME</key>
+              <string>http</string>
+              <key>NODE_RPC_ADDR</key>
+              <string>localhost:8732</string>
               <key>BAKER_ACCOUNT</key>
               <string></string>
           </dict>

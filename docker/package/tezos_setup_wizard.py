@@ -362,7 +362,7 @@ class Setup(Setup):
         print("Waiting for the node service to start...")
 
         while True:
-            rpc_address = self.config["node_rpc_addr"]
+            rpc_address = "http://" + self.config["node_rpc_addr"]
             try:
                 urllib.request.urlopen(rpc_address + "/version")
                 break
@@ -440,9 +440,9 @@ class Setup(Setup):
     def set_liquidity_toggle_vote(self):
         self.query_step(liquidity_toggle_vote_query)
 
-        config_filepath = self.get_baking_config_filepath()
-        replace_in_service_config(
-            config_filepath,
+        net = self.config["network"]
+        replace_systemd_service_env(
+            f"tezos-baking-{net}",
             "LIQUIDITY_BAKING_TOGGLE_VOTE",
             f"\"{self.config['liquidity_toggle_vote']}\"",
         )

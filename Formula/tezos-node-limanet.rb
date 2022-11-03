@@ -25,13 +25,13 @@ class TezosNodeLimanet < Formula
           echo "Configuring the node..."
           "$node" config init \
                   --rpc-addr "$NODE_RPC_ADDR" \
-                  --network=https://teztnets.xyz/limanet \
+                  --network=limanet \
                   "$@"
       else
           echo "Updating the node configuration..."
           "$node" config update \
                   --rpc-addr "$NODE_RPC_ADDR" \
-                  --network=https://teztnets.xyz/limanet \
+                  --network=limanet \
                   "$@"
       fi
 
@@ -80,6 +80,6 @@ class TezosNodeLimanet < Formula
   end
   def post_install
     mkdir_p "#{var}/lib/tezos/node-limanet"
-    system "octez-node", "config", "init", "--data-dir" "#{var}/lib/tezos/node-limanet", "--network", "https://teztnets.xyz/limanet"
+    system "octez-node", "config", "init", "--data-dir" "#{var}/lib/tezos/node-limanet", "--network", "limanet"
   end
 end

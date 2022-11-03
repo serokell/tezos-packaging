@@ -276,7 +276,10 @@ def yes_or_no(prompt, default=None):
 
 
 def mk_full_url(host_name, path):
-    return "/".join([host_name.rstrip("/"), path.lstrip("/")])
+    if path is None:
+        return host_name.rstrip("/")
+    else:
+        return "/".join([host_name.rstrip("/"), path.lstrip("/")])
 
 
 def url_is_reachable(url):

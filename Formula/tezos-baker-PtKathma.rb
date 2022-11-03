@@ -64,24 +64,20 @@ class TezosBakerPtkathma < Formula
 
       baker="#{bin}/octez-baker-PtKathma"
 
-      baker_dir="$TEZOS_CLIENT_DIR"
-
-      baker_config="$baker_dir/config"
-      mkdir -p "$baker_dir"
+      baker_config="$TEZOS_CLIENT_DIR/config"
+      mkdir -p "$TEZOS_CLIENT_DIR"
 
       if [ ! -f "$baker_config" ]; then
-          "$baker" --base-dir "$baker_dir" \
-                  --endpoint "$NODE_RPC_SCHEME://$NODE_RPC_ADDR" \
+          "$baker" --endpoint "$NODE_RPC_SCHEME://$NODE_RPC_ADDR" \
                   config init --output "$baker_config" >/dev/null 2>&1
       else
-          "$baker" --base-dir "$baker_dir" \
-                  --endpoint "$NODE_RPC_SCHEME://$NODE_RPC_ADDR" \
+          "$baker" --endpoint "$NODE_RPC_SCHEME://$NODE_RPC_ADDR" \
                   config update >/dev/null 2>&1
       fi
 
       launch_baker() {
           exec "$baker" \
-              --base-dir "$baker_dir" --endpoint "$NODE_RPC_SCHEME://$NODE_RPC_ADDR" \
+              --endpoint "$NODE_RPC_SCHEME://$NODE_RPC_ADDR" \
               run with local node "$TEZOS_NODE_DIR" "$@"
       }
 

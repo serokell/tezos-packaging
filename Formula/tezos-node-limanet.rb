@@ -24,14 +24,12 @@ class TezosNodeLimanet < Formula
       if [[ ! -f "$config_file" ]]; then
           echo "Configuring the node..."
           "$node" config init \
-                  --data-dir "$TEZOS_CLIENT_DIR" \
                   --rpc-addr "$NODE_RPC_ADDR" \
                   --network=https://teztnets.xyz/limanet \
                   "$@"
       else
           echo "Updating the node configuration..."
           "$node" config update \
-                  --data-dir "$TEZOS_CLIENT_DIR" \
                   --rpc-addr "$NODE_RPC_ADDR" \
                   --network=https://teztnets.xyz/limanet \
                   "$@"
@@ -39,9 +37,9 @@ class TezosNodeLimanet < Formula
 
       # Launching the node
       if [[ -z "$CERT_PATH" || -z "$KEY_PATH" ]]; then
-          exec "$node" run --data-dir "$TEZOS_CLIENT_DIR" --config-file="$config_file"
+          exec "$node" run --config-file="$config_file"
       else
-          exec "$node" run --data-dir "$TEZOS_CLIENT_DIR" --config-file="$config_file" \
+          exec "$node" run --config-file="$config_file" \
               --rpc-tls="$CERT_PATH","$KEY_PATH"
       fi
     EOS

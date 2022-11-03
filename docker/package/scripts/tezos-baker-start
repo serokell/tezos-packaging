@@ -6,22 +6,20 @@
 
 set -euo pipefail
 
+# Note: the 'TEZOS_CLIENT_DIR' env var is expected and used by the baker
+
 # $PROTOCOL should be defined in the system unit environment
 baker="/usr/bin/octez-baker-$PROTOCOL"
 tezos_client="/usr/bin/octez-client"
 
-baker_dir="$TEZOS_CLIENT_DIR"
-
-baker_config="$baker_dir/config"
-mkdir -p "$baker_dir"
+baker_config="$TEZOS_CLIENT_DIR/config"
+mkdir -p "$TEZOS_CLIENT_DIR"
 
 if [ ! -f "$baker_config" ]; then
-    "$baker" --base-dir "$baker_dir" \
-             --endpoint "$NODE_RPC_SCHEME://$NODE_RPC_ADDR" \
+    "$baker" --endpoint "$NODE_RPC_SCHEME://$NODE_RPC_ADDR" \
              config init --output "$baker_config" >/dev/null 2>&1
 else
-    "$baker" --base-dir "$baker_dir" \
-             --endpoint "$NODE_RPC_SCHEME://$NODE_RPC_ADDR" \
+    "$baker" --endpoint "$NODE_RPC_SCHEME://$NODE_RPC_ADDR" \
              config update >/dev/null 2>&1
 fi
 
@@ -34,10 +32,10 @@ launch_baker() {
     if [[ ${key_type:-} == "encrypted" ]]; then
         password="$(systemd-ask-password --keyname="tezos-$BAKER_ADDRESS_ALIAS" --accept-cached \
             "Enter password for $BAKER_ADDRESS_ALIAS key:")"
-        "$baker" --base-dir "$baker_dir" --endpoint "$NODE_RPC_SCHEME://$NODE_RPC_ADDR" \
+        "$baker" --endpoint "$NODE_RPC_SCHEME://$NODE_RPC_ADDR" \
             run with local node "$TEZOS_NODE_DIR" "${vote_args[@]}" "$@" <<< "$password" &
     else
-        "$baker" --base-dir "$baker_dir" --endpoint "$NODE_RPC_SCHEME://$NODE_RPC_ADDR" \
+        "$baker" --endpoint "$NODE_RPC_SCHEME://$NODE_RPC_ADDR" \
             run with local node "$TEZOS_NODE_DIR" "${vote_args[@]}" "$@" &
     fi
 }

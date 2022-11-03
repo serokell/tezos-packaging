@@ -5,6 +5,7 @@
 
 set -euo pipefail
 
+# Note: the 'TEZOS_NODE_DIR' env var is expected and used by the node
 node="/usr/bin/octez-node"
 # default location of the config file
 config_file="$TEZOS_NODE_DIR/config.json"
@@ -15,23 +16,21 @@ if [[ -z "${CUSTOM_NODE_CONFIG:-}" ]]; then
     if [[ ! -f "$config_file" ]]; then
         echo "Configuring the node..."
         "$node" config init \
-                --data-dir "$TEZOS_NODE_DIR" \
                 --rpc-addr "$NODE_RPC_ADDR" \
                 ${NETWORK:+"--network=$NETWORK"} \
                 "$@"
     else
         echo "Updating the node configuration..."
         "$node" config update \
-                --data-dir "$TEZOS_NODE_DIR" \
                 --rpc-addr "$NODE_RPC_ADDR" \
                 ${NETWORK:+"--network=$NETWORK"} \
                 "$@"
     fi
-    node_run_args=("--data-dir" "$TEZOS_NODE_DIR" "--config-file" "$config_file")
+    node_run_args=("--config-file" "$config_file")
 else
     echo "Run using custom node config file"
     config_file="$CUSTOM_NODE_CONFIG"
-    node_run_args=("--data-dir" "$TEZOS_NODE_DIR" "--config-file" "$config_file" --rpc-addr "$NODE_RPC_ADDR")
+    node_run_args=("--config-file" "$config_file" --rpc-addr "$NODE_RPC_ADDR")
 fi
 
  if [[ -z "$CERT_PATH" || -z "$KEY_PATH" ]]; then

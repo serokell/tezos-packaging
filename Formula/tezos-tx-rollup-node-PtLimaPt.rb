@@ -68,14 +68,11 @@ class TezosTxRollupNodePtlimapt < Formula
 
       "$node" init "$ROLLUP_MODE" config \
           for "$ROLLUP_ALIAS" \
-          --data-dir "$TEZOS_CLIENT_DIR" \
           --rpc-addr "$ROLLUP_NODE_RPC_ENDPOINT" \
           --force
 
       "$node" --endpoint "$NODE_RPC_SCHEME://$NODE_RPC_ADDR" \
-          run "$ROLLUP_MODE" for "$ROLLUP_ALIAS" \
-          --data-dir "$TEZOS_CLIENT_DIR"
-
+          run "$ROLLUP_MODE" for "$ROLLUP_ALIAS"
       EOS
     File.write("tezos-tx-rollup-node-PtLimaPt-start", startup_contents)
     bin.install "tezos-tx-rollup-node-PtLimaPt-start"

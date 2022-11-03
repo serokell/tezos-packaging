@@ -5,6 +5,7 @@
 
 set -euo pipefail
 
+# Note: the 'TEZOS_NODE_DIR' env var is expected and used by the node
 node="/usr/bin/octez-node"
 
 if [[ ! -d "$TEZOS_NODE_DIR" ]]; then
@@ -12,10 +13,10 @@ if [[ ! -d "$TEZOS_NODE_DIR" ]]; then
 fi
 
 if [[ -d "$TEZOS_NODE_DIR/store" ]]; then
-    "$node" upgrade --data-dir "$TEZOS_NODE_DIR" storage
+    "$node" upgrade storage
     rm -rf "$TEZOS_NODE_DIR/lmdb_store_to_remove"
 fi
 
 if [[ ! -f "$TEZOS_NODE_DIR/identity.json" ]]; then
-    "$node" identity generate --data-dir "$TEZOS_NODE_DIR"
+    "$node" identity generate
 fi

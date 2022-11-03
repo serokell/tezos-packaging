@@ -41,7 +41,6 @@ signer_units = [
             ),
             Service(
                 environment_files=["/etc/default/tezos-signer-tcp"],
-                environment=["ADDRESS=127.0.0.1", "PORT=8000", "TIMEOUT=1"],
                 exec_start="/usr/bin/tezos-signer-start launch socket signer "
                 + " --address ${ADDRESS} --port ${PORT} --timeout ${TIMEOUT}",
                 state_directory="tezos",
@@ -52,6 +51,7 @@ signer_units = [
         suffix="tcp",
         startup_script="tezos-signer-start",
         config_file="tezos-signer.conf",
+        config_file_append=['ADDRESS="127.0.0.1"', 'PORT="8000"', 'TIMEOUT="1"'],
     ),
     SystemdUnit(
         ServiceFile(
@@ -61,7 +61,6 @@ signer_units = [
             ),
             Service(
                 environment_files=["/etc/default/tezos-signer-unix"],
-                environment=["SOCKET="],
                 exec_start="/usr/bin/tezos-signer-start launch local signer "
                 + "--socket ${SOCKET}",
                 state_directory="tezos",
@@ -72,6 +71,7 @@ signer_units = [
         suffix="unix",
         startup_script="tezos-signer-start",
         config_file="tezos-signer.conf",
+        config_file_append=['SOCKET=""'],
     ),
     SystemdUnit(
         ServiceFile(
@@ -81,12 +81,6 @@ signer_units = [
             ),
             Service(
                 environment_files=["/etc/default/tezos-signer-http"],
-                environment=[
-                    "CERT_PATH=",
-                    "KEY_PATH=",
-                    "ADDRESS=127.0.0.1",
-                    "PORT=8080",
-                ],
                 exec_start="/usr/bin/tezos-signer-start launch http signer "
                 + "--address ${ADDRESS} --port ${PORT}",
                 state_directory="tezos",
@@ -97,6 +91,12 @@ signer_units = [
         suffix="http",
         startup_script="tezos-signer-start",
         config_file="tezos-signer.conf",
+        config_file_append=[
+            'CERT_PATH="',
+            'KEY_PATH=""',
+            'ADDRESS="127.0.0.1"',
+            'PORT="8080"',
+        ],
     ),
     SystemdUnit(
         ServiceFile(
@@ -106,12 +106,6 @@ signer_units = [
             ),
             Service(
                 environment_files=["/etc/default/tezos-signer-https"],
-                environment=[
-                    "CERT_PATH=",
-                    "KEY_PATH=",
-                    "ADDRESS=127.0.0.1",
-                    "PORT=8080",
-                ],
                 exec_start="/usr/bin/tezos-signer-start launch https signer "
                 + "${CERT_PATH} ${KEY_PATH} --address ${ADDRESS} --port ${PORT}",
                 state_directory="tezos",
@@ -122,6 +116,12 @@ signer_units = [
         suffix="https",
         startup_script="tezos-signer-start",
         config_file="tezos-signer.conf",
+        config_file_append=[
+            'CERT_PATH="',
+            'KEY_PATH=""',
+            'ADDRESS="127.0.0.1"',
+            'PORT="8080"',
+        ],
     ),
 ]
 

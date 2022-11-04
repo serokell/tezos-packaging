@@ -126,7 +126,7 @@ ballot_outcome_query = Step(
 )
 
 
-def get_node_rpc_addr_query(network, default=None):
+def get_node_rpc_endpoint_query(network, default=None):
     url_path = "chains/main/blocks/head/header"
     node_is_alive = lambda host: url_is_reachable(mk_full_url(host, url_path))
     custom_url_validator = reachable_url_validator(url_path)
@@ -137,7 +137,7 @@ def get_node_rpc_addr_query(network, default=None):
         if network == "mainnet" and node_is_alive(url)
     }
     return Step(
-        id="node_rpc_addr",
+        id="node_rpc_endpoint",
         prompt="Provide the node's RPC address."
         if not relevant_nodes
         else "Choose one of the public nodes or provide the node's RPC address.",
@@ -200,7 +200,7 @@ class Setup(Setup):
     def check_data_correctness(self):
         print("Baker data detected is as follows:")
         print(f"Data directory: {self.config['client_data_dir']}")
-        print(f"Node RPC address: {self.config['node_rpc_addr']}")
+        print(f"Node RPC endpoint: {self.config['node_rpc_endpoint']}")
         print(f"Voter key: {self.config['baker_key_value']}")
         return yes_or_no("Does this look correct? (Y/n) ", "yes")
 
@@ -233,10 +233,12 @@ class Setup(Setup):
 
             self.config["client_data_dir"] = network_dir
 
-            self.config["node_rpc_addr"] = self.search_client_config("endpoint", None)
-            if self.config["node_rpc_addr"] is None:
+            self.config["node_rpc_endpoint"] = self.search_client_config(
+                "endpoint", None
+            )
+            if self.config["node_rpc_endpoint"] is None:
                 self.query_and_update_config(
-                    get_node_rpc_addr_query(self.config["network"])
+                    get_node_rpc_endpoint_query(self.config["network"])
                 )
 
             key_import_modes.pop("json", None)
@@ -247,8 +249,8 @@ class Setup(Setup):
 
         while not collected:
             self.query_and_update_config(
-                get_node_rpc_addr_query(
-                    self.config["network"], self.config["node_rpc_addr"]
+                get_node_rpc_endpoint_query(
+                    self.config["network"], self.config["node_rpc_endpoint"]
                 )
             )
 

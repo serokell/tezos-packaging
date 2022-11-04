@@ -362,9 +362,9 @@ class Setup(Setup):
         print("Waiting for the node service to start...")
 
         while True:
-            rpc_address = "http://" + self.config["node_rpc_addr"]
+            rpc_endpoint = self.config["node_rpc_endpoint"]
             try:
-                urllib.request.urlopen(rpc_address + "/version")
+                urllib.request.urlopen(rpc_endpoint + "/version")
                 break
             except urllib.error.URLError:
                 proc_call("sleep 1")
@@ -388,7 +388,7 @@ class Setup(Setup):
 
         proc_call(
             f"sudo -u tezos {suppress_warning_text} octez-client "
-            f"--endpoint {rpc_address} bootstrapped"
+            f"--endpoint {rpc_endpoint} bootstrapped"
         )
 
         print()

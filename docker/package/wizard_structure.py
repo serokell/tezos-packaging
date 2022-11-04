@@ -612,7 +612,7 @@ class Setup:
     def get_tezos_client_options(self):
         options = (
             f"--base-dir {self.config['client_data_dir']} "
-            f"--endpoint {self.config['node_rpc_addr']}"
+            f"--endpoint {self.config['node_rpc_endpoint']}"
         )
         if "remote_host" in self.config:
             options += f" -R '{self.config['remote_host']}'"
@@ -634,9 +634,9 @@ class Setup:
             "TEZOS_CLIENT_DIR",
             "/var/lib/tezos/.tezos-client",
         )
-        self.config["node_rpc_addr"] = baking_env.get(
+        self.config["node_rpc_endpoint"] = "http://" + baking_env.get(
             "NODE_RPC_ADDR",
-            "http://localhost:8732",
+            "localhost:8732",
         )
         self.config["baker_alias"] = baking_env.get("BAKER_ADDRESS_ALIAS", "baker")
 
@@ -650,7 +650,7 @@ class Setup:
 
     def get_current_head_level(self):
         response = urllib.request.urlopen(
-            self.config["node_rpc_addr"] + "/chains/main/blocks/head/header"
+            self.config["node_rpc_endpoint"] + "/chains/main/blocks/head/header"
         )
         return str(json.load(response)["level"])
 
@@ -752,7 +752,7 @@ class Setup:
                         self.query_step(
                             get_ledger_derivation_query(
                                 ledgers_derivations,
-                                self.config["node_rpc_addr"],
+                                self.config["node_rpc_endpoint"],
                             )
                         )
                         if self.config["ledger_derivation"] == "Go back":

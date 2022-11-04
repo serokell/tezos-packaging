@@ -56,10 +56,12 @@ def build_ubuntu_package(
                 default_name = (
                     unit_name if systemd_unit.instances is None else f"{unit_name}@"
                 )
-                shutil.copy(
-                    f"{cwd}/defaults/{systemd_unit.config_file}",
-                    f"debian/{default_name}.default",
-                )
+                default_path = f"debian/{default_name}.default"
+                shutil.copy(f"{cwd}/defaults/{systemd_unit.config_file}", default_path)
+                if systemd_unit.config_file_append is not None:
+                    with open(default_path, "a") as def_file:
+                        def_file.write("\n".join(systemd_unit.config_file_append))
+
             for script, script_source in [
                 (systemd_unit.startup_script, systemd_unit.startup_script_source),
                 (systemd_unit.prestart_script, systemd_unit.prestart_script_source),

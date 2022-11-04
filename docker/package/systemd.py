@@ -53,6 +53,7 @@ class SystemdUnit:
     poststop_script_source: str = None
     suffix: str = None
     config_file: str = None
+    config_file_append: List[str] = None
     instances: List[str] = None
 
 

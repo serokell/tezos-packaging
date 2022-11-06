@@ -591,7 +591,7 @@ class TezosBakingServicesPackage(AbstractPackage):
                     network,
                 )
             )
-        custom_requires = []
+        custom_requires = ["tezos-node-custom@%i.service"]
         for network in target_networks:
             for proto in network_protos[network]:
                 custom_requires.append(f"tezos-baker-{proto.lower()}@custom@%i.service")

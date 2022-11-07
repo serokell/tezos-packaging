@@ -96,7 +96,12 @@ def gen_spec_systemd_part(package):
         install_default = f"mkdir -p %{{buildroot}}/%{{_sysconfdir}}/default\n"
     else:
         install_default = ""
+    # Note: this covers all environment files too because there are either:
+    # 1. the default files of a systemd unit in this package
+    # 2. the default files of a systemd unit in another package
+    # 3. files that we don't create during installation (e.g. for instantiated services)
     default_files = ""
+    environment_files = ""
     for systemd_unit in package.systemd_units:
         if systemd_unit.suffix is None:
             service_name = f"{package.name.lower()}"
@@ -519,7 +524,7 @@ class TezosBakingServicesPackage(AbstractPackage):
     buildfile = "setup.py"
 
     def __gen_baking_systemd_unit(
-        self, requires, description, environment_file, config_file, suffix
+        self, requires, description, environment_files, config_file, suffix
     ):
         return SystemdUnit(
             service_file=ServiceFile(
@@ -532,7 +537,7 @@ class TezosBakingServicesPackage(AbstractPackage):
                     exec_start="/usr/bin/tezos-baking-start",
                     user="tezos",
                     state_directory="tezos",
-                    environment_file=environment_file,
+                    environment_files=environment_files,
                     exec_start_pre=[
                         "+/usr/bin/setfacl -m u:tezos:rwx /run/systemd/ask-password",
                         "/usr/bin/tezos-baking-prestart",
@@ -578,26 +583,31 @@ class TezosBakingServicesPackage(AbstractPackage):
                 self.__gen_baking_systemd_unit(
                     requires,
                     f"Tezos baking instance for {network}",
-                    f"/etc/default/tezos-baking-{network}",
+                    [
+                        f"/etc/default/tezos-baking-{network}",
+                        f"/etc/default/tezos-node-{network}",
+                    ],
                     "tezos-baking.conf",
                     network,
                 )
             )
-        custom_requires = []
+        custom_requires = ["tezos-node-custom@%i.service"]
         for network in target_networks:
             for proto in network_protos[network]:
                 custom_requires.append(f"tezos-baker-{proto.lower()}@custom@%i.service")
         custom_unit = self.__gen_baking_systemd_unit(
             custom_requires,
             f"Tezos baking instance for custom network",
-            f"/etc/default/tezos-baking-custom@%i",
+            [
+                f"/etc/default/tezos-baking-custom@%i",
+                f"/etc/default/tezos-node-custom@%i",
+            ],
             "tezos-baking-custom.conf",
             "custom",
         )
         custom_unit.service_file.service.exec_stop_post.append(
             "/usr/bin/tezos-baking-custom-poststop %i"
         )
-        custom_unit.poststop_script = "tezos-baking-custom-poststop"
         custom_unit.instances = []
         self.systemd_units.append(custom_unit)
         self.postinst_steps = ""

@@ -18,20 +18,18 @@ class TezosNodeLimanet < Formula
 
       node="/usr/local/bin/octez-node"
       # default location of the config file
-      config_file="$DATA_DIR/config.json"
+      config_file="$TEZOS_CLIENT_DIR/config.json"
 
-      mkdir -p "$DATA_DIR"
+      mkdir -p "$TEZOS_CLIENT_DIR"
       if [[ ! -f "$config_file" ]]; then
           echo "Configuring the node..."
           "$node" config init \
-                  --data-dir "$DATA_DIR" \
                   --rpc-addr "$NODE_RPC_ADDR" \
                   --network=https://teztnets.xyz/limanet \
                   "$@"
       else
           echo "Updating the node configuration..."
           "$node" config update \
-                  --data-dir "$DATA_DIR" \
                   --rpc-addr "$NODE_RPC_ADDR" \
                   --network=https://teztnets.xyz/limanet \
                   "$@"
@@ -39,9 +37,9 @@ class TezosNodeLimanet < Formula
 
       # Launching the node
       if [[ -z "$CERT_PATH" || -z "$KEY_PATH" ]]; then
-          exec "$node" run --data-dir "$DATA_DIR" --config-file="$config_file"
+          exec "$node" run --config-file="$config_file"
       else
-          exec "$node" run --data-dir "$DATA_DIR" --config-file="$config_file" \
+          exec "$node" run --config-file="$config_file" \
               --rpc-tls="$CERT_PATH","$KEY_PATH"
       fi
     EOS
@@ -62,7 +60,7 @@ class TezosNodeLimanet < Formula
           <string>#{opt_bin}/tezos-node-limanet-start</string>
           <key>EnvironmentVariables</key>
             <dict>
-              <key>DATA_DIR</key>
+              <key>TEZOS_CLIENT_DIR</key>
               <string>#{var}/lib/tezos/node-limanet</string>
               <key>NODE_RPC_ADDR</key>
               <string>127.0.0.1:8732</string>

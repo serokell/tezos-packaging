@@ -36,7 +36,7 @@ class TezosSignerHttp < Formula
         check_high_watermark_args=()
       fi
 
-      "$signer" -d "$DATA_DIR" launch http signer --address "$ADDRESS" --port "$PORT" \
+      "$signer" -d "$TEZOS_CLIENT_DIR" launch http signer --address "$ADDRESS" --port "$PORT" \
         ${pid_file_args[@]+"${pid_file_args[@]}"} ${magic_bytes_args[@]+"${magic_bytes_args[@]}"} \
         ${check_high_watermark_args[@]+"${check_high_watermark_args[@]}"} "$@"
     EOS
@@ -60,7 +60,7 @@ class TezosSignerHttp < Formula
               <string>127.0.0.1</string>
               <key>PORT</key>
               <string>8080</string>
-              <key>DATA_DIR</key>
+              <key>TEZOS_CLIENT_DIR</key>
               <string>#{var}/lib/tezos/signer-http</string>
               <key>PIDFILE</key>
               <string></string>

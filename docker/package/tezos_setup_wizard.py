@@ -362,9 +362,9 @@ class Setup(Setup):
         print("Waiting for the node service to start...")
 
         while True:
-            rpc_address = self.config["node_rpc_addr"]
+            rpc_endpoint = self.config["node_rpc_endpoint"]
             try:
-                urllib.request.urlopen(rpc_address + "/version")
+                urllib.request.urlopen(rpc_endpoint + "/version")
                 break
             except urllib.error.URLError:
                 proc_call("sleep 1")
@@ -388,7 +388,7 @@ class Setup(Setup):
 
         proc_call(
             f"sudo -u tezos {suppress_warning_text} octez-client "
-            f"--endpoint {rpc_address} bootstrapped"
+            f"--endpoint {rpc_endpoint} bootstrapped"
         )
 
         print()
@@ -440,9 +440,9 @@ class Setup(Setup):
     def set_liquidity_toggle_vote(self):
         self.query_step(liquidity_toggle_vote_query)
 
-        config_filepath = self.get_baking_config_filepath()
-        replace_in_service_config(
-            config_filepath,
+        net = self.config["network"]
+        replace_systemd_service_env(
+            f"tezos-baking-{net}",
             "LIQUIDITY_BAKING_TOGGLE_VOTE",
             f"\"{self.config['liquidity_toggle_vote']}\"",
         )

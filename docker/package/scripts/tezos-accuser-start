@@ -6,24 +6,20 @@
 
 set -euo pipefail
 
+# Note: the 'TEZOS_CLIENT_DIR' env var is expected and used by the accuser
+
 # $PROTOCOL should be defined in the system unit environment
 accuser="/usr/bin/octez-accuser-$PROTOCOL"
 
-accuser_dir="$DATA_DIR"
-
-accuser_config="$accuser_dir/config"
-mkdir -p "$accuser_dir"
+accuser_config="$TEZOS_CLIENT_DIR/config"
+mkdir -p "$TEZOS_CLIENT_DIR"
 
 if [ ! -f "$accuser_config" ]; then
-    "$accuser" --base-dir "$accuser_dir" \
-               --endpoint "$NODE_RPC_ENDPOINT" \
+    "$accuser" --endpoint "$NODE_RPC_SCHEME://$NODE_RPC_ADDR" \
                config init --output "$accuser_config" >/dev/null 2>&1
 else
-    "$accuser" --base-dir "$accuser_dir" \
-               --endpoint "$NODE_RPC_ENDPOINT" \
+    "$accuser" --endpoint "$NODE_RPC_SCHEME://$NODE_RPC_ADDR" \
                config update >/dev/null 2>&1
 fi
 
-exec "$accuser" --base-dir "$accuser_dir" \
-     --endpoint "$NODE_RPC_ENDPOINT" \
-     run "$@"
+exec "$accuser" --endpoint "$NODE_RPC_SCHEME://$NODE_RPC_ADDR" run "$@"

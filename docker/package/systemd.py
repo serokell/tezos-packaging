@@ -13,7 +13,7 @@ class Service:
     exec_start_post: List[str] = None
     exec_stop_post: List[str] = None
     timeout_start_sec: str = None
-    environment_file: str = None
+    environment_files: List[str] = None
     environment: List[str] = None
     remain_after_exit: bool = False
     type_: str = None
@@ -53,11 +53,12 @@ class SystemdUnit:
     poststop_script_source: str = None
     suffix: str = None
     config_file: str = None
+    config_file_append: List[str] = None
     instances: List[str] = None
 
 
 def print_service_file(service_file: ServiceFile, out):
-    after = requires = part_of = environment = environment_file = wanted_by = ""
+    after = requires = part_of = environment = environment_files = wanted_by = ""
     exec_start_pres = exec_start_posts = exec_stop_posts = ""
     if service_file.unit.after is not None:
         after = "".join(f"After={x}\n" for x in service_file.unit.after)
@@ -69,8 +70,10 @@ def print_service_file(service_file: ServiceFile, out):
         environment = "".join(
             f'Environment="{x}"\n' for x in service_file.service.environment
         )
-    if service_file.service.environment_file is not None:
-        environment_file = f"EnvironmentFile={service_file.service.environment_file}"
+    if service_file.service.environment_files is not None:
+        environment_files = "\n".join(
+            f"EnvironmentFile={x}" for x in service_file.service.environment_files
+        )
     if service_file.install.wanted_by is not None:
         wanted_by = "".join(f"WantedBy={x}\n" for x in service_file.install.wanted_by)
     if service_file.service.exec_start_pre is not None:
@@ -91,7 +94,7 @@ def print_service_file(service_file: ServiceFile, out):
 [Unit]
 {after}{requires}{part_of}Description={service_file.unit.description}
 [Service]
-{environment_file}
+{environment_files}
 {environment}
 {exec_start_pres}
 {f"TimeoutStartSec={service_file.service.timeout_start_sec}" if service_file.service.timeout_start_sec is not None else ""}

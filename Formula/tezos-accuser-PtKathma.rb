@@ -64,24 +64,18 @@ class TezosAccuserPtkathma < Formula
 
       accuser="#{bin}/octez-accuser-PtKathma"
 
-      accuser_dir="$DATA_DIR"
-
-      accuser_config="$accuser_dir/config"
-      mkdir -p "$accuser_dir"
+      accuser_config="$TEZOS_CLIENT_DIR/config"
+      mkdir -p "$TEZOS_CLIENT_DIR"
 
       if [ ! -f "$accuser_config" ]; then
-          "$accuser" --base-dir "$accuser_dir" \
-                    --endpoint "$NODE_RPC_ENDPOINT" \
+          "$accuser" --endpoint "$NODE_RPC_SCHEME://$NODE_RPC_ADDR" \
                     config init --output "$accuser_config" >/dev/null 2>&1
       else
-          "$accuser" --base-dir "$accuser_dir" \
-                    --endpoint "$NODE_RPC_ENDPOINT" \
+          "$accuser" --endpoint "$NODE_RPC_SCHEME://$NODE_RPC_ADDR" \
                     config update >/dev/null 2>&1
       fi
 
-      exec "$accuser" --base-dir "$accuser_dir" \
-          --endpoint "$NODE_RPC_ENDPOINT" \
-          run
+      exec "$accuser" --endpoint "$NODE_RPC_SCHEME://$NODE_RPC_ADDR" run
     EOS
     File.write("tezos-accuser-PtKathma-start", startup_contents)
     bin.install "tezos-accuser-PtKathma-start"
@@ -105,10 +99,12 @@ class TezosAccuserPtkathma < Formula
           <string>#{opt_bin}/tezos-accuser-PtKathma-start</string>
           <key>EnvironmentVariables</key>
             <dict>
-              <key>DATA_DIR</key>
+              <key>TEZOS_CLIENT_DIR</key>
               <string>#{var}/lib/tezos/client</string>
-              <key>NODE_RPC_ENDPOINT</key>
-              <string>http://localhost:8732</string>
+              <key>NODE_RPC_SCHEME</key>
+              <string>http</string>
+              <key>NODE_RPC_ADDR</key>
+              <string>localhost:8732</string>
           </dict>
           <key>RunAtLoad</key><true/>
           <key>StandardOutPath</key>

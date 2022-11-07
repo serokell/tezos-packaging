@@ -3,14 +3,15 @@
 # SPDX-FileCopyrightText: 2022 Oxhead Alpha
 # SPDX-License-Identifier: LicenseRef-MIT-OA
 
+# Note: the 'TEZOS_CLIENT_DIR' env var is expected and used by the client
+
 set -euo pipefail
 
 tezos_client="/usr/bin/octez-client"
 
-config="$DATA_DIR/config"
+config="$TEZOS_CLIENT_DIR/config"
 
-mkdir -p "$DATA_DIR"
+mkdir -p "$TEZOS_CLIENT_DIR"
 
-"$tezos_client" --base-dir "$DATA_DIR" \
-                --endpoint "$NODE_RPC_ENDPOINT" \
+"$tezos_client" --endpoint "$NODE_RPC_SCHEME://$NODE_RPC_ADDR" \
                 config "$([[ -f $config ]] && echo "update" || echo "init")"

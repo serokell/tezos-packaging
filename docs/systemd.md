@@ -21,21 +21,17 @@ To stop the service run:
 systemctl stop <package-name>.service
 ```
 
-Each service has its configuration file located in `/etc/default`. Default
-configurations can be found [here](../docker/package/defaults/).
+Each service has its configuration file located in `/etc/default`.
+These can be edited to modify the options and behavior of the services, see
+[the dedicated documentation](./service-options.md) for more information.
 
 Files created by the services will be located in `/var/lib/tezos/` by default.
-`tezos-{accuser, baker}-<protocol>` services have a configurable
-data directory.
-
-`tezos-accuser` has a configurable node address, so that it can be used with both
-remote and local node.
 
 <a name="generic-linux"></a>
 ## Systemd units on other Linux systems
 
-If you're not using Ubuntu or Fedora you can still construct systemd units for binaries
-from scratch.
+If you're not using Ubuntu or Fedora you can still construct systemd units for
+binaries from scratch.
 
 For this you'll need a `.service` file to define each systemd service.
 The easiest way to get one is to generate one with `docker` by running [`gen_systemd_service_file.py`](../gen_systemd_service_file.py).
@@ -52,9 +48,13 @@ Then you can use the script, specifying the binary name as an argument, e.g.:
 ```
 After that you'll have `.service` files in the current directory.
 
-Apart from these `.service` files you'll need the services' startup scripts and default
-configuration files, they can be found in the [`scripts`](../docker/package/scripts) and
-[`defaults`](../docker/package/defaults) folders respectively.
+Apart from these `.service` files you'll need the services' startup scripts and
+default configuration files, they can be found in the
+[`scripts`](../docker/package/scripts) and [`defaults`](../docker/package/defaults)
+folders respectively.
+Note: some of the default values are not in those files, as they are generated
+dinamically, you can find the remaining options needed in
+[the dedicated document](./service-options.md).
 
 ## Systemd units on WSL
 
@@ -83,19 +83,16 @@ systemctl start tezos-node-<network>
 ```
 
 Also, there are `tezos-node-<network>` binary aliases that are equivalent to
-```
-TEZOS_NODE_DIR="<DATA_DIR from tezos-node-<network>.service>" tezos-node
-```
+running `tezos-node` with [the service options](./service-options.md) given.
 
 In addition to node services where the config is predefined to a specific network
-(e.g. `tezos-node-mainnet` or `tezos-node-kathmandunet`), it's possible to run `tezos-node-custom`
-service and provide a path to the custom node config file via the
-`CUSTOM_NODE_CONFIG` variable in the `tezos-node-custom.service` file.
+(e.g. `tezos-node-mainnet` or `tezos-node-kathmandunet`), it's possible to run
+`tezos-node-custom` service.
 
 Another case for running multiple similar systemd services is when one wants to have
 multiple daemons that target different protocols.
 Since daemons for different protocols are provided in the different packages, they will
-have different service files. The only thing that needs to be changed is config file.
+have different service files. The only thing that needs to be changed is [the config file](./service-options.md).
 One should provide desired node address, data directory for daemon files and node directory
 (however, this is the case only for baker daemon).
 
@@ -104,4 +101,4 @@ One should provide desired node address, data directory for daemon files and nod
 * Over UNIX socker (`tezos-signer-unix.service`).
 * Over HTTP (`tezos-signer-http.service`).
 * Over HTTPS (`tezos-signer-https.service`)
-Each signer service has dedicated config file in e.g. `/etc/default/tezos-signer-{mode}`.
+Each signer service has [dedicated config files](./service-options.md) as well.

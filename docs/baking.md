@@ -126,9 +126,7 @@ the smallest and the fastest mode that is sufficient for baking (you can read mo
 All commands within the service are run under the `tezos` user.
 
 The `tezos-node` package provides `tezos-node-<network>` aliases that are equivalent to
-`tezos-node --data-dir <DATA_DIR from the tezos-node-<network>.service>`.
-These aliases can be used instead of providing `--data-dir` option to the `tezos-node`
-invocations manually.
+running `tezos-node` with [the service options](./service-options.md).
 
 In order to import the snapshot, run the following command:
 ```
@@ -159,14 +157,8 @@ key that will be used for baking and endorsing.
 
 Since `PtJakart`, the `--liquidity-baking-toggle-vote` command line option for
 `tezos-baker` is now mandatory. In our systemd services, it is set to `pass` by
-default. You can change it as desired in the service config file at
-`/etc/defaults/tezos-baking-<network>`.
-
-If the baking service is running already, changing this options requires a restart.
-You can do so manually by running:
-```bash
-sudo systemctl restart tezos-baking-<network>.service
-```
+default.
+You can change it as desired in [the service config file](./service-options.md).
 
 You can also use the [Setup Wizard](#using-the-wizard) which will handle everything for you.
 
@@ -248,27 +240,9 @@ sudo systemctl stop tezos-baking-<network>.service
 
 ## Advanced baking instance setup
 
-### Using different data directories and node RPC address
-
-In case you want to use a different `tezos-client` data directory or RPC address,
-you should edit the `/etc/default/tezos-baking-<network>` file, e.g.:
-```
-sudo vim /etc/default/tezos-baking-<network>
-```
-
-In case you want to use a different `tezos-node` data directory, you
-should instead edit the service configuration, using:
-```
-sudo systemctl edit --full tezos-node-<network>.service
-```
-
-### Using different account alias for baking
-
-In case you want to use a different alias for the baking account:
-1. replace `baker` with he desired alias in the sections about [importing](#import)
-    and [registering](#registration) the baker key.
-2. update the `BAKER_ADDRESS_ALIAS` by editing the
-    `/etc/default/tezos-baking-<network>` file.
+These services have several options that can be modified to change their behavior.
+See [the dedicated documentation](./service-options.md) for more information on
+how to do that.
 
 ### Using a custom chain
 
@@ -279,8 +253,8 @@ or official testnets, you can do so:
   ```bash
   sudo cp /etc/default/tezos-baking-custom@ /etc/default/tezos-baking-custom@<chain-name>
   ```
-2. In `/etc/default/tezos-baking-custom@<chain-name>`, provide the path to your custom node
-  config in `CUSTOM_NODE_CONFIG`.
+2. [Edit the `tezos-baking-custom@<chain-name>` configuration](./service-options.md)
+ and set the `CUSTOM_NODE_CONFIG` variable to the path to your config file.
 3. Start custom baking service:
   ```bash
   sudo systemctl start tezos-baking-custom@<chain-name>
@@ -292,7 +266,7 @@ or official testnets, you can do so:
 ```
 
 If at any point after that you want to reset the custom baking service, you can set
-`RESET_ON_STOP=true` in the `/etc/default/tezos-baking-custom@<chain-name>` config file and run:
+`RESET_ON_STOP` to `true` [in the `tezos-baking-custom@<chain-name>` configuration](./service-options.md) and run:
 
 ```bash
 sudo systemctl stop tezos-baking-custom@voting
@@ -339,24 +313,12 @@ multipass shell tezos
   <em>Optional</em> Allow RPC access from virtual machine's host...
  </summary>
 
-Update service configuration:
+[Update the `tezos-node-<network>` service configuration](./service-options.md)
+and set the `NODE_RPC_ADDR` to `0.0.0.0:8732`.
 
+Then restart the service:
 ```
-sudo systemctl edit tezos-node-$tznet
-```
-
-An editor will open with service override configuration file.
-Add the following:
-
-```
-[Service]
-Environment="NODE_RPC_ADDR=0.0.0.0:8732"
-```
-
-Save and close the editor, restart the service:
-
-```
-sudo systemctl restart tezos-node-$tznet
+sudo systemctl restart tezos-node-<network>
 ```
 
 </details>

@@ -17,12 +17,12 @@ from .systemd import Service, ServiceFile, SystemdUnit, Unit, Install
 networks = {
     "mainnet": "mainnet",
     "ghostnet": "ghostnet",
-    "limanet": "https://teztnets.xyz/limanet",
+    "limanet": "limanet",
     "kathmandunet": "kathmandunet",
 }
 networks_protos = {
-    "mainnet": ["PtKathma"],
-    "ghostnet": ["PtKathma"],
+    "mainnet": ["PtKathma", "PtLimaPt"],
+    "ghostnet": ["PtKathma", "PtLimaPt"],
     "limanet": ["PtLimaPt"],
     "kathmandunet": ["PtKathma"],
 }

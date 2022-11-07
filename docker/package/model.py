@@ -519,7 +519,7 @@ class TezosBakingServicesPackage(AbstractPackage):
     # native releases, so we append an extra letter to the version of
     # the package.
     # This should be reset to "" whenever the native version is bumped.
-    letter_version = "a"
+    letter_version = ""
 
     buildfile = "setup.py"
 
@@ -610,7 +610,19 @@ class TezosBakingServicesPackage(AbstractPackage):
         )
         custom_unit.instances = []
         self.systemd_units.append(custom_unit)
-        self.postinst_steps = ""
+        # TODO: remove this on the next stable octez release
+        self.postinst_steps = """echo ""
+echo "********************************************************************************"
+echo "**  Note: this version adds context pruning, which will prevent the disk"
+echo "**  space used by the node from growing indefinitely. If you have an"
+echo "**  existing node or baking setup running, it is recommended to import"
+echo "**  a fresh snapshot. You can re-run tezos-setup-wizard to do so."
+echo ""
+echo "**  You can read more about it here:"
+echo "**  http://tezos.gitlab.io/releases/version-15.html#context-pruning-requirements"
+echo "********************************************************************************"
+echo ""
+"""
         self.postrm_steps = ""
 
     def fetch_sources(self, out_dir, binaries_dir=None):

@@ -48,6 +48,7 @@ jobs:
       - name: Build the bottle
         if: steps.check-built.outcome == 'failure'
         run: ./scripts/build-one-bottle.sh "${{ matrix.formula }}"
+        timeout-minutes: 120
 
       - name: Upload the bottle to Github Actions
         if: steps.check-built.outcome == 'failure'

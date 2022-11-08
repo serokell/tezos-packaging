@@ -26,6 +26,7 @@ class TezosAccuserPtlimapt < Formula
 
   bottle do
     root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosAccuserPtlimapt.version}/"
+    sha256 cellar: :any, monterey: "2cf992e014081ce7181aeae5bf7d5e902c79946f58e88b12b62af390bf7b2ee1"
     sha256 cellar: :any, big_sur: "f2cf42699f80631d593edbc01b0ed08919e54d5fdcd1364edaf32115185682bb"
     sha256 cellar: :any, arm64_big_sur: "54dc3facfe127b4960f7bedab3b2bbe906435fdeb2ff70a0c5b5306515cec6a1"
   end

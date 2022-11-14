@@ -92,6 +92,7 @@
 
       devShells = {
         buildkite = callPackage ./.buildkite/shell.nix {};
+        docker-tezos-packages = callPackage ./docker/shell.nix {};
         autorelease = callPackage ./scripts/shell.nix {};
         dev = callPackage ./shell.nix { pkgs = unstable; };
       };

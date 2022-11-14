@@ -51,12 +51,12 @@ to copying the binaries instead of building again from scratch.
 
 Using Ubuntu/Debian and assuming all Tezos binaries are located in the `binaries` directory:
 ```sh
-cd .. && ./docker/docker-tezos-packages.sh --os ubuntu --type binary --binaries-dir binaries
+cd .. && ./docker/docker-tezos-packages.py --os ubuntu --type binary --binaries-dir binaries
 ```
 
 Using Fedora and assuming all Tezos binaries are located in the `binaries` directory:
 ```sh
-cd .. && ./docker/docker-tezos-packages.sh --os fedora --type binary --binaries-dir binaries
+cd .. && ./docker/docker-tezos-packages.py --os fedora --type binary --binaries-dir binaries
 ```
 
 The resulting packages will be located in `../out` directory.
@@ -65,12 +65,17 @@ The resulting packages will be located in `../out` directory.
 
 We provide a way to build both binary and source native Ubuntu packages.
 
-[`docker-tezos-packages.sh`](docker-tezos-packages.sh) script with `ubuntu` argument
+[`docker-tezos-packages.py`](docker-tezos-packages.py) script with `ubuntu` argument
 will build source or binary packages depending on the passed argument (`source` and `binary` respectively).
 This script builds packages inside docker image defined in [Dockerfile-ubuntu](package/Dockerfile-ubuntu).
-This script uses [python script](package/package_generator.py) which generates meta information for
+This script uses [another script](package/package_generator.py), which generates meta information for
 tezos packages based on information defined in [meta.json](../meta.json) and current tezos
 version defined in [meta.json](../meta.json) and build native ubuntu packages.
+
+To see all available options, run:
+```
+./docker-tezos-packages.py --help
+```
 
 ### `.deb` packages
 
@@ -78,15 +83,22 @@ In order to build binary `.deb` packages specify `OCTEZ_VERSION` and
 run the following command:
 ```
 export OCTEZ_VERSION="v14.1"
-cd .. && ./docker/docker-tezos-packages.sh --os ubuntu --type binary
+cd .. && ./docker/docker-tezos-packages.py --os ubuntu --type binary
 ```
 
-It is also possible to build single package. In order to do that run the following:
+It is also possible to specify packages to build with `-p` or `--packages` option. In order to do that run the following:
 ```
-# cd .. && ./docker/docker-tezos-packages.sh --os ubuntu --type binary --package <tezos-binary-name>
+# cd .. && ./docker/docker-tezos-packages.py -os ubuntu --type binary --packages <tezos-binary-1> <tezos-binary-2>
 # Example for baker
 export OCTEZ_VERSION="v14.1"
-cd .. && ./docker/docker-tezos-packages.sh --os ubuntu --type binary --package tezos-baker-PtKathma
+cd .. && ./docker/docker-tezos-packages.py --os ubuntu --type binary -p tezos-client tezos-node
+```
+
+In order to choose specific ubuntu distribution to build for (see [support policy](../docs/support-policy.md)),
+use `-d` or `--distributions` option:
+```
+export OCTEZ_VERSION="v14.1"
+cd .. && ./docker/docker-tezos-packages.py --os ubuntu --type binary -d focal jammy -p tezos-client tezos-node
 ```
 
 The build can take some time due to the fact that we build tezos and its dependencies
@@ -104,9 +116,9 @@ sudo apt install <path to deb file>
 In order to build source packages run the following commands:
 ```
 export OCTEZ_VERSION="v14.1"
-cd .. && ./docker/docker-tezos-packages.sh --os ubuntu --type source
+cd .. && ./docker/docker-tezos-packages.py --os ubuntu --type source
 # you can also build single source package
-cd .. && ./docker/docker-tezos-packages.sh --os ubuntu --type source --package tezos-baker-PtKathma
+cd .. && ./docker/docker-tezos-packages.py --os ubuntu --type source --packages tezos-client
 ```
 
 Once the packages build is complete `../out` directory will contain files required
@@ -168,7 +180,7 @@ Otherwise, Launchpad will prohibit the build of the new release.
 
 In order to build new proper source package using existing source archive run the following:
 ```
-cd .. && ./docker/docker-tezos-packages.sh --os ubuntu --type source --package tezos-client --sources <path to .orig.tar.gz>
+cd .. && ./docker/docker-tezos-packages.py --os ubuntu --type source -p tezos-client --sources <path to .orig.tar.gz>
 ```
 
 After that, the resulting source package can be signed and uploaded to the Launchpad using the commands
@@ -178,8 +190,13 @@ described previously.
 
 We provide a way to build both binary(`.rpm`) and source(`.src.rpm`) native Fedora packages.
 
-[`docker-tezos-packages.sh`](docker-tezos-packages.sh) script with `fedora` argument
+[`docker-tezos-packages.py`](docker-tezos-packages.py) script with `fedora` argument
 will build source or binary packages depending on the passed argument (`source` and `binary` respectively).
+
+To see all available options, run:
+```
+./docker-tezos-packages.py --help
+```
 
 ### `.rpm` packages
 
@@ -187,15 +204,22 @@ In order to build binary `.rpm` packages specify `OCTEZ_VERSION` and
 run the following command:
 ```
 export OCTEZ_VERSION="v14.1"
-cd .. && ./docker/docker-tezos-packages.sh --os fedora --type binary
+cd .. && ./docker/docker-tezos-packages.py --os fedora --type binary
 ```
 
-It is also possible to build single package. In order to do that run the following:
+It is also possible to specify packages to build with `-p` or `--packages` option. In order to do that run the following:
 ```
-# cd .. && ./docker/docker-tezos-packages.sh --os fedora --type binary --package <tezos-binary-name>
+# cd .. && ./docker/docker-tezos-packages.py --os fedora --type binary --packages <tezos-binary-1> <tezos-binary-2>
 # Example for baker
 export OCTEZ_VERSION="v14.1"
-cd .. && ./docker/docker-tezos-packages.sh --os fedora --type binary --package tezos-baker-PtKathma
+cd .. && ./docker/docker-tezos-packages.py --os fedora --type binary -p tezos-client tezos-node
+```
+
+In order to build packages for specific Fedora distribution (see [support policy](../docs/support-policy.md)),
+use `-d` or `--distributions` option:
+```
+export OCTEZ_VERSION="v14.1"
+cd .. && ./docker/docker-tezos-packages.py --os fedora -d 36 --type binary -p tezos-baking
 ```
 
 The build can take some time due to the fact that we build tezos and its dependencies
@@ -203,9 +227,12 @@ from scratch for each package individually.
 
 Once the build is completed the packages will be located in `../out` directory.
 
-In order to install `.rpm` package run the following command:
+In order to install `.rpm` package run either of these commands:
 ```
 sudo yum localinstall <path to rpm file>
+```
+```
+sudo dnf install <path to rpm file>
 ```
 
 ### `.src.rpm` packages and publishing them on Copr
@@ -213,9 +240,9 @@ sudo yum localinstall <path to rpm file>
 In order to build source packages run the following commands:
 ```
 export OCTEZ_VERSION="v14.1"
-cd .. && ./docker/docker-tezos-packages.sh --os fedora --type source
+cd .. && ./docker/docker-tezos-packages.py --os fedora --type source
 # you can also build single source package
-cd .. && ./docker/docker-tezos-packages.sh --os fedora --type source --package tezos-baker-PtKathma
+cd .. && ./docker/docker-tezos-packages.py --os fedora --type source -p tezos-client
 ```
 
 Sign source packages:

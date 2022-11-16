@@ -11,16 +11,8 @@ from package.packages import packages
 from package.package_generator import parser
 from package.package_generator import output_dir as container_output_dir
 
-ubuntu_versions = [
-    "bionic",  # 18.04
-    "focal",  # 20.04
-    "jammy",  # 22.04
-]
-
-fedora_versions = [
-    "36",
-    "37",
-]
+sys.path.append("docker")
+from supported_versions import ubuntu_versions, fedora_versions
 
 
 def check_call(cmd):

@@ -32,7 +32,49 @@ steps:
    commands:
    - eval "$SET_VERSION"
    - buildkite-agent artifact download "out/*" . --step build-source-packages
-   - nix develop .#autorelease -c ./scripts/publish-native-packages.sh out
+   - nix develop .#autorelease -c ./scripts/publish-native-packages.py out
+
+ - label: build-via-docker
+   if: build.tag =~ /^v.*-1/
+   key: build-via-docker
+   commands:
+   - eval "$SET_VERSION"
+   - cd docker
+   - ./docker-static-build.sh
+   artifact_paths:
+     - ./docker/octez-*
+   agents:
+     queue: "docker"
+   only_changes:
+   - docker/build/.*
+   - docker/docker-static-build.sh
+   - meta.json
+   - protocols.json
+
+ - label: Build source packages from static binaries
+   key: build-source-packages-from-static-binaries
+   if: build.tag =~ /^v.*-1/
+   agents:
+     queue: "docker"
+   depends_on:
+   - "build-via-docker"
+   commands:
+   - eval "$SET_VERSION"
+   - mkdir binaries
+   - buildkite-agent artifact download "docker/*" binaries --step build-via-docker
+   - nix develop .#docker-tezos-packages -c ./docker/docker-tezos-packages.py --os fedora --type source --output-dir epel --binaries-dir ./binaries/docker
+   artifact_paths:
+     - ./epel/*
+
+ - label: Publish epel packages
+   if: build.tag =~ /^v.*-1/
+   depends_on:
+   - "build-source-packages-from-static-binaries"
+   commands:
+   - eval "$SET_VERSION"
+   - mkdir -p srcs
+   - buildkite-agent artifact download "epel/*" srcs --step build-source-packages-from-static-binaries
+   - nix develop .#autorelease -c ./scripts/publish-native-packages.py ./srcs/epel epel-7-x86_64
 
  - label: Build Big Sur x86_64 bottles
    key: build-bottles-big-sur-x86_64

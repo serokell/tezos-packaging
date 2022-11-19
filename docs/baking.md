@@ -40,7 +40,7 @@ The most convenient way to orchestrate all these binaries is to use the `tezos-b
 package, which provides predefined services for running baking instances on different
 networks.
 
-This package also provides a `tezos-setup-wizard` CLI utility, designed to
+This package also provides a `tezos-setup` CLI utility, designed to
 query all necessary configuration options and use the answers to automatically set up
 a baking instance.
 
@@ -94,7 +94,7 @@ protocol is activated, the `tezos-baking` package is updated again to stop runni
 If at this point you want to set up the baking instance, or just a node, using the wizard, run:
 
 ```
-tezos-setup-wizard
+tezos-setup
 ```
 
 This wizard closely follows this guide, so for most setups it won't be necessary to follow
@@ -306,7 +306,7 @@ multipass shell tezos
 
 1) Install `tezos-baking` package following [these instructions](#add-repository).
 
-2) Run `tezos-setup-wizard` and follow the instructions there.
+2) Run `tezos-setup` and follow the instructions there.
 
 <details>
  <summary>

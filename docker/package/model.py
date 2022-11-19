@@ -674,7 +674,7 @@ echo "**************************************************************************
 echo "**  Note: this version adds context pruning, which will prevent the disk"
 echo "**  space used by the node from growing indefinitely. If you have an"
 echo "**  existing node or baking setup running, it is recommended to import"
-echo "**  a fresh snapshot. You can re-run tezos-setup-wizard to do so."
+echo "**  a fresh snapshot. You can re-run tezos-setup to do so."
 echo ""
 echo "**  You can read more about it here:"
 echo "**  http://tezos.gitlab.io/releases/version-15.html#context-pruning-requirements"
@@ -745,8 +745,8 @@ Maintainer: {self.meta.maintainer}
 %py3_install
 {systemd_install}
 %files
-%{{_bindir}}/tezos-setup-wizard
-%{{_bindir}}/tezos-voting-wizard
+%{{_bindir}}/tezos-setup
+%{{_bindir}}/tezos-vote
 %{{python3_sitelib}}/tezos_baking-*.egg-info/
 %{{python3_sitelib}}/tezos_baking/
 %license LICENSE
@@ -766,8 +766,8 @@ setup(
     version='{self.meta.version}',
     entry_points=dict(
         console_scripts=[
-            'tezos-setup-wizard=tezos_baking.tezos_setup_wizard:main',
-            'tezos-voting-wizard=tezos_baking.tezos_voting_wizard:main',
+            'tezos-setup=tezos_baking.tezos_setup_wizard:main',
+            'tezos-vote=tezos_baking.tezos_voting_wizard:main',
         ]
     )
 )

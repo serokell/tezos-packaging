@@ -715,13 +715,13 @@ class Setup:
                         f"Waiting for funds to arrive... (Ctrl + C to choose another option)."
                     )
                     try:
-                        # dry-run delegate registration until it succeeds
                         while True:
                             result = get_proc_output(
                                 f"sudo -u tezos {suppress_warning_text} octez-client {tezos_client_options} "
-                                f"register key {baker_alias} as delegate --dry-run"
+                                f"register key {baker_alias} as delegate"
                             )
                             if result.returncode == 0:
+                                print(result.stdout.decode("utf8"))
                                 break
                             else:
                                 proc_call("sleep 1")

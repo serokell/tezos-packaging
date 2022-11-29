@@ -236,6 +236,8 @@ class Setup(Setup):
     # that is suited for the chosen history mode and network
     def get_snapshot_link(self):
         self.config["snapshot_url"] = None
+        self.config["snapshot_block_hash"] = None
+
         json_url = "https://xtz-shots.io/tezos-snapshots.json"
         try:
             with urllib.request.urlopen(json_url) as url:
@@ -245,7 +247,7 @@ class Setup(Setup):
             print(f"Couldn't collect snapshot metadata from {json_url}")
             return
 
-        self.config["snapshot_url"] = next(
+        snapshot_metadata = next(
             filter(
                 lambda artifact: artifact["artifact_type"] == "tezos-snapshot"
                 and artifact["chain_name"] == self.config["network"]
@@ -258,8 +260,11 @@ class Setup(Setup):
                 ),
                 iter(snapshot_array),
             ),
-            {"url": None},
-        )["url"]
+            {"url": None, "block_hash": None},
+        )
+
+        self.config["snapshot_url"] = snapshot_metadata["url"]
+        self.config["snapshot_block_hash"] = snapshot_metadata["block_hash"]
 
     # Importing the snapshot for Node bootstrapping
     def import_snapshot(self):
@@ -292,6 +297,7 @@ class Setup(Setup):
             self.query_step(get_snapshot_mode_query(snapshot_import_modes))
 
             snapshot_file = TMP_SNAPSHOT_LOCATION
+            snapshot_block_hash = None
 
             if self.config["snapshot"] == "skip":
                 return
@@ -313,6 +319,7 @@ class Setup(Setup):
                     continue
             else:
                 url = self.config["snapshot_url"]
+                snapshot_block_hash = self.config["snapshot_block_hash"]
                 try:
                     snapshot_file = fetch_snapshot(url)
                 except (ValueError, urllib.error.URLError):
@@ -330,12 +337,17 @@ class Setup(Setup):
                 if self.config["history_mode"] == "archive":
                     import_flag = "--reconstruct "
 
+            block_hash_option = ""
+            if snapshot_block_hash is not None:
+                block_hash_option = " --block " + snapshot_block_hash
+
             proc_call(
                 "sudo -u tezos octez-node-"
                 + self.config["network"]
                 + " snapshot import "
                 + import_flag
                 + snapshot_file
+                + block_hash_option
             )
 
             print("Snapshot imported.")

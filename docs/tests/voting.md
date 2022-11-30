@@ -74,7 +74,7 @@ The script will stop at the beginning of each voting period that requires voting
 Launch the wizard by running:
 
 ```bash
-tezos-voting-wizard --network voting
+tezos-vote --network voting
 ```
 
 Under normal conditions, you won't have to adjust any information about your baking service.

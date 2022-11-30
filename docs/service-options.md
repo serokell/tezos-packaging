@@ -27,12 +27,12 @@ sudo systemctl restart tezos-node-mainnet.service
 ```
 in order for the changes to take effect.
 
-In case you [set up baking using the `tezos-setup-wizard`](./baking.md), running:
+In case you [set up baking using the `tezos-setup`](./baking.md), running:
 ```sh
 sudo systemctl restart tezos-baking-<network>.service
 ```
 will be sufficient, as all the services involved will be restarted.
-Running again `tezos-setup-wizard` and following the setup process is also an option.
+Running again `tezos-setup` and following the setup process is also an option.
 
 ## Utility node scripts
 

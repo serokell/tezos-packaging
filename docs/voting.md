@@ -19,7 +19,7 @@ it is Tezos Setup Wizard. See the [baking](./baking.md#prerequisites) article fo
 After all the services required for baking have been set up, run:
 
 ```bash
-tezos-voting-wizard
+tezos-vote
 ```
 
 The wizard displays the voting period and offers approppriate possible actions for that period.
@@ -28,26 +28,26 @@ The wizard displays the voting period and offers approppriate possible actions f
 
 ## Using custom networks
 
-`tezos-voting-wizard` supports voting on custom networks, in turn enabled by `tezos-packaging`'s
+`tezos-vote` supports voting on custom networks, in turn enabled by `tezos-packaging`'s
 support for custom chain systemd services. The process to set up a custom baking instance is
 documented [here](./baking.md#using-a-custom-chain).
 
 After the custom baking instance is fully set up, you can vote or propose amendments on it by running:
 
 ```bash
-tezos-voting-wizard --network <custom-network-name>
+tezos-vote --network <custom-network-name>
 ```
 
 E.g. if you have a custom baking instance `tezos-baking-custom@voting`, you can run:
 
 ```bash
-tezos-voting-wizard --network voting
+tezos-vote --network voting
 ```
 
 ## Using testnets
 
-`tezos-voting-wizard` also supports voting on currently running testnets, for example:
+`tezos-vote` also supports voting on currently running testnets, for example:
 
 ```bash
-tezos-voting-wizard --network kathmandunet
+tezos-vote --network kathmandunet
 ```

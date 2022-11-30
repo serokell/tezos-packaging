@@ -4,9 +4,11 @@
 import os, subprocess
 import re
 import shutil
+import stat
 from copy import deepcopy
 from abc import abstractmethod
-from typing import List, Dict
+from dataclasses import dataclass, field
+from typing import List, Dict, Callable, Optional
 
 from .meta import PackagesMeta
 from .systemd import (
@@ -18,9 +20,20 @@ from .systemd import (
 )
 
 
+@dataclass
+class AdditionalScript:
+    local_file_name: str
+    name: str
+    symlink_name: Optional[str] = field(default_factory=None)
+    # expected to be pure
+    transform: Callable[[str], str] = field(default_factory=lambda x: x)
+
+
 class AbstractPackage:
 
     buildfile = "Makefile"
+
+    additional_scripts: List[AdditionalScript] = []
 
     @abstractmethod
     def fetch_sources(self, out_dir, binaries_dir=None):
@@ -61,10 +74,23 @@ class AbstractPackage:
             ]:
                 if script is not None:
                     scripts.add(script)
+        scripts |= set(map(lambda x: x.name, self.additional_scripts))
         if len(scripts) > 0:
             install_contents = "\n".join([f"debian/{x} usr/bin" for x in scripts])
             with open(out, "w") as f:
                 f.write(install_contents)
+
+    def gen_links(self, out):
+        with open(out, "w") as f:
+            f.write(
+                "\n".join(
+                    [
+                        f"/usr/bin/{x.name} /usr/bin/{x.symlink_name}"
+                        for x in self.additional_scripts
+                        if x.symlink_name is not None
+                    ]
+                )
+            )
 
     @abstractmethod
     def gen_postinst(self, out):
@@ -210,6 +236,7 @@ class TezosBinaryPackage(AbstractPackage):
         target_proto: str = None,
         postinst_steps: str = "",
         postrm_steps: str = "",
+        additional_scripts: List[AdditionalScript] = [],
         additional_native_deps: List[str] = [],
         patches: List[str] = [],
     ):
@@ -220,6 +247,7 @@ class TezosBinaryPackage(AbstractPackage):
         self.postinst_steps = postinst_steps
         self.postrm_steps = postrm_steps
         self.additional_native_deps = additional_native_deps
+        self.additional_scripts = additional_scripts
         self.meta = meta
         self.dune_filepath = dune_filepath
         self.patches = patches
@@ -232,6 +260,7 @@ class TezosBinaryPackage(AbstractPackage):
         ]
 
     def fetch_sources(self, out_dir, binaries_dir=None):
+        cwd = os.path.dirname(__file__)
         os.makedirs(out_dir)
         os.chdir(out_dir)
 
@@ -242,9 +271,7 @@ class TezosBinaryPackage(AbstractPackage):
             os.chdir("../")
             return
 
-        shutil.copy(
-            f"{os.path.dirname(__file__)}/scripts/build-binary.sh", "build-binary.sh"
-        )
+        shutil.copy(f"{cwd}/scripts/build-binary.sh", "build-binary.sh")
         subprocess.run(
             [
                 "git",
@@ -305,6 +332,34 @@ Description: {self.desc}
         ) = gen_spec_systemd_part(self)
         version = self.meta.version.replace("-", "")
 
+        scripts_install = "\n".join(
+            [
+                f"install -m 0755 {x.name} %{{buildroot}}/%{{_bindir}}/\n"
+                for x in self.additional_scripts
+            ]
+        )
+
+        symlinks_install = "\n".join(
+            [
+                f"ln -s %{{_bindir}}/{x.name} %{{buildroot}}/%{{_bindir}}/{x.symlink_name}"
+                for x in self.additional_scripts
+                if x.symlink_name is not None
+            ]
+        )
+
+        additional_files_list = "\n".join(
+            map(
+                lambda x: "%{_bindir}/" + x,
+                sum(
+                    [
+                        [x.name] + ([] if x.symlink_name is None else [x.symlink_name])
+                        for x in self.additional_scripts
+                    ],
+                    [],
+                ),
+            )
+        )
+
         file_contents = f"""
 %define debug_package %{{nil}}
 Name:    {self.name}
@@ -328,10 +383,13 @@ Maintainer: {self.meta.maintainer}
 make {binary_name}
 mkdir -p %{{buildroot}}/%{{_bindir}}
 install -m 0755 {binary_name} %{{buildroot}}/%{{_bindir}}
-ln -sf %{{_bindir}}/{binary_name} %{{buildroot}}/%{{_bindir}}/{self.name}
+ln -s %{{_bindir}}/{binary_name} %{{buildroot}}/%{{_bindir}}/{self.name}
+{scripts_install}
+{symlinks_install}
 {systemd_install}
 %files
 %license LICENSE
+{additional_files_list}
 %{{_bindir}}/{binary_name}
 %{{_bindir}}/{self.name}
 {systemd_files}

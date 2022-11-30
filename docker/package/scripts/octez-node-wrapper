@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+# SPDX-FileCopyrightText: 2022 Oxhead Alpha
+# SPDX-License-Identifier: LicenseRef-MIT-OA
+
+# Set the environment, including TEZOS_NODE_DIR and calls the node command:
+export $(cat $(systemctl show -p EnvironmentFiles tezos-node-{network}.service | cut -d '=' -f2 | cut -d ' ' -f1 | tr '\n' ' ') | grep -v '^#' | xargs)
+octez-node "$@"

@@ -1,10 +1,11 @@
 # SPDX-FileCopyrightText: 2021 Oxhead Alpha
 # SPDX-License-Identifier: LicenseRef-MIT-OA
-import os, json
+import os, json, stat
 
 from .meta import packages_meta
 
 from .model import (
+    AdditionalScript,
     TezosBinaryPackage,
     TezosSaplingParamsPackage,
     TezosBakingServicesPackage,
@@ -216,7 +217,7 @@ def mk_node_unit(
 
 node_units = []
 node_postinst_steps = postinst_steps_common
-node_postrm_steps = ""
+node_additional_scripts = []
 for network, network_config in networks.items():
     config_file_append = [
         f'TEZOS_NODE_DIR="/var/lib/tezos/node-{network}"',
@@ -229,22 +230,18 @@ for network, network_config in networks.items():
             desc=f"Tezos node {network}",
         )
     )
-    node_postinst_steps += f"""mkdir -p /var/lib/tezos/node-{network}
+    node_additional_scripts.append(
+        AdditionalScript(
+            name=f"octez-node-{network}",
+            symlink_name=f"tezos-node-{network}",
+            local_file_name="octez-node-wrapper",
+            transform=lambda x, network=network: x.replace("{network}", network),
+        )
+    )
+    node_postinst_steps += f"""
+mkdir -p /var/lib/tezos/node-{network}
 [ ! -f /var/lib/tezos/node-{network}/config.json ] && octez-node config init --data-dir /var/lib/tezos/node-{network} --network {network_config}
 chown -R tezos:tezos /var/lib/tezos/node-{network}
-
-cat > /usr/bin/octez-node-{network} <<- 'EOM'
-#! /usr/bin/env bash
-
-# Set the environment, including TEZOS_NODE_DIR and calls the node command:
-export $(cat $(systemctl show -p EnvironmentFiles tezos-node-{network}.service | cut -d '=' -f2 | cut -d ' ' -f1 | tr '\n' ' ') | grep -v '^#' | xargs)
-octez-node "$@"
-EOM
-chmod +x /usr/bin/octez-node-{network}
-ln -sf /usr/bin/octez-node-{network} /usr/bin/tezos-node-{network}
-"""
-    node_postrm_steps += f"""
-rm -f /usr/bin/octez-node-{network} /usr/bin/tezos-node-{network}
 """
 
 # Add custom config service
@@ -274,6 +271,7 @@ custom_node_instantiated = mk_node_unit(
 custom_node_instantiated.poststop_script = "tezos-node-custom-poststop"
 node_units.append(custom_node_instantiated)
 
+
 packages.append(
     {
         "tezos-node": TezosBinaryPackage(
@@ -282,12 +280,12 @@ packages.append(
             meta=packages_meta,
             systemd_units=node_units,
             postinst_steps=node_postinst_steps,
-            postrm_steps=node_postrm_steps,
             additional_native_deps=[
                 "tezos-sapling-params",
                 "curl",
                 {"ubuntu": "netbase"},
             ],
+            additional_scripts=node_additional_scripts,
             dune_filepath="src/bin_node/main.exe",
         )
     }

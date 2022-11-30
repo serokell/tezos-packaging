@@ -557,7 +557,7 @@ def main():
                 + ".service"
             )
         print("Error in Tezos Setup Wizard, exiting.")
-        logfile = "tezos_setup_wizard.log"
+        logfile = "tezos_setup.log"
         with open(logfile, "a") as f:
             f.write(str(e) + "\n")
         print("The error has been logged to", os.path.abspath(logfile))

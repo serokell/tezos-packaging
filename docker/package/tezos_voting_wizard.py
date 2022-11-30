@@ -192,7 +192,7 @@ class Setup(Setup):
             return True
         except:
             print(f"No local baking services for {net} running on this machine.")
-            print("If there should be, you can run 'tezos-setup-wizard' to set it up.")
+            print("If there should be, you can run 'tezos-setup' to set it up.")
             print()
 
             return False
@@ -468,7 +468,7 @@ def main():
         sys.exit(1)
     except Exception as e:
         print("Error in Tezos Voting Wizard, exiting.")
-        logfile = "tezos_voting_wizard.log"
+        logfile = "tezos_vote.log"
         with open(logfile, "a") as f:
             f.write(str(e) + "\n")
         print("The error has been logged to", os.path.abspath(logfile))

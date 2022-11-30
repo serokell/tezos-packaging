@@ -18,6 +18,8 @@ policy for the provided forms of distribution.
 
 ## Set up a node and/or baking on Ubuntu
 
+> :warning: Since [#570](https://github.com/serokell/tezos-packaging/pull/570), wizards' names were simplified.
+
 The simplest procedure to set up a node and/or baking instance is provided for Ubuntu.
 
 These commands will install everything necessary and start an interactive
@@ -25,7 +27,7 @@ setup wizard:
 ```
 sudo add-apt-repository -yu ppa:serokell/tezos
 sudo apt-get install -y tezos-baking
-tezos-setup-wizard
+tezos-setup
 ```
 
 Read [the dedicated article](./docs/baking.md) to find out more about the setup,
@@ -39,7 +41,7 @@ An interactive voting wizard is provided for Ubuntu. After setting up a baking i
 on mainnet, you can vote by running:
 
 ```bash
-tezos-voting-wizard
+tezos-vote
 ```
 
 Read the [documentation on voting](./docs/voting.md) to find out more details about

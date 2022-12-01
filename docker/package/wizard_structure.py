@@ -634,10 +634,14 @@ class Setup:
             "TEZOS_CLIENT_DIR",
             "/var/lib/tezos/.tezos-client",
         )
-        self.config["node_rpc_endpoint"] = "http://" + baking_env.get(
+
+        node_rpc_addr = baking_env.get(
             "NODE_RPC_ADDR",
             "localhost:8732",
         )
+        self.config["node_rpc_addr"] = node_rpc_addr
+        self.config["node_rpc_endpoint"] = "http://" + node_rpc_addr
+
         self.config["baker_alias"] = baking_env.get("BAKER_ADDRESS_ALIAS", "baker")
 
     def fill_remote_signer_infos(self):

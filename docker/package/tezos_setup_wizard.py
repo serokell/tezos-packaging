@@ -212,7 +212,7 @@ class Setup(Setup):
             node_dir_contents = set(os.listdir(node_dir))
         except FileNotFoundError:
             print("The Tezos node data directory does not exist.")
-            print("Creating it now")
+            print("  Creating directory: " + node_dir)
             proc_call("sudo mkdir " + node_dir)
             proc_call("sudo chown tezos:tezos " + node_dir)
 
@@ -222,8 +222,7 @@ class Setup(Setup):
         # Configure data dir if the config is missing
         if not node_dir_config.issubset(node_dir_contents):
             print("The Tezos node data directory has not been configured yet.")
-            print("Configuring it now.")
-            print()
+            print("  Configuring directory: " + node_dir)
             proc_call(
                 "sudo -u tezos octez-node-"
                 + self.config["network"]
@@ -237,8 +236,7 @@ class Setup(Setup):
         diff = node_dir_contents - node_dir_config
         if diff:
             print("The Tezos node data directory already has some blockchain data:")
-            print("\n".join(diff))
-            print()
+            print("\n".join(["- " + os.path.join(node_dir, path) for path in diff]))
             if yes_or_no("Delete this data and bootstrap the node again? <y/N> ", "no"):
                 for path in diff:
                     try:

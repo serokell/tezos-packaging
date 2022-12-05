@@ -26,10 +26,16 @@
   outputs = inputs@{ self, nixpkgs, nixpkgs-unstable, flake-utils, serokell-nix, nix, ... }:
   let
     pkgs-darwin = nixpkgs-unstable.legacyPackages."aarch64-darwin";
-
     protocols = nixpkgs.lib.importJSON ./protocols.json;
     meta = nixpkgs.lib.importJSON ./meta.json;
-    sources = { inherit (inputs) tezos opam-repository; };
+
+    tezos = builtins.path {
+      path = inputs.tezos;
+      name = "tezos";
+      # we exclude optional development packages
+      filter = path: _: baseNameOf path != "octez-dev-deps.opam";
+    };
+    sources = { inherit tezos; inherit (inputs) opam-repository; };
 
     ocaml-overlay = import ./nix/build/ocaml-overlay.nix (inputs // { inherit sources protocols meta; });
   in pkgs-darwin.lib.recursiveUpdate

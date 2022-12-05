@@ -9,9 +9,9 @@ class TezosTxRollupClientPtkathma < Formula
   end
   homepage "https://gitlab.com/tezos/tezos"
 
-  url "https://gitlab.com/tezos/tezos.git", :tag => "v15.0", :shallow => false
+  url "https://gitlab.com/tezos/tezos.git", :tag => "v15.1", :shallow => false
 
-  version "v15.0-1"
+  version "v15.1-1"
 
   build_dependencies = %w[pkg-config coreutils autoconf rsync wget rustup-init]
   build_dependencies.each do |dependency|
@@ -26,9 +26,6 @@ class TezosTxRollupClientPtkathma < Formula
 
   bottle do
     root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosTxRollupClientPtkathma.version}/"
-    sha256 cellar: :any, monterey: "c474bd7b07a5ab63b6b65a9b8854e681d4f69cdf1c71bb246f3420a6c061d60a"
-    sha256 cellar: :any, big_sur: "cffe8681ffea428c5f7454709969eb094d6eb527c9d605a7b3c9e85e5f097bd1"
-    sha256 cellar: :any, arm64_big_sur: "ca92fada47a6368efc3f98aa13195b50b06e805bde4b67e84becf9e3fb6fb775"
   end
 
   def make_deps

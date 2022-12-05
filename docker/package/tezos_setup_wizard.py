@@ -207,13 +207,36 @@ class Setup(Setup):
     # and ask the user if it can be overwritten.
     def check_blockchain_data(self):
         node_dir = get_data_dir(self.config["network"])
-        node_dir_contents = os.listdir(node_dir)
-        clean = ["config.json", "version.json"]
-        diff = set(node_dir_contents) - set(clean)
+        node_dir_contents = set()
+        try:
+            node_dir_contents = set(os.listdir(node_dir))
+        except FileNotFoundError:
+            print("The Tezos node data directory does not exist.")
+            print("  Creating directory: " + node_dir)
+            proc_call("sudo mkdir " + node_dir)
+            proc_call("sudo chown tezos:tezos " + node_dir)
+
+        # Content expected in a configured and clean node data dir
+        node_dir_config = set(["config.json", "version.json"])
+
+        # Configure data dir if the config is missing
+        if not node_dir_config.issubset(node_dir_contents):
+            print("The Tezos node data directory has not been configured yet.")
+            print("  Configuring directory: " + node_dir)
+            proc_call(
+                "sudo -u tezos octez-node-"
+                + self.config["network"]
+                + " config init"
+                + " --network "
+                + self.config["network"]
+                + " --rpc-addr "
+                + self.config["node_rpc_addr"]
+            )
+
+        diff = node_dir_contents - node_dir_config
         if diff:
             print("The Tezos node data directory already has some blockchain data:")
-            print("\n".join(diff))
-            print()
+            print("\n".join(["- " + os.path.join(node_dir, path) for path in diff]))
             if yes_or_no("Delete this data and bootstrap the node again? <y/N> ", "no"):
                 for path in diff:
                     try:

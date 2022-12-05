@@ -13,10 +13,7 @@ with opam-nix.lib.${self.system}; let
   octezSourcesResolved =
     self.runCommand "resolve-octez-sources" {} "cp --no-preserve=all -Lr ${sources.tezos} $out";
   octezScope = buildOpamProject' {
-    repos = [
-      sources.opam-repository
-      opam-nix.inputs.opam-repository
-    ];
+    repos = [sources.opam-repository];
     recursive = true;
     resolveArgs = { };
   } octezSourcesResolved { };

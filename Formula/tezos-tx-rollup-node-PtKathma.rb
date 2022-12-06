@@ -28,6 +28,8 @@ class TezosTxRollupNodePtkathma < Formula
 
   bottle do
     root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosTxRollupNodePtkathma.version}/"
+    sha256 cellar: :any, big_sur: "c3b0fcabd26af346a0745b87b14b7c9306556599162565fa2f3a61b380d57666"
+    sha256 cellar: :any, arm64_big_sur: "c3ea1708117da9877ee4a5ed15b22e386ec502a65c2ef1b680f462c6a4dde081"
   end
 
   def make_deps

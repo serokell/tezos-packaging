@@ -28,7 +28,7 @@ def run_node(network, use_tls):
         + tls_args
         + "--no-bootstrap-peers --network "
         + network
-        + " &"
+        + " >/dev/null &"
     )
     tls_endpoint = (
         " --endpoint https://localhost:8732/ "
@@ -50,9 +50,9 @@ def run_node_with_daemons(network, use_tls):
     machine.succeed(
         f"{octez_baker} -d client-dir"
         + tls_endpoint
-        + "run with local node node-dir baker --liquidity-baking-toggle-vote on &"
+        + "run with local node node-dir baker --liquidity-baking-toggle-vote on >/dev/null &"
     )
-    machine.succeed(octez_accuser + tls_endpoint + "-d client-dir run &")
+    machine.succeed(octez_accuser + tls_endpoint + "-d client-dir run >/dev/null &")
 
 
 def kill_node_with_daemons():
@@ -92,7 +92,7 @@ with subtest("test remote signer"):
         f'{octez_signer} -d signer-dir show address signer | tail -n +1 | head -n 1 | sed -e s/^"Hash: "//g'
     )
     machine.succeed(
-        f"{octez_signer} -d signer-dir launch socket signer -a 127.0.0.1 -p 22000 &"
+        f"{octez_signer} -d signer-dir launch socket signer -a 127.0.0.1 -p 22000 >/dev/null &"
     )
     machine.succeed(
         f"{octez_client} -d client-dir import secret key remote-signer-tcp tcp://127.0.0.1:22000/{signer_addr}"

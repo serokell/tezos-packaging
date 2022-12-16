@@ -5,6 +5,7 @@
 let
 in import "${nixpkgs}/nixos/tests/make-test-python.nix" ({ ... }:
 {
+  name = "tezos-binaries-test";
   nodes.machine = { ... }: {
     virtualisation.memorySize = 2048;
     virtualisation.diskSize = 1024;

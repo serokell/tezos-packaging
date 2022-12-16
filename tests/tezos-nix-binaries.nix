@@ -7,6 +7,7 @@ let
     octez-accuser-PtKathma octez-baker-PtKathma;
 in import "${nixpkgs}/nixos/tests/make-test-python.nix" ({ ... }:
 {
+  name = "tezos-nix-binaries-test";
   nodes.machine = { ... }: {
     virtualisation.memorySize = 1024;
     virtualisation.diskSize = 1024;

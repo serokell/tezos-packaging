@@ -5,6 +5,7 @@
 import os
 import sys
 import shlex
+import shutil
 import subprocess
 from package.packages import packages
 from package.package_generator import parser
@@ -68,6 +69,13 @@ parser.add_argument(
     help="whether to build the sapling-params package",
     action="store_true",
 )
+parser.add_argument(
+    "--gpg-sign",
+    "-s",
+    help="provide an identity to sign packages",
+    type=str,
+)
+
 parser.set_defaults(build_sapling_package=False)
 args = parser.parse_args()
 
@@ -172,6 +180,23 @@ def build_packages(pkgs, image, distros):
     if exit_code:
         print("Unrecoverable error occured.")
         sys.exit(exit_code)
+
+    artifacts = (os.path.join(args.output_dir, x) for x in os.listdir(args.output_dir))
+    if args.gpg_sign and args.type == "source":
+        if target_os == "ubuntu":
+            for f in artifacts:
+                if f.endswith(".changes"):
+                    call(
+                        f"sed -i 's/^Changed-By: .*$/Changed-By: {args.gpg_sign}/' {f}"
+                    )
+                    call(f"debsign {f}")
+        elif target_os == "fedora":
+            gpg = shutil.which("gpg")
+            for f in artifacts:
+                if f.endswith(".src.rpm"):
+                    call(
+                        f'rpmsign --define="%_gpg_name {args.gpg_sign}" --define="%__gpg {gpg}" --addsign {f}'
+                    )
 
 
 packages_to_build = get_packages_to_build(args.packages)

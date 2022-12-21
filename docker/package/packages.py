@@ -124,6 +124,13 @@ signer_units = [
     ),
 ]
 
+postinst_steps_common = """
+if [ -z $(getent passwd tezos) ]; then
+    useradd -r -s /bin/false -m -d /var/lib/tezos tezos
+    chmod 0755 /var/lib/tezos
+fi
+"""
+
 ledger_udev_postinst = open(
     f"{os.path.dirname(__file__)}/scripts/udev-rules", "r"
 ).read()
@@ -135,7 +142,7 @@ packages = [
             "CLI client for interacting with tezos blockchain",
             meta=packages_meta,
             additional_native_deps=["tezos-sapling-params", "udev"],
-            postinst_steps=ledger_udev_postinst,
+            postinst_steps=postinst_steps_common + ledger_udev_postinst,
             dune_filepath="src/bin_client/main_client.exe",
         )
     },
@@ -154,7 +161,7 @@ packages = [
             meta=packages_meta,
             additional_native_deps=["udev"],
             systemd_units=signer_units,
-            postinst_steps=ledger_udev_postinst,
+            postinst_steps=postinst_steps_common + ledger_udev_postinst,
             dune_filepath="src/bin_signer/main_signer.exe",
         )
     },
@@ -167,11 +174,6 @@ packages = [
         )
     },
 ]
-
-postinst_steps_common = """
-mkdir -p -m755 /var/lib/tezos || true
-useradd --home-dir /var/lib/tezos tezos || true
-"""
 
 
 def mk_node_unit(
@@ -303,8 +305,11 @@ daemon_decs = {
 
 daemon_postinst_common = (
     postinst_steps_common
-    + "\nmkdir -p /var/lib/tezos/.tezos-client\nchown -R tezos:tezos /var/lib/tezos/.tezos-client\n"
-) + ledger_udev_postinst
+    + """
+mkdir -p /var/lib/tezos/.tezos-client
+chown -R tezos:tezos /var/lib/tezos/.tezos-client
+"""
+)
 
 
 for proto in active_protocols:

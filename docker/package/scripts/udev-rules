@@ -34,6 +34,6 @@ EOF
         service udev restart || systemctl restart udev.service
     fi
     udevadm control --reload-rules
-    groupadd plugdev || true
-    usermod -a -G plugdev tezos || true
+    ! getent group plugdev &> /dev/null && groupadd plugdev || true
+    usermod -aG plugdev tezos &> /dev/null || true
 fi

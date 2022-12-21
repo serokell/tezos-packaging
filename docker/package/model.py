@@ -195,8 +195,8 @@ def mk_dh_flags(package):
 
 
 def gen_systemd_rules_contents(package, binaries_dir=None):
-    override_dh_install_init = "override_dh_installinit:\n"
     package_name = package.name.lower()
+    units = set()
     for systemd_unit in package.systemd_units:
         if systemd_unit.instances is None:
             if systemd_unit.suffix is not None:
@@ -208,20 +208,41 @@ def gen_systemd_rules_contents(package, binaries_dir=None):
                 unit_name = f"{package_name}-{systemd_unit.suffix}@"
             else:
                 unit_name = f"{package_name}@"
-        override_dh_install_init += f"	dh_installinit --name={unit_name}\n"
+        units.add(unit_name)
+    override_dh_install_init = "override_dh_installinit:\n" + "\n".join(
+        f"	dh_installinit --name={unit_name}" for unit_name in units
+    )
+    override_dh_auto_install = (
+        "override_dh_auto_install:\n"
+        + "	dh_auto_install\n"
+        + "\n".join(
+            f"	dh_installsystemd --no-enable --no-start --name={unit_name} {unit_name}.service"
+            for unit_name in units
+        )
+    )
+    splice_if = lambda cond: lambda string: string if cond else ""
+    pybuild_splice = splice_if(package.buildfile == "setup.py")
     rules_contents = f"""#!/usr/bin/make -f
-{"export DEB_BUILD_OPTIONS=nostrip" if binaries_dir is not None else ""}
-export DEB_CFLAGS_APPEND=-fPIC
 # Disable usage of instructions from the ADX extension to avoid incompatibility
 # with old CPUs, see https://gitlab.com/dannywillems/ocaml-bls12-381/-/merge_requests/135/
 export BLST_PORTABLE=yes
-{f"export PYBUILD_NAME={package_name}" if package.buildfile == "setup.py" else ""}
+{splice_if(binaries_dir)("export DEB_BUILD_OPTIONS=nostrip")}
+{pybuild_splice(f"export PYBUILD_NAME={package_name}")}
+export DEB_CFLAGS_APPEND=-fPIC
 
 %:
 	dh $@ {mk_dh_flags(package)}
+
+override_dh_systemd_enable:
+	dh_systemd_enable {pybuild_splice("-O--buildsystem=pybuild")} --no-enable
+
 override_dh_systemd_start:
-	dh_systemd_start --no-start
-{override_dh_install_init if len(package.systemd_units) > 1 else ""}"""
+	dh_systemd_start {pybuild_splice("-O--buildsystem=pybuild")} --no-start
+
+{override_dh_auto_install if len(package.systemd_units) > 1 else ""}
+
+{override_dh_install_init if len(package.systemd_units) > 1 else ""}
+"""
     return rules_contents
 
 

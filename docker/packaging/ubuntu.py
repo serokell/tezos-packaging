@@ -97,7 +97,7 @@ def build_ubuntu_package(
             f.write("10")
         pkg.gen_install("debian/install")
         pkg.gen_links("debian/links")
-        pkg.gen_rules("debian/rules", binaries_dir)
+        pkg.gen_rules("debian/rules", ubuntu_version, binaries_dir)
         pkg.gen_postinst("debian/postinst")
         pkg.gen_postrm("debian/postrm")
         pkg.gen_control_file(build_deps, ubuntu_version, "debian/control")

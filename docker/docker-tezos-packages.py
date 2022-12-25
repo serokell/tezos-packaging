@@ -6,9 +6,9 @@ import os
 import sys
 import shlex
 import subprocess
-from package.packages import packages
-from package.package_generator import parser
-from package.package_generator import output_dir as container_output_dir
+from packaging.packages import packages
+from packaging.package_generator import parser
+from packaging.package_generator import output_dir as container_output_dir
 
 ubuntu_versions = [
     "bionic",  # 18.04
@@ -108,7 +108,7 @@ check_call(
     f"""
 {virtualisation_engine}
 build -t tezos-{target_os}
--f docker/package/Dockerfile-{target_os} .
+-f docker/packaging/Dockerfile-{target_os} .
 """
 )
 

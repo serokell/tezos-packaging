@@ -196,7 +196,7 @@ def show_systemd_service(service_name):
 
 
 def find_systemd_env_files(show_systemd_output):
-    return re.findall(b"EnvironmentFiles=(.*) ", show_systemd_output)
+    return re.findall(b"EnvironmentFiles?=(.*) ", show_systemd_output)
 
 
 def find_systemd_unit_env(show_systemd_output):

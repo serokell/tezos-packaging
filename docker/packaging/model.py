@@ -221,7 +221,8 @@ def gen_systemd_rules_contents(package, ubuntu_version, binaries_dir=None):
         )
     )
     splice_if = lambda cond: lambda string: string if cond else ""
-    pybuild_splice = splice_if(package.buildfile == "setup.py")
+    is_pybuild = package.buildfile == "setup.py"
+    pybuild_splice = splice_if(is_pybuild)
     # оно работает, дело в билд энвайроменте, на лаунчпаде такого не будет все ок
     rules_contents = f"""#!/usr/bin/make -f
 # Disable usage of instructions from the ADX extension to avoid incompatibility
@@ -243,7 +244,7 @@ override_dh_systemd_enable:
 override_dh_systemd_start:
 	dh_systemd_start {pybuild_splice("-O--buildsystem=pybuild")} --no-start
 
-{override_dh_auto_install if len(package.systemd_units) > 1 else ""}
+{override_dh_auto_install if len(package.systemd_units) > 1 and not is_pybuild else ""}
 
 {override_dh_install_init if len(package.systemd_units) > 1 else ""}
 """
@@ -711,10 +712,7 @@ echo ""
     def fetch_sources(self, out_dir, binaries_dir=None):
         os.makedirs(out_dir)
         package_dir = out_dir + "/tezos_baking"
-        os.makedirs(package_dir)
-        shutil.copy(f"{os.path.dirname(__file__)}/wizard_structure.py", package_dir)
-        shutil.copy(f"{os.path.dirname(__file__)}/tezos_setup_wizard.py", package_dir)
-        shutil.copy(f"{os.path.dirname(__file__)}/tezos_voting_wizard.py", package_dir)
+        shutil.copytree(f"{os.path.dirname(__file__)}/tezos_baking", package_dir)
 
     def gen_control_file(self, deps, ubuntu_version, out):
         run_deps_list = map(lambda x: x.lower(), self.additional_native_deps)
@@ -724,7 +722,7 @@ Source: {self.name}
 Section: utils
 Priority: optional
 Maintainer: {self.meta.maintainer}
-Build-Depends: debhelper (>=11), {"dh-systemd (>= 1.5), " if ubuntu_version != "jammy" else ""} autotools-dev, dh-python, {"python3.8" if ubuntu_version != "jammy" else "python3-all"}, python3-setuptools
+Build-Depends: debhelper (>=11), {"dh-systemd (>= 1.5), python3.8" if ubuntu_version != "jammy" else "python3-all"}, autotools-dev, dh-python, python3-setuptools
 Standards-Version: 3.9.6
 Homepage: https://gitlab.com/tezos/tezos/
 X-Python3-Version: >= 3.8

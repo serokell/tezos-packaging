@@ -103,19 +103,23 @@ octez_version = os.getenv("OCTEZ_VERSION", None)
 if not octez_version:
     raise Exception("Environment variable OCTEZ_VERSION is not set.")
 
-# prebuild docker image before using containers
-check_call(
-    f"""
-{virtualisation_engine}
-build -t tezos-{target_os}
--f docker/packaging/Dockerfile-{target_os} .
-"""
-)
+# that option reflects launchpad and copr build infrastruture
+# and has a purpose to behave more similar to them
+images = ["36"] if target_os == "fedora" else distributions
+
+for dist in images:
+    # prebuild docker image before using containers
+    check_call(
+        f"""
+    {virtualisation_engine}
+    build -t tezos-{target_os}-{dist}
+    -f docker/packaging/Dockerfile-{target_os} --build-arg dist={dist} .
+    """
+    )
 
 
 # enclose defined above variables to shorten argument list
-def build_packages(pkgs, distros):
-
+def build_packages(pkgs, image, distros):
     cmd_args = " ".join(
         [
             f"--os {target_os}",
@@ -138,7 +142,7 @@ def build_packages(pkgs, distros):
     {container_create_args}
     --env OCTEZ_VERSION={octez_version}
     --env OPAMSOLVERTIMEOUT=900
-    -t tezos-{target_os} {cmd_args}
+    -t tezos-{target_os}-{image} {cmd_args}
     """
     ).stdout.strip()
 
@@ -165,4 +169,6 @@ packages_to_build = get_packages_to_build(args.packages)
 if not args.build_sapling_package:
     packages_to_build.pop("tezos-sapling-params", None)
 
-build_packages(packages_to_build.keys(), distributions)
+for image in images:
+    dists_to_build = [image] if target_os == "ubuntu" else distributions
+    build_packages(packages_to_build.keys(), image, dists_to_build)

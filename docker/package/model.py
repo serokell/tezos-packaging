@@ -48,7 +48,7 @@ class AbstractPackage:
         pass
 
     @abstractmethod
-    def gen_buildfile(self, out, binaries_dir=None):
+    def gen_buildfile(self, out, ubuntu_version, binaries_dir=None):
         pass
 
     def gen_changelog(self, ubuntu_version, maintainer, date, out):
@@ -423,7 +423,7 @@ ln -s %{{_bindir}}/{binary_name} %{{buildroot}}/%{{_bindir}}/{self.name}
         with open(out, "w") as f:
             f.write(file_contents)
 
-    def gen_buildfile(self, out, binaries_dir=None):
+    def gen_buildfile(self, out, ubuntu_version, binaries_dir=None):
         binary_name = self.name.replace("tezos", "octez")
         makefile_contents = f"""
 .PHONY: install
@@ -567,7 +567,7 @@ install -m 0755 sapling-output.params %{{buildroot}}/%{{_datadir}}/zcash-params
         with open(out, "w") as f:
             f.write(file_contents)
 
-    def gen_buildfile(self, out, binaries_dir=None):
+    def gen_buildfile(self, out, ubuntu_version, binaries_dir=None):
         file_contents = """
 .PHONY: install
 
@@ -781,7 +781,8 @@ Maintainer: {self.meta.maintainer}
         with open(out, "w") as f:
             f.write(file_contents)
 
-    def gen_buildfile(self, out, binaries_dir=None):
+    def gen_buildfile(self, out, ubuntu_version, binaries_dir=None):
+        interpreter = "python3.8" if ubuntu_version != "jammy" else "python3"
         file_contents = f"""
 from setuptools import setup
 
@@ -797,7 +798,7 @@ setup(
     ),
     options=dict(
         build_scripts=dict(
-            executable="/usr/bin/python3.8"
+            executable="/usr/bin/{interpreter}"
         )
     ),
 )

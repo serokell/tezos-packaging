@@ -420,9 +420,9 @@ class Setup(Setup):
 
         print("Waiting for the node to bootstrap...")
 
+        tezos_client_options = self.get_tezos_client_options()
         proc_call(
-            f"sudo -u tezos {suppress_warning_text} octez-client "
-            f"--endpoint {rpc_endpoint} bootstrapped"
+            f"sudo -u tezos {suppress_warning_text} octez-client {tezos_client_options} bootstrapped"
         )
 
         print()

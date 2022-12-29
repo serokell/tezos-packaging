@@ -348,12 +348,12 @@ def get_key_address(tezos_client_options, key_alias):
         return None
 
 
-def wait_for_ledger_app(ledger_app):
+def wait_for_ledger_app(ledger_app, client_dir):
     output = b""
     try:
         while re.search(f"Found a Tezos {ledger_app}".encode(), output) is None:
             output = get_proc_output(
-                f"sudo -u tezos {suppress_warning_text} octez-client list connected ledgers"
+                f"sudo -u tezos {suppress_warning_text} octez-client --base-dir {client_dir} list connected ledgers"
             ).stdout
             proc_call("sleep 1")
     except KeyboardInterrupt:
@@ -370,7 +370,7 @@ def wait_for_ledger_app(ledger_app):
     return ledgers_derivations
 
 
-def ledger_urls_info(ledgers_derivations, node_endpoint):
+def ledger_urls_info(ledgers_derivations, node_endpoint, client_dir):
     ledgers_info = {}
     max_derivation_len = 0
     for derivations_paths in ledgers_derivations.values():
@@ -378,13 +378,13 @@ def ledger_urls_info(ledgers_derivations, node_endpoint):
     for ledger_url, derivations_paths in ledgers_derivations.items():
         for derivation_path in derivations_paths:
             output = get_proc_output(
-                f"sudo -u tezos {suppress_warning_text} octez-client "
+                f"sudo -u tezos {suppress_warning_text} octez-client --base-dir {client_dir} "
                 f"show ledger {ledger_url + derivation_path}"
             ).stdout
             addr = re.search(address_regex, output).group(0).decode()
             balance = (
                 get_proc_output(
-                    f"sudo -u tezos {suppress_warning_text} octez-client "
+                    f"sudo -u tezos {suppress_warning_text} octez-client --base-dir {client_dir} "
                     f"--endpoint {node_endpoint} get balance for {addr}"
                 )
                 .stdout.decode()
@@ -540,7 +540,7 @@ def get_ledger_url_query(ledgers):
 # tezos-node to be running and bootstrapped in order to gather the data
 # about the ledger-stored addresses, so it's called right before invoking
 # after the node was boostrapped
-def get_ledger_derivation_query(ledgers_derivations, node_endpoint):
+def get_ledger_derivation_query(ledgers_derivations, node_endpoint, client_dir):
     extra_options = ["Specify derivation path", "Go back"]
     full_ledger_urls = []
     for ledger_url, derivations_paths in ledgers_derivations.items():
@@ -553,7 +553,8 @@ def get_ledger_derivation_query(ledgers_derivations, node_endpoint):
         help="'Specify derivation path' will ask a derivation path from you."
         "'Go back' will return you back to the key type choice.",
         default=None,
-        options=[ledger_urls_info(ledgers_derivations, node_endpoint)] + extra_options,
+        options=[ledger_urls_info(ledgers_derivations, node_endpoint, client_dir)]
+        + extra_options,
         validator=Validator(
             [
                 required_field_validator,
@@ -745,7 +746,9 @@ class Setup:
                 else:
                     print(f"Please open the Tezos {ledger_app} app on your ledger or")
                     print("press Ctrl+C to go back to the key import mode selection.")
-                    ledgers_derivations = wait_for_ledger_app(ledger_app)
+                    ledgers_derivations = wait_for_ledger_app(
+                        ledger_app, self.config["client_data_dir"]
+                    )
                     if ledgers_derivations is None:
                         print("Going back to the import mode selection.")
                         continue
@@ -756,6 +759,7 @@ class Setup:
                             get_ledger_derivation_query(
                                 ledgers_derivations,
                                 self.config["node_rpc_endpoint"],
+                                self.config["client_data_dir"],
                             )
                         )
                         if self.config["ledger_derivation"] == "Go back":

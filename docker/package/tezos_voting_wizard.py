@@ -68,11 +68,11 @@ Type in 'exit' to quit.
 
 
 # we don't need any data here, just a confirmation Tezos Wallet app is open
-def wait_for_ledger_wallet_app():
+def wait_for_ledger_wallet_app(client_dir):
     output = b""
     while re.search(b"Found a Tezos Wallet", output) is None:
         output = get_proc_output(
-            f"sudo -u tezos {suppress_warning_text} octez-client list connected ledgers"
+            f"sudo -u tezos {suppress_warning_text} octez-client --base-dir {client_dir} list connected ledgers"
         ).stdout
         proc_call("sleep 1")
 
@@ -423,7 +423,7 @@ class Setup(Setup):
         if self.check_ledger_use():
             print("Please make sure the Tezos Wallet app is open on your ledger.")
             print()
-            wait_for_ledger_wallet_app()
+            wait_for_ledger_wallet_app(config["client_data_dir"])
 
         # process 'tezos-client show voting period'
         self.fill_voting_period_info()

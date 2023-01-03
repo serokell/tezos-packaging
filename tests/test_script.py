@@ -77,8 +77,8 @@ def test_node_with_daemons_scenario(network, use_tls=False):
     kill_node_with_daemons()
 
 
-with subtest("run node with daemons on kathmandunet"):
-    test_node_with_daemons_scenario("kathmandunet")
+with subtest("run node with daemons on limanet"):
+    test_node_with_daemons_scenario("limanet")
 
 with subtest("run node with daemons on mainnet"):
     test_node_with_daemons_scenario("mainnet")

@@ -7,8 +7,6 @@ with lib;
 
 let
   octez-accuser-pkgs = {
-    "PtKathma" =
-      "${pkgs.octezPackages.octez-accuser-PtKathma}/bin/octez-accuser-PtKathma";
     "PtLimaPt" =
       "${pkgs.octezPackages.octez-accuser-PtLimaPt}/bin/octez-accuser-PtLimaPt";
   };

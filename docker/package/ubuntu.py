@@ -16,23 +16,26 @@ def build_ubuntu_package(
     source_archive_path: str = None,
     binaries_dir: str = None,
 ):
-    # ubuntu prohibits uppercase in packages names
-    pkg_name = pkg.name.lower()
-    old_version = pkg.meta.version
-    # debian build utils don't like '_' symbol in version
-    fixed_version = pkg.meta.version.replace("_", "-")
-    dir = f"{pkg_name}-{fixed_version}"
-    cwd = os.path.dirname(__file__)
-    date = subprocess.check_output(["date", "-R"]).decode().strip()
-    if source_archive_path is None:
-        pkg.fetch_sources(dir, binaries_dir)
-        pkg.gen_buildfile("/".join([dir, pkg.buildfile]), binaries_dir)
-        subprocess.run(["tar", "-czf", f"{dir}.tar.gz", dir], check=True)
-    else:
-        shutil.copy(f"{cwd}/../{source_archive_path}", f"{dir}.tar.gz")
-        subprocess.run(["tar", "-xzf", f"{dir}.tar.gz"], check=True)
-    pkg.meta.version = fixed_version
     for ubuntu_version in ubuntu_versions:
+        # ubuntu prohibits uppercase in packages names
+        pkg_name = pkg.name.lower()
+        old_version = pkg.meta.version
+        # debian build utils don't like '_' symbol in version
+        fixed_version = pkg.meta.version.replace("_", "-")
+        dir = f"{pkg_name}-{fixed_version}"
+        cwd = os.path.dirname(__file__)
+        date = subprocess.check_output(["date", "-R"]).decode().strip()
+        if source_archive_path is None:
+            pkg.fetch_sources(dir, binaries_dir)
+            pkg.gen_buildfile(
+                "/".join([dir, pkg.buildfile]), ubuntu_version, binaries_dir
+            )
+            subprocess.run(["tar", "-czf", f"{dir}.tar.gz", dir], check=True)
+        else:
+            shutil.copy(f"{cwd}/../{source_archive_path}", f"{dir}.tar.gz")
+            subprocess.run(["tar", "-xzf", f"{dir}.tar.gz"], check=True)
+        pkg.meta.version = fixed_version
+
         os.chdir(dir)
         subprocess.run(["rm", "-r", "debian"])
         subprocess.run(["dh_make", "-syf" f"../{dir}.tar.gz"], check=True)
@@ -97,7 +100,7 @@ def build_ubuntu_package(
             f.write("10")
         pkg.gen_install("debian/install")
         pkg.gen_links("debian/links")
-        pkg.gen_rules("debian/rules", binaries_dir)
+        pkg.gen_rules("debian/rules", ubuntu_version, binaries_dir)
         pkg.gen_postinst("debian/postinst")
         pkg.gen_postrm("debian/postrm")
         pkg.gen_control_file(build_deps, ubuntu_version, "debian/control")
@@ -106,7 +109,7 @@ def build_ubuntu_package(
         pkg.gen_license("debian/copyright")
         pkg.meta.version = fixed_version
         subprocess.run(
-            "rm debian/*.ex debian/*.EX debian/README*", shell=True, check=True
+            "rm -f debian/*.ex debian/*.EX debian/README*", shell=True, check=True
         )
         pkg.gen_changelog(ubuntu_version, pkg.meta.maintainer, date, "debian/changelog")
         subprocess.run(
@@ -116,4 +119,4 @@ def build_ubuntu_package(
         os.chdir("..")
         pkg.meta.version = old_version
 
-    subprocess.run(f"rm -rf {dir}", shell=True, check=True)
+        subprocess.run(f"rm -rf {dir}", shell=True, check=True)

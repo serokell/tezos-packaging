@@ -48,7 +48,7 @@ class AbstractPackage:
         pass
 
     @abstractmethod
-    def gen_buildfile(self, out, binaries_dir=None):
+    def gen_buildfile(self, out, ubuntu_version, binaries_dir=None):
         pass
 
     def gen_changelog(self, ubuntu_version, maintainer, date, out):
@@ -61,7 +61,7 @@ class AbstractPackage:
             f.write(changelog_contents)
 
     @abstractmethod
-    def gen_rules(self, out, binaries_dir=None):
+    def gen_rules(self, out, ubuntu_version, binaries_dir=None):
         pass
 
     def gen_install(self, out):
@@ -194,7 +194,7 @@ def mk_dh_flags(package):
     )
 
 
-def gen_systemd_rules_contents(package, binaries_dir=None):
+def gen_systemd_rules_contents(package, ubuntu_version, binaries_dir=None):
     package_name = package.name.lower()
     units = set()
     for systemd_unit in package.systemd_units:
@@ -221,13 +221,17 @@ def gen_systemd_rules_contents(package, binaries_dir=None):
         )
     )
     splice_if = lambda cond: lambda string: string if cond else ""
-    pybuild_splice = splice_if(package.buildfile == "setup.py")
+    is_pybuild = package.buildfile == "setup.py"
+    pybuild_splice = splice_if(is_pybuild)
     rules_contents = f"""#!/usr/bin/make -f
 # Disable usage of instructions from the ADX extension to avoid incompatibility
 # with old CPUs, see https://gitlab.com/dannywillems/ocaml-bls12-381/-/merge_requests/135/
 export BLST_PORTABLE=yes
 {splice_if(binaries_dir)("export DEB_BUILD_OPTIONS=nostrip")}
-{pybuild_splice(f"export PYBUILD_NAME={package_name}")}
+{pybuild_splice(f'''
+export PYBUILD_NAME={package_name}
+export PYBUILD_INTERPRETERS={"python3.8" if ubuntu_version != "jammy" else "python3"}
+''')}
 export DEB_CFLAGS_APPEND=-fPIC
 
 %:
@@ -239,7 +243,7 @@ override_dh_systemd_enable:
 override_dh_systemd_start:
 	dh_systemd_start {pybuild_splice("-O--buildsystem=pybuild")} --no-start
 
-{override_dh_auto_install if len(package.systemd_units) > 1 else ""}
+{override_dh_auto_install if len(package.systemd_units) > 1 and not is_pybuild else ""}
 
 {override_dh_install_init if len(package.systemd_units) > 1 else ""}
 """
@@ -419,7 +423,7 @@ ln -s %{{_bindir}}/{binary_name} %{{buildroot}}/%{{_bindir}}/{self.name}
         with open(out, "w") as f:
             f.write(file_contents)
 
-    def gen_buildfile(self, out, binaries_dir=None):
+    def gen_buildfile(self, out, ubuntu_version, binaries_dir=None):
         binary_name = self.name.replace("tezos", "octez")
         makefile_contents = f"""
 .PHONY: install
@@ -440,8 +444,8 @@ install: {binary_name}
         with open(out, "w") as f:
             f.write(makefile_contents)
 
-    def gen_rules(self, out, binaries_dir=None):
-        rules_contents = gen_systemd_rules_contents(self, binaries_dir)
+    def gen_rules(self, out, ubuntu_version, binaries_dir=None):
+        rules_contents = gen_systemd_rules_contents(self, ubuntu_version, binaries_dir)
         with open(out, "w") as f:
             f.write(rules_contents)
 
@@ -563,7 +567,7 @@ install -m 0755 sapling-output.params %{{buildroot}}/%{{_datadir}}/zcash-params
         with open(out, "w") as f:
             f.write(file_contents)
 
-    def gen_buildfile(self, out, binaries_dir=None):
+    def gen_buildfile(self, out, ubuntu_version, binaries_dir=None):
         file_contents = """
 .PHONY: install
 
@@ -579,7 +583,7 @@ install: tezos-sapling-params
         with open(out, "w") as f:
             f.write(file_contents)
 
-    def gen_rules(self, out, binaries_dir=None):
+    def gen_rules(self, out, ubuntu_version, binaries_dir=None):
         rules_contents = """#!/usr/bin/make -f
 
 %:
@@ -720,14 +724,14 @@ Source: {self.name}
 Section: utils
 Priority: optional
 Maintainer: {self.meta.maintainer}
-Build-Depends: debhelper (>=11), {"dh-systemd (>= 1.5), " if ubuntu_version != "jammy" else ""} autotools-dev, dh-python, python3-all, python3-setuptools
+Build-Depends: debhelper (>=11), {"dh-systemd (>= 1.5), python3.8" if ubuntu_version != "jammy" else "python3-all"}, autotools-dev, dh-python, python3-setuptools
 Standards-Version: 3.9.6
 Homepage: https://gitlab.com/tezos/tezos/
-X-Python3-Version: >= 3.6
+X-Python3-Version: >= 3.8
 
 Package: {self.name.lower()}
 Architecture: amd64 arm64
-Depends: ${{shlibs:Depends}}, ${{misc:Depends}}, {run_deps}, ${{python3:Depends}}
+Depends: ${{shlibs:Depends}}, ${{misc:Depends}}, {run_deps}, ${{python3:Depends}}{", python3.8" if ubuntu_version != "jammy" else ""}
 Description: {self.desc}
 """
         with open(out, "w") as f:
@@ -777,7 +781,8 @@ Maintainer: {self.meta.maintainer}
         with open(out, "w") as f:
             f.write(file_contents)
 
-    def gen_buildfile(self, out, binaries_dir=None):
+    def gen_buildfile(self, out, ubuntu_version, binaries_dir=None):
+        interpreter = "python3.8" if ubuntu_version != "jammy" else "python3"
         file_contents = f"""
 from setuptools import setup
 
@@ -790,14 +795,19 @@ setup(
             'tezos-setup=tezos_baking.tezos_setup_wizard:main',
             'tezos-vote=tezos_baking.tezos_voting_wizard:main',
         ]
-    )
+    ),
+    options=dict(
+        build_scripts=dict(
+            executable="/usr/bin/{interpreter}"
+        )
+    ),
 )
 """
         with open(out, "w") as f:
             f.write(file_contents)
 
-    def gen_rules(self, out, binaries_dir=None):
-        rules_contents = gen_systemd_rules_contents(self)
+    def gen_rules(self, out, ubuntu_version, binaries_dir=None):
+        rules_contents = gen_systemd_rules_contents(self, ubuntu_version)
         with open(out, "w") as f:
             f.write(rules_contents)
 

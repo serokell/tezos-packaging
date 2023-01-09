@@ -17,7 +17,7 @@ jobs:
       matrix:
         os: [ { id: macos-12, name: "monterey" } ]
         # we don't bottle meta-formulas that contain only services
-        formula: [tezos-accuser-PtKathma, tezos-accuser-PtLimaPt, tezos-admin-client, tezos-baker-PtKathma, tezos-baker-PtLimaPt, tezos-client, tezos-codec, tezos-node, tezos-signer, tezos-tx-rollup-client-PtKathma, tezos-tx-rollup-client-PtLimaPt, tezos-tx-rollup-node-PtKathma, tezos-tx-rollup-node-PtLimaPt]
+        formula: [tezos-accuser-PtLimaPt, tezos-admin-client, tezos-baker-PtLimaPt, tezos-client, tezos-codec, tezos-node, tezos-signer, tezos-tx-rollup-client-PtLimaPt, tezos-tx-rollup-node-PtLimaPt]
     steps:
       - name: Checkout
         uses: actions/checkout@v2

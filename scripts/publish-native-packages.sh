@@ -38,18 +38,10 @@ login       = anonymous
 EOL
 
 if [[ $OCTEZ_VERSION =~ v.*-rc[0-9]* ]]; then
-  launchpad_ppa="tezos-rc-serokell"
   copr_project="@Serokell/Tezos-rc"
 else
-  launchpad_ppa="tezos-serokell"
   copr_project="@Serokell/Tezos"
 fi
-
-for f in "$source_packages_path"/*.changes; do
-  sed -i 's/^Changed-By: .*$/Changed-By: Serokell <tezos-packaging@serokell.io>/' "$f"
-  debsign "$f"
-  execute-dput -c dput.cfg "$launchpad_ppa" "$f"
-done
 
 for f in "$source_packages_path"/*.src.rpm; do
   rpmsign --define="%_gpg_name Serokell <tezos-packaging@serokell.io>" --define="%__gpg $(which gpg)" --addsign "$f"

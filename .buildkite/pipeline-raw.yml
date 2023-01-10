@@ -6,3 +6,22 @@ env:
   USE_NEWER_NIX: 1
 
 steps:
+ - label: Build source packages
+   key: build-source-packages
+   branches: "pasqu4le/build-native-release"
+   agents:
+     queue: "docker"
+   commands:
+   - eval "$SET_VERSION"
+   - nix develop .#docker-tezos-packages -c ./docker/docker-tezos-packages.py --os fedora --type source
+   artifact_paths:
+     - ./out/*
+
+ - label: Publish native packages
+   branches: "pasqu4le/build-native-release"
+   depends_on:
+   - "build-source-packages"
+   commands:
+   - eval "$SET_VERSION"
+   - buildkite-agent artifact download "out/*" . --step build-source-packages
+   - nix develop .#autorelease -c ./scripts/publish-native-packages.sh out

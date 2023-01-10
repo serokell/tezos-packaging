@@ -1,0 +1,11 @@
+# SPDX-FileCopyrightText: 2023 Oxhead Alpha
+# SPDX-License-Identifier: LicenseRef-MIT-OA
+
+# directory commonly used to store static binaries
+binaries/
+
+# directory commonly used to store built packages
+out/
+
+# docker packages' python cache
+docker/package/__pycache__/

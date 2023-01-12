@@ -240,6 +240,9 @@ export DEB_CFLAGS_APPEND=-fPIC
 override_dh_systemd_enable:
 	dh_systemd_enable {pybuild_splice("-O--buildsystem=pybuild")} --no-enable
 
+override_dh_python3:
+	dh_python3 --shebang=/usr/bin/${{PYBUILD_INTERPRETERS}}
+
 override_dh_systemd_start:
 	dh_systemd_start {pybuild_splice("-O--buildsystem=pybuild")} --no-start
 
@@ -798,6 +801,9 @@ setup(
     ),
     options=dict(
         build_scripts=dict(
+            executable="/usr/bin/{interpreter}"
+        ),
+        console_scripts=dict(
             executable="/usr/bin/{interpreter}"
         )
     ),

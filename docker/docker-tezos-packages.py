@@ -81,6 +81,14 @@ if args.binaries_dir:
 else:
     binaries_dir_name = None
 
+if args.sources_dir:
+    sources_dir_name = os.path.basename(args.sources_dir)
+    docker_volumes += (
+        f"-v {args.sources_dir}:/tezos-packaging/docker/{sources_dir_name}"
+    )
+else:
+    sources_dir_name = None
+
 target_os = args.os
 
 if target_os == "ubuntu":
@@ -126,7 +134,7 @@ def build_packages(pkgs, image, distros):
         [
             f"--os {target_os}",
             f"--binaries-dir {binaries_dir_name}" if binaries_dir_name else "",
-            f"--sources {args.sources}" if args.sources else "",
+            f"--sources-dir {sources_dir_name}" if sources_dir_name else "",
             f"--type {args.type}",
             f"--distributions {' '.join(distros)}",
             f"--packages {' '.join(pkgs)}",

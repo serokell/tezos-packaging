@@ -180,9 +180,9 @@ Otherwise, Launchpad will prohibit the build of the new release.
 
 In order to build new proper source package using existing source archive run the following:
 ```
-cd .. && ./docker/docker-tezos-packages.py --os ubuntu --type source -p tezos-client --sources <path to .orig.tar.gz>
+cd .. && ./docker/docker-tezos-packages.py --os ubuntu --type source -p tezos-client --sources-dir <path dir with source archives>
 ```
-
+If a directory contains with correctly named archive (e.g. `tezos-client_15.1a.orig.tar.gz`), it would be caught up by the build script.
 After that, the resulting source package can be signed and uploaded to the Launchpad using the commands
 described previously.
 

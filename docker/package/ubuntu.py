@@ -32,7 +32,7 @@ def build_ubuntu_package(
             )
             subprocess.run(["tar", "-czf", f"{dir}.tar.gz", dir], check=True)
         else:
-            shutil.copy(f"{cwd}/../{source_archive_path}", f"{dir}.tar.gz")
+            shutil.copy(source_archive_path, f"{dir}.tar.gz")
             subprocess.run(["tar", "-xzf", f"{dir}.tar.gz"], check=True)
         pkg.meta.version = fixed_version
 

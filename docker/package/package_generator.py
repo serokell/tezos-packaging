@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: LicenseRef-MIT-OA
 
 import os
+import sys
 import shutil
 import argparse
 from .fedora import build_fedora_package
@@ -34,8 +35,8 @@ parser.add_argument(
     type=os.path.abspath,
 )
 parser.add_argument(
-    "--sources",
-    help="specify source archive for single ubuntu package",
+    "--sources-dir",
+    help="specify directory with source archive(s) for ubuntu packages",
     type=os.path.abspath,
 )
 
@@ -106,7 +107,7 @@ def main():
 
     is_source = args.type == "source"
 
-    source_archive = args.sources
+    source_archives = os.listdir(args.sources_dir) if args.sources_dir else []
 
     binaries_dir = args.binaries_dir
 
@@ -130,6 +131,23 @@ def main():
     for package_name in args.packages:
         packages.append(all_packages[package_name])
 
+    if is_source and source_archives:
+        errors = []
+        for package in packages:
+            if getattr(package, "letter_version", None) is None:
+                source_archive = f"{package.name}_{package.meta.version}.orig.tar.gz"
+                if source_archive in source_archives:
+                    package.source_archive = os.path.join(
+                        args.sources_dir, source_archive
+                    )
+                else:
+                    errors.append(
+                        f"ERROR: supplied source dir does not contain source archive for {package.name}"
+                    )
+        if errors:
+            print("\n" + "\n".join(errors) + "\n")
+            sys.exit(1)
+
     if target_os == "ubuntu":
         for package in packages:
             build_ubuntu_package(
@@ -137,7 +155,7 @@ def main():
                 distributions,
                 common_deps,
                 is_source,
-                source_archive,
+                getattr(package, "source_archive", None),
                 binaries_dir,
             )
 

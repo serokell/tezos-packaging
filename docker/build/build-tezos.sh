@@ -19,5 +19,5 @@ export BLST_PORTABLE="yes"
 opam init --bare --disable-sandboxing
 make build-deps
 
-eval "$(opam env)" && PROFILE="static" make build
+eval "$(opam env)" && make static
 chmod +w octez-*

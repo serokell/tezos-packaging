@@ -131,7 +131,7 @@ for dist in images:
         f"""
     {virtualisation_engine}
     build -t tezos-{target_os}-{dist}
-    -f docker/package/Dockerfile-{target_os} --build-arg dist={dist} .
+    -f docker/package/Dockerfile-{target_os} --build-arg OCTEZ_VERSION={octez_version} --build-arg dist={dist} .
     """
     )
 

@@ -3,28 +3,45 @@
 
 ARG dist
 FROM ubuntu:${dist}
+
 ENV DEBIAN_FRONTEND="noninteractive"
-RUN apt-get update && apt-get install -y libev-dev libgmp-dev libhidapi-dev libffi-dev zlib1g-dev libpq-dev m4 perl pkg-config \
-  debhelper dh-make dh-python devscripts autotools-dev python3-all python3-setuptools wget rsync cmake
+RUN apt-get update
+RUN apt-get install -y libev-dev libgmp-dev libhidapi-dev libffi-dev \
+                       zlib1g-dev libpq-dev m4 perl pkg-config \
+                       debhelper dh-make dh-python devscripts autotools-dev \
+                       python3-all python3-setuptools wget rsync cmake \
+                       software-properties-common
+
 ARG dist
-RUN [ "$dist" != "jammy" ] && apt-get install -y python3.8 dh-systemd || true
-RUN apt-get install -y software-properties-common
-RUN add-apt-repository ppa:ubuntu-mozilla-security/rust-next -y && apt-get update && apt-get -y install cargo
-RUN [ "$dist" != "jammy" ] && add-apt-repository ppa:avsm/ppa -y || true
-RUN apt-get update && apt-get -y install opam
+RUN if [ "$dist" != "jammy" ]; then \
+        apt-get install -y python3.8 dh-systemd; \
+        add-apt-repository ppa:avsm/ppa -y; \
+        install -m 0755 /usr/bin/python3.8 /usr/bin/builder; \
+    else \
+        install -m 0755 /usr/bin/python3 /usr/bin/builder; \
+    fi
+
+RUN add-apt-repository ppa:ubuntu-mozilla-security/rust-next -y && apt-get update -y
+RUN apt-get -y install cargo opam
+
 ENV USER dockerbuilder
-RUN useradd dockerbuilder && mkdir /tezos-packaging
+RUN useradd dockerbuilder
+
 ENV HOME /tezos-packaging
+
+ARG OCTEZ_VERSION
+WORKDIR /tezos-packaging/docker/sources
+COPY docker/fetch_tezos_sources.py .
+RUN python3 fetch_tezos_sources.py
+
+WORKDIR /tezos-packaging/docker
 COPY meta.json /tezos-packaging/meta.json
 COPY protocols.json /tezos-packaging/protocols.json
-WORKDIR /tezos-packaging/docker
-ENV OPAMROOT "/tezos-packaging/docker/opamroot"
 COPY docker/package/*.py /tezos-packaging/docker/package/
 COPY docker/package/defaults /tezos-packaging/docker/package/defaults
 COPY docker/package/scripts /tezos-packaging/docker/package/scripts
-# Uncomment once pathces are needed once again
+# Uncomment once patches are needed once again
 # COPY docker/package/patches /tezos-packaging/docker/package/patches
 COPY LICENSE /tezos-packaging/LICENSE
-RUN [ "$dist" != "jammy" ] && install -m 0755 /usr/bin/python3.8 /usr/bin/builder || true
-RUN [ "$dist" = "jammy" ] && install -m 0755 /usr/bin/python3 /usr/bin/builder || true
+
 ENTRYPOINT ["builder", "-m", "package.package_generator"]

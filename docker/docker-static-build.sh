@@ -14,6 +14,8 @@ for proto in $(jq -r ".active | .[]" ../protocols.json); do
     binaries+=("octez-accuser-$proto" "octez-baker-$proto" "octez-tx-rollup-node-$proto" "octez-tx-rollup-client-$proto")
 done
 
+binaries+=("octez-smart-rollup-client-PtMumbai" "octez-smart-rollup-node-PtMumbai")
+
 if [[ "${USE_PODMAN-}" == "True" ]]; then
     virtualisation_engine="podman"
 else

@@ -7,8 +7,7 @@ set -euo pipefail
 # Note: the 'TEZOS_CLIENT_DIR' env var is expected and used by the rollup node
 
 # $PROTOCOL should be defined in the system unit environment
-node="/usr/bin/octez-tx-rollup-node-$PROTOCOL"
-tezos_client="/usr/bin/octez-client"
+node="/usr/bin/octez-$TYPE-rollup-node-$PROTOCOL"
 
 "$node" init "$ROLLUP_MODE" config \
     for "$ROLLUP_ALIAS" \

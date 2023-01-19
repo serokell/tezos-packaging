@@ -5,7 +5,7 @@ ARG dist
 FROM ubuntu:${dist}
 ENV DEBIAN_FRONTEND="noninteractive"
 RUN apt-get update && apt-get install -y libev-dev libgmp-dev libhidapi-dev libffi-dev zlib1g-dev libpq-dev m4 perl pkg-config \
-  debhelper dh-make dh-python devscripts autotools-dev python3-all python3-setuptools wget rsync
+  debhelper dh-make dh-python devscripts autotools-dev python3-all python3-setuptools wget rsync cmake
 ARG dist
 RUN [ "$dist" != "jammy" ] && apt-get install -y python3.8 dh-systemd || true
 RUN apt-get install -y software-properties-common

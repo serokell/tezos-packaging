@@ -3,6 +3,7 @@
 
 env:
   USE_NEWER_NIX: 1
+  DOCKER_BUILDKIT: 1
   SET_VERSION: "export OCTEZ_VERSION=\"$(cat meta.json | jq -r '.tezos_ref' | cut -d'/' -f3)\""
 
 

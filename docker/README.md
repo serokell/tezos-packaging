@@ -86,6 +86,7 @@ export OCTEZ_VERSION="v14.1"
 cd .. && ./docker/docker-tezos-packages.py --os ubuntu --type binary
 ```
 
+
 It is also possible to specify packages to build with `-p` or `--packages` option. In order to do that run the following:
 ```
 # cd .. && ./docker/docker-tezos-packages.py -os ubuntu --type binary --packages <tezos-binary-1> <tezos-binary-2>
@@ -132,12 +133,17 @@ You can test source package building using [`pbuilder`](https://wiki.ubuntu.com/
 In order to push the packages to the Launchpad PPA `*.changes` files should should be updated with
 the submitter info and signed.
 
-In order to update `*.changes` files with the proper signer info run the following:
+If you want to sign resulted source packages automatically, you can provide signer identity through `--gpg-sign` or `-s` option:
 ```
-sed -i "s/^Changed-By: .*$/Changed-By: $signer_info/" ../out/*.changes
+export OCTEZ_VERSION="v14.1"
+cd .. && ./docker/docker-tezos-packages.py --os ubuntu --type source -d focal jammy -p tezos-client -s <signer_info>
 ```
-
 For example, `signer_info` can be the following: `Roman Melnikov <roman.melnikov@serokell.io>`
+
+If you want to do it manually, you should update `*.changes` files with the proper signer info run the following:
+```
+sed -i "s/^Changed-By: .*$/Changed-By: <signer_info>/" ../out/*.changes
+```
 
 Once these files are updated, they should be signed using `debsign`.
 ```
@@ -180,10 +186,10 @@ Otherwise, Launchpad will prohibit the build of the new release.
 
 In order to build new proper source package using existing source archive run the following:
 ```
-cd .. && ./docker/docker-tezos-packages.py --os ubuntu --type source -p tezos-client --sources <path to .orig.tar.gz>
+cd .. && ./docker/docker-tezos-packages.py --os ubuntu --type source -p tezos-client --sources-dir <path to dir with source archives> -s <signer_info>
 ```
-
-After that, the resulting source package can be signed and uploaded to the Launchpad using the commands
+If the directory contains the correctly named archive (e.g. `tezos-client_15.1a.orig.tar.gz`), it will be used by the build script.
+After that, the resulting source package can be uploaded to the Launchpad using the commands
 described previously.
 
 ## Fedora packages
@@ -245,7 +251,14 @@ cd .. && ./docker/docker-tezos-packages.py --os fedora --type source
 cd .. && ./docker/docker-tezos-packages.py --os fedora --type source -p tezos-client
 ```
 
-Sign source packages:
+If you want to sign resulted source packages automatically, you can provide signer identity through `--gpg-sign` or `-s` option:
+```
+export OCTEZ_VERSION="v14.1"
+cd .. && ./docker/docker-tezos-packages.py --os fedora --type source -p tezos-client -s <signer_info>
+```
+For example, `signer_info` can be the following: `Roman Melnikov <roman.melnikov@serokell.io>`
+
+If you want to sign source packages manually, run:
 ```
 rpm --addsign out/*.src.rpm
 ```

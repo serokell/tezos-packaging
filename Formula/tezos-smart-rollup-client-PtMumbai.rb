@@ -1,7 +1,8 @@
-# SPDX-FileCopyrightText: 2021 Oxhead Alpha
+#!/usr/bin/env ruby
+# SPDX-FileCopyrightText: 2023 Oxhead Alpha
 # SPDX-License-Identifier: LicenseRef-MIT-OA
 
-class TezosNode < Formula
+class TezosSmartRollupClientPtmumbai < Formula
   @all_bins = []
 
   class << self
@@ -22,10 +23,10 @@ class TezosNode < Formula
   dependencies.each do |dependency|
     depends_on dependency
   end
-  desc "Entry point for initializing, configuring and running a Tezos node"
+  desc "Smart contract rollup CLI client for PtMumbai"
 
   bottle do
-    root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosNode.version}/"
+    root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosSmartRollupClientPtmumbai.version}/"
   end
 
   def make_deps
@@ -54,8 +55,8 @@ class TezosNode < Formula
 
   def install
     make_deps
-    install_template "src/bin_node/main.exe",
-                     "_build/default/src/bin_node/main.exe",
-                     "octez-node"
+    install_template "src/proto_016_PtMumbai/bin_sc_rollup_client/main_sc_rollup_client_016_PtMumbai.exe",
+                     "_build/default/src/proto_016_PtMumbai/bin_sc_rollup_client/main_sc_rollup_client_016_PtMumbai.exe",
+                     "octez-smart-rollup-client-PtMumbai"
   end
 end

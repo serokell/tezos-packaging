@@ -170,6 +170,7 @@ steps:
    - mkdir arm-binaries
    - buildkite-agent artifact download "docker/*" binaries --step "build-via-docker"
    # - buildkite-agent artifact download "docker/*" arm-binaries --step "build-arm-via-docker"
+   - mkdir arm-binaries/docker
    - ls binaries
    - nix develop .#autorelease -c ./scripts/autorelease.sh "$BUILDKITE_MESSAGE"
    branches: master

@@ -11,9 +11,10 @@ set -euo pipefail
 binaries=("octez-admin-client" "octez-client" "octez-node" "octez-signer" "octez-codec")
 
 for proto in $(jq -r ".active | .[]" ../protocols.json); do
-    binaries+=("octez-accuser-$proto" "octez-baker-$proto" "octez-tx-rollup-node-$proto" "octez-tx-rollup-client-$proto")
+    binaries+=("octez-accuser-$proto" "octez-baker-$proto")
 done
 
+binaries+=("octez-tx-rollup-node-PtLimaPt" "octez-tx-rollup-client-PtLimaPt")
 binaries+=("octez-smart-rollup-client-PtMumbai" "octez-smart-rollup-node-PtMumbai")
 
 if [[ "${USE_PODMAN-}" == "True" ]]; then

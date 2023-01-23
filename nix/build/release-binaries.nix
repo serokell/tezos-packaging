@@ -32,6 +32,16 @@ in [
     description = "A client to decode and encode JSON";
     supports = protocolsFormatted;
   }
+  {
+    name = "octez-tx-rollup-node-PtLimaPt";
+    description = "Transaction rollup node";
+    supports = "PtLimaPt";
+  }
+  {
+    name = "octez-tx-rollup-client-PtLimaPt";
+    description = "Client for interacting with transaction rollup node";
+    supports = "PtLimaPt";
+  }
 ] ++ builtins.concatMap (protocol: [
   {
     name = "octez-baker-${protocol}";
@@ -41,16 +51,6 @@ in [
   {
     name = "octez-accuser-${protocol}";
     description = "Daemon for accusing";
-    supports = protocol;
-  }
-  {
-    name = "octez-tx-rollup-node-${protocol}";
-    description = "Transaction rollup node";
-    supports = protocol;
-  }
-  {
-    name = "octez-tx-rollup-client-${protocol}";
-    description = "Client for interacting with transaction rollup node";
     supports = protocol;
   }
 ]) protocols.active

@@ -46,9 +46,12 @@ else
 fi
 
 for f in "$source_packages_path"/*.changes; do
+  sed -i 's/^Changed-By: .*$/Changed-By: Serokell <tezos-packaging@serokell.io>/' "$f"
+  debsign "$f"
   execute-dput -c dput.cfg "$launchpad_ppa" "$f"
 done
 
 for f in "$source_packages_path"/*.src.rpm; do
+  rpmsign --define="%_gpg_name Serokell <tezos-packaging@serokell.io>" --define="%__gpg $(which gpg)" --addsign "$f"
   /run/wrappers/bin/sudo -u copr-uploader /run/current-system/sw/bin/copr-cli build "$copr_project" --nowait "$f"
 done

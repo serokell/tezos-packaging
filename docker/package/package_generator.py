@@ -136,7 +136,9 @@ def main():
         errors = []
         for package in packages:
             if getattr(package, "letter_version", None) is None:
-                source_archive = f"{package.name}_{package.meta.version}.orig.tar.gz"
+                source_archive = (
+                    f"{package.name.lower()}_{package.meta.version}.orig.tar.gz"
+                )
                 if source_archive in source_archives:
                     package.source_archive = os.path.join(
                         args.sources_dir, source_archive

@@ -101,6 +101,11 @@
         buildkite = callPackage ./.buildkite/shell.nix {};
         autorelease = callPackage ./scripts/shell.nix {};
         docker-tezos-packages = callPackage ./shell.nix {};
+        aarch64-build = pkgs.mkShell {
+          buildInputs = [
+            pkgs.pkgsCross.musl64.qemu
+          ];
+        };
       };
 
       checks = {

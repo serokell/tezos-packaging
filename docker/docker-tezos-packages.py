@@ -135,9 +135,13 @@ for dist in images:
     """
     )
 
+packages_to_build = get_packages_to_build(args.packages)
 
-# enclose defined above variables to shorten argument list
-def build_packages(pkgs, image, distros):
+if not args.build_sapling_package:
+    packages_to_build.pop("tezos-sapling-params", None)
+
+for image in images:
+    distros = [image] if target_os == "ubuntu" else distributions
     cmd_args = " ".join(
         [
             f"--os {target_os}",
@@ -145,7 +149,7 @@ def build_packages(pkgs, image, distros):
             f"--sources-dir {sources_dir_name}" if sources_dir_name else "",
             f"--type {args.type}",
             f"--distributions {' '.join(distros)}",
-            f"--packages {' '.join(pkgs)}",
+            f"--packages {' '.join(packages_to_build.keys())}",
         ]
     )
 
@@ -181,15 +185,12 @@ def build_packages(pkgs, image, distros):
         print("Unrecoverable error occured.")
         sys.exit(exit_code)
 
-
-packages_to_build = get_packages_to_build(args.packages)
-
-if not args.build_sapling_package:
-    packages_to_build.pop("tezos-sapling-params", None)
-
-for image in images:
-    dists_to_build = [image] if target_os == "ubuntu" else distributions
-    build_packages(packages_to_build.keys(), image, dists_to_build)
+    # the same source archive has to be reused for an ubuntu package on different distros
+    if sources_dir_name is None and target_os == "ubuntu":
+        sources_dir_name = "origs"
+        docker_volumes += (
+            f"-v {args.output_dir}:/tezos-packaging/docker/{sources_dir_name}/"
+        )
 
 artifacts = (os.path.join(args.output_dir, x) for x in os.listdir(args.output_dir))
 if args.gpg_sign and args.type == "source":

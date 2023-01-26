@@ -88,6 +88,17 @@
 
       release = callPackage ./release.nix {};
 
+      # Remove this workaround once https://github.com/NixOS/nixpkgs/pull/160802 is merged upstream and present
+      # in our nixpkgs fork
+      qemu-aarch64-static = let
+        qemu-aarch64-static-binary = pkgs.fetchurl {
+          url = "https://github.com/multiarch/qemu-user-static/releases/download/v7.2.0-1/qemu-aarch64-static";
+          sha256 = "0gw87p3x0b2b6a5w5bavgszhc06b77mafdd7g9f4h1dhqqnlprnw";
+        };
+      in pkgs.runCommand "qemu-aarch64-static" {} ''
+        install -Dm777 ${qemu-aarch64-static-binary} $out/bin/qemu-aarch64-static
+      '';
+
     in {
 
       legacyPackages = unstable;
@@ -101,11 +112,7 @@
         buildkite = callPackage ./.buildkite/shell.nix {};
         autorelease = callPackage ./scripts/shell.nix {};
         docker-tezos-packages = callPackage ./shell.nix {};
-        aarch64-build = pkgs.mkShell {
-          buildInputs = [
-            pkgs.pkgsCross.musl64.qemu
-          ];
-        };
+        aarch64-build = pkgs.mkShell { buildInputs = [ qemu-aarch64-static pkgs.which pkgs.jq ]; };
       };
 
       checks = {

@@ -69,10 +69,15 @@ steps:
  - label: build-arm-via-docker
    # this step is used as a dependency, so we're defining 'key' explicitely
    key: build-arm-via-docker
+   env:
+    # TODO: update variables once https://github.com/NixOS/nixpkgs/pull/160802 is merged and present
+    # our building servers
+    # Currently used by 'boot.binfmt.emulatedSystems'
+    QEMU_AARCH64_INTERPRETER_PATH: /run/binfmt/aarch64-linux
    commands:
    - eval "$SET_VERSION"
    - cd docker
-   - ./docker-static-build.sh
+   - nix develop ..#aarch64-build -c ./docker-static-build.sh aarch64
    - upx octez-*
    - >
      for f in ./octez-*; do
@@ -81,7 +86,7 @@ steps:
    artifact_paths:
      - ./docker/octez-*
    agents:
-     queue: "arm64-build"
+     queue: "docker"
    #only_changes: *static_binaries_changes_regexes
 
  - label: test docker-built binaries

@@ -1,13 +1,10 @@
 # SPDX-FileCopyrightText: 2020 TQ Tezos <https://tqtezos.com/>
 #
 # SPDX-License-Identifier: LicenseRef-MIT-TQ
-FROM alpine:3.12 as binary-fetch
-# Latest v5.0.0-2 qemu-user-static has some weird bug that causes curl and wget to segfault.
-# See https://bugs.launchpad.net/qemu/+bug/1892684.
-RUN wget https://github.com/multiarch/qemu-user-static/releases/download/v4.2.0-7/qemu-aarch64-static
-RUN chmod +x qemu-aarch64-static
 FROM arm64v8/alpine:3.12
-COPY --from=binary-fetch qemu-aarch64-static /usr/bin/qemu-aarch64-static
+ARG QEMU_INTERPRETER_BINARY=./qemu-aarch64-static
+ARG QEMU_INTERPRETER_PATH=/run/binfmt/aarch64-linux
+COPY ${QEMU_INTERPRETER_BINARY} ${QEMU_INTERPRETER_PATH}
 RUN apk update
 RUN apk --no-cache --virtual add rsync git m4 build-base patch unzip \
   bubblewrap wget pkgconfig gmp-dev libev-dev hidapi-dev eudev-dev perl opam libusb-dev bash \

@@ -13,7 +13,7 @@ class TezosSigner < Formula
 
   version "v16.0-rc1-1"
 
-  build_dependencies = %w[pkg-config coreutils autoconf rsync wget rustup-init]
+  build_dependencies = %w[pkg-config coreutils autoconf rsync wget rustup-init cmake]
   build_dependencies.each do |dependency|
     depends_on dependency => :build
   end

@@ -66,22 +66,23 @@ steps:
    - protocols.json
  # TODO #593 re-enable the following commented-out step
  # arm builder is an ubuntu machine without nix
- #  - label: build-arm-via-docker
-   # this step is used as a dependency, so we're defining 'key' explicitely
- #    key: build-arm-via-docker
- #    commands:
- #    - eval "$SET_VERSION"
- #    - cd docker
- #    - ./docker-static-build.sh
- #    - >
- #      for f in ./octez-*; do
- #        mv "\$f" "\$f-arm64"
- #      done
- #    artifact_paths:
- #      - ./docker/octez-*
- #    agents:
- #      queue: "arm64-build"
- #    only_changes: *static_binaries_changes_regexes
+  - label: build-arm-via-docker
+ # this step is used as a dependency, so we're defining 'key' explicitely
+    key: build-arm-via-docker
+    commands:
+    - eval "$SET_VERSION"
+    - cd docker
+    - ./docker-static-build.sh
+    - upx octez-*
+    - >
+      for f in ./octez-*; do
+        mv "\$f" "\$f-arm64"
+      done
+    artifact_paths:
+      - ./docker/octez-*
+    agents:
+      queue: "arm64-build"
+    #only_changes: *static_binaries_changes_regexes
 
  - label: test docker-built binaries
    commands:

@@ -78,7 +78,7 @@ steps:
    - eval "$SET_VERSION"
    - cd docker
    - nix develop ..#aarch64-build -c ./docker-static-build.sh aarch64
-   - upx octez-*
+   - nix shell .#upx -c upx octez-*
    - >
      for f in ./octez-*; do
        mv "\$f" "\$f-arm64"

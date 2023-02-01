@@ -296,32 +296,12 @@ class TezosBinaryPackage(AbstractPackage):
         if binaries_dir:
             binary_name = self.name.replace("tezos", "octez")
             shutil.copy(f"{binaries_dir}/{binary_name}", binary_name)
-            os.chdir("../")
-            return
+        else:
+            shutil.copytree(f"{cwd}/../sources/tezos", "tezos")
+            shutil.copytree(f"{cwd}/../sources/opam-repository", "opam-repository")
+            shutil.copy(f"{cwd}/scripts/build-binary.sh", "build-binary.sh")
 
-        shutil.copy(f"{cwd}/scripts/build-binary.sh", "build-binary.sh")
-        subprocess.run(
-            [
-                "git",
-                "clone",
-                "--branch",
-                f"v{self.meta.version}",
-                "https://gitlab.com/tezos/tezos.git",
-                "--depth",
-                "1",
-            ]
-        )
-        subprocess.run(["git", "clone", "https://gitlab.com/tezos/opam-repository.git"])
-        with open("tezos/scripts/version.sh", "r") as f:
-            opam_repository_tag = re.search(
-                "^export opam_repository_tag=([0-9a-z]*)", f.read(), flags=re.MULTILINE
-            ).group(1)
-            os.chdir("opam-repository")
-            subprocess.run(["git", "checkout", opam_repository_tag])
-            subprocess.run(["rm", "-rf", ".git"])
-            subprocess.run(["rm", "-r", "zcash-params"])
-            subprocess.run(["opam", "admin", "cache"])
-            os.chdir("../..")
+        os.chdir("..")
 
     def gen_control_file(self, deps, ubuntu_version, out):
         str_build_deps = ", ".join(deps)

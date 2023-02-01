@@ -16,4 +16,5 @@ with pkgs; mkShell {
     buildkite-agent
   ];
   OCTEZ_VERSION= with pkgs.lib; lists.last (strings.splitString "/" (meta.tezos_ref));
+  DOCKER_BUILDKIT = 1;
 }

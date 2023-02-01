@@ -3,18 +3,30 @@
 
 ARG dist
 FROM fedora:${dist}
+
 RUN dnf update -y
-RUN dnf install -y libev-devel gmp-devel hidapi-devel libffi-devel zlib-devel libpq-devel m4 perl git pkg-config \
-  rpmdevtools python3-devel python3-setuptools wget opam rsync which cargo autoconf mock systemd systemd-rpm-macros cmake
+RUN dnf install -y libev-devel gmp-devel hidapi-devel libffi-devel \
+                   zlib-devel libpq-devel m4 perl git pkg-config \
+                   rpmdevtools python3-devel python3-setuptools \
+                   wget opam rsync which cargo autoconf mock systemd \
+                   systemd-rpm-macros cmake
+
 ENV USER dockerbuilder
-RUN useradd dockerbuilder && mkdir /tezos-packaging
+RUN useradd dockerbuilder
+
 ENV HOME /tezos-packaging
+
+WORKDIR /tezos-packaging/docker/sources
+ARG OCTEZ_VERSION
+COPY docker/fetch_tezos_sources.py .
+RUN python3 fetch_tezos_sources.py
+
+WORKDIR /tezos-packaging/docker
 COPY meta.json /tezos-packaging/meta.json
 COPY protocols.json /tezos-packaging/protocols.json
-WORKDIR /tezos-packaging/docker
-ENV OPAMROOT "/tezos-packaging/docker/opamroot"
 COPY docker/package/*.py /tezos-packaging/docker/package/
 COPY docker/package/defaults /tezos-packaging/docker/package/defaults
 COPY docker/package/scripts /tezos-packaging/docker/package/scripts
 COPY LICENSE /tezos-packaging/LICENSE
+
 ENTRYPOINT ["python3", "-m", "package.package_generator"]

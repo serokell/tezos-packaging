@@ -77,8 +77,8 @@ class TezosAccuserPtmumbai < Formula
     File.write("tezos-accuser-PtMumbai-start", startup_contents)
     bin.install "tezos-accuser-PtMumbai-start"
     make_deps
-    install_template "src/proto_015_PtMumbai/bin_accuser/main_accuser_015_PtMumbai.exe",
-                     "_build/default/src/proto_015_PtMumbai/bin_accuser/main_accuser_015_PtMumbai.exe",
+    install_template "src/proto_016_PtMumbai/bin_accuser/main_accuser_016_PtMumbai.exe",
+                     "_build/default/src/proto_016_PtMumbai/bin_accuser/main_accuser_016_PtMumbai.exe",
                      "octez-accuser-PtMumbai"
   end
 

@@ -87,8 +87,8 @@ class TezosBakerPtmumbai < Formula
     File.write("tezos-baker-PtMumbai-start", startup_contents)
     bin.install "tezos-baker-PtMumbai-start"
     make_deps
-    install_template "src/proto_015_PtMumbai/bin_baker/main_baker_015_PtMumbai.exe",
-                     "_build/default/src/proto_015_PtMumbai/bin_baker/main_baker_015_PtMumbai.exe",
+    install_template "src/proto_016_PtMumbai/bin_baker/main_baker_016_PtMumbai.exe",
+                     "_build/default/src/proto_016_PtMumbai/bin_baker/main_baker_016_PtMumbai.exe",
                      "octez-baker-PtMumbai"
   end
   plist_options manual: "tezos-baker-PtMumbai run with local node"

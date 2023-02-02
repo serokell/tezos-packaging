@@ -18,8 +18,8 @@ ubuntu_versions = [
 ]
 
 fedora_versions = [
-    "35",
     "36",
+    "37",
 ]
 
 

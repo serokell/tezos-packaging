@@ -59,7 +59,7 @@ fi
     --build-arg QEMU_INTERPRETER_BINARY="$QEMU_AARCH64_BASENAME" \
     --build-arg QEMU_INTERPRETER_PATH="$QEMU_AARCH64_INTERPRETER_PATH" \
     --network=host .
-container_id="$("$virtualisation_engine" create alpine-tezos)"
+container_id="$("$virtualisation_engine" create "$image_name")"
 for b in "${binaries[@]}"; do
     "$virtualisation_engine" cp "$container_id:/tezos/$b" "$b"
 done

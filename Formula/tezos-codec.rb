@@ -9,9 +9,9 @@ class TezosCodec < Formula
   end
   homepage "https://gitlab.com/tezos/tezos"
 
-  url "https://gitlab.com/tezos/tezos.git", :tag => "v16.0-rc1", :shallow => false
+  url "https://gitlab.com/tezos/tezos.git", :tag => "v16.0-rc2", :shallow => false
 
-  version "v16.0-rc1-1"
+  version "v16.0-rc2-1"
 
   build_dependencies = %w[pkg-config coreutils autoconf rsync wget rustup-init cmake]
   build_dependencies.each do |dependency|
@@ -26,9 +26,6 @@ class TezosCodec < Formula
 
   bottle do
     root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosCodec.version}/"
-    sha256 cellar: :any, monterey: "4b42bc870e8e3c770ba84ccc159810946bb454ee83060cf26103585d06dd792b"
-    sha256 cellar: :any, arm64_big_sur: "73ef805d8a7121f34418c43229afafbc9137866c5534fca7c885d057573df4a8"
-    sha256 cellar: :any, big_sur: "65e423aa1abca58b6009df38b01f5ee2e49bc46776adb6c300399e572efa06ab"
   end
 
   def make_deps

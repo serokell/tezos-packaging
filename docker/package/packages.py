@@ -20,11 +20,13 @@ networks = {
     "mainnet": "mainnet",
     "ghostnet": "ghostnet",
     "limanet": "limanet",
+    "mumbainet": "mumbainet",
 }
 networks_protos = {
     "mainnet": ["PtLimaPt"],
     "ghostnet": ["PtLimaPt"],
     "limanet": ["PtLimaPt"],
+    "mumbainet": ["PtMumbai"],
 }
 
 protocol_numbers = {

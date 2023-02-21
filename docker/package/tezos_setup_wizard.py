@@ -263,8 +263,8 @@ class Setup(Setup):
         json_url = "https://xtz-shots.io/tezos-snapshots.json"
         try:
             with urllib.request.urlopen(json_url) as url:
-                snapshot_array = json.load(url)
-                snapshot_array.sort(reverse=True, key=lambda x: int(x["block_height"]))
+                snapshot_array = json.load(url)["data"]
+                snapshot_array.sort(reverse=True, key=lambda x: x["block_height"])
         except (urllib.error.URLError, ValueError):
             print(f"Couldn't collect snapshot metadata from {json_url}")
             return

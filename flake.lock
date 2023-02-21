@@ -271,7 +271,6 @@
       "original": {
         "owner": "serokell",
         "repo": "nixpkgs",
-        "rev": "1dfdbb65d77430fc0935e8592d0abc4addcce711",
         "type": "github"
       }
     },

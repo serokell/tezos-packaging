@@ -29,5 +29,19 @@ in {
             pkg))
       hacks
       zcash-overlay
+      (final: prev: {
+        tezos-rust-libs = prev.tezos-rust-libs.overrideAttrs (drv: {
+          postInstall =
+            drv.postInstall + (let
+              rust-types-h = pkgs.fetchurl {
+                url = "https://gitlab.com/tezos/tezos-rust-libs/-/raw/v1.4/librustzcash/include/rust/types.h";
+                sha256 = "sha256-Q2lEV7JfPpFwfS/fcV7HDbBUSIGovasr7/bcANRuMZA=";
+              };
+            in ''
+              mkdir -p $out/include/rust
+              cp ${rust-types-h} $out/include/rust/types.h
+            '');
+        });
+      })
     ]));
 }

@@ -7,16 +7,14 @@ FROM alpine:3.12 as binary-fetch
 RUN wget https://github.com/multiarch/qemu-user-static/releases/download/v4.2.0-7/qemu-aarch64-static
 RUN chmod +x qemu-aarch64-static
 
-FROM arm64v8/alpine:3.12 as builder
+FROM arm64v8/alpine:3.17 as builder
 COPY --from=binary-fetch qemu-aarch64-static /usr/bin/qemu-aarch64-static
 RUN apk update
 RUN apk --no-cache --virtual add rsync git m4 build-base patch unzip \
   bubblewrap wget pkgconfig gmp-dev libev-dev \
   hidapi-dev eudev-dev perl opam libusb-dev bash \
   autoconf automake libtool linux-headers cargo \
-  libffi-dev zlib-static coreutils perl-utils cmake
-COPY ./build/build-libusb-and-hidapi.sh /build-libusb-and-hidapi.sh
-RUN /build-libusb-and-hidapi.sh
+  libffi-dev zlib-dev zlib-static coreutils perl-utils cmake
 COPY ./build/build-rust.sh /build-rust.sh
 RUN /build-rust.sh
 COPY ./build/build-upx.sh /build-upx.sh

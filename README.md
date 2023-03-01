@@ -27,8 +27,6 @@ sudo add-apt-repository -yu ppa:serokell/tezos
 sudo apt-get install -y tezos-baking
 tezos-setup
 ```
-> :warning: Since [#570](https://github.com/serokell/tezos-packaging/pull/570), this wizard was renamed from `tezos-setup-wizard`.
-
 
 Read [the dedicated article](./docs/baking.md) to find out more about the setup,
 the binaries, and the services used.
@@ -43,8 +41,6 @@ on mainnet, you can vote by running:
 ```bash
 tezos-vote
 ```
-> :warning: Since [#570](https://github.com/serokell/tezos-packaging/pull/570), this wizard was renamed from `tezos-voting-wizard`.
-
 
 Read the [documentation on voting](./docs/voting.md) to find out more details about
 voting on custom networks.

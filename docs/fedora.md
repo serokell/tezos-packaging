@@ -34,4 +34,4 @@ sudo yum copr enable @Serokell/Tezos-rc
 ## Systemd services from Fedora packages
 
 Some of the packages provide background `systemd` services, you can read more about them
-[here](../systemd.md#ubuntu-and-fedora).
+[here](./systemd.md#ubuntu-and-fedora).

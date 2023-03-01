@@ -57,7 +57,7 @@ Once the configuration is updated, you should restart the service:
 
 ## Building brew bottles
 
-In order to build bottles with Tezos binaries run the [`build-one-bottle.sh`](../../scripts/build-one-bottle.sh)
+In order to build bottles with Tezos binaries run the [`build-one-bottle.sh`](../scripts/build-one-bottle.sh)
 script with the formula that you want to build. For example:
 ```
 ./scripts/build-one-bottle.sh tezos-client

@@ -53,12 +53,12 @@ voting on custom networks.
 
 `tezos-packaging` supports several native distribution methods for convenience:
 
-- [**Ubuntu**](./docs/distros/ubuntu.md)
-- [**Debian**](./docs/distros/ubuntu.md#debian)
-- [**Raspberry Pi OS**](./docs/distros/ubuntu.md#raspberry)
-- [**Fedora**](./docs/distros/fedora.md)
-- [**macOS**](./docs/distros/macos.md)
-- [**Windows using WSL**](./docs/distros/ubuntu.md#wsl)
+- [**Ubuntu**](./docs/ubuntu.md)
+- [**Debian**](./docs/ubuntu.md#debian)
+- [**Raspberry Pi OS**](./docs/ubuntu.md#raspberry)
+- [**Fedora**](./docs/fedora.md)
+- [**macOS**](./docs/macos.md)
+- [**Windows using WSL**](./docs/ubuntu.md#wsl)
 
 The information about supported versions of the aforementioned OSes is available in the [support policy doc](./docs/support-policy.md).
 

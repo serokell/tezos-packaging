@@ -84,4 +84,4 @@ In order to use ledger on WSL some additional preparation steps are needed. We r
 ## Systemd services from Ubuntu packages
 
 Some of the packages provide background `systemd` services, you can read more about them
-[here](../systemd.md#ubuntu-and-fedora).
+[here](./systemd.md#ubuntu-and-fedora).

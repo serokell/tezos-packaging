@@ -24,6 +24,7 @@ use `ppa:serokell/tezos-rc` PPA:
 sudo add-apt-repository ppa:serokell/tezos-rc && sudo apt-get update
 ```
 
+<a name="tezos-baking"></a>
 ## `tezos-baking` package
 
 As an addition, `tezos-baking` package provides `tezos-baking-<network>` services that orchestrate

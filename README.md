@@ -16,34 +16,37 @@ for information about the binaries, their usage, and concepts about the Tezos ne
 See the [versioning doc](./docs/versioning.md) for information about the versioning
 policy for the provided forms of distribution.
 
-## Set up a node and/or baking on Ubuntu
+## Getting started on Ubuntu
 
-The simplest procedure to set up a node and/or baking instance is provided for Ubuntu.
+The simplest procedures to set up a node, to bake and/or vote are provided for Ubuntu.
 
-These commands will install everything necessary and start an interactive
-setup wizard:
-```
+These commands will install everything necessary for you:
+```sh
 sudo add-apt-repository -yu ppa:serokell/tezos
 sudo apt-get install -y tezos-baking
+```
+
+#### Set up a node and/or bake
+
+To set up a node and/or a baking instance, launch the interactive setup wizard with:
+```sh
 tezos-setup
 ```
 
-Read [the dedicated article](./docs/baking.md) to find out more about the setup,
-the binaries, and the services used.
+You can also read [the dedicated article](./docs/baking.md) to find out more about
+this setup, the binaries, and the services used.
 
 For setting up experimental transaction rollup node, see [this doc](./docs/tx-rollup.md).
 
-### Voting on Ubuntu
+#### Voting on Ubuntu
 
-An interactive voting wizard is provided for Ubuntu. After setting up a baking instance
-on mainnet, you can vote by running:
-
+To vote on `mainnet`, launch the interactive voting wizard with:
 ```bash
 tezos-vote
 ```
 
-Read the [documentation on voting](./docs/voting.md) to find out more details about
-voting on custom networks.
+Read the [documentation on voting](./docs/voting.md) to find out more details
+about voting on custom networks.
 
 ## Installing Tezos
 
@@ -74,8 +77,8 @@ This repository provides two distinct ways for building and packaging tezos bina
 
 ## Release process
 
-Please see the [release workflow doc](./docs/release-workflow.md) for more information about the details of the `tezos-packaging`
-releasing process.
+Please see the [release workflow doc](./docs/release-workflow.md) for more
+information about the details of the `tezos-packaging` releasing process.
 
 ## For Contributors
 

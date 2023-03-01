@@ -71,16 +71,6 @@ And install packages with `apt-get`, e.g. for `tezos-client`:
 sudo apt-get install tezos-client
 ```
 
-<a name="wsl"></a>
-## Ubuntu packages on WSL
-
-If you use [Ubuntu on WSL](https://ubuntu.com/wsl), you can use the Launchpad PPA
-to install `tezos-*` executables on it as well.
-
-You can add the PPA and install packages in the same way as described in [Ubuntu section](#ubuntu)
-
-In order to use ledger on WSL some additional preparation steps are needed. We recommed to use `usbipd-win` tool and follow [this guide](https://docs.microsoft.com/en-us/windows/wsl/connect-usb) about connecting usb devices to WSL.
-
 ## Systemd services from Ubuntu packages
 
 Some of the packages provide background `systemd` services, you can read more about them

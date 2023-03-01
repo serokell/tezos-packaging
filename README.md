@@ -58,7 +58,7 @@ voting on custom networks.
 - [**Raspberry Pi OS**](./docs/ubuntu.md#raspberry)
 - [**Fedora**](./docs/fedora.md)
 - [**macOS**](./docs/macos.md)
-- [**Windows using WSL**](./docs/ubuntu.md#wsl)
+- [**Windows using WSL**](./docs/windows.md)
 
 The information about supported versions of the aforementioned OSes is available in the [support policy doc](./docs/support-policy.md).
 

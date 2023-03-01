@@ -17,13 +17,11 @@ otherwise improve our project, pull requests are most welcome.
 
 ## Quick maintenance guide
 
-- Tezos revision is located in the [`sources.json`](../nix/nix/sources.json) file.
-  You can either update it manually to newer revision or use `niv` tool.
-  In order to do that run
-  `niv update tezos -a ref=<tag from tezos repo> -a rev=<commit in this tag>`
-  from the [`nix/`](../nix) directory. This command will update sources to some commit
-  from the given tag.
-- Used tezos protocols can be changed by [`proto`](../script/proto) script.
+<!-- TODO: check and update these instructions -->
+
+- The Octez revision used is located in the [`meta.json`](../meta.json) and [`flake.lock`](../flake.lock) file.
+  You can update these to the latest available revision with the [`update-tezos.sh` script](../scripts/update-tezos.sh)
+- Used tezos protocols can be changed by [`proto`](../scripts/proto) script.
   This script requires `jq` and `moreutils` to be installed.
   Currently used protocols are displayed in [`protocols.json`](../protocols.json).
   - To add a new protocol, `./proto activate ...`.
@@ -33,7 +31,7 @@ otherwise improve our project, pull requests are most welcome.
 
 ### Nix specific maintenance
 
-All nix related files are located in the [nix](./nix) directory.
+All nix related files are located in the [nix](../nix) directory.
 
 If the build breaks because of a dependency issue, `nix repl pkgs.nix`
 can be very useful to investigate it.

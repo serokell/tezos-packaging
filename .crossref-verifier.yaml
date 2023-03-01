@@ -24,6 +24,7 @@ verification:
   notScanned:
     # Github-specific files
     - .github/pull_request_template.md
+    - .github/release_pull_request_template.md
 
   # Glob patterns describing the files which do not physically exist in the repository
   # but should be treated as existing nevertheless.

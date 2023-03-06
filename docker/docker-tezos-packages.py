@@ -111,6 +111,11 @@ octez_version = os.getenv("OCTEZ_VERSION", None)
 if not octez_version:
     raise Exception("Environment variable OCTEZ_VERSION is not set.")
 
+if args.sources_dir and args.launchpad_sources:
+    raise Exception(
+        "--sources-dir and --launchpad-sources options are mutually exclusive."
+    )
+
 # copr build infrastructure uses latest stable fedora and `mock` for builds
 # so we should also keep that way
 # for ubuntu builds, since we lack `pbuilder` for now,

@@ -13,10 +13,13 @@ RUN apt-get install -y libev-dev libgmp-dev libhidapi-dev libffi-dev \
                        software-properties-common
 
 ARG dist
-RUN if [ "$dist" != "jammy" ]; then \
+RUN if [ "$dist" = "bionic" ]; then \
         apt-get install -y python3.8 dh-systemd; \
         add-apt-repository ppa:avsm/ppa -y; \
         install -m 0755 /usr/bin/python3.8 /usr/bin/builder; \
+    elif [ "$dist" = "focal" ]; then \
+        apt-get install -y dh-systemd; \
+        install -m 0755 /usr/bin/python3 /usr/bin/builder; \
     else \
         install -m 0755 /usr/bin/python3 /usr/bin/builder; \
     fi

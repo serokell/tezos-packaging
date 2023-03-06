@@ -135,18 +135,17 @@ def main():
     if is_source and source_archives:
         errors = []
         for package in packages:
-            if getattr(package, "letter_version", None) is None:
-                source_archive = (
-                    f"{package.name.lower()}_{package.meta.version}.orig.tar.gz"
+            source_archive = (
+                f"{package.name.lower()}_{package.meta.version}.orig.tar.gz"
+            )
+            if source_archive in source_archives:
+                package.source_archive = os.path.join(args.sources_dir, source_archive)
+            elif getattr(package, "letter_version", None) is None:
+                # We throw an error if the source is missing, unless the package is
+                # tezos-baking, for which we don't need new sources.
+                errors.append(
+                    f"ERROR: supplied source dir does not contain source archive for {package.name}"
                 )
-                if source_archive in source_archives:
-                    package.source_archive = os.path.join(
-                        args.sources_dir, source_archive
-                    )
-                else:
-                    errors.append(
-                        f"ERROR: supplied source dir does not contain source archive for {package.name}"
-                    )
         if errors:
             print("\n" + "\n".join(errors) + "\n")
             sys.exit(1)

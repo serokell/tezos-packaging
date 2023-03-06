@@ -67,10 +67,14 @@ Type in 'exit' to quit.
 """
 
 
-# we don't need any data here, just a confirmation Tezos Wallet app is open
-def wait_for_ledger_wallet_app(client_dir):
+# we don't need any data here, just a confirmation that a Tezos app is open
+# `app_name` here can only be `"Wallet"` or `"Baking"`
+def wait_for_ledger_app(app_name, client_dir):
+    print(f"Please make sure the Tezos {app_name} app is open on your ledger.")
+    print()
+    search_string = b"Found a Tezos " + bytes(app_name, "utf8")
     output = b""
-    while re.search(b"Found a Tezos Wallet", output) is None:
+    while re.search(search_string, output) is None:
         output = get_proc_output(
             f"sudo -u tezos {suppress_warning_text} octez-client --base-dir {client_dir} list connected ledgers"
         ).stdout
@@ -189,13 +193,12 @@ class Setup(Setup):
         net = self.config["network"]
         try:
             proc_call(f"systemctl is-active --quiet tezos-baking-{net}.service")
-            return True
+            self.config["is_local_baking_setup"] = True
         except:
             print(f"No local baking services for {net} running on this machine.")
             print("If there should be, you can run 'tezos-setup' to set it up.")
             print()
-
-            return False
+            self.config["is_local_baking_setup"] = False
 
     def check_data_correctness(self):
         print("Baker data detected is as follows:")
@@ -212,7 +215,8 @@ class Setup(Setup):
             return search_json_with_default(config_filepath, field, default)
 
     def collect_baking_info(self):
-        if self.check_baking_service():
+        self.check_baking_service()
+        if self.config.get("is_local_baking_setup", False):
             self.fill_baking_config()
             self.config["tezos_client_options"] = self.get_tezos_client_options()
 
@@ -421,9 +425,7 @@ class Setup(Setup):
 
         # if a ledger is used for baking, ask to open Tezos Wallet app on it before proceeding
         if self.check_ledger_use():
-            print("Please make sure the Tezos Wallet app is open on your ledger.")
-            print()
-            wait_for_ledger_wallet_app(config["client_data_dir"])
+            wait_for_ledger_app("Wallet", config["client_data_dir"])
 
         # process 'tezos-client show voting period'
         self.fill_voting_period_info()
@@ -448,6 +450,14 @@ class Setup(Setup):
         else:
             print("Voting isn't possible at the moment.")
             print("Exiting the Tezos Voting Wizard.")
+
+        # if a ledger was used for baking on this machine, ask to open Tezos Baking app on it,
+        # then restart the relevant baking service (due to issue: tezos/#4486)
+        if self.config.get("is_local_baking_setup", False) and self.check_ledger_use():
+            wait_for_ledger_app("Baking", config["client_data_dir"])
+            net = self.config["network"]
+            print(f"Restarting local {net} baking setup")
+            proc_call(f"sudo systemctl restart tezos-baking-{net}.service")
 
         print()
         print("Thank you for voting!")

@@ -11,6 +11,7 @@ Asks questions, validates answers, and executes the appropriate steps using the 
 import os, sys, shutil
 import readline
 import re
+import traceback
 import urllib.request
 import json
 from typing import List
@@ -583,7 +584,7 @@ def main():
         print("Error in Tezos Setup Wizard, exiting.")
         logfile = "tezos_setup.log"
         with open(logfile, "a") as f:
-            f.write(str(e) + "\n")
+            f.write(traceback.format_exc() + "\n")
         print("The error has been logged to", os.path.abspath(logfile))
         sys.exit(1)
 

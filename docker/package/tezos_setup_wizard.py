@@ -262,31 +262,33 @@ class Setup(Setup):
 
         json_url = "https://xtz-shots.io/tezos-snapshots.json"
         try:
+            snapshot_array = None
             with urllib.request.urlopen(json_url) as url:
                 snapshot_array = json.load(url)["data"]
-                snapshot_array.sort(reverse=True, key=lambda x: x["block_height"])
+            snapshot_array.sort(reverse=True, key=lambda x: x["block_height"])
+
+            snapshot_metadata = next(
+                filter(
+                    lambda artifact: artifact["artifact_type"] == "tezos-snapshot"
+                    and artifact["chain_name"] == self.config["network"]
+                    and (
+                        artifact["history_mode"] == self.config["history_mode"]
+                        or (
+                            self.config["history_mode"] == "archive"
+                            and artifact["history_mode"] == "full"
+                        )
+                    ),
+                    iter(snapshot_array),
+                ),
+                {"url": None, "block_hash": None},
+            )
+
+            self.config["snapshot_url"] = snapshot_metadata["url"]
+            self.config["snapshot_block_hash"] = snapshot_metadata["block_hash"]
         except (urllib.error.URLError, ValueError):
             print(f"Couldn't collect snapshot metadata from {json_url}")
-            return
-
-        snapshot_metadata = next(
-            filter(
-                lambda artifact: artifact["artifact_type"] == "tezos-snapshot"
-                and artifact["chain_name"] == self.config["network"]
-                and (
-                    artifact["history_mode"] == self.config["history_mode"]
-                    or (
-                        self.config["history_mode"] == "archive"
-                        and artifact["history_mode"] == "full"
-                    )
-                ),
-                iter(snapshot_array),
-            ),
-            {"url": None, "block_hash": None},
-        )
-
-        self.config["snapshot_url"] = snapshot_metadata["url"]
-        self.config["snapshot_block_hash"] = snapshot_metadata["block_hash"]
+        except Exception as e:
+            print(f"Unexpected error handling snapshot metadata:\n{e}\n")
 
     # Importing the snapshot for Node bootstrapping
     def import_snapshot(self):

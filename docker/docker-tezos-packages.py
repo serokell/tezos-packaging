@@ -111,6 +111,9 @@ octez_version = os.getenv("OCTEZ_VERSION", None)
 if not octez_version:
     raise Exception("Environment variable OCTEZ_VERSION is not set.")
 
+if (args.sources_dir or args.launchpad_sources) and target_os != "ubuntu":
+    raise Exception("Sources-related options are only supported for Ubuntu.")
+
 if args.sources_dir and args.launchpad_sources:
     raise Exception(
         "--sources-dir and --launchpad-sources options are mutually exclusive."

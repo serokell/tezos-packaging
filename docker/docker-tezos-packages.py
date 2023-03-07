@@ -141,6 +141,7 @@ for image in images:
             f"--sources-dir {sources_dir_name}" if sources_dir_name else "",
             f"--type {args.type}",
             f"--distributions {' '.join(distros)}",
+            f"--launchpad-sources" if args.launchpad_sources else "",
             f"--packages {' '.join(packages_to_build.keys())}",
         ]
     )

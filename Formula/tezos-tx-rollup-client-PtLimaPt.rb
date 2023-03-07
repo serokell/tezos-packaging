@@ -9,9 +9,9 @@ class TezosTxRollupClientPtlimapt < Formula
   end
   homepage "https://gitlab.com/tezos/tezos"
 
-  url "https://gitlab.com/tezos/tezos.git", :tag => "v16.0-rc2", :shallow => false
+  url "https://gitlab.com/tezos/tezos.git", :tag => "v16.0-rc3", :shallow => false
 
-  version "v16.0-rc2-1"
+  version "v16.0-rc3-1"
 
   build_dependencies = %w[pkg-config coreutils autoconf rsync wget rustup-init cmake]
   build_dependencies.each do |dependency|

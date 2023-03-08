@@ -45,11 +45,6 @@ steps:
      - ./docker/octez-*
    agents:
      queue: "docker"
-   only_changes:
-   - docker/build/.*
-   - docker/docker-static-build.sh
-   - meta.json
-   - protocols.json
 
  - label: Build source packages from static binaries
    key: build-source-packages-from-static-binaries

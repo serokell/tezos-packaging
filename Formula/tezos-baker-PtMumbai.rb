@@ -26,6 +26,7 @@ class TezosBakerPtmumbai < Formula
 
   bottle do
     root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosBakerPtmumbai.version}/"
+    sha256 cellar: :any, monterey: "4128d099c630b185e4361f65e10acd1ad4bebed29c38eda7e2aa6ac9cf66e62a"
   end
 
   def make_deps

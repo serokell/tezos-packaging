@@ -9,11 +9,11 @@ class TezosAdminClient < Formula
   end
   homepage "https://gitlab.com/tezos/tezos"
 
-  url "https://gitlab.com/tezos/tezos.git", :tag => "v16.0-rc3", :shallow => false
+  url "https://gitlab.com/tezos/tezos.git", :tag => "v15.1", :shallow => false
 
-  version "v16.0-rc3-1"
+  version "v15.1-1"
 
-  build_dependencies = %w[pkg-config coreutils autoconf rsync wget rustup-init cmake]
+  build_dependencies = %w[pkg-config coreutils autoconf rsync wget rustup-init]
   build_dependencies.each do |dependency|
     depends_on dependency => :build
   end
@@ -26,9 +26,9 @@ class TezosAdminClient < Formula
 
   bottle do
     root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosAdminClient.version}/"
-    sha256 cellar: :any, big_sur: "1c99f72f82ff0217ed08930c3138d07eef7d5910d53370ec840198b24265627b"
-    sha256 cellar: :any, arm64_big_sur: "d64fb167f3c573c980303e57473726d1d862f880c6ebe8c185fbab6a10e81729"
-    sha256 cellar: :any, monterey: "de90058c07fd2ce8a08742db3b2c6316ed0fd623c22b5df2df9e0e3fd55d833d"
+    sha256 cellar: :any, monterey: "467a8140f27ba749762ff2f40e87aa923dc575d33ec5c0e8d41c951306e6045b"
+    sha256 cellar: :any, big_sur: "43c5137599bcbf5751d57d9c2e199d0f13ef6a370a8d88c2430f4ec76bb99578"
+    sha256 cellar: :any, arm64_big_sur: "c6abd27ccda936fe381bb748378db240353f010ea4404e17c82dd023eeac6a6a"
   end
 
   def make_deps

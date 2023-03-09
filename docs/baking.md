@@ -30,7 +30,7 @@ that you can use by following the [installation instructions](https://www.raspbe
 In order to run a baking instance, you'll need the following Tezos binaries:
 `tezos-client`, `tezos-node`, `tezos-baker-<proto>`.
 
-The currently supported protocol is `PtLimaPt` (used on `limanet`, `ghostnet` and `mainnet`) and `PtMumbai` (used on `mumbainet`).
+The currently supported protocol is `PtLimaPt` (used on `limanet`, `ghostnet` and `mainnet`).
 Also, note that the corresponding packages have protocol
 suffix in lowercase, e.g. the list of available baker packages can be found
 [here](https://launchpad.net/~serokell/+archive/ubuntu/tezos/+packages?field.name_filter=tezos-baker&field.status_filter=published).

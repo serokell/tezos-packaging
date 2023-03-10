@@ -5,7 +5,7 @@
 
 class TezosNodeMumbainet < Formula
   url "file:///dev/null"
-  version "v16.0-rc3-1"
+  version "v16.0-rc3-2"
 
   depends_on "tezos-node"
 
@@ -27,13 +27,13 @@ class TezosNodeMumbainet < Formula
           echo "Configuring the node..."
           "$node" config init \
                   --rpc-addr "$NODE_RPC_ADDR" \
-                  --network=mumbainet\
+                  --network=https://teztnets.xyz/mumbainet\
                   "$@"
       else
           echo "Updating the node configuration..."
           "$node" config update \
                   --rpc-addr "$NODE_RPC_ADDR" \
-                  --network=mumbainet\
+                  --network=https://teztnets.xyz/mumbainet\
                   "$@"
       fi
 
@@ -82,6 +82,6 @@ class TezosNodeMumbainet < Formula
   end
   def post_install
     mkdir_p "#{var}/lib/tezos/node-mumbainet"
-    system "octez-node", "config", "init", "--data-dir" "#{var}/lib/tezos/node-mumbainet", "--network", "mumbainet"
+    system "octez-node", "config", "init", "--data-dir" "#{var}/lib/tezos/node-mumbainet", "--network", "https://teztnets.xyz/mumbainet"
   end
 end

@@ -64,24 +64,23 @@ steps:
    - docker/docker-static-build.sh
    - meta.json
    - protocols.json
- # TODO #593 re-enable the following commented-out step
- # arm builder is an ubuntu machine without nix
- #  - label: build-arm-via-docker
+
+ - label: build-arm-via-docker
    # this step is used as a dependency, so we're defining 'key' explicitely
- #    key: build-arm-via-docker
- #    commands:
- #    - eval "$SET_VERSION"
- #    - cd docker
- #    - ./docker-static-build.sh
- #    - >
- #      for f in ./octez-*; do
- #        mv "\$f" "\$f-arm64"
- #      done
- #    artifact_paths:
- #      - ./docker/octez-*
- #    agents:
- #      queue: "arm64-build"
- #    only_changes: *static_binaries_changes_regexes
+   key: build-arm-via-docker
+   commands:
+   - eval "$SET_VERSION"
+   - cd docker
+   - ./docker-static-build.sh
+   - >
+     for f in ./octez-*; do
+       mv "\$f" "\$f-arm64"
+     done
+   artifact_paths:
+     - ./docker/octez-*
+   agents:
+     queue: "arm64-darwin"
+   only_changes: *static_binaries_changes_regexes
 
  - label: test docker-built binaries
    commands:
@@ -161,21 +160,19 @@ steps:
    - gen_systemd_service_file.py
    - docker/package/.*
 
- # TODO #593 re-enable the commented-out arm parts
  - label: create auto release/pre-release
    key: auto-release
    commands:
    - mkdir binaries
    - mkdir arm-binaries
    - buildkite-agent artifact download "docker/*" binaries --step "build-via-docker"
-   # - buildkite-agent artifact download "docker/*" arm-binaries --step "build-arm-via-docker"
-   - mkdir arm-binaries/docker
+   - buildkite-agent artifact download "docker/*" arm-binaries --step "build-arm-via-docker"
    - ls binaries
    - nix develop .#autorelease -c ./scripts/autorelease.sh "$BUILDKITE_MESSAGE"
    branches: master
    depends_on:
     - "build-via-docker"
-    # - "build-arm-via-docker"
+    - "build-arm-via-docker"
    only_changes:
    - scripts/autorelease.sh
    - scripts/shell.nix

@@ -305,7 +305,6 @@ networks = {
     "mainnet": "Main Tezos network",
     "ghostnet": "Long running test network, currently using the lima Tezos protocol",
     "limanet": "Test network using the lima Tezos protocol",
-    "mumbainet": "Test network using the mumbai Tezos protocol",
 }
 
 http_request_headers = {"User-Agent": "Mozilla/5.0"}

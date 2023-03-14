@@ -42,16 +42,6 @@ in [
     description = "Client for interacting with transaction rollup node";
     supports = "PtLimaPt";
   }
-  {
-    name = "octez-smart-rollup-client-PtMumbai";
-    description = "Smart contract rollup CLI client for PtMumbai";
-    supports = "PtMumbai";
-  }
-  {
-    name = "octez-smart-rollup-node-PtMumbai";
-    description = "Tezos smart contract rollup node for PtMumbai";
-    supports = "PtMumbai";
-  }
 ] ++ builtins.concatMap (protocol: [
   {
     name = "octez-baker-${protocol}";

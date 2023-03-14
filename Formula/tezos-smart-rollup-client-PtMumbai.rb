@@ -1,7 +1,8 @@
-# SPDX-FileCopyrightText: 2021 Oxhead Alpha
+#!/usr/bin/env ruby
+# SPDX-FileCopyrightText: 2023 Oxhead Alpha
 # SPDX-License-Identifier: LicenseRef-MIT-OA
 
-class TezosAdminClient < Formula
+class TezosSmartRollupClientPtmumbai < Formula
   @all_bins = []
 
   class << self
@@ -18,17 +19,17 @@ class TezosAdminClient < Formula
     depends_on dependency => :build
   end
 
-  dependencies = %w[gmp hidapi libev libffi]
+  dependencies = %w[gmp hidapi libev libffi tezos-sapling-params]
   dependencies.each do |dependency|
     depends_on dependency
   end
-  desc "Administration tool for the node"
+  desc "Smart contract rollup CLI client for PtMumbai"
 
   bottle do
-    root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosAdminClient.version}/"
-    sha256 cellar: :any, big_sur: "1c99f72f82ff0217ed08930c3138d07eef7d5910d53370ec840198b24265627b"
-    sha256 cellar: :any, arm64_big_sur: "d64fb167f3c573c980303e57473726d1d862f880c6ebe8c185fbab6a10e81729"
-    sha256 cellar: :any, monterey: "de90058c07fd2ce8a08742db3b2c6316ed0fd623c22b5df2df9e0e3fd55d833d"
+    root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosSmartRollupClientPtmumbai.version}/"
+    sha256 cellar: :any, big_sur: "926db44800b1aedc5a62935ee886399454392022122a97736ad0d5013200742a"
+    sha256 cellar: :any, arm64_big_sur: "6e10881ac601a4af5231c0b2d6b9e2faab41357c201253bfebcfdece924e949e"
+    sha256 cellar: :any, monterey: "63f157b0c5890a7f97528d78a6f71ef13e76b5f10b20a4d56345cefa9328ee41"
   end
 
   def make_deps
@@ -57,8 +58,8 @@ class TezosAdminClient < Formula
 
   def install
     make_deps
-    install_template "src/bin_client/main_admin.exe",
-                     "_build/default/src/bin_client/main_admin.exe",
-                     "octez-admin-client"
+    install_template "src/proto_016_PtMumbai/bin_sc_rollup_client/main_sc_rollup_client_016_PtMumbai.exe",
+                     "_build/default/src/proto_016_PtMumbai/bin_sc_rollup_client/main_sc_rollup_client_016_PtMumbai.exe",
+                     "octez-smart-rollup-client-PtMumbai"
   end
 end

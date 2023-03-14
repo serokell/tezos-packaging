@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2022 Oxhead Alpha
 # SPDX-License-Identifier: LicenseRef-MIT-OA
 
-class TezosAccuserPtlimapt < Formula
+class TezosBakerPtmumbai < Formula
   @all_bins = []
 
   class << self
@@ -18,17 +18,17 @@ class TezosAccuserPtlimapt < Formula
     depends_on dependency => :build
   end
 
-  dependencies = %w[gmp hidapi libev libffi]
+  dependencies = %w[gmp hidapi libev libffi tezos-sapling-params]
   dependencies.each do |dependency|
     depends_on dependency
   end
-  desc "Daemon for accusing"
+  desc "Daemon for baking"
 
   bottle do
-    root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosAccuserPtlimapt.version}/"
-    sha256 cellar: :any, big_sur: "d9c11d11a86fca3e77b19a2c17b4740673e5edb3801e52ee62cdab7f67f1340c"
-    sha256 cellar: :any, arm64_big_sur: "8b2e1a01ad158bdc5f99f8bacd6e31b2c78f244e5d1aa43c64badb90917320e3"
-    sha256 cellar: :any, monterey: "d97277fef228671ca712c4fceca58cbf82ff34e7f10e42d08c4a5aef7b0430a8"
+    root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosBakerPtmumbai.version}/"
+    sha256 cellar: :any, big_sur: "1f01fa1b5d550e0ff19b0ac3d988f129417998d06f26ca238a4a5f81f562ea26"
+    sha256 cellar: :any, arm64_big_sur: "c127e6fc7afb025d36d183b7e0e8d12b599434f16ecc52e5923f3ad4588bb360"
+    sha256 cellar: :any, monterey: "4128d099c630b185e4361f65e10acd1ad4bebed29c38eda7e2aa6ac9cf66e62a"
   end
 
   def make_deps
@@ -37,7 +37,7 @@ class TezosAccuserPtlimapt < Formula
     # Disable usage of instructions from the ADX extension to avoid incompatibility
     # with old CPUs, see https://gitlab.com/dannywillems/ocaml-bls12-381/-/merge_requests/135/
     ENV["BLST_PORTABLE"]="yes"
-    # Here is the workaround to use opam 2.0 because Tezos is currently not compatible with opam 2.1.0 and newer
+    # Here is the workaround to use opam 2.0.9 because Tezos is currently not compatible with opam 2.1.0 and newer
     arch = RUBY_PLATFORM.include?("arm64") ? "arm64" : "x86_64"
     system "curl", "-L", "https://github.com/ocaml/opam/releases/download/2.0.9/opam-2.0.9-#{arch}-macos", "--create-dirs", "-o", "#{ENV["HOME"]}/.opam-bin/opam"
     system "chmod", "+x", "#{ENV["HOME"]}/.opam-bin/opam"
@@ -62,30 +62,39 @@ class TezosAccuserPtlimapt < Formula
 
       set -euo pipefail
 
-      accuser="#{bin}/octez-accuser-PtLimaPt"
+      baker="#{bin}/octez-baker-PtMumbai"
 
-      accuser_config="$TEZOS_CLIENT_DIR/config"
+      baker_config="$TEZOS_CLIENT_DIR/config"
       mkdir -p "$TEZOS_CLIENT_DIR"
 
-      if [ ! -f "$accuser_config" ]; then
-          "$accuser" --endpoint "$NODE_RPC_SCHEME://$NODE_RPC_ADDR" \
-                    config init --output "$accuser_config" >/dev/null 2>&1
+      if [ ! -f "$baker_config" ]; then
+          "$baker" --endpoint "$NODE_RPC_SCHEME://$NODE_RPC_ADDR" \
+                  config init --output "$baker_config" >/dev/null 2>&1
       else
-          "$accuser" --endpoint "$NODE_RPC_SCHEME://$NODE_RPC_ADDR" \
-                    config update >/dev/null 2>&1
+          "$baker" --endpoint "$NODE_RPC_SCHEME://$NODE_RPC_ADDR" \
+                  config update >/dev/null 2>&1
       fi
 
-      exec "$accuser" --endpoint "$NODE_RPC_SCHEME://$NODE_RPC_ADDR" run
-    EOS
-    File.write("tezos-accuser-PtLimaPt-start", startup_contents)
-    bin.install "tezos-accuser-PtLimaPt-start"
-    make_deps
-    install_template "src/proto_015_PtLimaPt/bin_accuser/main_accuser_015_PtLimaPt.exe",
-                     "_build/default/src/proto_015_PtLimaPt/bin_accuser/main_accuser_015_PtLimaPt.exe",
-                     "octez-accuser-PtLimaPt"
-  end
+      launch_baker() {
+          exec "$baker" \
+              --endpoint "$NODE_RPC_SCHEME://$NODE_RPC_ADDR" \
+              run with local node "$TEZOS_NODE_DIR" "$@"
+      }
 
-  plist_options manual: "tezos-accuser-PtLimaPt run"
+      if [[ -z "$BAKER_ACCOUNT" ]]; then
+          launch_baker
+      else
+          launch_baker "$BAKER_ACCOUNT"
+      fi
+    EOS
+    File.write("tezos-baker-PtMumbai-start", startup_contents)
+    bin.install "tezos-baker-PtMumbai-start"
+    make_deps
+    install_template "src/proto_016_PtMumbai/bin_baker/main_baker_016_PtMumbai.exe",
+                     "_build/default/src/proto_016_PtMumbai/bin_baker/main_baker_016_PtMumbai.exe",
+                     "octez-baker-PtMumbai"
+  end
+  plist_options manual: "tezos-baker-PtMumbai run with local node"
   def plist
     <<~EOS
       <?xml version="1.0" encoding="UTF-8"?>
@@ -96,15 +105,19 @@ class TezosAccuserPtlimapt < Formula
           <key>Label</key>
           <string>#{plist_name}</string>
           <key>Program</key>
-          <string>#{opt_bin}/tezos-accuser-PtLimaPt-start</string>
+          <string>#{opt_bin}/tezos-baker-PtMumbai-start</string>
           <key>EnvironmentVariables</key>
             <dict>
               <key>TEZOS_CLIENT_DIR</key>
               <string>#{var}/lib/tezos/client</string>
+              <key>TEZOS_NODE_DIR</key>
+              <string></string>
               <key>NODE_RPC_SCHEME</key>
               <string>http</string>
               <key>NODE_RPC_ADDR</key>
               <string>localhost:8732</string>
+              <key>BAKER_ACCOUNT</key>
+              <string></string>
           </dict>
           <key>RunAtLoad</key><true/>
           <key>StandardOutPath</key>

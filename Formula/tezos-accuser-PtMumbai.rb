@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2022 Oxhead Alpha
 # SPDX-License-Identifier: LicenseRef-MIT-OA
 
-class TezosAccuserPtlimapt < Formula
+class TezosAccuserPtmumbai < Formula
   @all_bins = []
 
   class << self
@@ -25,10 +25,10 @@ class TezosAccuserPtlimapt < Formula
   desc "Daemon for accusing"
 
   bottle do
-    root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosAccuserPtlimapt.version}/"
-    sha256 cellar: :any, big_sur: "d9c11d11a86fca3e77b19a2c17b4740673e5edb3801e52ee62cdab7f67f1340c"
-    sha256 cellar: :any, arm64_big_sur: "8b2e1a01ad158bdc5f99f8bacd6e31b2c78f244e5d1aa43c64badb90917320e3"
-    sha256 cellar: :any, monterey: "d97277fef228671ca712c4fceca58cbf82ff34e7f10e42d08c4a5aef7b0430a8"
+    root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosAccuserPtmumbai.version}/"
+    sha256 cellar: :any, big_sur: "d5974934a0ab40ace7162e8a2355eb4450f7d5736610cd205f0d202e388380e9"
+    sha256 cellar: :any, arm64_big_sur: "659a4ffd38cce2571fd688f91d880f472e463425a69dd2251b8eabd2ceb38406"
+    sha256 cellar: :any, monterey: "0784517d0b0ccba57a1f4a12ee3f4a61ea749509245914cd6ecc125a78f92d52"
   end
 
   def make_deps
@@ -62,7 +62,7 @@ class TezosAccuserPtlimapt < Formula
 
       set -euo pipefail
 
-      accuser="#{bin}/octez-accuser-PtLimaPt"
+      accuser="#{bin}/octez-accuser-PtMumbai"
 
       accuser_config="$TEZOS_CLIENT_DIR/config"
       mkdir -p "$TEZOS_CLIENT_DIR"
@@ -77,15 +77,15 @@ class TezosAccuserPtlimapt < Formula
 
       exec "$accuser" --endpoint "$NODE_RPC_SCHEME://$NODE_RPC_ADDR" run
     EOS
-    File.write("tezos-accuser-PtLimaPt-start", startup_contents)
-    bin.install "tezos-accuser-PtLimaPt-start"
+    File.write("tezos-accuser-PtMumbai-start", startup_contents)
+    bin.install "tezos-accuser-PtMumbai-start"
     make_deps
-    install_template "src/proto_015_PtLimaPt/bin_accuser/main_accuser_015_PtLimaPt.exe",
-                     "_build/default/src/proto_015_PtLimaPt/bin_accuser/main_accuser_015_PtLimaPt.exe",
-                     "octez-accuser-PtLimaPt"
+    install_template "src/proto_016_PtMumbai/bin_accuser/main_accuser_016_PtMumbai.exe",
+                     "_build/default/src/proto_016_PtMumbai/bin_accuser/main_accuser_016_PtMumbai.exe",
+                     "octez-accuser-PtMumbai"
   end
 
-  plist_options manual: "tezos-accuser-PtLimaPt run"
+  plist_options manual: "tezos-accuser-PtMumbai run"
   def plist
     <<~EOS
       <?xml version="1.0" encoding="UTF-8"?>
@@ -96,7 +96,7 @@ class TezosAccuserPtlimapt < Formula
           <key>Label</key>
           <string>#{plist_name}</string>
           <key>Program</key>
-          <string>#{opt_bin}/tezos-accuser-PtLimaPt-start</string>
+          <string>#{opt_bin}/tezos-accuser-PtMumbai-start</string>
           <key>EnvironmentVariables</key>
             <dict>
               <key>TEZOS_CLIENT_DIR</key>

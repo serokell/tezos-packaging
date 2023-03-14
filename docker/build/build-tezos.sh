@@ -7,5 +7,6 @@
 # in parent directory.
 set -euo pipefail
 
-eval "$(opam env)" && PROFILE="static" make build
+eval "$(opam env)"
+make static
 chmod +w octez-*

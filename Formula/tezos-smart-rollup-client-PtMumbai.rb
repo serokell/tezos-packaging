@@ -1,7 +1,8 @@
-# SPDX-FileCopyrightText: 2021 Oxhead Alpha
+#!/usr/bin/env ruby
+# SPDX-FileCopyrightText: 2023 Oxhead Alpha
 # SPDX-License-Identifier: LicenseRef-MIT-OA
 
-class TezosSigner < Formula
+class TezosSmartRollupClientPtmumbai < Formula
   @all_bins = []
 
   class << self
@@ -18,14 +19,17 @@ class TezosSigner < Formula
     depends_on dependency => :build
   end
 
-  dependencies = %w[gmp hidapi libev libffi]
+  dependencies = %w[gmp hidapi libev libffi tezos-sapling-params]
   dependencies.each do |dependency|
     depends_on dependency
   end
-  desc "A client to remotely sign operations or blocks"
+  desc "Smart contract rollup CLI client for PtMumbai"
 
   bottle do
-    root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosSigner.version}/"
+    root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosSmartRollupClientPtmumbai.version}/"
+    sha256 cellar: :any, big_sur: "926db44800b1aedc5a62935ee886399454392022122a97736ad0d5013200742a"
+    sha256 cellar: :any, arm64_big_sur: "6e10881ac601a4af5231c0b2d6b9e2faab41357c201253bfebcfdece924e949e"
+    sha256 cellar: :any, monterey: "63f157b0c5890a7f97528d78a6f71ef13e76b5f10b20a4d56345cefa9328ee41"
   end
 
   def make_deps
@@ -54,8 +58,8 @@ class TezosSigner < Formula
 
   def install
     make_deps
-    install_template "src/bin_signer/main_signer.exe",
-                     "_build/default/src/bin_signer/main_signer.exe",
-                     "octez-signer"
+    install_template "src/proto_016_PtMumbai/bin_sc_rollup_client/main_sc_rollup_client_016_PtMumbai.exe",
+                     "_build/default/src/proto_016_PtMumbai/bin_sc_rollup_client/main_sc_rollup_client_016_PtMumbai.exe",
+                     "octez-smart-rollup-client-PtMumbai"
   end
 end

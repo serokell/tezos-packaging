@@ -1,7 +1,9 @@
-# SPDX-FileCopyrightText: 2022 Oxhead Alpha
+#!/usr/bin/env ruby
+
+# SPDX-FileCopyrightText: 2023 Oxhead Alpha
 # SPDX-License-Identifier: LicenseRef-MIT-OA
 
-class TezosBakerPtlimapt < Formula
+class TezosSmartRollupNodePtmumbai < Formula
   @all_bins = []
 
   class << self
@@ -22,10 +24,13 @@ class TezosBakerPtlimapt < Formula
   dependencies.each do |dependency|
     depends_on dependency
   end
-  desc "Daemon for baking"
+  desc "Tezos smart contract rollup node for PtMumbai"
 
   bottle do
-    root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosBakerPtlimapt.version}/"
+    root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosSmartRollupNodePtmumbai.version}/"
+    sha256 cellar: :any, big_sur: "9593ee16dba5552eebcc4ccb0a54c87e68cdd2fbae16d6be3696fc1e8ef0a20b"
+    sha256 cellar: :any, arm64_big_sur: "e288980b2592adb8ba13310efb6661e8907bffd3be831cc4e080d802d99ae24d"
+    sha256 cellar: :any, monterey: "6198f9242da9d6c27ef4dfb077e78bf5aae7e0f2ebabd3cb4cb7033f3d7ee52d"
   end
 
   def make_deps
@@ -59,39 +64,24 @@ class TezosBakerPtlimapt < Formula
 
       set -euo pipefail
 
-      baker="#{bin}/octez-baker-PtLimaPt"
+      node="#{bin}/octez-smart-rollup-node-PtMumbai"
 
-      baker_config="$TEZOS_CLIENT_DIR/config"
-      mkdir -p "$TEZOS_CLIENT_DIR"
+      "$node" init "$ROLLUP_MODE" config \
+          for "$ROLLUP_ALIAS" \
+          --rpc-addr "$ROLLUP_NODE_RPC_ENDPOINT" \
+          --force
 
-      if [ ! -f "$baker_config" ]; then
-          "$baker" --endpoint "$NODE_RPC_SCHEME://$NODE_RPC_ADDR" \
-                  config init --output "$baker_config" >/dev/null 2>&1
-      else
-          "$baker" --endpoint "$NODE_RPC_SCHEME://$NODE_RPC_ADDR" \
-                  config update >/dev/null 2>&1
-      fi
-
-      launch_baker() {
-          exec "$baker" \
-              --endpoint "$NODE_RPC_SCHEME://$NODE_RPC_ADDR" \
-              run with local node "$TEZOS_NODE_DIR" "$@"
-      }
-
-      if [[ -z "$BAKER_ACCOUNT" ]]; then
-          launch_baker
-      else
-          launch_baker "$BAKER_ACCOUNT"
-      fi
-    EOS
-    File.write("tezos-baker-PtLimaPt-start", startup_contents)
-    bin.install "tezos-baker-PtLimaPt-start"
+      "$node" --endpoint "$NODE_RPC_SCHEME://$NODE_RPC_ADDR" \
+          run "$ROLLUP_MODE" for "$ROLLUP_ALIAS"
+      EOS
+    File.write("tezos-smart-rollup-node-PtMumbai-start", startup_contents)
+    bin.install "tezos-smart-rollup-node-PtMumbai-start"
     make_deps
-    install_template "src/proto_015_PtLimaPt/bin_baker/main_baker_015_PtLimaPt.exe",
-                     "_build/default/src/proto_015_PtLimaPt/bin_baker/main_baker_015_PtLimaPt.exe",
-                     "octez-baker-PtLimaPt"
+    install_template "src/proto_016_PtMumbai/bin_sc_rollup_node/main_sc_rollup_node_016_PtMumbai.exe",
+                     "_build/default/src/proto_016_PtMumbai/bin_sc_rollup_node/main_sc_rollup_node_016_PtMumbai.exe",
+                     "octez-smart-rollup-node-PtMumbai"
   end
-  plist_options manual: "tezos-baker-PtLimaPt run with local node"
+  plist_options manual: "tezos-smart-rollup-node-PtMumbai run for"
   def plist
     <<~EOS
       <?xml version="1.0" encoding="UTF-8"?>
@@ -102,19 +92,19 @@ class TezosBakerPtlimapt < Formula
           <key>Label</key>
           <string>#{plist_name}</string>
           <key>Program</key>
-          <string>#{opt_bin}/tezos-baker-PtLimaPt-start</string>
+          <string>#{opt_bin}/tezos-smart-rollup-node-PtMumbai-start</string>
           <key>EnvironmentVariables</key>
             <dict>
               <key>TEZOS_CLIENT_DIR</key>
               <string>#{var}/lib/tezos/client</string>
-              <key>TEZOS_NODE_DIR</key>
-              <string></string>
-              <key>NODE_RPC_SCHEME</key>
-              <string>http</string>
-              <key>NODE_RPC_ADDR</key>
-              <string>localhost:8732</string>
-              <key>BAKER_ACCOUNT</key>
-              <string></string>
+              <key>NODE_RPC_ENDPOINT</key>
+              <string>http://localhost:8732</string>
+              <key>ROLLUP_NODE_RPC_ENDPOINT</key>
+              <string>127.0.0.1:8472</string>
+              <key>ROLLUP_MODE</key>
+              <string>observer</string>
+              <key>ROLLUP_ALIAS</key>
+              <string>rollup</string>
           </dict>
           <key>RunAtLoad</key><true/>
           <key>StandardOutPath</key>

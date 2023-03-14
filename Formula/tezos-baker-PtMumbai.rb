@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2022 Oxhead Alpha
 # SPDX-License-Identifier: LicenseRef-MIT-OA
 
-class TezosBakerPtlimapt < Formula
+class TezosBakerPtmumbai < Formula
   @all_bins = []
 
   class << self
@@ -25,7 +25,7 @@ class TezosBakerPtlimapt < Formula
   desc "Daemon for baking"
 
   bottle do
-    root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosBakerPtlimapt.version}/"
+    root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosBakerPtmumbai.version}/"
   end
 
   def make_deps
@@ -59,7 +59,7 @@ class TezosBakerPtlimapt < Formula
 
       set -euo pipefail
 
-      baker="#{bin}/octez-baker-PtLimaPt"
+      baker="#{bin}/octez-baker-PtMumbai"
 
       baker_config="$TEZOS_CLIENT_DIR/config"
       mkdir -p "$TEZOS_CLIENT_DIR"
@@ -84,14 +84,14 @@ class TezosBakerPtlimapt < Formula
           launch_baker "$BAKER_ACCOUNT"
       fi
     EOS
-    File.write("tezos-baker-PtLimaPt-start", startup_contents)
-    bin.install "tezos-baker-PtLimaPt-start"
+    File.write("tezos-baker-PtMumbai-start", startup_contents)
+    bin.install "tezos-baker-PtMumbai-start"
     make_deps
-    install_template "src/proto_015_PtLimaPt/bin_baker/main_baker_015_PtLimaPt.exe",
-                     "_build/default/src/proto_015_PtLimaPt/bin_baker/main_baker_015_PtLimaPt.exe",
-                     "octez-baker-PtLimaPt"
+    install_template "src/proto_016_PtMumbai/bin_baker/main_baker_016_PtMumbai.exe",
+                     "_build/default/src/proto_016_PtMumbai/bin_baker/main_baker_016_PtMumbai.exe",
+                     "octez-baker-PtMumbai"
   end
-  plist_options manual: "tezos-baker-PtLimaPt run with local node"
+  plist_options manual: "tezos-baker-PtMumbai run with local node"
   def plist
     <<~EOS
       <?xml version="1.0" encoding="UTF-8"?>
@@ -102,7 +102,7 @@ class TezosBakerPtlimapt < Formula
           <key>Label</key>
           <string>#{plist_name}</string>
           <key>Program</key>
-          <string>#{opt_bin}/tezos-baker-PtLimaPt-start</string>
+          <string>#{opt_bin}/tezos-baker-PtMumbai-start</string>
           <key>EnvironmentVariables</key>
             <dict>
               <key>TEZOS_CLIENT_DIR</key>

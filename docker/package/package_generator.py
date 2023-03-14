@@ -84,6 +84,7 @@ def get_build_deps(binaries_dir):
 
     return [
         "make",
+        "cmake",
         "m4",
         "perl",
         "pkg-config",

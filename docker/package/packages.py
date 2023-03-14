@@ -20,15 +20,18 @@ networks = {
     "mainnet": "mainnet",
     "ghostnet": "ghostnet",
     "limanet": "limanet",
+    "mumbainet": "mumbainet",
 }
 networks_protos = {
-    "mainnet": ["PtLimaPt"],
-    "ghostnet": ["PtLimaPt"],
+    "mainnet": ["PtLimaPt", "PtMumbai"],
+    "ghostnet": ["PtLimaPt", "PtMumbai"],
     "limanet": ["PtLimaPt"],
+    "mumbainet": ["PtMumbai"],
 }
 
 protocol_numbers = {
     "PtLimaPt": "015",
+    "PtMumbai": "016",
 }
 
 signer_units = [
@@ -544,5 +547,6 @@ def mk_rollup_packages(type, protos, full_type=None):
 
 
 packages.extend(mk_rollup_packages("tx", ["PtLimaPt"]))
+packages.extend(mk_rollup_packages("sc", ["PtMumbai"], "smart"))
 
 packages = dict(ChainMap(*packages))

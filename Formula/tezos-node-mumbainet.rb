@@ -5,7 +5,7 @@
 
 class TezosNodeMumbainet < Formula
   url "file:///dev/null"
-  version "v16.0-rc3-2"
+  version "v16.0-1"
 
   depends_on "tezos-node"
 

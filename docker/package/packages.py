@@ -23,8 +23,8 @@ networks = {
     "mumbainet": "https://teztnets.xyz/mumbainet",
 }
 networks_protos = {
-    "mainnet": ["PtLimaPt"],
-    "ghostnet": ["PtLimaPt"],
+    "mainnet": ["PtLimaPt", "PtMumbai"],
+    "ghostnet": ["PtLimaPt", "PtMumbai"],
     "limanet": ["PtLimaPt"],
     "mumbainet": ["PtMumbai"],
 }

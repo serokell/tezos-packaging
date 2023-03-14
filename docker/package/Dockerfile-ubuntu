@@ -46,5 +46,6 @@ COPY docker/package/scripts /tezos-packaging/docker/package/scripts
 # Uncomment once patches are needed once again
 # COPY docker/package/patches /tezos-packaging/docker/package/patches
 COPY LICENSE /tezos-packaging/LICENSE
-
-ENTRYPOINT ["builder", "-m", "package.package_generator"]
+COPY docker/package/scripts/container-entrypoint.sh /container-entrypoint.sh
+ARG args
+RUN /container-entrypoint.sh

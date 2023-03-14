@@ -29,4 +29,7 @@ COPY docker/package/defaults /tezos-packaging/docker/package/defaults
 COPY docker/package/scripts /tezos-packaging/docker/package/scripts
 COPY LICENSE /tezos-packaging/LICENSE
 
-ENTRYPOINT ["python3", "-m", "package.package_generator"]
+RUN install -m 0755 /usr/bin/python3 /usr/bin/builder
+COPY docker/package/scripts/container-entrypoint.sh /container-entrypoint.sh
+ARG args
+RUN /container-entrypoint.sh

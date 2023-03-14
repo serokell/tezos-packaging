@@ -117,16 +117,6 @@ if not octez_version:
 # packages should be built in respective containers for better reproducibility
 images = ["37"] if target_os == "fedora" else distributions
 
-for dist in images:
-    # prebuild docker image before using containers
-    check_call(
-        f"""
-    {virtualisation_engine}
-    build -t tezos-{target_os}-{dist}
-    -f docker/package/Dockerfile-{target_os} --build-arg OCTEZ_VERSION={octez_version} --build-arg dist={dist} .
-    """
-    )
-
 packages_to_build = get_packages_to_build(args.packages)
 
 if not args.build_sapling_package:
@@ -144,23 +134,36 @@ for image in images:
             f"--packages {' '.join(packages_to_build.keys())}",
         ]
     )
+    # prebuild docker image before using containers
+    check_call(
+        f"""
+    {virtualisation_engine}
+    build -t tezos-{target_os}-{image}
+    -f docker/package/Dockerfile-{target_os}
+    --build-arg OCTEZ_VERSION={octez_version}
+    --build-arg dist={image}
+    --build-arg args='{cmd_args}' .
+    """
+    )
 
     container_create_args = (
         "--cap-add SYS_ADMIN" if target_os == "fedora" and args.distributions else ""
     )
 
-    container_id = get_proc_output(
+    result = get_proc_output(
         f"""
     {virtualisation_engine}
     create {docker_volumes}
     {container_create_args}
     --env OCTEZ_VERSION={octez_version}
     --env OPAMSOLVERTIMEOUT=900
-    -t tezos-{target_os}-{image} {cmd_args}
+    -t tezos-{target_os}-{image}
     """
-    ).stdout.strip()
+    )
 
-    exit_code = call(f"{virtualisation_engine} start -a {container_id}")
+    exit_code = result.returncode
+
+    container_id = result.stdout.strip()
 
     os.makedirs(args.output_dir, exist_ok=True)
 

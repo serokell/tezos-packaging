@@ -181,7 +181,7 @@ for image in images:
     if sources_dir_name is None and target_os == "ubuntu":
         sources_dir_name = "origs"
         docker_volumes += (
-            f"-v {args.output_dir}:/tezos-packaging/docker/{sources_dir_name}/"
+            f" -v {args.output_dir}:/tezos-packaging/docker/{sources_dir_name}/"
         )
 
 artifacts = (os.path.join(args.output_dir, x) for x in os.listdir(args.output_dir))

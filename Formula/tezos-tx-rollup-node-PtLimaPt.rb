@@ -28,6 +28,7 @@ class TezosTxRollupNodePtlimapt < Formula
 
   bottle do
     root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosTxRollupNodePtlimapt.version}/"
+    sha256 cellar: :any, monterey: "6bb2525be624ef6205ba9d13615083284741048529e3bb80d609de5dcbdea83c"
     sha256 cellar: :any, big_sur: "9585ba4dd156e9b4390892d51635eabd72eaef451f2d452848efa34fe5bf2748"
     sha256 cellar: :any, arm64_big_sur: "5b1566df2706fa8caa247c884308a24e149005dbc62ed2b469505b0fd213a23d"
   end

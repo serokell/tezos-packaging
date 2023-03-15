@@ -26,6 +26,8 @@ class TezosAccuserPtmumbai < Formula
 
   bottle do
     root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosAccuserPtmumbai.version}/"
+    sha256 cellar: :any, big_sur: "28e7b8c24e5c1f962d7b8097484275d25a738e688958d08eb26d6413d0acc425"
+    sha256 cellar: :any, arm64_big_sur: "d58437e2035dee5c651f2670697638014c6315620a2daa1c23b99f9cf39a8f2d"
   end
 
   def make_deps

@@ -24,8 +24,6 @@ subprocess.run(
     ]
 )
 
-shutil.rmtree(os.path.join("tezos", ".git"))
-
 subprocess.run(["git", "clone", "https://gitlab.com/tezos/opam-repository.git"])
 
 opam_repository_tag = (

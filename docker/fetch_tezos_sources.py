@@ -23,8 +23,8 @@ subprocess.run(
         "1",
     ]
 )
-
-shutil.rmtree(os.path.join("tezos", ".git"))
+# NOTE: it's important to keep the `tezos/.git` directory here, because the
+# git tag is used to set the version in the Octez binaries.
 
 subprocess.run(["git", "clone", "https://gitlab.com/tezos/opam-repository.git"])
 

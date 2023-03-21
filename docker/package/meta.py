@@ -23,7 +23,8 @@ meta_json_contents = json.load(
     open(f"{os.path.dirname(__file__)}/../../meta.json", "r")
 )
 packages_meta = PackagesMeta(
-    version=version,
+    # TODO: remove this in the next release
+    version=version + "b",
     release=str(meta_json_contents["release"]),
     ubuntu_epoch=2,
     fedora_epoch=1,

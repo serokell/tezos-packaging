@@ -9,6 +9,8 @@ The following scripts can be used with `podman` instead of `docker`
 as a virtualisation engine. In order to use `podman` you should
 set environment variable `USE_PODMAN="True"`.
 
+<!-- TODO #635: extend and clean up this doc -->
+
 ## Statically built binaries
 
 Static binaries building using custom alpine image.

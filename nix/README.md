@@ -7,14 +7,14 @@
 
 ## Dynamically built binaries
 
-In order to build all binaries run at the root of project:
+In order to build all binaries run at the root of this project:
 ```bash
 nix build .
 ```
 
-As an alternative you can build single binary:
+Alternatively, you can build a single binary too.
+For example, this:
 ```
 nix build .#tezos-client
 ```
-
-This will produce `tezos-client` binary.
+will produce the `tezos-client` binary.

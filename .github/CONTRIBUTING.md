@@ -17,7 +17,7 @@ otherwise improve our project, pull requests are most welcome.
 
 ## Quick maintenance guide
 
-<!-- TODO: check and update these instructions -->
+<!-- TODO #634: check and update these instructions -->
 
 - The Octez revision used is located in the [`meta.json`](../meta.json) and [`flake.lock`](../flake.lock) file.
   You can update these to the latest available revision with the [`update-tezos.sh` script](../scripts/update-tezos.sh)

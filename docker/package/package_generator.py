@@ -5,6 +5,7 @@ import os
 import sys
 import shutil
 import argparse
+import urllib.request
 from .fedora import build_fedora_package
 from .ubuntu import build_ubuntu_package
 from .packages import packages as all_packages
@@ -39,6 +40,12 @@ parser.add_argument(
     help="specify directory with source archive(s) for ubuntu packages",
     type=os.path.abspath,
 )
+parser.add_argument(
+    "--launchpad-sources",
+    help="download sources from launchpad instead of providing them",
+    action="store_true",
+)
+parser.set_defaults(launchpad_sources=False)
 
 
 def get_ubuntu_run_deps(binaries_dir):
@@ -110,6 +117,8 @@ def main():
 
     source_archives = os.listdir(args.sources_dir) if args.sources_dir else []
 
+    dl_sources = args.launchpad_sources
+
     binaries_dir = args.binaries_dir
 
     if target_os == "ubuntu":
@@ -132,20 +141,52 @@ def main():
     for package_name in args.packages:
         packages.append(all_packages[package_name])
 
-    if is_source and source_archives:
+    if is_source:
         errors = []
-        for package in packages:
-            source_archive = (
-                f"{package.name.lower()}_{package.meta.version}.orig.tar.gz"
-            )
-            if source_archive in source_archives:
-                package.source_archive = os.path.join(args.sources_dir, source_archive)
-            elif getattr(package, "letter_version", None) is None:
-                # We throw an error if the source is missing, unless the package is
-                # tezos-baking, for which we don't need new sources.
-                errors.append(
-                    f"ERROR: supplied source dir does not contain source archive for {package.name}"
+        if source_archives:
+            for package in packages:
+                source_archive = (
+                    f"{package.name.lower()}_{package.meta.version}.orig.tar.gz"
                 )
+                if source_archive in source_archives:
+                    package.source_archive = os.path.join(
+                        args.sources_dir, source_archive
+                    )
+                elif getattr(package, "letter_version", None) is None:
+                    # We throw an error if the source is missing, unless the package is
+                    # tezos-baking, for which we don't need new sources.
+                    errors.append(
+                        f"ERROR: supplied source dir does not contain source archive for {package.name}"
+                    )
+        elif dl_sources:
+            for package in packages:
+                if getattr(package, "letter_version", None) is None:
+                    version = package.meta.version
+                    repo = "tezos-rc" if "rc" in version else "tezos"
+                    release = package.meta.release
+                    name = package.name.lower()
+                    # distributions list is always unempty at this point
+                    # and sources archive is the same for all distributions
+                    dist = distributions[0]
+                    url = f"https://launchpad.net/~serokell/+archive/ubuntu/{repo}/+sourcefiles/{name}/2:{version}-0ubuntu1~{dist}/{name}_{version}.orig.tar.gz"
+                    source_archive = f"{name}_{package.meta.version}.orig.tar.gz"
+                    try:
+                        urllib.request.urlretrieve(
+                            url,
+                            source_archive,
+                            lambda count, block_size, total_size: print(
+                                f"{package.name} source is downloading: "
+                                + str(round(count * block_size / total_size * 100, 2))
+                                + "%",
+                                end="\r",
+                            ),
+                        )
+                        print(f"{package.name} source was downloaded successfully")
+                        package.source_archive = os.path.realpath(source_archive)
+                    except (urllib.error.URLError, ValueError):
+                        errors.append(
+                            f"ERROR: source archive for {package.name} is not available"
+                        )
         if errors:
             print("\n" + "\n".join(errors) + "\n")
             sys.exit(1)

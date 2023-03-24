@@ -21,7 +21,7 @@ steps:
    commands:
    - eval "$SET_VERSION"
    - nix develop .#docker-tezos-packages -c ./docker/docker-tezos-packages.py --os ubuntu --type source -s "Serokell <tezos-packaging@serokell.io>"
-   - nix develop .#docker-tezos-packages -c ./docker/docker-tezos-packages.py --os fedora --type source -s "Serokell <tezos-packaging@serokell.io>"
+   - nix develop .#docker-tezos-packages -c ./docker/docker-tezos-packages.py --os fedora --type source --build-sapling-package -s "Serokell <tezos-packaging@serokell.io>"
    artifact_paths:
      - ./out/*
 

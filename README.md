@@ -16,49 +16,48 @@ for information about the binaries, their usage, and concepts about the Tezos ne
 See the [versioning doc](./docs/versioning.md) for information about the versioning
 policy for the provided forms of distribution.
 
-## Set up a node and/or baking on Ubuntu
+## Getting started on Ubuntu
 
-The simplest procedure to set up a node and/or baking instance is provided for Ubuntu.
+The simplest procedures to set up a node, to bake and/or vote are provided for Ubuntu.
 
-These commands will install everything necessary and start an interactive
-setup wizard:
-```
+These commands will install everything necessary for you:
+```sh
 sudo add-apt-repository -yu ppa:serokell/tezos
 sudo apt-get install -y tezos-baking
+```
+
+#### Set up a node and/or bake
+
+To set up a node and/or a baking instance, launch the interactive setup wizard with:
+```sh
 tezos-setup
 ```
-> :warning: Since [#570](https://github.com/serokell/tezos-packaging/pull/570), this wizard was renamed from `tezos-setup-wizard`.
 
+You can also read [the dedicated article](./docs/baking.md) to find out more about
+this setup, the binaries, and the services used.
 
-Read [the dedicated article](./docs/baking.md) to find out more about the setup,
-the binaries, and the services used.
+For setting up experimental transaction rollup node, see [this doc](./docs/tx-rollup.md).
 
-For setting up experimental transaction rollup node, see [this doc](./docs/tx_rollup.md).
+#### Voting on Ubuntu
 
-### Voting on Ubuntu
-
-An interactive voting wizard is provided for Ubuntu. After setting up a baking instance
-on mainnet, you can vote by running:
-
+To vote on `mainnet`, launch the interactive voting wizard with:
 ```bash
 tezos-vote
 ```
-> :warning: Since [#570](https://github.com/serokell/tezos-packaging/pull/570), this wizard was renamed from `tezos-voting-wizard`.
 
-
-Read the [documentation on voting](./docs/voting.md) to find out more details about
-voting on custom networks.
+Read the [documentation on voting](./docs/voting.md) to find out more details
+about voting on custom networks.
 
 ## Installing Tezos
 
 `tezos-packaging` supports several native distribution methods for convenience:
 
-- [**Ubuntu**](./docs/distros/ubuntu.md)
-- [**Debian**](./docs/distros/ubuntu.md#debian)
-- [**Raspberry Pi OS**](./docs/distros/ubuntu.md#raspberry)
-- [**Fedora**](./docs/distros/fedora.md)
-- [**macOS**](./docs/distros/macos.md)
-- [**Windows using WSL**](./docs/distros/ubuntu.md#wsl)
+- [**Ubuntu**](./docs/ubuntu.md)
+- [**Debian**](./docs/ubuntu.md#debian)
+- [**Raspberry Pi OS**](./docs/ubuntu.md#raspberry)
+- [**Fedora**](./docs/fedora.md)
+- [**macOS**](./docs/macos.md)
+- [**Windows using WSL**](./docs/windows.md)
 
 The information about supported versions of the aforementioned OSes is available in the [support policy doc](./docs/support-policy.md).
 
@@ -78,8 +77,8 @@ This repository provides two distinct ways for building and packaging tezos bina
 
 ## Release process
 
-Please see the [release workflow doc](./docs/release-workflow.md) for more information about the details of the `tezos-packaging`
-releasing process.
+Please see the [release workflow doc](./docs/release-workflow.md) for more
+information about the details of the `tezos-packaging` releasing process.
 
 ## For Contributors
 

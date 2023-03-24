@@ -23,7 +23,7 @@ systemctl stop <package-name>.service
 
 Each service has its configuration file located in `/etc/default`.
 These can be edited to modify the options and behavior of the services, see
-[the dedicated documentation](./service-options.md) for more information.
+[the dedicated documentation](./configuration.md) for more information.
 
 Files created by the services will be located in `/var/lib/tezos/` by default.
 
@@ -54,41 +54,7 @@ default configuration files, they can be found in the
 folders respectively.
 Note: some of the default values are not in those files, as they are generated
 dinamically, you can find the remaining options needed in
-[the dedicated document](./service-options.md).
-
-## Systemd units on WSL
-
-`systemd` is supported on WSL starting from version `0.67.6` and higher.
-You can check your version by running the `wsl --version` command.
-
-If that command fails then you need to upgrade your WSL to the Store version.
-You can read how to do it [there](https://devblogs.microsoft.com/commandline/a-preview-of-wsl-in-the-microsoft-store-is-now-available/#how-to-install-and-use-wsl-in-the-microsoft-store).
-Note that you need to have Windows 11 to install the required version.
-
-After you have installed the required version of WSL along with the distribution
-(we recommend using Ubuntu), you need to launch it and configure `systemd`.
-The configuration steps are described below.
-
-To enable `systemd` startup on boot you need to do the following steps:
-
-1. `sudo nano /etc/wsl.conf`
-2. In the `nano` editor add the following lines to the `wsl.conf` file
-
-```
-[boot]
-systemd=true
-```
-3. Close the editor and save your changes using `ctrl + x` keyboard shortcut.
-4. Restart your machine to apply the WSL configuration changes.
-
-To make sure `systemd` is running on your machine use the
-`systemctl list-unit-files --type=service` command which should show your services' status.
-
-You can read more about installing and using `systemd` on WSL in
-[this article](https://devblogs.microsoft.com/commandline/systemd-support-is-now-available-in-wsl/).
-
-After you have configured WSL with `systemd`, the documentation above should
-apply to you too.
+[the dedicated document](./configuration.md).
 
 ## Multiple similar systemd services
 
@@ -109,7 +75,7 @@ systemctl start tezos-node-<network>
 ```
 
 Also, there are `tezos-node-<network>` binary aliases that are equivalent to
-running `tezos-node` with [the service options](./service-options.md) given.
+running `tezos-node` with [the service options](./configuration.md) given.
 
 In addition to node services where the config is predefined to a specific network
 (e.g. `tezos-node-mainnet` or `tezos-node-limanet`), it's possible to run
@@ -118,7 +84,7 @@ In addition to node services where the config is predefined to a specific networ
 Another case for running multiple similar systemd services is when one wants to have
 multiple daemons that target different protocols.
 Since daemons for different protocols are provided in the different packages, they will
-have different service files. The only thing that needs to be changed is [the config file](./service-options.md).
+have different service files. The only thing that needs to be changed is [the config file](./configuration.md).
 One should provide desired node address, data directory for daemon files and node directory
 (however, this is the case only for baker daemon).
 
@@ -127,4 +93,4 @@ One should provide desired node address, data directory for daemon files and nod
 * Over UNIX socker (`tezos-signer-unix.service`).
 * Over HTTP (`tezos-signer-http.service`).
 * Over HTTPS (`tezos-signer-https.service`)
-Each signer service has [dedicated config files](./service-options.md) as well.
+Each signer service has [dedicated config files](./configuration.md) as well.

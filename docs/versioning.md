@@ -45,14 +45,14 @@ the [Debian versioning policy](https://www.debian.org/doc/debian-policy/ch-contr
 E.g. `tezos-client-11.0+no-adx-0ubuntu1~focal`, where `focal` is `20.04 LTS`.
 
 We use different PPA repositories for stable and release candidate Ubuntu packages.
-You can read more about this in the [doc about Ubuntu packages](./distros/ubuntu.md).
+You can read more about this in the [doc about Ubuntu packages](./ubuntu.md).
 
 ## Fedora packages
 
 We use different Copr projects for stable and release candidate Fedora packages.
-You can read more about this in the [doc about Fedora packages](./distros/fedora.md).
+You can read more about this in the [doc about Fedora packages](./fedora.md).
 
 ## Brew formulae
 
 We use two distinct repository mirrors to provide stable and release candidate brew formulae.
-You can read more about this in the [doc about macOS packaging](./distros/macos.md).
+You can read more about this in the [doc about macOS packaging](./macos.md).

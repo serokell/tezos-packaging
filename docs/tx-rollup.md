@@ -21,5 +21,5 @@ For futher details, see [the upstream documentation on transaction rollups](http
 ## Options and defaults
 
 As any other `systemd` services ditributed here, rollup binaries have settable
-options, see [the dedicated documentation](./service-options.md) to see their
+options, see [the dedicated documentation](./configuration.md) to see their
 default values and how to change these.

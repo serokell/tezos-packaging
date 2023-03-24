@@ -125,7 +125,7 @@ the smallest and the fastest mode that is sufficient for baking (you can read mo
 All commands within the service are run under the `tezos` user.
 
 The `tezos-node` package provides `tezos-node-<network>` aliases that are equivalent to
-running `tezos-node` with [the service options](./service-options.md).
+running `tezos-node` with [the service options](./configuration.md).
 
 In order to import the snapshot, run the following command:
 ```
@@ -157,7 +157,7 @@ key that will be used for baking and endorsing.
 Since `PtJakart`, the `--liquidity-baking-toggle-vote` command line option for
 `tezos-baker` is now mandatory. In our systemd services, it is set to `pass` by
 default.
-You can change it as desired in [the service config file](./service-options.md).
+You can change it as desired in [the service config file](./configuration.md).
 
 You can also use the [Setup Wizard](#using-the-wizard) which will handle everything for you.
 
@@ -240,7 +240,7 @@ sudo systemctl stop tezos-baking-<network>.service
 ## Advanced baking instance setup
 
 These services have several options that can be modified to change their behavior.
-See [the dedicated documentation](./service-options.md) for more information on
+See [the dedicated documentation](./configuration.md) for more information on
 how to do that.
 
 ### Using a custom chain
@@ -252,7 +252,7 @@ or official testnets, you can do so:
   ```bash
   sudo cp /etc/default/tezos-baking-custom@ /etc/default/tezos-baking-custom@<chain-name>
   ```
-2. [Edit the `tezos-baking-custom@<chain-name>` configuration](./service-options.md)
+2. [Edit the `tezos-baking-custom@<chain-name>` configuration](./configuration.md)
  and set the `CUSTOM_NODE_CONFIG` variable to the path to your config file.
 3. Start custom baking service:
   ```bash
@@ -265,7 +265,7 @@ or official testnets, you can do so:
 ```
 
 If at any point after that you want to reset the custom baking service, you can set
-`RESET_ON_STOP` to `true` [in the `tezos-baking-custom@<chain-name>` configuration](./service-options.md) and run:
+`RESET_ON_STOP` to `true` [in the `tezos-baking-custom@<chain-name>` configuration](./configuration.md) and run:
 
 ```bash
 sudo systemctl stop tezos-baking-custom@voting
@@ -312,7 +312,7 @@ multipass shell tezos
   <em>Optional</em> Allow RPC access from virtual machine's host...
  </summary>
 
-[Update the `tezos-node-<network>` service configuration](./service-options.md)
+[Update the `tezos-node-<network>` service configuration](./configuration.md)
 and set the `NODE_RPC_ADDR` to `0.0.0.0:8732`.
 
 Then restart the service:

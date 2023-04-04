@@ -242,7 +242,7 @@ def replace_systemd_service_env(service_name, field, value):
         if old is not None:
             new = f"{field}={value}"
             proc_call(
-                f"sudo sed -i 's/{old.group(0)}/{new}/' {env_file.decode('utf8')}"
+                f"sudo sed -i 's|{old.group(0)}|{new}|' {env_file.decode('utf8')}"
             )
 
 

@@ -99,7 +99,7 @@ steps:
  - label: test deb source packages via docker
    commands:
    - eval "$SET_VERSION"
-   - nix develop .#docker-tezos-packages -c ./docker/docker-tezos-packages.py --os ubuntu --type source
+   - nix develop .#docker-tezos-packages -c ./docker/package/util/build.py --os ubuntu --type source
    artifact_paths:
      - ./out/*
    branches: "!master"
@@ -108,7 +108,7 @@ steps:
      queue: "docker"
    only_changes: &native_packaging_changes_regexes
    - docker/package/.*
-   - docker/docker-tezos-packages.py
+   - docker/package/util/build.py
    - meta.json
    - protocols.json
  - label: test deb binary packages via docker
@@ -116,7 +116,7 @@ steps:
    - eval "$SET_VERSION"
    # Building all binary packages will take significant amount of time, so we build only one
    # in order to ensure package generation sanity
-   - nix develop .#docker-tezos-packages -c ./docker/docker-tezos-packages.py --os ubuntu --type binary -p tezos-baker-PtMumbai
+   - nix develop .#docker-tezos-packages -c ./docker/package/util/build.py --os ubuntu --type binary -p tezos-baker-PtMumbai
    - rm -rf out
    # It takes much time to build binary package, so we do it only on master
    branches: "master"
@@ -127,7 +127,7 @@ steps:
  - label: test rpm source packages via docker
    commands:
    - eval "$SET_VERSION"
-   - nix develop .#docker-tezos-packages -c ./docker/docker-tezos-packages.py --os fedora --type source
+   - nix develop .#docker-tezos-packages -c ./docker/package/util/build.py --os fedora --type source
    artifact_paths:
      - ./out/*
    branches: "!master"
@@ -140,7 +140,7 @@ steps:
    - eval "$SET_VERSION"
    # Building all binary packages will take significant amount of time, so we build only one
    # in order to ensure package generation sanity
-   - nix develop .#docker-tezos-packages -c ./docker/docker-tezos-packages.py --os fedora --type binary -p tezos-baker-PtMumbai
+   - nix develop .#docker-tezos-packages -c ./docker/package/util/build.py --os fedora --type binary -p tezos-baker-PtMumbai
    - rm -rf out
    # It takes much time to build binary package, so we do it only on master
    branches: "master"

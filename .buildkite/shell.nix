@@ -2,6 +2,9 @@
 # SPDX-License-Identifier: LicenseRef-MIT-TQ
 
 { pkgs, ... }:
-(pkgs.python3.buildEnv.override {
-  extraLibs = with pkgs.python3Packages; [ pyyaml ];
-}).env
+with pkgs; mkShell {
+  buildInputs = [
+    (python3.withPackages (ps: with ps; [ pyyaml ]))
+    (writeShellScriptBin "copr-cli" ''/run/wrappers/bin/sudo -u copr-uploader /run/current-system/sw/bin/copr-cli "$@"'')
+  ];
+}

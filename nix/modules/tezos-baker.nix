@@ -9,6 +9,8 @@ let
   octez-baker-pkgs = {
     "PtMumbai" =
       "${pkgs.octezPackages.octez-baker-PtMumbai}/bin/octez-baker-PtMumbai";
+    "PtNairob" =
+      "${pkgs.octezPackages.octez-baker-PtNairob}/bin/octez-baker-PtNairob";
   };
   octez-client = "${pkgs.octezPackages.octez-client}/bin/octez-client";
   cfg = config.services.octez-baker;

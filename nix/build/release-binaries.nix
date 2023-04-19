@@ -32,16 +32,6 @@ in [
     description = "A client to decode and encode JSON";
     supports = protocolsFormatted;
   }
-  {
-    name = "octez-smart-rollup-client-PtMumbai";
-    description = "Smart contract rollup CLI client for PtMumbai";
-    supports = "PtMumbai";
-  }
-  {
-    name = "octez-smart-rollup-node-PtMumbai";
-    description = "Tezos smart contract rollup node for PtMumbai";
-    supports = "PtMumbai";
-  }
 ] ++ builtins.concatMap (protocol: [
   {
     name = "octez-baker-${protocol}";
@@ -51,6 +41,16 @@ in [
   {
     name = "octez-accuser-${protocol}";
     description = "Daemon for accusing";
+    supports = protocol;
+  }
+  {
+    name = "octez-smart-rollup-client-${protocol}";
+    description = "Smart contract rollup CLI client for ${protocol}";
+    supports = protocol;
+  }
+  {
+    name = "octez-smart-rollup-node-${protocol}";
+    description = "Tezos smart contract rollup node for ${protocol}";
     supports = protocol;
   }
 ]) protocols.active

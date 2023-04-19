@@ -303,8 +303,7 @@ key_import_modes = {
 
 networks = {
     "mainnet": "Main Tezos network",
-    "ghostnet": "Long running test network, currently using the lima Tezos protocol",
-    "limanet": "Test network using the lima Tezos protocol",
+    "ghostnet": "Long running test network, currently using the mumbai Tezos protocol",
     "mumbainet": "Test network using the mumbai Tezos protocol",
 }
 

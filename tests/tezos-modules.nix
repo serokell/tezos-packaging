@@ -18,7 +18,7 @@ import "${nixpkgs}/nixos/tests/make-test-python.nix" ({ ... }:
                 ../nix/modules/tezos-baker.nix
               ];
 
-    services.octez-node.instances.limanet = {
+    services.octez-node.instances.mumbainet = {
       enable = true;
       additionalOptions = [
         "--bootstrap-threshold=1"
@@ -26,19 +26,19 @@ import "${nixpkgs}/nixos/tests/make-test-python.nix" ({ ... }:
       ];
     };
 
-    services.octez-signer.instances.limanet = {
+    services.octez-signer.instances.mumbainet = {
       enable = true;
       networkProtocol = "http";
     };
 
-    services.octez-accuser.instances.limanet = {
+    services.octez-accuser.instances.mumbainet = {
       enable = true;
-      baseProtocols = ["PtLimaPt"];
+      baseProtocols = ["PtMumbai"];
     };
 
-    services.octez-baker.instances.limanet = {
+    services.octez-baker.instances.mumbainet = {
       enable = true;
-      baseProtocols = ["PtLimaPt"];
+      baseProtocols = ["PtMumbai"];
       bakerAccountAlias = "baker";
       bakerSecretKey = "unencrypted:edsk3KaTNj1d8Xd3kMBrZkJrfkqsz4XwwiBXatuuVgTdPye2KpE98o";
     };
@@ -56,7 +56,7 @@ import "${nixpkgs}/nixos/tests/make-test-python.nix" ({ ... }:
     ]
 
     for s in services:
-        machine.wait_for_unit(f"tezos-limanet-{s}.service")
+        machine.wait_for_unit(f"tezos-mumbainet-{s}.service")
 
     with subtest("check octez-node rpc response"):
         machine.wait_for_open_port(8732)
@@ -66,6 +66,6 @@ import "${nixpkgs}/nixos/tests/make-test-python.nix" ({ ... }:
 
     with subtest("service status sanity check"):
         for s in services:
-            machine.succeed(f"systemctl status tezos-limanet-{s}.service")
+            machine.succeed(f"systemctl status tezos-mumbainet-{s}.service")
   '';
 }) { inherit pkgs system; }

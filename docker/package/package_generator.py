@@ -162,7 +162,9 @@ def main():
             for package in packages:
                 if getattr(package, "letter_version", None) is None:
                     version = package.meta.version
-                    repo = "tezos-rc" if "rc" in version else "tezos"
+                    repo = (
+                        "tezos-rc" if "rc" in version or "beta" in version else "tezos"
+                    )
                     release = package.meta.release
                     name = package.name.lower()
                     # distributions list is always unempty at this point

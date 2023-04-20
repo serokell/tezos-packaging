@@ -198,8 +198,8 @@ steps:
  - label: update RC mirror repository
    if: |
      build.branch == "master" &&
-       (build.message =~ /^Merge pull request .* from serokell\/auto\/v[0-9]+\.[0-9]+-rc.*-release/ ||
-          build.message =~ /^Merge pull request .* from serokell\/auto\/update-brew-formulae-v[.0-9]+-rc.*/)
+       (build.message =~ /^Merge pull request .* from serokell\/auto\/v[0-9]+\.[0-9]+-(rc|beta).*-release/ ||
+          build.message =~ /^Merge pull request .* from serokell\/auto\/update-brew-formulae-v[.0-9]+-(rc|beta).*/)
    depends_on:
    - "auto-release"
    env:

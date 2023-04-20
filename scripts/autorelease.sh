@@ -34,7 +34,7 @@ for asset in "$assets_dir"/*; do
 done
 
 msg_regex="Merge pull request .* from serokell\/auto\/(v.*)-release"
-rc_regex="^v[0-9]+\.[0-9]+-rc[0-9]+"
+rc_regex="^v[0-9]+\.[0-9]+-(rc|beta)[0-9]+"
 
 # We create a pre-release in any case except if we are merging a stable version release PR
 mode_flag="--prerelease"

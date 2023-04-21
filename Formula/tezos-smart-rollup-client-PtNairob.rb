@@ -1,7 +1,8 @@
-# SPDX-FileCopyrightText: 2022 Oxhead Alpha
+#!/usr/bin/env ruby
+# SPDX-FileCopyrightText: 2023 Oxhead Alpha
 # SPDX-License-Identifier: LicenseRef-MIT-OA
 
-class TezosTxRollupClientPtlimapt < Formula
+class TezosSmartRollupClientPtnairob < Formula
   @all_bins = []
 
   class << self
@@ -9,9 +10,9 @@ class TezosTxRollupClientPtlimapt < Formula
   end
   homepage "https://gitlab.com/tezos/tezos"
 
-  url "https://gitlab.com/tezos/tezos.git", :tag => "v16.1", :shallow => false
+  url "https://gitlab.com/tezos/tezos.git", :tag => "v17.0-beta1", :shallow => false
 
-  version "v16.1-1"
+  version "v17.0-beta1-1"
 
   build_dependencies = %w[pkg-config coreutils autoconf rsync wget rustup-init cmake]
   build_dependencies.each do |dependency|
@@ -22,13 +23,10 @@ class TezosTxRollupClientPtlimapt < Formula
   dependencies.each do |dependency|
     depends_on dependency
   end
-  desc "Transaction rollup CLI client for PtLimaPt"
+  desc "Smart contract rollup CLI client for PtNairob"
 
   bottle do
-    root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosTxRollupClientPtlimapt.version}/"
-    sha256 cellar: :any, big_sur: "2e0cd8e30e1446f18116e6d72eec879c8bb47b584032f5e7aa773eee9994f39e"
-    sha256 cellar: :any, arm64_big_sur: "4953653e1fb2772633fbffd87582b7b3fa12496da8d775ff749554ea3768b7a2"
-    sha256 cellar: :any, monterey: "97ea765ffaaf4d8f8e4762d79b1a7d9c3ee9b254a98bee2c860eddde3e72e611"
+    root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosSmartRollupClientPtnairob.version}/"
   end
 
   def make_deps
@@ -57,8 +55,8 @@ class TezosTxRollupClientPtlimapt < Formula
 
   def install
     make_deps
-    install_template "src/proto_015_PtLimaPt/bin_tx_rollup_client/main_tx_rollup_client_015_PtLimaPt.exe",
-                     "_build/default/src/proto_015_PtLimaPt/bin_tx_rollup_client/main_tx_rollup_client_015_PtLimaPt.exe",
-                     "octez-tx-rollup-client-PtLimaPt"
+    install_template "src/proto_016_PtNairob/bin_sc_rollup_client/main_sc_rollup_client_016_PtNairob.exe",
+                     "_build/default/src/proto_016_PtNairob/bin_sc_rollup_client/main_sc_rollup_client_016_PtNairob.exe",
+                     "octez-smart-rollup-client-PtNairob"
   end
 end

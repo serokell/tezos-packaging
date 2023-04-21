@@ -28,4 +28,7 @@ self: super: rec {
   octez-node = super.octez-node.overrideAttrs (_ : {
     postInstall = "rm $out/bin/*.sh";
   });
+  ocamlfind = super.ocamlfind.overrideAttrs (drv: {
+    patches = [ ./install_topfind_196.patch ];
+  });
 }

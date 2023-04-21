@@ -1,13 +1,15 @@
-# SPDX-FileCopyrightText: 2022 Oxhead Alpha
+#!/usr/bin/env ruby
+
+# SPDX-FileCopyrightText: 2023 Oxhead Alpha
 # SPDX-License-Identifier: LicenseRef-MIT-OA
 
-class TezosNodeLimanet < Formula
+class TezosNodeNairobinet < Formula
   url "file:///dev/null"
-  version "v16.1-1"
+  version "v17.0-beta1-1"
 
   depends_on "tezos-node"
 
-  desc "Meta formula that provides background tezos-node service that runs on limanet"
+  desc "Meta formula that provides background tezos-node service that runs on nairobinet"
 
   def install
     startup_contents =
@@ -25,13 +27,13 @@ class TezosNodeLimanet < Formula
           echo "Configuring the node..."
           "$node" config init \
                   --rpc-addr "$NODE_RPC_ADDR" \
-                  --network=limanet \
+                  --network=https://teztnets.xyz/nairobinet\
                   "$@"
       else
           echo "Updating the node configuration..."
           "$node" config update \
                   --rpc-addr "$NODE_RPC_ADDR" \
-                  --network=limanet \
+                  --network=https://teztnets.xyz/nairobinet\
                   "$@"
       fi
 
@@ -43,9 +45,9 @@ class TezosNodeLimanet < Formula
               --rpc-tls="$CERT_PATH","$KEY_PATH"
       fi
     EOS
-    File.write("tezos-node-limanet-start", startup_contents)
-    bin.install "tezos-node-limanet-start"
-    print "Installing tezos-node-limanet service"
+    File.write("tezos-node-nairobinet-start", startup_contents)
+    bin.install "tezos-node-nairobinet-start"
+    print "Installing tezos-node-nairobinet service"
   end
   def plist
     <<~EOS
@@ -57,11 +59,11 @@ class TezosNodeLimanet < Formula
           <key>Label</key>
           <string>#{plist_name}</string>
           <key>Program</key>
-          <string>#{opt_bin}/tezos-node-limanet-start</string>
+          <string>#{opt_bin}/tezos-node-nairobinet-start</string>
           <key>EnvironmentVariables</key>
             <dict>
               <key>TEZOS_CLIENT_DIR</key>
-              <string>#{var}/lib/tezos/node-limanet</string>
+              <string>#{var}/lib/tezos/node-nairobinet</string>
               <key>NODE_RPC_ADDR</key>
               <string>127.0.0.1:8732</string>
               <key>CERT_PATH</key>
@@ -79,7 +81,7 @@ class TezosNodeLimanet < Formula
     EOS
   end
   def post_install
-    mkdir_p "#{var}/lib/tezos/node-limanet"
-    system "octez-node", "config", "init", "--data-dir" "#{var}/lib/tezos/node-limanet", "--network", "limanet"
+    mkdir_p "#{var}/lib/tezos/node-nairobinet"
+    system "octez-node", "config", "init", "--data-dir" "#{var}/lib/tezos/node-nairobinet", "--network", "https://teztnets.xyz/nairobinet"
   end
 end

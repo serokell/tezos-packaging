@@ -1,9 +1,7 @@
-#!/usr/bin/env ruby
-
-# SPDX-FileCopyrightText: 2022 Oxhead Alpha
+# SPDX-FileCopyrightText: 2023 Oxhead Alpha
 # SPDX-License-Identifier: LicenseRef-MIT-OA
 
-class TezosTxRollupNodePtlimapt < Formula
+class TezosAccuserPtnairob < Formula
   @all_bins = []
 
   class << self
@@ -11,26 +9,23 @@ class TezosTxRollupNodePtlimapt < Formula
   end
   homepage "https://gitlab.com/tezos/tezos"
 
-  url "https://gitlab.com/tezos/tezos.git", :tag => "v16.1", :shallow => false
+  url "https://gitlab.com/tezos/tezos.git", :tag => "v17.0-beta1", :shallow => false
 
-  version "v16.1-1"
+  version "v17.0-beta1-1"
 
   build_dependencies = %w[pkg-config coreutils autoconf rsync wget rustup-init cmake]
   build_dependencies.each do |dependency|
     depends_on dependency => :build
   end
 
-  dependencies = %w[gmp hidapi libev libffi tezos-sapling-params]
+  dependencies = %w[gmp hidapi libev libffi]
   dependencies.each do |dependency|
     depends_on dependency
   end
-  desc "Tezos transaction rollup node for PtLimaPt"
+  desc "Daemon for accusing"
 
   bottle do
-    root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosTxRollupNodePtlimapt.version}/"
-    sha256 cellar: :any, big_sur: "deafe82ae4bc56f2e4261a3de328a3e33a50c0bbc2ce0872b8d3e5a9356b118c"
-    sha256 cellar: :any, arm64_big_sur: "b3327eec558d983df1b028f93cb3f904237deb9caa5f25caa790dde77c17a5a4"
-    sha256 cellar: :any, monterey: "c9681de9deef9c0fd03797af800f8f6da926e5008de803d420135d2d8b4826ec"
+    root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosAccuserPtnairob.version}/"
   end
 
   def make_deps
@@ -39,7 +34,7 @@ class TezosTxRollupNodePtlimapt < Formula
     # Disable usage of instructions from the ADX extension to avoid incompatibility
     # with old CPUs, see https://gitlab.com/dannywillems/ocaml-bls12-381/-/merge_requests/135/
     ENV["BLST_PORTABLE"]="yes"
-    # Here is the workaround to use opam 2.0.9 because Tezos is currently not compatible with opam 2.1.0 and newer
+    # Here is the workaround to use opam 2.0 because Tezos is currently not compatible with opam 2.1.0 and newer
     arch = RUBY_PLATFORM.include?("arm64") ? "arm64" : "x86_64"
     system "curl", "-L", "https://github.com/ocaml/opam/releases/download/2.0.9/opam-2.0.9-#{arch}-macos", "--create-dirs", "-o", "#{ENV["HOME"]}/.opam-bin/opam"
     system "chmod", "+x", "#{ENV["HOME"]}/.opam-bin/opam"
@@ -64,24 +59,30 @@ class TezosTxRollupNodePtlimapt < Formula
 
       set -euo pipefail
 
-      node="#{bin}/octez-tx-rollup-node-PtLimaPt"
+      accuser="#{bin}/octez-accuser-PtNairob"
 
-      "$node" init "$ROLLUP_MODE" config \
-          for "$ROLLUP_ALIAS" \
-          --rpc-addr "$ROLLUP_NODE_RPC_ENDPOINT" \
-          --force
+      accuser_config="$TEZOS_CLIENT_DIR/config"
+      mkdir -p "$TEZOS_CLIENT_DIR"
 
-      "$node" --endpoint "$NODE_RPC_SCHEME://$NODE_RPC_ADDR" \
-          run "$ROLLUP_MODE" for "$ROLLUP_ALIAS"
-      EOS
-    File.write("tezos-tx-rollup-node-PtLimaPt-start", startup_contents)
-    bin.install "tezos-tx-rollup-node-PtLimaPt-start"
+      if [ ! -f "$accuser_config" ]; then
+          "$accuser" --endpoint "$NODE_RPC_SCHEME://$NODE_RPC_ADDR" \
+                    config init --output "$accuser_config" >/dev/null 2>&1
+      else
+          "$accuser" --endpoint "$NODE_RPC_SCHEME://$NODE_RPC_ADDR" \
+                    config update >/dev/null 2>&1
+      fi
+
+      exec "$accuser" --endpoint "$NODE_RPC_SCHEME://$NODE_RPC_ADDR" run
+    EOS
+    File.write("tezos-accuser-PtNairob-start", startup_contents)
+    bin.install "tezos-accuser-PtNairob-start"
     make_deps
-    install_template "src/proto_015_PtLimaPt/bin_tx_rollup_node/main_tx_rollup_node_015_PtLimaPt.exe",
-                     "_build/default/src/proto_015_PtLimaPt/bin_tx_rollup_node/main_tx_rollup_node_015_PtLimaPt.exe",
-                     "octez-tx-rollup-node-PtLimaPt"
+    install_template "src/proto_016_PtNairob/bin_accuser/main_accuser_016_PtNairob.exe",
+                     "_build/default/src/proto_016_PtNairob/bin_accuser/main_accuser_016_PtNairob.exe",
+                     "octez-accuser-PtNairob"
   end
-  plist_options manual: "tezos-tx-rollup-node-PtLimaPt run for"
+
+  plist_options manual: "tezos-accuser-PtNairob run"
   def plist
     <<~EOS
       <?xml version="1.0" encoding="UTF-8"?>
@@ -92,19 +93,15 @@ class TezosTxRollupNodePtlimapt < Formula
           <key>Label</key>
           <string>#{plist_name}</string>
           <key>Program</key>
-          <string>#{opt_bin}/tezos-tx-rollup-node-PtLimaPt-start</string>
+          <string>#{opt_bin}/tezos-accuser-PtNairob-start</string>
           <key>EnvironmentVariables</key>
             <dict>
               <key>TEZOS_CLIENT_DIR</key>
               <string>#{var}/lib/tezos/client</string>
-              <key>NODE_RPC_ENDPOINT</key>
-              <string>http://localhost:8732</string>
-              <key>ROLLUP_NODE_RPC_ENDPOINT</key>
-              <string>127.0.0.1:8472</string>
-              <key>ROLLUP_MODE</key>
-              <string>observer</string>
-              <key>ROLLUP_ALIAS</key>
-              <string>rollup</string>
+              <key>NODE_RPC_SCHEME</key>
+              <string>http</string>
+              <key>NODE_RPC_ADDR</key>
+              <string>localhost:8732</string>
           </dict>
           <key>RunAtLoad</key><true/>
           <key>StandardOutPath</key>

@@ -1,7 +1,9 @@
-# SPDX-FileCopyrightText: 2022 Oxhead Alpha
+#!/usr/bin/env ruby
+
+# SPDX-FileCopyrightText: 2023 Oxhead Alpha
 # SPDX-License-Identifier: LicenseRef-MIT-OA
 
-class TezosBakerPtlimapt < Formula
+class TezosSmartRollupNodePtnairob < Formula
   @all_bins = []
 
   class << self
@@ -9,9 +11,9 @@ class TezosBakerPtlimapt < Formula
   end
   homepage "https://gitlab.com/tezos/tezos"
 
-  url "https://gitlab.com/tezos/tezos.git", :tag => "v16.1", :shallow => false
+  url "https://gitlab.com/tezos/tezos.git", :tag => "v17.0-beta1", :shallow => false
 
-  version "v16.1-1"
+  version "v17.0-beta1-1"
 
   build_dependencies = %w[pkg-config coreutils autoconf rsync wget rustup-init cmake]
   build_dependencies.each do |dependency|
@@ -22,13 +24,10 @@ class TezosBakerPtlimapt < Formula
   dependencies.each do |dependency|
     depends_on dependency
   end
-  desc "Daemon for baking"
+  desc "Tezos smart contract rollup node for PtNairob"
 
   bottle do
-    root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosBakerPtlimapt.version}/"
-    sha256 cellar: :any, big_sur: "c91f35661b7e3d3abd62c0f00e4a78653c78916b700fd672f09a7d94bd384002"
-    sha256 cellar: :any, arm64_big_sur: "1a3c4605dd4dc2244a4adc000fa04b9ba9c95c58e5b30c62a5315735016cb5bb"
-    sha256 cellar: :any, monterey: "0a02e5e15ee02f6beeb1ea7e8b0b69a6a506547f3b20107b824e90512a1a67d2"
+    root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosSmartRollupNodePtnairob.version}/"
   end
 
   def make_deps
@@ -62,39 +61,24 @@ class TezosBakerPtlimapt < Formula
 
       set -euo pipefail
 
-      baker="#{bin}/octez-baker-PtLimaPt"
+      node="#{bin}/octez-smart-rollup-node-PtNairob"
 
-      baker_config="$TEZOS_CLIENT_DIR/config"
-      mkdir -p "$TEZOS_CLIENT_DIR"
+      "$node" init "$ROLLUP_MODE" config \
+          for "$ROLLUP_ALIAS" \
+          --rpc-addr "$ROLLUP_NODE_RPC_ENDPOINT" \
+          --force
 
-      if [ ! -f "$baker_config" ]; then
-          "$baker" --endpoint "$NODE_RPC_SCHEME://$NODE_RPC_ADDR" \
-                  config init --output "$baker_config" >/dev/null 2>&1
-      else
-          "$baker" --endpoint "$NODE_RPC_SCHEME://$NODE_RPC_ADDR" \
-                  config update >/dev/null 2>&1
-      fi
-
-      launch_baker() {
-          exec "$baker" \
-              --endpoint "$NODE_RPC_SCHEME://$NODE_RPC_ADDR" \
-              run with local node "$TEZOS_NODE_DIR" "$@"
-      }
-
-      if [[ -z "$BAKER_ACCOUNT" ]]; then
-          launch_baker
-      else
-          launch_baker "$BAKER_ACCOUNT"
-      fi
-    EOS
-    File.write("tezos-baker-PtLimaPt-start", startup_contents)
-    bin.install "tezos-baker-PtLimaPt-start"
+      "$node" --endpoint "$NODE_RPC_SCHEME://$NODE_RPC_ADDR" \
+          run "$ROLLUP_MODE" for "$ROLLUP_ALIAS"
+      EOS
+    File.write("tezos-smart-rollup-node-PtNairob-start", startup_contents)
+    bin.install "tezos-smart-rollup-node-PtNairob-start"
     make_deps
-    install_template "src/proto_015_PtLimaPt/bin_baker/main_baker_015_PtLimaPt.exe",
-                     "_build/default/src/proto_015_PtLimaPt/bin_baker/main_baker_015_PtLimaPt.exe",
-                     "octez-baker-PtLimaPt"
+    install_template "src/proto_016_PtNairob/bin_sc_rollup_node/main_sc_rollup_node_016_PtNairob.exe",
+                     "_build/default/src/proto_016_PtNairob/bin_sc_rollup_node/main_sc_rollup_node_016_PtNairob.exe",
+                     "octez-smart-rollup-node-PtNairob"
   end
-  plist_options manual: "tezos-baker-PtLimaPt run with local node"
+  plist_options manual: "tezos-smart-rollup-node-PtNairob run for"
   def plist
     <<~EOS
       <?xml version="1.0" encoding="UTF-8"?>
@@ -105,19 +89,19 @@ class TezosBakerPtlimapt < Formula
           <key>Label</key>
           <string>#{plist_name}</string>
           <key>Program</key>
-          <string>#{opt_bin}/tezos-baker-PtLimaPt-start</string>
+          <string>#{opt_bin}/tezos-smart-rollup-node-PtNairob-start</string>
           <key>EnvironmentVariables</key>
             <dict>
               <key>TEZOS_CLIENT_DIR</key>
               <string>#{var}/lib/tezos/client</string>
-              <key>TEZOS_NODE_DIR</key>
-              <string></string>
-              <key>NODE_RPC_SCHEME</key>
-              <string>http</string>
-              <key>NODE_RPC_ADDR</key>
-              <string>localhost:8732</string>
-              <key>BAKER_ACCOUNT</key>
-              <string></string>
+              <key>NODE_RPC_ENDPOINT</key>
+              <string>http://localhost:8732</string>
+              <key>ROLLUP_NODE_RPC_ENDPOINT</key>
+              <string>127.0.0.1:8472</string>
+              <key>ROLLUP_MODE</key>
+              <string>observer</string>
+              <key>ROLLUP_ALIAS</key>
+              <string>rollup</string>
           </dict>
           <key>RunAtLoad</key><true/>
           <key>StandardOutPath</key>

@@ -116,7 +116,7 @@ steps:
    - eval "$SET_VERSION"
    # Building all binary packages will take significant amount of time, so we build only one
    # in order to ensure package generation sanity
-   - nix develop .#docker-tezos-packages -c ./docker/docker-tezos-packages.py --os ubuntu --type binary -p tezos-baker-PtLimaPt
+   - nix develop .#docker-tezos-packages -c ./docker/docker-tezos-packages.py --os ubuntu --type binary -p tezos-baker-PtMumbai
    - rm -rf out
    # It takes much time to build binary package, so we do it only on master
    branches: "master"
@@ -140,7 +140,7 @@ steps:
    - eval "$SET_VERSION"
    # Building all binary packages will take significant amount of time, so we build only one
    # in order to ensure package generation sanity
-   - nix develop .#docker-tezos-packages -c ./docker/docker-tezos-packages.py --os fedora --type binary -p tezos-baker-PtLimaPt
+   - nix develop .#docker-tezos-packages -c ./docker/docker-tezos-packages.py --os fedora --type binary -p tezos-baker-PtMumbai
    - rm -rf out
    # It takes much time to build binary package, so we do it only on master
    branches: "master"
@@ -198,8 +198,8 @@ steps:
  - label: update RC mirror repository
    if: |
      build.branch == "master" &&
-       (build.message =~ /^Merge pull request .* from serokell\/auto\/v[0-9]+\.[0-9]+-rc.*-release/ ||
-          build.message =~ /^Merge pull request .* from serokell\/auto\/update-brew-formulae-v[.0-9]+-rc.*/)
+       (build.message =~ /^Merge pull request .* from serokell\/auto\/v[0-9]+\.[0-9]+-(rc|beta).*-release/ ||
+          build.message =~ /^Merge pull request .* from serokell\/auto\/update-brew-formulae-v[.0-9]+-(rc|beta).*/)
    depends_on:
    - "auto-release"
    env:

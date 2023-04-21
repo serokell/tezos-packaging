@@ -19,19 +19,19 @@ from collections import ChainMap
 networks = {
     "mainnet": "mainnet",
     "ghostnet": "ghostnet",
-    "limanet": "limanet",
     "mumbainet": "mumbainet",
+    "nairobinet": "https://teztnets.xyz/nairobinet",
 }
 networks_protos = {
-    "mainnet": ["PtLimaPt", "PtMumbai"],
-    "ghostnet": ["PtLimaPt", "PtMumbai"],
-    "limanet": ["PtLimaPt"],
+    "mainnet": ["PtMumbai"],
+    "ghostnet": ["PtMumbai"],
     "mumbainet": ["PtMumbai"],
+    "nairobinet": ["PtNairob"],
 }
 
 protocol_numbers = {
-    "PtLimaPt": "015",
     "PtMumbai": "016",
+    "PtNairob": "017",
 }
 
 signer_units = [
@@ -484,20 +484,14 @@ packages.append(
 )
 
 
-def mk_rollup_packages(type, protos, full_type=None):
-
-    if full_type is None:
-        full_type = type
-
+def mk_rollup_packages(*protos):
     def mk_units(proto):
-        startup_script = f"/usr/bin/tezos-{type}-rollup-node-{proto}-start"
+        startup_script = f"/usr/bin/tezos-sc-rollup-node-{proto}-start"
         service_file = ServiceFile(
-            Unit(after=["network.target"], description=f"Tezos {type} rollup node"),
+            Unit(after=["network.target"], description=f"Tezos smart rollup node"),
             Service(
-                environment_files=[
-                    f"/etc/default/tezos-{full_type}-rollup-node-{proto}"
-                ],
-                environment=[f"PROTOCOL={proto}", f"TYPE={type}"],
+                environment_files=[f"/etc/default/tezos-smart-rollup-node-{proto}"],
+                environment=[f"PROTOCOL={proto}", f"TYPE=sc"],
                 exec_start_pre=[
                     "+/usr/bin/setfacl -m u:tezos:rwx /run/systemd/ask-password"
                 ],
@@ -524,8 +518,8 @@ def mk_rollup_packages(type, protos, full_type=None):
     def mk_rollup_package(name, proto):
         proto_snake_case = protocol_numbers[proto] + "_" + proto
         return TezosBinaryPackage(
-            f"tezos-{full_type}-rollup-{name}-{proto}",
-            f"Tezos {type} rollup {name} using {proto}",
+            f"tezos-smart-rollup-{name}-{proto}",
+            f"Tezos smart rollup {name} using {proto}",
             meta=packages_meta,
             systemd_units=mk_units(proto) if name == "node" else [],
             target_proto=proto,
@@ -535,18 +529,17 @@ def mk_rollup_packages(type, protos, full_type=None):
                 "tezos-sapling-params",
             ],
             postinst_steps=daemon_postinst_common,
-            dune_filepath=f"src/proto_{proto_snake_case}/bin_{type}_rollup_{name}/main_{type}_rollup_{name}_{proto_snake_case}.exe",
+            dune_filepath=f"src/proto_{proto_snake_case}/bin_sc_rollup_{name}/main_sc_rollup_{name}_{proto_snake_case}.exe",
         )
 
     packages = ["node", "client"]
     return [
-        {f"tezos-{full_type}-rollup-{name}-{proto}": mk_rollup_package(name, proto)}
+        {f"tezos-smart-rollup-{name}-{proto}": mk_rollup_package(name, proto)}
         for name in packages
         for proto in protos
     ]
 
 
-packages.extend(mk_rollup_packages("tx", ["PtLimaPt"]))
-packages.extend(mk_rollup_packages("sc", ["PtMumbai"], "smart"))
+packages.extend(mk_rollup_packages("PtMumbai", "PtNairob"))
 
 packages = dict(ChainMap(*packages))

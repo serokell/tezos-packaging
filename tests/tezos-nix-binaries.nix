@@ -4,7 +4,7 @@
 let
   inherit (pkgs) system;
   inherit (pkgs.octezPackages) octez-client octez-admin-client octez-node octez-signer octez-codec
-    octez-accuser-PtLimaPt octez-baker-PtLimaPt;
+    octez-accuser-PtMumbai octez-baker-PtMumbai;
 in import "${nixpkgs}/nixos/tests/make-test-python.nix" ({ ... }:
 {
   name = "tezos-nix-binaries-test";
@@ -20,9 +20,9 @@ in import "${nixpkgs}/nixos/tests/make-test-python.nix" ({ ... }:
   };
 
   testScript = ''
-    octez_accuser = "${octez-accuser-PtLimaPt}/bin/octez-accuser-PtLimaPt"
+    octez_accuser = "${octez-accuser-PtMumbai}/bin/octez-accuser-PtMumbai"
     octez_admin_client = "${octez-admin-client}/bin/octez-admin-client"
-    octez_baker = "${octez-baker-PtLimaPt}/bin/octez-baker-PtLimaPt"
+    octez_baker = "${octez-baker-PtMumbai}/bin/octez-baker-PtMumbai"
     octez_client = (
         "${octez-client}/bin/octez-client"
     )

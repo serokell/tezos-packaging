@@ -121,7 +121,7 @@ steps:
    - rm -rf out
    # It takes much time to build binary package, so we do it only on master
    branches: "master"
-   timeout_in_minutes: 180
+   timeout_in_minutes: 240
    agents:
      queue: "docker"
    only_changes: *native_packaging_changes_regexes

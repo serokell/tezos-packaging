@@ -238,6 +238,14 @@ class Setup(Setup):
             print("The Tezos node data directory already has some blockchain data:")
             print("\n".join(["- " + os.path.join(node_dir, path) for path in diff]))
             if yes_or_no("Delete this data and bootstrap the node again? <y/N> ", "no"):
+                # We first stop the node service, because it's possible that it
+                # will re-create some of the files while we go on with the wizard
+                print("Stopping node service")
+                proc_call(
+                    "sudo systemctl stop tezos-node-"
+                    + setup.config["network"]
+                    + ".service"
+                )
                 for path in diff:
                     try:
                         proc_call("sudo rm -r " + os.path.join(node_dir, path))

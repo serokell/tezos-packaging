@@ -1,0 +1,11 @@
+{
+  "ubuntu": [
+    "bionic",
+    "focal",
+    "jammy"
+  ],
+  "fedora": [
+    "36",
+    "37"
+  ]
+}

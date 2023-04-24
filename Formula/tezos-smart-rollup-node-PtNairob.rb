@@ -74,8 +74,8 @@ class TezosSmartRollupNodePtnairob < Formula
     File.write("tezos-smart-rollup-node-PtNairob-start", startup_contents)
     bin.install "tezos-smart-rollup-node-PtNairob-start"
     make_deps
-    install_template "src/proto_016_PtNairob/bin_sc_rollup_node/main_sc_rollup_node_016_PtNairob.exe",
-                     "_build/default/src/proto_016_PtNairob/bin_sc_rollup_node/main_sc_rollup_node_016_PtNairob.exe",
+    install_template "src/proto_017_PtNairob/bin_sc_rollup_node/main_sc_rollup_node_017_PtNairob.exe",
+                     "_build/default/src/proto_017_PtNairob/bin_sc_rollup_node/main_sc_rollup_node_017_PtNairob.exe",
                      "octez-smart-rollup-node-PtNairob"
   end
   plist_options manual: "tezos-smart-rollup-node-PtNairob run for"

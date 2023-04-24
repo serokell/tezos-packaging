@@ -77,8 +77,8 @@ class TezosAccuserPtnairob < Formula
     File.write("tezos-accuser-PtNairob-start", startup_contents)
     bin.install "tezos-accuser-PtNairob-start"
     make_deps
-    install_template "src/proto_016_PtNairob/bin_accuser/main_accuser_016_PtNairob.exe",
-                     "_build/default/src/proto_016_PtNairob/bin_accuser/main_accuser_016_PtNairob.exe",
+    install_template "src/proto_017_PtNairob/bin_accuser/main_accuser_017_PtNairob.exe",
+                     "_build/default/src/proto_017_PtNairob/bin_accuser/main_accuser_017_PtNairob.exe",
                      "octez-accuser-PtNairob"
   end
 

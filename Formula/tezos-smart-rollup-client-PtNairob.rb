@@ -55,8 +55,8 @@ class TezosSmartRollupClientPtnairob < Formula
 
   def install
     make_deps
-    install_template "src/proto_016_PtNairob/bin_sc_rollup_client/main_sc_rollup_client_016_PtNairob.exe",
-                     "_build/default/src/proto_016_PtNairob/bin_sc_rollup_client/main_sc_rollup_client_016_PtNairob.exe",
+    install_template "src/proto_017_PtNairob/bin_sc_rollup_client/main_sc_rollup_client_017_PtNairob.exe",
+                     "_build/default/src/proto_017_PtNairob/bin_sc_rollup_client/main_sc_rollup_client_017_PtNairob.exe",
                      "octez-smart-rollup-client-PtNairob"
   end
 end

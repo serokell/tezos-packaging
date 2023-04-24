@@ -87,8 +87,8 @@ class TezosBakerPtnairob < Formula
     File.write("tezos-baker-PtNairob-start", startup_contents)
     bin.install "tezos-baker-PtNairob-start"
     make_deps
-    install_template "src/proto_016_PtNairob/bin_baker/main_baker_016_PtNairob.exe",
-                     "_build/default/src/proto_016_PtNairob/bin_baker/main_baker_016_PtNairob.exe",
+    install_template "src/proto_017_PtNairob/bin_baker/main_baker_017_PtNairob.exe",
+                     "_build/default/src/proto_017_PtNairob/bin_baker/main_baker_017_PtNairob.exe",
                      "octez-baker-PtNairob"
   end
   plist_options manual: "tezos-baker-PtNairob run with local node"

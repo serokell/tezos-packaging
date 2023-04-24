@@ -140,6 +140,8 @@ packages_to_build = get_packages_to_build(args.packages)
 if not args.build_sapling_package:
     packages_to_build.pop("tezos-sapling-params", None)
 
+artifacts = []
+
 for image in images:
     distros = [image] if target_os == "ubuntu" else distributions
     cmd_args = " ".join(
@@ -180,6 +182,11 @@ for image in images:
     """
     )
 
+    with open(os.path.join(args.output_dir, ".artifact_list"), "r") as f:
+        artifacts += f.read().splitlines()
+
+    call(f"rm -f {os.path.join(args.output_dir, '.artifact_list')}")
+
     call(f"{virtualisation_engine} rm -v {container_id}")
 
     if exit_code:
@@ -193,7 +200,6 @@ for image in images:
             f" -v {args.output_dir}:/tezos-packaging/docker/{sources_dir_name}/"
         )
 
-artifacts = (os.path.join(args.output_dir, x) for x in os.listdir(args.output_dir))
 if args.gpg_sign and args.type == "source":
     if target_os == "ubuntu":
         for f in artifacts:

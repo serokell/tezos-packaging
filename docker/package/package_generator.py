@@ -227,10 +227,12 @@ def main():
         subdir = "SRPMS" if is_source else "RPMS/x86_64"
         artifacts_dir = f"{home}/rpmbuild/{subdir}"
 
-    for f in os.listdir(artifacts_dir):
-        for ext in exts:
-            if f.endswith(ext):
-                shutil.copy(f"{artifacts_dir}/{f}", os.path.join(output_dir, f))
+    with open(os.path.join(output_dir, ".artifact_list"), "w") as artifact_list:
+        for f in os.listdir(artifacts_dir):
+            for ext in exts:
+                if f.endswith(ext):
+                    artifact_list.write(f"{f}\n")
+                    shutil.copy(f"{artifacts_dir}/{f}", os.path.join(output_dir, f))
 
 
 if __name__ == "__main__":

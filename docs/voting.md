@@ -18,7 +18,7 @@ An easy way to configure one is with the Tezos Setup wizard, see the [baking](./
 If a local baking setup is detected, the voting wizard will attempt to figure out
 as many as the necessary info as possible from it.
 
-With the [`tezos-baking`](./ubuntu.md/tezos-baking) package installed, launch the
+With the [`tezos-baking`](./ubuntu.md#tezos-baking) package installed, launch the
 interactive wizard with:
 ```bash
 tezos-vote

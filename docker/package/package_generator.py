@@ -13,39 +13,44 @@ from .packages import packages as all_packages
 # fixed output dir in container
 output_dir = "out"
 
-parser = argparse.ArgumentParser()
-parser.add_argument("--os", required=True, choices=["ubuntu", "fedora"])
-parser.add_argument(
+common_parser = argparse.ArgumentParser()
+common_parser.add_argument("--os", required=True, choices=["ubuntu", "fedora"])
+common_parser.add_argument(
     "-t", "--type", help="package type", required=True, choices=["source", "binary"]
 )
-parser.add_argument(
+common_parser.add_argument(
     "-p",
     "--packages",
     help="specify binaries to package",
     nargs="+",
 )
-parser.add_argument(
+common_parser.add_argument(
     "-d",
     "--distributions",
     help="specify distributions to package for",
     nargs="+",
 )
-parser.add_argument(
+common_parser.add_argument(
     "--binaries-dir",
     help="provide a directory with exiting prebuilt binaries",
     type=os.path.abspath,
 )
-parser.add_argument(
-    "--sources-dir",
-    help="specify directory with source archive(s) for ubuntu packages",
-    type=os.path.abspath,
-)
-parser.add_argument(
-    "--launchpad-sources",
-    help="download sources from launchpad instead of providing them",
-    action="store_true",
-)
-parser.set_defaults(launchpad_sources=False)
+
+
+def make_ubuntu_parser(parser):
+    parser.add_argument(
+        "--sources-dir",
+        help="specify directory with source archive(s) for ubuntu packages",
+        type=os.path.abspath,
+    )
+    parser.add_argument(
+        "--launchpad-sources",
+        help="download sources from launchpad instead of providing them",
+        action="store_true",
+    )
+    parser.set_defaults(launchpad_sources=False)
+
+    return parser
 
 
 def get_ubuntu_run_deps(binaries_dir):
@@ -107,9 +112,55 @@ def get_build_deps(binaries_dir):
     ]
 
 
-def main():
+def build_fedora(args):
 
-    args = parser.parse_args()
+    target_os = args.os
+
+    is_source = args.type == "source"
+
+    binaries_dir = args.binaries_dir
+
+    run_deps = get_ubuntu_run_deps(binaries_dir)
+
+    build_deps = get_build_deps(binaries_dir)
+
+    common_deps = run_deps + build_deps
+
+    home = os.environ["HOME"]
+
+    os.makedirs(output_dir, exist_ok=True)
+
+    distributions = list(args.distributions)
+
+    packages = []
+
+    for package_name in args.packages:
+        packages.append(all_packages[package_name])
+
+    for package in packages:
+        build_fedora_package(
+            package,
+            build_deps,
+            run_deps,
+            is_source,
+            distributions,
+            binaries_dir,
+        )
+
+    exts = [".src.rpm"] if is_source else [".rpm"]
+
+    subdir = "SRPMS" if is_source else "RPMS/x86_64"
+    artifacts_dir = f"{home}/rpmbuild/{subdir}"
+
+    with open(os.path.join(output_dir, ".artifact_list"), "w") as artifact_list:
+        for f in os.listdir(artifacts_dir):
+            for ext in exts:
+                if f.endswith(ext):
+                    artifact_list.write(f"{f}\n")
+                    shutil.copy(f"{artifacts_dir}/{f}", os.path.join(output_dir, f))
+
+
+def build_ubuntu(args):
 
     target_os = args.os
 
@@ -121,10 +172,7 @@ def main():
 
     binaries_dir = args.binaries_dir
 
-    if target_os == "ubuntu":
-        run_deps = get_ubuntu_run_deps(binaries_dir)
-    elif target_os == "fedora":
-        run_deps = get_fedora_run_deps(binaries_dir)
+    run_deps = get_ubuntu_run_deps(binaries_dir)
 
     build_deps = get_build_deps(binaries_dir)
 
@@ -165,7 +213,6 @@ def main():
                     repo = (
                         "tezos-rc" if "rc" in version or "beta" in version else "tezos"
                     )
-                    release = package.meta.release
                     name = package.name.lower()
                     # distributions list is always unempty at this point
                     # and sources archive is the same for all distributions
@@ -193,44 +240,41 @@ def main():
             print("\n" + "\n".join(errors) + "\n")
             sys.exit(1)
 
-    if target_os == "ubuntu":
-        for package in packages:
-            build_ubuntu_package(
-                package,
-                distributions,
-                common_deps,
-                is_source,
-                getattr(package, "source_archive", None),
-                binaries_dir,
-            )
+    for package in packages:
+        build_ubuntu_package(
+            package,
+            distributions,
+            common_deps,
+            is_source,
+            getattr(package, "source_archive", None),
+            binaries_dir,
+        )
 
-        if not is_source:
-            exts = [".deb"]
-        else:
-            exts = [".orig.tar.gz", ".dsc", ".changes", ".debian.tar.xz", ".buildinfo"]
+    if not is_source:
+        exts = [".deb"]
+    else:
+        exts = [".orig.tar.gz", ".dsc", ".changes", ".debian.tar.xz", ".buildinfo"]
 
-        artifacts_dir = "."
+    artifacts_dir = "."
 
-    elif target_os == "fedora":
-        for package in packages:
-            build_fedora_package(
-                package,
-                build_deps,
-                run_deps,
-                is_source,
-                distributions,
-                binaries_dir,
-            )
+    with open(os.path.join(output_dir, ".artifact_list"), "w") as artifact_list:
+        for f in os.listdir(artifacts_dir):
+            for ext in exts:
+                if f.endswith(ext):
+                    artifact_list.write(f"{f}\n")
+                    shutil.copy(f"{artifacts_dir}/{f}", os.path.join(output_dir, f))
 
-        exts = [".src.rpm"] if is_source else [".rpm"]
 
-        subdir = "SRPMS" if is_source else "RPMS/x86_64"
-        artifacts_dir = f"{home}/rpmbuild/{subdir}"
+def main():
 
-    for f in os.listdir(artifacts_dir):
-        for ext in exts:
-            if f.endswith(ext):
-                shutil.copy(f"{artifacts_dir}/{f}", os.path.join(output_dir, f))
+    args, _ = common_parser.parse_known_args()
+
+    if args.os == "ubuntu":
+        args = make_ubuntu_parser(common_parser).parse_args()
+        build_ubuntu(args)
+    elif args.os == "fedora":
+        args = common_parser.parse_args()
+        build_fedora(args)
 
 
 if __name__ == "__main__":

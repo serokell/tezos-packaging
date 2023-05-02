@@ -14,7 +14,7 @@ from .packages import packages as all_packages
 output_dir = "out"
 
 common_parser = argparse.ArgumentParser()
-common_parser.add_argument("--os", required=True, choices=["ubuntu", "fedora"])
+common_parser.add_argument("--os", choices=["ubuntu", "fedora"])
 common_parser.add_argument(
     "-t", "--type", help="package type", required=True, choices=["source", "binary"]
 )

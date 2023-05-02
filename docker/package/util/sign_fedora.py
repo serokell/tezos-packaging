@@ -12,24 +12,32 @@ from typing import Optional, List
 
 sys.path.append("docker")
 from package.util.sign_common import *
-from package.util.sign_fedora import sign_fedora
-from package.util.sign_ubuntu import sign_ubuntu
+
+
+def sign_fedora(args: Arguments):
+
+    artifacts = get_artifact_list(args)
+
+    identity = args.identity
+
+    gpg = shutil.which("gpg")
+
+    for f in artifacts:
+        if f.endswith(".src.rpm"):
+            subprocess.call(
+                f'rpmsign --define="%_gpg_name {identity}" --define="%__gpg {gpg}" --addsign {f}',
+                shell=True,
+            )
 
 
 def main(args: Optional[Arguments] = None):
 
+    parser.set_defaults(os="fedora")
+
     if args is None:
         args = fill_args(parser.parse_args())
 
-    targets = ["ubuntu", "fedora"] if args.os is None else [args.os]
-
-    for target in targets:
-        if target == "ubuntu":
-            sign_ubuntu(args)
-        elif target == "fedora":
-            sign_fedora(args)
-        else:
-            print(f"{target} target is not supported")
+    sign_fedora(args)
 
 
 if __name__ == "__main__":

@@ -682,10 +682,7 @@ class TezosBakingServicesPackage(AbstractPackage):
     def fetch_sources(self, out_dir, binaries_dir=None):
         os.makedirs(out_dir)
         package_dir = out_dir + "/tezos_baking"
-        os.makedirs(package_dir)
-        shutil.copy(f"{os.path.dirname(__file__)}/wizard_structure.py", package_dir)
-        shutil.copy(f"{os.path.dirname(__file__)}/tezos_setup_wizard.py", package_dir)
-        shutil.copy(f"{os.path.dirname(__file__)}/tezos_voting_wizard.py", package_dir)
+        shutil.copytree(f"{os.path.dirname(__file__)}/tezos_baking", package_dir)
 
     def gen_control_file(self, deps, ubuntu_version, out):
         run_deps_list = map(lambda x: x.lower(), self.additional_native_deps)

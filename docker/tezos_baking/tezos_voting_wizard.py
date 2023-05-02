@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# SPDX-FileCopyrightText: 2022 Oxhead Alpha
+# SPDX-FileCopyrightText: 2023 Oxhead Alpha
 # SPDX-License-Identifier: LicenseRef-MIT-OA
 
 """
@@ -10,9 +10,11 @@ Asks questions, validates answers, and executes the appropriate steps using the 
 
 import os, sys
 import readline
+import argparse
 import re
-
-from .wizard_structure import *
+import tezos_baking.validators as validators
+import tezos_baking.wizard_structure as wizard_structure
+from tezos_baking.steps_common import Step
 
 # Global options
 
@@ -31,6 +33,8 @@ public_nodes = {
 }
 
 # Command line argument parsing
+
+parser = argparse.ArgumentParser()
 
 parser.add_argument(
     "--network",
@@ -88,7 +92,7 @@ new_proposal_query = Step(
     prompt="Provide the hash for your newly submitted proposal.",
     default=None,
     help="The format is 'P[123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]{50}'",
-    validator=Validator([required_field_validator, protocol_hash_validator]),
+    validator=[validators.required_field, validators.protocol_hash],
 )
 
 # We define this step as a function since the corresponding step requires that we get the
@@ -124,9 +128,7 @@ ballot_outcome_query = Step(
     "'pass' is used to not influence a vote but still contribute to reaching a quorum.",
     default=None,
     options=ballot_outcomes,
-    validator=Validator(
-        [required_field_validator, enum_range_validator(ballot_outcomes)]
-    ),
+    validator= [validators.required_field, validators.enum_range(ballot_outcomes)],
 )
 
 
@@ -149,15 +151,15 @@ def get_node_rpc_endpoint_query(network, default=None):
         "through systemd services, the address is usually 'http://localhost:8732' by default.",
         default="1" if relevant_nodes and default is None else default,
         options=relevant_nodes,
-        validator=Validator(
+        validator=
             [
-                required_field_validator,
-                or_validator(
-                    enum_range_validator(relevant_nodes),
-                    custom_url_validator,
+                validators.required_field,
+                validators.or_validator(
+                    validators.enum_range(relevant_nodes),
+                    validators.custom_url,
                 ),
             ]
-        ),
+        ,
     )
 
 
@@ -167,7 +169,7 @@ baker_alias_query = Step(
     help="The baker's alias will be used by octez-client to vote. If you have baking set up\n"
     "through systemd services, the address is usually 'baker' by default.",
     default=None,
-    validator=Validator([required_field_validator]),
+    validator=[validators.required_field],
 )
 
 # We define the step as a function to disallow choosing json
@@ -179,11 +181,11 @@ def get_key_mode_query(modes):
         "that will be used for voting. You will only need to import the key\n"
         "once unless you'll want to change the key.",
         options=modes,
-        validator=Validator(enum_range_validator(modes)),
+        validator=validators.enum_range,
     )
 
 
-class Setup(Setup):
+class Setup(wizard_structure.Setup):
 
     # Check whether the baker_alias account is set up to use ledger
     def check_ledger_use(self):

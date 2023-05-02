@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+
+#!/usr/bin/env python3
 # SPDX-FileCopyrightText: 2021 Oxhead Alpha
 # SPDX-License-Identifier: LicenseRef-MIT-OA
 
@@ -11,33 +13,78 @@ Asks questions, validates answers, and executes the appropriate steps using the 
 import os, sys, shutil
 import readline
 import re
-import traceback
 import urllib.request
 import json
-from typing import List
+import traceback
+import argparse
+from typing import List, Dict, Mapping, Union
+import tezos_baking.validators as validators
+from tezos_baking.steps_common import Step, Option, networks, key_import_modes
+import tezos_baking.wizard_structure as wizard_structure
+import tezos_baking.steps_common as steps
+from tezos_baking.common import *
 
-from .wizard_structure import *
+# Steps
 
-# Global options
+def network_query_action(answer: str, config: Dict[str, str]):
+    net = config["network"]
+    baking_env = get_systemd_service_env(f"tezos-baking-{net}")
+
+    config["client_data_dir"] = baking_env.get(
+        "TEZOS_CLIENT_DIR",
+        "/var/lib/tezos/.tezos-client",
+    )
+
+    node_rpc_addr = baking_env.get(
+        "NODE_RPC_ADDR",
+        "localhost:8732",
+    )
+    config["node_rpc_addr"] = node_rpc_addr
+    config["node_rpc_endpoint"] = "http://" + node_rpc_addr
+
+    config["baker_alias"] = baking_env.get("BAKER_ADDRESS_ALIAS", "baker")
+
+
+network_query = Step(
+    id="network",
+    prompt="Which Tezos network would you like to use?\nCurrently supported:",
+    help="The selected network will be used to set up all required services.\n"
+    "The currently supported protocol is `PtMumbai` (used on `mumbainet`, `ghostnet` and `mainnet`) and `PtNairob` (used on `nairobinet`).\n"
+    "Keep in mind that you must select the test network (e.g. ghostnet)\n"
+    "if you plan on baking with a faucet JSON file.\n",
+    options=networks,
+    validator=validators.enum_range,
+    actions=[network_query_action],
+)
 
 modes = {
-    "baking": "Set up and start all services for baking: "
-    "tezos-node and tezos-baker.",
+    "baking": "Set up and start all services for baking: tezos-node and tezos-baker.",
     "node": "Only bootstrap and run the Tezos node.",
 }
 
-snapshot_import_modes = {
-    "download rolling": "Import rolling snapshot from xtz-shots.io (recommended)",
-    "download full": "Import full snapshot from xtz-shots.io",
-    "file": "Import snapshot from a file",
-    "url": "Import snapshot from a url",
-    "skip": "Skip snapshot import and synchronize with the network from scratch",
-}
+service_mode_query = Step(
+    id="mode",
+    prompt="Do you want to set up baking or to run the standalone node?",
+    help="By default, tezos-baking provides predefined services for running baking instances "
+    "on different networks.\nSometimes, however, you might want to only run the Tezos node.\n"
+    "When this option is chosen, this wizard will help you bootstrap the Tezos node only.",
+    options=modes,
+    validator=validators.enum_range,
+)
 
 systemd_enable = {
     "yes": "Enable the services, running them both now and on every boot",
     "no": "Start the services this time only",
 }
+
+systemd_mode_query = Step(
+    id="systemd_mode",
+    prompt="Would you like your setup to automatically start on boot?",
+    help="Starting the service will make it available just for this session, great\n"
+    "if you want to experiment. Enabling it will make it start on every boot.",
+    options=systemd_enable,
+    validator=validators.enum_range,
+)
 
 history_modes = {
     "rolling": "Store a minimal rolling window of chain data, lightest option",
@@ -45,18 +92,139 @@ history_modes = {
     "archive": "Store all the chain data, very storage-demanding",
 }
 
+history_mode_query = Step(
+    id="history_mode",
+    prompt="Which history mode do you want your node to run in?",
+    help="History modes govern how much data a Tezos node stores, and, consequently, how much disk\n"
+    "space is required. Rolling mode is the smallest and fastest but still sufficient for baking.\n"
+    "You can read more about different nodes history modes here:\n"
+    "https://tezos.gitlab.io/user/history_modes.html",
+    options=history_modes,
+    validator=validators.enum_range,
+)
+
+
+snapshot_file_query = Step(
+    id="snapshot_file",
+    prompt="Provide the path to the node snapshot file.",
+    help="You have indicated wanting to import the snapshot from a file.\n"
+    "You can download the snapshot yourself e.g. from XTZ-Shots or Tezos Giganode Snapshots.",
+    validator=[validators.required_field, validators.filepath],
+)
+
+snapshot_url_query = Step(
+    id="snapshot_url",
+    prompt="Provide the url of the node snapshot file.",
+    help="You have indicated wanting to import the snapshot from a custom url.\n"
+    "You can use e.g. links to XTZ-Shots or Tezos Giganode Snapshots resources.",
+    validator=[validators.required_field, validators.reachable_url()],
+)
+
+snapshot_import_modes: Mapping[str, Union[str, Option]] = {
+    "download-rolling": "Import rolling snapshot from xtz-shots.io (recommended)",
+    "download-full": "Import full snapshot from xtz-shots.io",
+    "file": Option("file", "Import snapshot from a file", requires=snapshot_file_query),
+    "url": Option("url", "Import snapshot from a url", requires=snapshot_url_query),
+    "skip": "Skip snapshot import and synchronize with the network from scratch",
+}
+
+overwrite_node_dir_options = {
+    "yes": "Overwrite existing node directory",
+    "no": "Keep existing baker key",
+}
+
+
+def get_overwrite_node_dir_query(node_dir, diff):
+    return Step(
+        id="overwrite_node_dir",
+        prompt="The Tezos node data directory already has some blockchain data:\n" +
+        ("\n".join(["- " + os.path.join(node_dir, path) for path in diff])) +
+        "Delete this data and bootstrap the node again?",
+        help="If you choose 'yes', the node dir would be overwritten by fresh snapshot import.\n",
+        options=overwrite_node_dir_options,
+        default="no",
+        validator=validators.enum_range,
+    )
+
+
+# We define this step as a function to better tailor snapshot options to the chosen history mode
+def get_snapshot_mode_query(history_mode, modes):
+    return Step(
+        id="snapshot",
+        prompt="The Tezos node can take a significant time to bootstrap from scratch.\n"
+        "Bootstrapping from a snapshot is suggested instead.\n"
+        "How would you like to proceed?",
+        help="A fully-synced local Tezos node is required for running a baking instance.\n"
+        "By default, the Tezos node service will start to bootstrap from scratch,\n"
+        "which will take a significant amount of time.\nIn order to avoid this, we suggest "
+        "bootstrapping from a snapshot instead.\n\n"
+        "Snapshots can be downloaded from the following websites:\n"
+        "Tezos Giganode Snapshots - https://snapshots-tezos.giganode.io/ \n"
+        "XTZ-Shots - https://xtz-shots.io/ \n\n"
+        "We recommend to use rolling snapshots. This is the smallest and the fastest mode\n"
+        "that is sufficient for baking. You can read more about other Tezos node history modes here:\n"
+        "https://tezos.gitlab.io/user/history_modes.html#history-modes",
+        options=modes,
+        default="1" if history_mode == "rolling" else "2",
+        validator=validators.enum_range,
+    )
+
+
+# We define the step as a function to disallow choosing json baking on mainnet
+def get_key_mode_query(modes):
+    return Step(
+        id="key_import_mode",
+        prompt="How do you want to import the baker key?",
+        help="To register the baker, its secret key needs to be imported to the data "
+        "directory first.\nBy default tezos-baking-<network>.service will use the 'baker' "
+        "alias\nfor the key that will be used for baking and endorsing.\n"
+        "If you want to test baking with a faucet file, "
+        "make sure you have chosen a test network like " + list(networks.keys())[1],
+        options=modes,
+        validator=validators.enum_range,
+    )
+
+
 toggle_vote_modes = {
     "pass": "Abstain from voting",
     "off": "Request to end the subsidy",
     "on": "Request to continue or restart the subsidy",
 }
 
+liquidity_toggle_vote_query = Step(
+    id="liquidity_toggle_vote",
+    prompt="Would you like to request to end the Liquidity Baking subsidy?",
+    help="Tezos chain offers a Liquidity Baking subsidy mechanism to incentivise exchange\n"
+    "between tez and tzBTC. You can ask to end this subsidy, ask to continue it, or abstain.\n"
+    "\nYou can read more about this in the here:\n"
+    "https://tezos.gitlab.io/active/liquidity_baking.html",
+    options=toggle_vote_modes,
+    validator=validators.enum_range,
+)
+
+# CLI argument parser
+
+parser = argparse.ArgumentParser()
+parser.add_argument("--network", type=str)
+parser.add_argument("-n", "--non-interactive", default=False, action='store_true')
+parser.add_argument("--mode", type=str)
+parser.add_argument("--enable", type=str, dest="systemd_mode")
+parser.add_argument("--overwrite-node-dir", type=str)
+parser.add_argument("--replace-baker-key", type=str)
+parser.add_argument("--liquidity-toggle-vote", type=str)
+parser.add_argument("--file", type=str, metavar="SNAPSHOT_FILE", dest="snapshot_file")
+parser.add_argument("--url", type=str, metavar="SNAPSHOT_URL", dest="snapshot_url")
+parser.add_argument("--history-mode", type=str)
+parser.add_argument("--key-import-mode", type=str)
+
+# for the non interactive mode we need option for Delete this data and bootstrap the node again? <y/N>
+# something like --force
+
+# Global options
 
 TMP_SNAPSHOT_LOCATION = "/tmp/octez_node.snapshot"
 
-
 # Wizard CLI utility
-
 
 welcome_text = """Tezos Setup Wizard
 
@@ -92,117 +260,35 @@ def is_full_snapshot(import_mode):
         return re.search(b"at level [0-9]+ in full", output) is not None
     return False
 
-
-# Steps
-
-network_query = Step(
-    id="network",
-    prompt="Which Tezos network would you like to use?\nCurrently supported:",
-    help="The selected network will be used to set up all required services.\n"
-    "The currently supported protocol is `PtMumbai` (used on `mumbainet`, `ghostnet` and `mainnet`) and `PtNairob` (used on `nairobinet`).\n"
-    "Keep in mind that you must select the test network (e.g. ghostnet)\n"
-    "if you plan on baking with a faucet JSON file.\n",
-    options=networks,
-    validator=Validator(enum_range_validator(networks)),
-)
-
-service_mode_query = Step(
-    id="mode",
-    prompt="Do you want to set up baking or to run the standalone node?",
-    help="By default, tezos-baking provides predefined services for running baking instances "
-    "on different networks.\nSometimes, however, you might want to only run the Tezos node.\n"
-    "When this option is chosen, this wizard will help you bootstrap the Tezos node only.",
-    options=modes,
-    validator=Validator(enum_range_validator(modes)),
-)
-
-systemd_mode_query = Step(
-    id="systemd_mode",
-    prompt="Would you like your setup to automatically start on boot?",
-    help="Starting the service will make it available just for this session, great\n"
-    "if you want to experiment. Enabling it will make it start on every boot.",
-    options=systemd_enable,
-    validator=Validator(enum_range_validator(systemd_enable)),
-)
-
-liquidity_toggle_vote_query = Step(
-    id="liquidity_toggle_vote",
-    prompt="Would you like to request to end the Liquidity Baking subsidy?",
-    help="Tezos chain offers a Liquidity Baking subsidy mechanism to incentivise exchange\n"
-    "between tez and tzBTC. You can ask to end this subsidy, ask to continue it, or abstain.\n"
-    "\nYou can read more about this in the here:\n"
-    "https://tezos.gitlab.io/active/liquidity_baking.html",
-    options=toggle_vote_modes,
-    validator=Validator(enum_range_validator(toggle_vote_modes)),
-)
-
-# We define this step as a function to better tailor snapshot options to the chosen history mode
-def get_snapshot_mode_query(modes):
-    return Step(
-        id="snapshot",
-        prompt="The Tezos node can take a significant time to bootstrap from scratch.\n"
-        "Bootstrapping from a snapshot is suggested instead.\n"
-        "How would you like to proceed?",
-        help="A fully-synced local Tezos node is required for running a baking instance.\n"
-        "By default, the Tezos node service will start to bootstrap from scratch,\n"
-        "which will take a significant amount of time.\nIn order to avoid this, we suggest "
-        "bootstrapping from a snapshot instead.\n\n"
-        "Snapshots can be downloaded from the following websites:\n"
-        "Tezos Giganode Snapshots - https://snapshots-tezos.giganode.io/ \n"
-        "XTZ-Shots - https://xtz-shots.io/ \n\n"
-        "We recommend to use rolling snapshots. This is the smallest and the fastest mode\n"
-        "that is sufficient for baking. You can read more about other Tezos node history modes here:\n"
-        "https://tezos.gitlab.io/user/history_modes.html#history-modes",
-        options=modes,
-        validator=Validator(enum_range_validator(modes)),
-    )
+# теперь осталось сделать то же самое с baker key
 
 
-snapshot_file_query = Step(
-    id="snapshot_file",
-    prompt="Provide the path to the node snapshot file.",
-    help="You have indicated wanting to import the snapshot from a file.\n"
-    "You can download the snapshot yourself e.g. from XTZ-Shots or Tezos Giganode Snapshots.",
-    default=None,
-    validator=Validator([required_field_validator, filepath_validator]),
-)
+class Setup(wizard_structure.Setup):
 
-snapshot_url_query = Step(
-    id="snapshot_url",
-    prompt="Provide the url of the node snapshot file.",
-    help="You have indicated wanting to import the snapshot from a custom url.\n"
-    "You can use e.g. links to XTZ-Shots or Tezos Giganode Snapshots resources.",
-    default=None,
-    validator=Validator([required_field_validator, reachable_url_validator()]),
-)
+    def clean_node_directory(self, node_dir, diff):
+        # We first stop the node service, because it's possible that it
+        # will re-create some of the files while we go on with the wizard
+        print("Stopping node service")
+        proc_call(
+            "sudo systemctl stop tezos-node-"
+            + self.config["network"]
+            + ".service"
+        )
+        for path in diff:
+            try:
+                proc_call("sudo rm -r " + os.path.join(node_dir, path))
+            except:
+                print(
+                    "Could not clean the Tezos node data directory. "
+                    "Please do so manually."
+                )
+                raise OSError(
+                    "'sudo rm -r " + os.path.join(node_dir, path) + "' failed."
+                )
 
-history_mode_query = Step(
-    id="history_mode",
-    prompt="Which history mode do you want your node to run in?",
-    help="History modes govern how much data a Tezos node stores, and, consequently, how much disk\n"
-    "space is required. Rolling mode is the smallest and fastest but still sufficient for baking.\n"
-    "You can read more about different nodes history modes here:\n"
-    "https://tezos.gitlab.io/user/history_modes.html",
-    options=history_modes,
-    validator=Validator(enum_range_validator(history_modes)),
-)
-
-# We define the step as a function to disallow choosing json baking on mainnet
-def get_key_mode_query(modes):
-    return Step(
-        id="key_import_mode",
-        prompt="How do you want to import the baker key?",
-        help="To register the baker, its secret key needs to be imported to the data "
-        "directory first.\nBy default tezos-baking-<network>.service will use the 'baker' "
-        "alias\nfor the key that will be used for baking and endorsing.\n"
-        "If you want to test baking with a faucet file, "
-        "make sure you have chosen a test network like " + list(networks.keys())[1],
-        options=modes,
-        validator=Validator(enum_range_validator(modes)),
-    )
+        print("Node directory cleaned.")
 
 
-class Setup(Setup):
     # Check if there is already some blockchain data in the octez-node data directory,
     # and ask the user if it can be overwritten.
     def check_blockchain_data(self):
@@ -235,32 +321,14 @@ class Setup(Setup):
 
         diff = node_dir_contents - node_dir_config
         if diff:
-            print("The Tezos node data directory already has some blockchain data:")
-            print("\n".join(["- " + os.path.join(node_dir, path) for path in diff]))
-            if yes_or_no("Delete this data and bootstrap the node again? <y/N> ", "no"):
-                # We first stop the node service, because it's possible that it
-                # will re-create some of the files while we go on with the wizard
-                print("Stopping node service")
-                proc_call(
-                    "sudo systemctl stop tezos-node-"
-                    + setup.config["network"]
-                    + ".service"
-                )
-                for path in diff:
-                    try:
-                        proc_call("sudo rm -r " + os.path.join(node_dir, path))
-                    except:
-                        print(
-                            "Could not clean the Tezos node data directory. "
-                            "Please do so manually."
-                        )
-                        raise OSError(
-                            "'sudo rm -r " + os.path.join(node_dir, path) + "' failed."
-                        )
-
-                print("Node directory cleaned.")
+            self.ensure_step(get_overwrite_node_dir_query(node_dir, diff))
+            if self.config["overwrite_node_dir"] == "yes":
+                print("Cleaning the directory...")
+                self.clean_node_directory(node_dir, diff)
                 return True
-            return False
+            else:
+                print("Assuming the blockchain data is valid.")
+                return False
         return True
 
     # Check https://xtz-shots.io/tezos-snapshots.json and collect the most recent snapshot
@@ -299,13 +367,14 @@ class Setup(Setup):
         except Exception as e:
             print(f"Unexpected error handling snapshot metadata:\n{e}\n")
 
+
     # Importing the snapshot for Node bootstrapping
     def import_snapshot(self):
         do_import = self.check_blockchain_data()
         valid_choice = False
 
         if do_import:
-            self.query_step(history_mode_query)
+            self.ensure_step(history_mode_query)
 
             proc_call(
                 f"sudo -u tezos octez-node-{self.config['network']} config update "
@@ -327,7 +396,7 @@ class Setup(Setup):
 
         while not valid_choice:
 
-            self.query_step(get_snapshot_mode_query(snapshot_import_modes))
+            self.ensure_step(get_snapshot_mode_query(self.config["history_mode"], snapshot_import_modes))
 
             snapshot_file = TMP_SNAPSHOT_LOCATION
             snapshot_block_hash = None
@@ -335,13 +404,13 @@ class Setup(Setup):
             if self.config["snapshot"] == "skip":
                 return
             elif self.config["snapshot"] == "file":
-                self.query_step(snapshot_file_query)
+                self.ensure_step(snapshot_file_query)
                 if self.config["snapshot_file"] != TMP_SNAPSHOT_LOCATION:
                     snapshot_file = shutil.copyfile(
                         self.config["snapshot_file"], TMP_SNAPSHOT_LOCATION
                     )
             elif self.config["snapshot"] == "url":
-                self.query_step(snapshot_url_query)
+                self.ensure_step(snapshot_url_query)
                 try:
                     snapshot_file = fetch_snapshot(self.config["snapshot_url"])
                 except (ValueError, urllib.error.URLError):
@@ -449,6 +518,7 @@ class Setup(Setup):
             if self.config["network"] == "mainnet":
                 key_import_modes.pop("json", None)
                 key_import_modes.pop("generate-fresh-key", None)
+
             key_mode_query = get_key_mode_query(key_import_modes)
 
             baker_set_up = False
@@ -483,7 +553,7 @@ class Setup(Setup):
     # There is no changing the toggle vote option at a glance,
     # so we need to change the config every time
     def set_liquidity_toggle_vote(self):
-        self.query_step(liquidity_toggle_vote_query)
+        self.ensure_step(liquidity_toggle_vote_query)
 
         net = self.config["network"]
         replace_systemd_service_env(
@@ -497,14 +567,16 @@ class Setup(Setup):
 
     def run_setup(self):
 
-        print(welcome_text)
+        if not self.args.non_interactive:
+            print(welcome_text)
+            print()
 
-        self.query_step(network_query)
-        self.fill_baking_config()
-        self.query_step(service_mode_query)
 
-        print()
-        self.query_step(systemd_mode_query)
+        self.ensure_step(network_query)
+        self.ensure_step(service_mode_query)
+
+
+        self.ensure_step(systemd_mode_query)
 
         print("Trying to bootstrap octez-node")
         self.bootstrap_node()
@@ -562,7 +634,8 @@ def main():
     readline.set_completer_delims(" ")
 
     try:
-        setup = Setup()
+        args = parser.parse_args()
+        setup = Setup(args=args)
         setup.run_setup()
     except KeyboardInterrupt:
         if "network" in setup.config:

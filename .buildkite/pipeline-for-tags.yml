@@ -20,7 +20,7 @@ steps:
      queue: "docker"
    commands:
    - eval "$SET_VERSION"
-   - nix develop .#docker-tezos-packages -c ./docker/package/util/build.py --os fedora --type source
+   - nix develop .#docker-tezos-packages -c ./docker/package/util/build_ubuntu.py --type source
    artifact_paths:
      - ./out/*
 
@@ -31,7 +31,7 @@ steps:
      queue: "docker"
    commands:
    - eval "$SET_VERSION"
-   - nix develop .#docker-tezos-packages -c ./docker/package/util/build.py --os fedora --type source
+   - nix develop .#docker-tezos-packages -c ./docker/package/util/build_fedora.py --type source
    artifact_paths:
      - ./out/*
 
@@ -45,7 +45,7 @@ steps:
    commands:
    - eval "$SET_VERSION"
    - buildkite-agent artifact download "out/*" . --step build-ubuntu-source-packages
-   - nix develop .#docker-tezos-packages -c ./docker/package/util/sign.py --os ubuntu -d out -i 'Serokell <tezos-packaging@serokell.io>'
+   - nix develop .#docker-tezos-packages -c ./docker/package/util/sign_ubuntu.py -d out -i 'Serokell <tezos-packaging@serokell.io>'
    artifact_paths:
      - ./out/*
 
@@ -59,7 +59,7 @@ steps:
    commands:
    - eval "$SET_VERSION"
    - buildkite-agent artifact download "out/*" . --step build-fedora-source-packages
-   - nix develop .#docker-tezos-packages -c ./docker/package/util/sign.py --os fedora -d out -i 'Serokell <tezos-packaging@serokell.io>'
+   - nix develop .#docker-tezos-packages -c ./docker/package/util/sign_fedora.py -d out -i 'Serokell <tezos-packaging@serokell.io>'
    artifact_paths:
      - ./out/*
 
@@ -70,7 +70,7 @@ steps:
    commands:
    - eval "$SET_VERSION"
    - buildkite-agent artifact download "out/*" . --step sign-ubuntu-source-packages
-   - nix develop .#autorelease -c ./docker/package/util/upload.py --os ubuntu -d out
+   - nix develop .#autorelease -c ./docker/package/util/upload_ubuntu.py -d out
 
  - label: Publish fedora native packages
    if: build.tag =~ /^v.*-1/
@@ -79,7 +79,7 @@ steps:
    commands:
    - eval "$SET_VERSION"
    - buildkite-agent artifact download "out/*" . --step sign-fedora-source-packages
-   - nix develop .#autorelease -c ./docker/package/util/upload.py --os fedora -d out
+   - nix develop .#autorelease -c ./docker/package/util/upload_fedora.py -d out
 
  - label: build-via-docker
    if: build.tag =~ /^v.*-1/
@@ -104,7 +104,7 @@ steps:
    - eval "$SET_VERSION"
    - mkdir binaries
    - buildkite-agent artifact download "docker/*" binaries --step build-via-docker
-   - nix develop .#docker-tezos-packages -c ./docker/package/util/build.py --os fedora --type source --output-dir epel --binaries-dir ./binaries/docker
+   - nix develop .#docker-tezos-packages -c ./docker/package/util/build_fedora.py --type source --output-dir epel --binaries-dir ./binaries/docker
    artifact_paths:
      - ./epel/*
 
@@ -119,7 +119,7 @@ steps:
    - eval "$SET_VERSION"
    - mkdir binaries
    - buildkite-agent artifact download "epel/*" . --step build-source-packages-from-static-binaries
-   - nix develop .#docker-tezos-packages -c ./docker/package/util/sign.py --os fedora -d epel -i 'Serokell <tezos-packaging@serokell.io>'
+   - nix develop .#docker-tezos-packages -c ./docker/package/util/sign_fedora.py -d epel -i 'Serokell <tezos-packaging@serokell.io>'
    artifact_paths:
      - ./epel/*
 
@@ -131,7 +131,7 @@ steps:
    - eval "$SET_VERSION"
    - mkdir -p srcs
    - buildkite-agent artifact download "epel/*" . --step sign-source-packages-built-from-static-binaries
-   - nix develop .#buildkite .#autorelease -c ./docker/pacakge/util/upload.py -d epel --upload epel
+   - nix develop .#buildkite .#autorelease -c ./docker/package/util/upload_fedora.py -d epel --upload epel
 
  - label: Build Big Sur x86_64 bottles
    key: build-bottles-big-sur-x86_64

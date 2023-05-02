@@ -9,9 +9,8 @@ import shutil
 import subprocess
 from typing import Optional
 from package.package_generator import make_ubuntu_parser
-from package.util.build import parser, build_fedora, build_ubuntu
+from package.util.build_common import parser
 from package.util.build import main as build
-from package.util.sign import sign_fedora, sign_ubuntu
 import package.util.sign as sign
 import package.util.upload as upload
 from package.util.upload import upload_ubuntu, upload_fedora

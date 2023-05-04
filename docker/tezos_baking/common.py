@@ -13,6 +13,8 @@ import json
 # Regexes
 
 secret_key_regex = b"(encrypted|unencrypted):(?:\w{54}|\w{88})"
+encrypted_secret_key_regex = b"encrypted:(?:\w{54}|\w{88})"
+unencrypted_secret_key_regex = b"unencrypted:(?:\w{54}|\w{88})"
 address_regex = b"tz[123]\w{33}"
 protocol_hash_regex = (
     b"P[123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]{50}"

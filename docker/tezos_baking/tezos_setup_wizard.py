@@ -99,6 +99,7 @@ history_mode_query = Step(
     "space is required. Rolling mode is the smallest and fastest but still sufficient for baking.\n"
     "You can read more about different nodes history modes here:\n"
     "https://tezos.gitlab.io/user/history_modes.html",
+    default="rolling",
     options=history_modes,
     validator=validators.enum_range,
 )
@@ -130,7 +131,7 @@ snapshot_import_modes: Mapping[str, Union[str, Option]] = {
 
 overwrite_node_dir_options = {
     "yes": "Overwrite existing node directory",
-    "no": "Keep existing baker key",
+    "no": "Keep existing node directory",
 }
 
 
@@ -139,7 +140,7 @@ def get_overwrite_node_dir_query(node_dir, diff):
         id="overwrite_node_dir",
         prompt="The Tezos node data directory already has some blockchain data:\n" +
         ("\n".join(["- " + os.path.join(node_dir, path) for path in diff])) +
-        "Delete this data and bootstrap the node again?",
+        "\nDelete this data and bootstrap the node again?",
         help="If you choose 'yes', the node dir would be overwritten by fresh snapshot import.\n",
         options=overwrite_node_dir_options,
         default="no",
@@ -211,10 +212,12 @@ parser.add_argument("--mode", type=str)
 parser.add_argument("--enable", type=str, dest="systemd_mode")
 parser.add_argument("--overwrite-node-dir", type=str)
 parser.add_argument("--replace-baker-key", type=str)
+parser.add_argument("--history-mode", type=str)
 parser.add_argument("--liquidity-toggle-vote", type=str)
 parser.add_argument("--file", type=str, metavar="SNAPSHOT_FILE", dest="snapshot_file")
 parser.add_argument("--url", type=str, metavar="SNAPSHOT_URL", dest="snapshot_url")
-parser.add_argument("--history-mode", type=str)
+parser.add_argument("--secret-key", type=str)
+parser.add_argument("--password-filename", type=str)
 parser.add_argument("--key-import-mode", type=str)
 
 # for the non interactive mode we need option for Delete this data and bootstrap the node again? <y/N>

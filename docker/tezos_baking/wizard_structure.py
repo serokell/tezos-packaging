@@ -15,29 +15,9 @@ import json
 from typing import List, Dict, Callable, Optional, Tuple, Union, Any
 from dataclasses import dataclass, field
 import tezos_baking.steps_common as steps
-from tezos_baking.steps_common import Step, get_systemd_service_env, networks, key_import_modes, get_replace_baker_key_query
+from tezos_baking.steps_common import Step, get_systemd_service_env, networks, key_import_modes, get_replace_baker_key_query, get_step_path
 from tezos_baking.common import *
-
-
-def get_step_path(args, step: Step) -> List[Tuple[str, Step]]:
-    argument: Optional[str] = getattr(args, step.id, None)
-    if argument is None:
-        paths = []
-        for (k, v) in step.options.items():
-            if isinstance(v, str):
-                continue
-            path = get_step_path(args, v.requires)
-            if path:
-                paths.append((v.item, path))
-        if len(paths) > 1:
-            raise ValueError(f"Conflicting arguments: {', '.join(path[1][-1][1].id for path in paths)}")
-        elif len(paths) == 1:
-            (answer, path) = paths[0]
-            return [(answer, step)] + path
-        else:
-            return []
-    else:
-        return [(argument, step)]
+import tezos_baking.validators as validators
 
 
 class Setup:
@@ -108,8 +88,8 @@ class Setup:
     def get_tezos_client_options(self):
         options = (
             f"--base-dir {self.config['client_data_dir']} "
-            f"--endpoint {self.config['node_rpc_endpoint']}"
-        )
+            f"--endpoint {self.config['node_rpc_endpoint']} "
+        ) + f"--password-filename {self.config['password_filename']}" if self.config.get("password_filename", None) else ""
         if "remote_host" in self.config:
             options += f" -R '{self.config['remote_host']}'"
         return options
@@ -139,6 +119,30 @@ class Setup:
         else:
             return True
 
+#Use command
+#  octez-client wait for oo7Tb626kbZaF6tLB8QYpKYqcW4daf5pvdk6MPuPNP5z9dpmBHo to be included --confirmations 1 --branch BMKa2VQpn5DGEZewLtLxWfgugPCKGa1viqpbAMsauXbbBMq1vcK
+#and/or an external block explorer.
+#You can check a blockchain explorer (e.g. https://tzkt.io/ or https://tzstats.com/)
+#to see the baker status and baking rights of your account.
+#
+#Starting the baking instance
+#🔐 Enter password for baker key: (press TAB for no echo)
+#Broadcast message from root@ubuntu2204.localdomain (Wed 2023-05-03 09:59:26 UTC):
+#
+#Password entry required for 'Enter password for baker key:' (PID 3787).
+#Please enter password with the systemd-tty-ask-password-agent tool.
+#
+#
+#Job for tezos-baking-mumbainet.service failed because the control process exited with error code.
+#See "systemctl status tezos-baking-mumbainet.service" and "journalctl -xeu tezos-baking-mumbainet.service" for details.
+#
+#Error in Tezos Setup Wizard, exiting.
+#The error has been logged to /home/vagrant/tezos-packaging/tezos_setup.log
+#  File "/usr/lib/python3.10/subprocess.py", line 369, in check_call
+#    raise CalledProcessError(retcode, cmd)
+#subprocess.CalledProcessError: Command '['sudo', 'systemctl', 'restart', 'tezos-baking-mumbainet.service']' returned non-zero exit status 1.
+#
+# понятно? нужно снова фиксить тезос пекежинг - давать возможность предоставить пароль в файле
     def import_key(self, key_mode_query, ledger_app=None):
 
         baker_alias = self.config["baker_alias"]
@@ -152,12 +156,26 @@ class Setup:
             try:
                 if self.config["key_import_mode"] == "secret-key":
                     self.ensure_step(steps.secret_key_query)
+
+                    # i would prefer to keep non-interactive dispatching in the
+                    # query_step only, but it is the only exception
+                    if self.args.non_interactive:
+                        encrypted = False
+                        try:
+                            validators.unencrypted_secret_key(self.config["secret_key"])
+                        except ValueError:
+                            encrypted = True
+                        if encrypted:
+                            self.ensure_step(steps.password_filename_query)
+
+                    tezos_client_options = self.get_tezos_client_options()
+
                     proc_call(
                         f"sudo -u tezos {suppress_warning_text} octez-client {tezos_client_options} "
                         f"import secret key {baker_alias} {self.config['secret_key']} --force"
                     )
                 elif self.config["key_import_mode"] == "remote":
-                    self.query_step(steps.remote_signer_uri_query)
+                    self.ensure_step(steps.remote_signer_uri_query)
 
                     tezos_client_options = self.get_tezos_client_options()
                     proc_call(

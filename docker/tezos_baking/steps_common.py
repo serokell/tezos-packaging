@@ -115,6 +115,26 @@ class Step:
             print("Default:", self.default)
 
 
+def get_step_path(args, step: Step) -> List[Tuple[str, Step]]:
+    argument: Optional[str] = getattr(args, step.id, None)
+    if argument is None:
+        paths = []
+        for (k, v) in step.options.items():
+            if isinstance(v, str):
+                continue
+            path = get_step_path(args, v.requires)
+            if path:
+                paths.append((v.item, path))
+        if len(paths) > 1:
+            raise ValueError(f"Conflicting arguments: {', '.join(path[1][-1][1].id for path in paths)}")
+        elif len(paths) == 1:
+            (answer, path) = paths[0]
+            return [(answer, step)] + path
+        else:
+            return []
+    else:
+        return [(argument, step)]
+
 
 networks = {
     "mainnet": "Main Tezos network",
@@ -124,13 +144,6 @@ networks = {
 }
 
 
-key_import_modes = {
-    "ledger": "From a ledger",
-    "secret-key": "Either the unencrypted or password-encrypted secret key for your address",
-    "remote": "Remote key governed by a signer running on a different machine",
-    "generate-fresh-key": "Generate fresh key that should be filled manually later",
-    "json": "Faucet JSON file",
-}
 
 # надо сделать чтобы non-interactive всплывал исключительно в query_step
 # ввести в модель понятие неявных шагов, которые не появляются в интерактивном режиме
@@ -146,6 +159,15 @@ secret_key_query = Step(
     default=None,
     validator=[validators.required_field, validators.secret_key],
 )
+
+
+key_import_modes = {
+    "ledger": "From a ledger",
+    "secret-key": Option("secret-key", "Either the unencrypted or password-encrypted secret key for your address", requires=secret_key_query),
+    "remote": "Remote key governed by a signer running on a different machine",
+    "generate-fresh-key": "Generate fresh key that should be filled manually later",
+    "json": "Faucet JSON file",
+}
 
 
 def remote_signer_url_action(answer: str, config: Dict[str, str]):
@@ -169,7 +191,6 @@ derivation_path_query = Step(
     id="derivation_path",
     prompt="Provide derivation path for the key stored on the ledger.",
     help="The format is '[0-9]+h/[0-9]+h'",
-    default=None,
     validator=[validators.required_field, validators.derivation_path],
 )
 
@@ -177,7 +198,13 @@ json_filepath_query = Step(
     id="json_filepath",
     prompt="Provide the path to your downloaded faucet JSON file.",
     help="The file should contain the 'mnemonic' and 'secret' fields.",
-    default=None,
+    validator=[validators.required_field, validators.filepath],
+)
+
+password_filename_query = Step(
+    id="password_filename",
+    prompt="Provide the path to the file with password.",
+    help="The file should contain the password in plain text.",
     validator=[validators.required_field, validators.filepath],
 )
 

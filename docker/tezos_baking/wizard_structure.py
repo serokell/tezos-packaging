@@ -26,11 +26,6 @@ class Setup:
         self.args = args
 
 
-    def ensure_step(self, step: Step):
-        if self.config.get(step.id, None) is None:
-            self.query_step(step)
-
-
     def query_step(self, step: Step):
         def interactive_query():
             validated = False
@@ -53,19 +48,22 @@ class Setup:
                     else:
                         validated = True
 
-        steps_to_fill = get_step_path(self.args, step)
-        if steps_to_fill:
-            for (answer, step) in steps_to_fill:
-                step.process(answer, self.config)
-        else:
-            if self.args.non_interactive:
-                if step.default is not None:
-                    step.process(step.default, self.config)
-                else:
-                    print(f"Validation error: argument {step.id} is not supplied.", color_red)
-                    raise ValueError(f"Missing argument: {step.id}")
+        # check if step weren't already been fulfilled by cmd arguments
+        if self.config.get(step.id, None) is None:
+
+            steps_to_fill = get_step_path(self.args, step)
+            if steps_to_fill:
+                for (answer, step) in steps_to_fill:
+                    step.process(answer, self.config)
             else:
-                interactive_query()
+                if self.args.non_interactive:
+                    if step.default is not None:
+                        step.process(step.default, self.config)
+                    else:
+                        print(f"Validation error: argument {step.id} is not supplied.", color_red)
+                        raise ValueError(f"Missing argument: {step.id}")
+                else:
+                    interactive_query()
 
 
 
@@ -114,7 +112,7 @@ class Setup:
         baker_alias = self.config["baker_alias"]
         baker_key_value = get_key_address(self.get_tezos_client_options(), baker_alias)
         if baker_key_value is not None:
-            self.ensure_step(get_replace_baker_key_query(self.config, baker_key_value))
+            self.query_step(get_replace_baker_key_query(self.config, baker_key_value))
             return self.config["replace_baker_key"] == "yes"
         else:
             return True
@@ -151,11 +149,11 @@ class Setup:
         valid_choice = False
         while not valid_choice:
 
-            self.ensure_step(key_mode_query)
+            self.query_step(key_mode_query)
 
             try:
                 if self.config["key_import_mode"] == "secret-key":
-                    self.ensure_step(steps.secret_key_query)
+                    self.query_step(steps.secret_key_query)
 
                     # i would prefer to keep non-interactive dispatching in the
                     # query_step only, but it is the only exception
@@ -166,7 +164,14 @@ class Setup:
                         except ValueError:
                             encrypted = True
                         if encrypted:
-                            self.ensure_step(steps.password_filename_query)
+                            # bad thing - in encrypted case it's still not really non-interactive because of systemd
+                            # second thing - non-intractivity should be part of the model, because here it's really
+                            # only need validator - you reproduced already existing logic
+                            # we should also give ability to provide password file in interactive mode
+                            #
+                            #
+                            # осталось точно реобработать флаги чтобы человеческие были и они переносились в вид который уже перевариваем в коде
+                            self.query_step(steps.password_filename_query)
 
                     tezos_client_options = self.get_tezos_client_options()
 
@@ -175,7 +180,7 @@ class Setup:
                         f"import secret key {baker_alias} {self.config['secret_key']} --force"
                     )
                 elif self.config["key_import_mode"] == "remote":
-                    self.ensure_step(steps.remote_signer_uri_query)
+                    self.query_step(steps.remote_signer_uri_query)
 
                     tezos_client_options = self.get_tezos_client_options()
                     proc_call(
@@ -214,7 +219,7 @@ class Setup:
                         print("Going back to the import mode selection.")
                         continue
                 elif self.config["key_import_mode"] == "json":
-                    self.ensure_step(steps.json_filepath_query)
+                    self.query_step(steps.json_filepath_query)
                     json_tmp_path = shutil.copy(self.config["json_filepath"], "/tmp/")
                     proc_call(
                         f"sudo -u tezos {suppress_warning_text} octez-client {tezos_client_options} "
@@ -237,7 +242,7 @@ class Setup:
                     ledgers = list(ledgers_derivations.keys())
                     baker_ledger_url = ""
                     while re.match(ledger_regex.decode(), baker_ledger_url) is None:
-                        self.ensure_step(
+                        self.query_step(
                             steps.get_ledger_derivation_query(
                                 ledgers_derivations,
                                 self.config["node_rpc_endpoint"],
@@ -256,9 +261,9 @@ class Setup:
                                 if len(ledgers) == 1:
                                     ledger_url = ledgers[0]
                                 else:
-                                    self.ensure_step(steps.get_ledger_url_query(ledgers))
+                                    self.query_step(steps.get_ledger_url_query(ledgers))
                                     ledger_url = self.config["ledger_url"]
-                                self.ensure_step(steps.derivation_path_query)
+                                self.query_step(steps.derivation_path_query)
                                 signing_curves = [
                                     "bip25519",
                                     "ed25519",

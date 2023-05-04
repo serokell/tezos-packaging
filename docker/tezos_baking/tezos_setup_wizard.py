@@ -324,7 +324,7 @@ class Setup(wizard_structure.Setup):
 
         diff = node_dir_contents - node_dir_config
         if diff:
-            self.ensure_step(get_overwrite_node_dir_query(node_dir, diff))
+            self.query_step(get_overwrite_node_dir_query(node_dir, diff))
             if self.config["overwrite_node_dir"] == "yes":
                 print("Cleaning the directory...")
                 self.clean_node_directory(node_dir, diff)
@@ -377,7 +377,7 @@ class Setup(wizard_structure.Setup):
         valid_choice = False
 
         if do_import:
-            self.ensure_step(history_mode_query)
+            self.query_step(history_mode_query)
 
             proc_call(
                 f"sudo -u tezos octez-node-{self.config['network']} config update "
@@ -399,7 +399,7 @@ class Setup(wizard_structure.Setup):
 
         while not valid_choice:
 
-            self.ensure_step(get_snapshot_mode_query(self.config["history_mode"], snapshot_import_modes))
+            self.query_step(get_snapshot_mode_query(self.config["history_mode"], snapshot_import_modes))
 
             snapshot_file = TMP_SNAPSHOT_LOCATION
             snapshot_block_hash = None
@@ -407,13 +407,13 @@ class Setup(wizard_structure.Setup):
             if self.config["snapshot"] == "skip":
                 return
             elif self.config["snapshot"] == "file":
-                self.ensure_step(snapshot_file_query)
+                self.query_step(snapshot_file_query)
                 if self.config["snapshot_file"] != TMP_SNAPSHOT_LOCATION:
                     snapshot_file = shutil.copyfile(
                         self.config["snapshot_file"], TMP_SNAPSHOT_LOCATION
                     )
             elif self.config["snapshot"] == "url":
-                self.ensure_step(snapshot_url_query)
+                self.query_step(snapshot_url_query)
                 try:
                     snapshot_file = fetch_snapshot(self.config["snapshot_url"])
                 except (ValueError, urllib.error.URLError):
@@ -556,7 +556,7 @@ class Setup(wizard_structure.Setup):
     # There is no changing the toggle vote option at a glance,
     # so we need to change the config every time
     def set_liquidity_toggle_vote(self):
-        self.ensure_step(liquidity_toggle_vote_query)
+        self.query_step(liquidity_toggle_vote_query)
 
         net = self.config["network"]
         replace_systemd_service_env(
@@ -575,11 +575,11 @@ class Setup(wizard_structure.Setup):
             print()
 
 
-        self.ensure_step(network_query)
-        self.ensure_step(service_mode_query)
+        self.query_step(network_query)
+        self.query_step(service_mode_query)
 
 
-        self.ensure_step(systemd_mode_query)
+        self.query_step(systemd_mode_query)
 
         print("Trying to bootstrap octez-node")
         self.bootstrap_node()

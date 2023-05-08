@@ -13,26 +13,73 @@ steps:
    commands:
    - nix develop .#autorelease -c ./scripts/update-tezos.sh
 
- - label: Build source packages
-   key: build-source-packages
+ - label: Build ubuntu source packages
+   key: build-ubuntu-source-packages
    if: build.tag =~ /^v.*-1/
    agents:
      queue: "docker"
    commands:
    - eval "$SET_VERSION"
-   - nix develop .#docker-tezos-packages -c ./docker/docker-tezos-packages.py --os ubuntu --type source -s "Serokell <tezos-packaging@serokell.io>"
-   - nix develop .#docker-tezos-packages -c ./docker/docker-tezos-packages.py --os fedora --type source -s "Serokell <tezos-packaging@serokell.io>"
+   - nix develop .#docker-tezos-packages -c ./docker/build/ubuntu/build.py --type source
    artifact_paths:
      - ./out/*
 
- - label: Publish native packages
+ - label: Build fedora source packages
+   key: build-fedora-source-packages
    if: build.tag =~ /^v.*-1/
-   depends_on:
-   - "build-source-packages"
+   agents:
+     queue: "docker"
    commands:
    - eval "$SET_VERSION"
-   - buildkite-agent artifact download "out/*" . --step build-source-packages
-   - nix develop .#autorelease -c ./scripts/publish-native-packages.py out
+   - nix develop .#docker-tezos-packages -c ./docker/build/fedora/build.py --type source
+   artifact_paths:
+     - ./out/*
+
+ - label: Sign ubuntu source packages
+   if: build.tag =~ /^v.*-1/
+   depends_on:
+   - "build-ubuntu-source-packages"
+   key: sign-ubuntu-source-packages
+   agents:
+     queue: "docker"
+   commands:
+   - eval "$SET_VERSION"
+   - buildkite-agent artifact download "out/*" . --step build-ubuntu-source-packages
+   - nix develop .#docker-tezos-packages -c ./docker/build/ubuntu/sign.py -d out -i 'Serokell <tezos-packaging@serokell.io>'
+   artifact_paths:
+     - ./out/*
+
+ - label: Sign fedora source packages
+   if: build.tag =~ /^v.*-1/
+   depends_on:
+   - "build-fedora-source-packages"
+   key: sign-fedora-source-packages
+   agents:
+     queue: "docker"
+   commands:
+   - eval "$SET_VERSION"
+   - buildkite-agent artifact download "out/*" . --step build-fedora-source-packages
+   - nix develop .#docker-tezos-packages -c ./docker/build/fedora/sign.py -d out -i 'Serokell <tezos-packaging@serokell.io>'
+   artifact_paths:
+     - ./out/*
+
+ - label: Publish ubuntu native packages
+   if: build.tag =~ /^v.*-1/
+   depends_on:
+   - "sign-ubuntu-source-packages"
+   commands:
+   - eval "$SET_VERSION"
+   - buildkite-agent artifact download "out/*" . --step sign-ubuntu-source-packages
+   - nix develop .#autorelease -c ./docker/build/ubuntu/upload.py -d out
+
+ - label: Publish fedora native packages
+   if: build.tag =~ /^v.*-1/
+   depends_on:
+   - "sign-fedora-source-packages"
+   commands:
+   - eval "$SET_VERSION"
+   - buildkite-agent artifact download "out/*" . --step sign-fedora-source-packages
+   - nix develop .#autorelease -c ./docker/build/fedora/upload.py -d out
 
  - label: build-via-docker
    if: build.tag =~ /^v.*-1/
@@ -57,19 +104,34 @@ steps:
    - eval "$SET_VERSION"
    - mkdir binaries
    - buildkite-agent artifact download "docker/*" binaries --step build-via-docker
-   - nix develop .#docker-tezos-packages -c ./docker/docker-tezos-packages.py --os fedora --type source --output-dir epel --binaries-dir ./binaries/docker
+   - nix develop .#docker-tezos-packages -c ./docker/build/fedora/build.py --type source --output-dir epel --binaries-dir ./binaries/docker
+   artifact_paths:
+     - ./epel/*
+
+ - label: Sign source packages built from static binaries
+   key: sign-source-packages-built-from-static-binaries
+   if: build.tag =~ /^v.*-1/
+   agents:
+     queue: "docker"
+   depends_on:
+   - "build-via-docker"
+   commands:
+   - eval "$SET_VERSION"
+   - mkdir binaries
+   - buildkite-agent artifact download "epel/*" . --step build-source-packages-from-static-binaries
+   - nix develop .#docker-tezos-packages -c ./docker/build/fedora/sign.py -d epel -i 'Serokell <tezos-packaging@serokell.io>'
    artifact_paths:
      - ./epel/*
 
  - label: Publish epel packages
    if: build.tag =~ /^v.*-1/
    depends_on:
-   - "build-source-packages-from-static-binaries"
+   - "sign-source-packages-built-from-static-binaries"
    commands:
    - eval "$SET_VERSION"
    - mkdir -p srcs
-   - buildkite-agent artifact download "epel/*" srcs --step build-source-packages-from-static-binaries
-   - nix develop .#autorelease -c ./scripts/publish-native-packages.py ./srcs/epel epel-7-x86_64
+   - buildkite-agent artifact download "epel/*" . --step sign-source-packages-built-from-static-binaries
+   - nix develop .#buildkite .#autorelease -c ./docker/build/fedora/upload.py -d epel --upload epel
 
  - label: Build Big Sur x86_64 bottles
    key: build-bottles-big-sur-x86_64

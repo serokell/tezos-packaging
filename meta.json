@@ -1,5 +1,5 @@
 {
   "release": "1",
   "maintainer": "Serokell <hi@serokell.io>",
-  "tezos_ref": "v17.0-beta1"
+  "tezos_ref": "v17.0-rc1"
 }

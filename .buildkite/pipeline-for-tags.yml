@@ -117,7 +117,6 @@ steps:
    - "build-via-docker"
    commands:
    - eval "$SET_VERSION"
-   - mkdir binaries
    - buildkite-agent artifact download "epel/*" . --step build-source-packages-from-static-binaries
    - nix develop .#docker-tezos-packages -c ./docker/build/fedora/sign.py -d epel -i 'Serokell <tezos-packaging@serokell.io>'
    artifact_paths:
@@ -130,8 +129,8 @@ steps:
    commands:
    - eval "$SET_VERSION"
    - mkdir -p srcs
-   - buildkite-agent artifact download "epel/*" . --step sign-source-packages-built-from-static-binaries
-   - nix develop .#buildkite .#autorelease -c ./docker/build/fedora/upload.py -d epel --upload epel
+   - buildkite-agent artifact download "epel/*" srcs --step sign-source-packages-built-from-static-binaries
+   - nix develop .#autorelease -c ./docker/build/fedora/upload.py -d srcs/epel --upload epel
 
  - label: Build Big Sur x86_64 bottles
    key: build-bottles-big-sur-x86_64

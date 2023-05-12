@@ -120,7 +120,7 @@ def build_fedora(args):
 
     binaries_dir = args.binaries_dir
 
-    run_deps = get_ubuntu_run_deps(binaries_dir)
+    run_deps = get_fedora_run_deps(binaries_dir)
 
     build_deps = get_build_deps(binaries_dir)
 

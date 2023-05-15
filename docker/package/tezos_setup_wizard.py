@@ -243,7 +243,7 @@ class Setup(Setup):
                 print("Stopping node service")
                 proc_call(
                     "sudo systemctl stop tezos-node-"
-                    + setup.config["network"]
+                    + self.config["network"]
                     + ".service"
                 )
                 for path in diff:

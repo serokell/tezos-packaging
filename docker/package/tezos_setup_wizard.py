@@ -82,12 +82,12 @@ def fetch_snapshot(url):
     return filename
 
 
-def is_full_snapshot(import_mode):
+def is_full_snapshot(snapshot_file, import_mode):
     if import_mode == "download full":
         return True
     if import_mode == "file" or import_mode == "url":
         output = get_proc_output(
-            "sudo -u tezos octez-node snapshot info " + TMP_SNAPSHOT_LOCATION
+            "sudo -u tezos octez-node snapshot info " + snapshot_file
         ).stdout
         return re.search(b"at level [0-9]+ in full", output) is not None
     return False
@@ -336,10 +336,7 @@ class Setup(Setup):
                 return
             elif self.config["snapshot"] == "file":
                 self.query_step(snapshot_file_query)
-                if self.config["snapshot_file"] != TMP_SNAPSHOT_LOCATION:
-                    snapshot_file = shutil.copyfile(
-                        self.config["snapshot_file"], TMP_SNAPSHOT_LOCATION
-                    )
+                snapshot_file = self.config["snapshot_file"]
             elif self.config["snapshot"] == "url":
                 self.query_step(snapshot_url_query)
                 try:
@@ -366,7 +363,7 @@ class Setup(Setup):
             valid_choice = True
 
             import_flag = ""
-            if is_full_snapshot(self.config["snapshot"]):
+            if is_full_snapshot(snapshot_file, self.config["snapshot"]):
                 if self.config["history_mode"] == "archive":
                     import_flag = "--reconstruct "
 

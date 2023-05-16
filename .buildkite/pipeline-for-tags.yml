@@ -70,7 +70,7 @@ steps:
    commands:
    - eval "$SET_VERSION"
    - buildkite-agent artifact download "out/*" . --step sign-ubuntu-source-packages
-   - nix develop .#autorelease -c ./docker/build/ubuntu/upload.py -d out
+   - nix develop .#buildkite -c ./docker/build/ubuntu/upload.py -d out
 
  - label: Publish fedora native packages
    if: build.tag =~ /^v.*-1/
@@ -79,7 +79,7 @@ steps:
    commands:
    - eval "$SET_VERSION"
    - buildkite-agent artifact download "out/*" . --step sign-fedora-source-packages
-   - nix develop .#autorelease -c ./docker/build/fedora/upload.py -d out
+   - nix develop .#buildkite -c ./docker/build/fedora/upload.py -d out
 
  - label: build-via-docker
    if: build.tag =~ /^v.*-1/
@@ -130,7 +130,7 @@ steps:
    - eval "$SET_VERSION"
    - mkdir -p srcs
    - buildkite-agent artifact download "epel/*" srcs --step sign-source-packages-built-from-static-binaries
-   - nix develop .#autorelease -c ./docker/build/fedora/upload.py -d srcs/epel --upload epel
+   - nix develop .#buildkite -c ./docker/build/fedora/upload.py -d srcs/epel --upload epel
 
  - label: Build Big Sur x86_64 bottles
    key: build-bottles-big-sur-x86_64

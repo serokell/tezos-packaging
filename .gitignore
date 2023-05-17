@@ -8,5 +8,4 @@ binaries/
 out/
 
 # docker packages' python cache
-docker/__pycache__/
-docker/package/__pycache__/
+__pycache__/

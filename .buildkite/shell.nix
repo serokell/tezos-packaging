@@ -6,5 +6,18 @@ with pkgs; mkShell {
   buildInputs = [
     (python3.withPackages (ps: with ps; [ pyyaml ]))
     (writeShellScriptBin "copr-cli" ''/run/wrappers/bin/sudo -u copr-uploader /run/current-system/sw/bin/copr-cli "$@"'')
+    coreutils
+    gnused
+    gh
+    git
+    rename
+    gnupg
+    dput
+    rpm
+    debian-devscripts
+    which
+    util-linux
+    perl
+    jq
   ];
 }

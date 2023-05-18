@@ -96,70 +96,92 @@ steps:
    # files from nix/ are massively used in tests infrastructure
    - nix/.*
 
- - label: test deb source packages via docker
+ - label: Build Big Sur x86_64 bottle
+   agents:
+     queue: "x86_64-rosetta-darwin"
    commands:
-   - eval "$SET_VERSION"
-   - nix develop .#docker-tezos-packages -c ./docker/build/ubuntu/build.py --type source
+   - brew install --formula ./Formula/tezos-sapling-params.rb
+   - nix develop .#autorelease-macos -c ./scripts/build-one-bottle.sh tezos-client
+   - brew uninstall ./Formula/tezos-sapling-params.rb
+   - brew autoremove
    artifact_paths:
-     - ./out/*
-   branches: "!master"
-   timeout_in_minutes: 60
-   agents:
-     queue: "docker"
-   only_changes: &native_packaging_changes_regexes
-   - docker/package/.*
-   - docker/build/ubuntu/build.py
-   - docker/build/util/build.py
-   - meta.json
-   - protocols.json
- - label: test deb binary packages via docker
-   commands:
-   - eval "$SET_VERSION"
-   # Building all binary packages will take significant amount of time, so we build only one
-   # in order to ensure package generation sanity
-   - nix develop .#docker-tezos-packages -c ./docker/build/ubuntu/build.py --type binary -p tezos-baker-PtMumbai
-   - rm -rf out
-   # It takes much time to build binary package, so we do it only on master
-   branches: "master"
-   timeout_in_minutes: 240
-   agents:
-     queue: "docker"
-   only_changes: *native_packaging_changes_regexes
- - label: test rpm source packages via docker
-   commands:
-   - eval "$SET_VERSION"
-   - nix develop .#docker-tezos-packages -c ./docker/build/fedora/build.py --type source
-   artifact_paths:
-     - ./out/*
-   branches: "!master"
-   timeout_in_minutes: 60
-   agents:
-     queue: "docker"
-   only_changes: *native_packaging_changes_regexes
- - label: test rpm binary packages via docker
-   commands:
-   - eval "$SET_VERSION"
-   # Building all binary packages will take significant amount of time, so we build only one
-   # in order to ensure package generation sanity
-   - nix develop .#docker-tezos-packages -c ./docker/build/fedora/build.py --type binary -p tezos-baker-PtMumbai
-   - rm -rf out
-   # It takes much time to build binary package, so we do it only on master
-   branches: "master"
-   timeout_in_minutes: 180
-   agents:
-     queue: "docker"
-   only_changes: *native_packaging_changes_regexes
+     - '*.bottle.*'
 
- - label: test gen_systemd_service_file.py script
-   commands:
-   - eval "$SET_VERSION"
-   - nix develop .#autorelease -c ./gen_systemd_service_file.py tezos-node
-   branches: "!master"
+ - label: Build Big Sur arm64 bottle
    agents:
-     queue: "docker"
-   only_changes:
-   - gen_systemd_service_file.py
-   - docker/package/.*
+     queue: "arm64-darwin"
+   commands:
+   - brew install --formula ./Formula/tezos-sapling-params.rb
+   - nix develop .#autorelease-macos -c ./scripts/build-one-bottle.sh tezos-client
+   - brew uninstall ./Formula/tezos-sapling-params.rb
+   - brew autoremove
+   artifact_paths:
+     - '*.bottle.*'
+
+#  - label: test deb source packages via docker
+#    commands:
+#    - eval "$SET_VERSION"
+#    - nix develop .#docker-tezos-packages -c ./docker/build/ubuntu/build.py --type source
+#    artifact_paths:
+#      - ./out/*
+#    branches: "!master"
+#    timeout_in_minutes: 60
+#    agents:
+#      queue: "docker"
+#    only_changes: &native_packaging_changes_regexes
+#    - docker/package/.*
+#    - docker/build/ubuntu/build.py
+#    - docker/build/util/build.py
+#    - meta.json
+#    - protocols.json
+#  - label: test deb binary packages via docker
+#    commands:
+#    - eval "$SET_VERSION"
+#    # Building all binary packages will take significant amount of time, so we build only one
+#    # in order to ensure package generation sanity
+#    - nix develop .#docker-tezos-packages -c ./docker/build/ubuntu/build.py --type binary -p tezos-baker-PtMumbai
+#    - rm -rf out
+#    # It takes much time to build binary package, so we do it only on master
+#    branches: "master"
+#    timeout_in_minutes: 240
+#    agents:
+#      queue: "docker"
+#    only_changes: *native_packaging_changes_regexes
+#  - label: test rpm source packages via docker
+#    commands:
+#    - eval "$SET_VERSION"
+#    - nix develop .#docker-tezos-packages -c ./docker/build/fedora/build.py --type source
+#    artifact_paths:
+#      - ./out/*
+#    branches: "!master"
+#    timeout_in_minutes: 60
+#    agents:
+#      queue: "docker"
+#    only_changes: *native_packaging_changes_regexes
+#  - label: test rpm binary packages via docker
+#    commands:
+#    - eval "$SET_VERSION"
+#    # Building all binary packages will take significant amount of time, so we build only one
+#    # in order to ensure package generation sanity
+#    - nix develop .#docker-tezos-packages -c ./docker/build/fedora/build.py --type binary -p tezos-baker-PtMumbai
+#    - rm -rf out
+#    # It takes much time to build binary package, so we do it only on master
+#    branches: "master"
+#    timeout_in_minutes: 180
+#    agents:
+#      queue: "docker"
+#    only_changes: *native_packaging_changes_regexes
+
+#  - label: test gen_systemd_service_file.py script
+#    commands:
+#    - eval "$SET_VERSION"
+#    - nix develop .#autorelease -c ./gen_systemd_service_file.py tezos-node
+#    branches: "!master"
+#    agents:
+#      queue: "docker"
+#    only_changes:
+#    - gen_systemd_service_file.py
+#    - docker/package/.*
 
  - label: create auto release/pre-release
    key: auto-release

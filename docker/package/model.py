@@ -681,11 +681,9 @@ class TezosBakingServicesPackage(AbstractPackage):
 
     def fetch_sources(self, out_dir, binaries_dir=None):
         os.makedirs(out_dir)
-        package_dir = out_dir + "/tezos_baking"
-        os.makedirs(package_dir)
-        shutil.copy(f"{os.path.dirname(__file__)}/wizard_structure.py", package_dir)
-        shutil.copy(f"{os.path.dirname(__file__)}/tezos_setup_wizard.py", package_dir)
-        shutil.copy(f"{os.path.dirname(__file__)}/tezos_voting_wizard.py", package_dir)
+        shutil.copytree(
+            f"{os.path.dirname(__file__)}/baking/", out_dir, dirs_exist_ok=True
+        )
 
     def gen_control_file(self, deps, ubuntu_version, out):
         run_deps_list = map(lambda x: x.lower(), self.additional_native_deps)
@@ -728,23 +726,33 @@ License: MIT
 BuildArch: x86_64 aarch64
 Source0: {self.name}-{version}.tar.gz
 Source1: https://gitlab.com/tezos/tezos/tree/v{self.meta.version}/
-BuildRequires: {systemd_deps}, python3-devel, python3-setuptools
+BuildRequires: {systemd_deps}, python3-devel, python3-setuptools, python3-wheel, python3-tox-current-env
 Requires: {run_deps}
 %description
 {self.desc}
 Maintainer: {self.meta.maintainer}
 %prep
-%autosetup -n {self.name}-{version}
+%autosetup -p1 -n {self.name}-{version}
+
+%generate_buildrequires
+%pyproject_buildrequires -t
+
 %build
-%py3_build
+%pyproject_wheel
+
 %install
-%py3_install
+%pyproject_install
+
+%pyproject_save_files tezos_baking
+
+%check
+%tox
+
 {systemd_install}
 %files
 %{{_bindir}}/tezos-setup
 %{{_bindir}}/tezos-vote
-%{{python3_sitelib}}/tezos_baking-*.egg-info/
-%{{python3_sitelib}}/tezos_baking/
+%{{python3_sitelib}}/tezos_baking*
 %license LICENSE
 {systemd_files}
 {systemd_macros}
@@ -753,20 +761,13 @@ Maintainer: {self.meta.maintainer}
             f.write(file_contents)
 
     def gen_buildfile(self, out, ubuntu_version, binaries_dir=None):
+        # ubuntu focal release does not support `pybuild-plugin-pyproject`
+        # so that we still need that file for compatibility
+        # actual configuration is supplied by `setup.cfg`
         file_contents = f"""
 from setuptools import setup
 
-setup(
-    name='tezos-baking',
-    packages=['tezos_baking'],
-    version='{self.meta.version}',
-    entry_points=dict(
-        console_scripts=[
-            'tezos-setup=tezos_baking.tezos_setup_wizard:main',
-            'tezos-vote=tezos_baking.tezos_voting_wizard:main',
-        ]
-    ),
-)
+setup()
 """
         with open(out, "w") as f:
             f.write(file_contents)

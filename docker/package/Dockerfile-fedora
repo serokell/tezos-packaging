@@ -9,7 +9,7 @@ RUN dnf install -y libev-devel gmp-devel hidapi-devel libffi-devel \
                    zlib-devel libpq-devel m4 perl git pkg-config \
                    rpmdevtools python3-devel python3-setuptools \
                    wget opam rsync which cargo autoconf mock systemd \
-                   systemd-rpm-macros cmake
+                   systemd-rpm-macros cmake python3-wheel python3-tox-current-env
 
 ENV USER dockerbuilder
 RUN useradd dockerbuilder
@@ -27,6 +27,7 @@ COPY protocols.json /tezos-packaging/protocols.json
 COPY docker/package/*.py /tezos-packaging/docker/package/
 COPY docker/package/defaults /tezos-packaging/docker/package/defaults
 COPY docker/package/scripts /tezos-packaging/docker/package/scripts
+COPY baking /tezos-packaging/docker/package/baking
 COPY LICENSE /tezos-packaging/LICENSE
 
 ENTRYPOINT ["python3", "-m", "package.package_generator"]

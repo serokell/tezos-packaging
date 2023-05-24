@@ -18,7 +18,9 @@ fi
 # As a result, they cannot be installed with a user-specific brew installation
 # (when all brew directories are directly in user HOME directory).
 # So we're installing all dependencies preliminary to the actual bottle build
-brew install "$(brew deps --include-build --formula "./Formula/$1.rb")"
+
+# shellcheck disable=SC2046
+brew install $(brew deps --include-build --formula "./Formula/$1.rb")
 brew install --formula --build-bottle "./Formula/$1.rb"
 # Newer brew versions fail when checking for a rebuild version of non-core taps.
 # So for now we skip the check with '--no-rebuild'

@@ -478,7 +478,7 @@ packages.append(
             additional_native_deps=[
                 f"tezos-baker-{proto}" for proto in active_protocols
             ]
-            + ["tezos-node", "acl"],
+            + ["tezos-node", "acl", "wget"],
         )
     }
 )

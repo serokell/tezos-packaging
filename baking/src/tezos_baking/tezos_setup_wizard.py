@@ -52,7 +52,7 @@ toggle_vote_modes = {
 }
 
 
-TMP_SNAPSHOT_LOCATION = "/tmp/octez_node.snapshot"
+TMP_SNAPSHOT_LOCATION = "/tmp/octez_node.snapshot.d/"
 
 
 # Wizard CLI utility
@@ -74,10 +74,66 @@ Type in 'exit' to quit.
 """
 
 
-def fetch_snapshot(url):
+def fetch_snapshot(url, sha256=None):
+
+    dirname = TMP_SNAPSHOT_LOCATION
+    filename = os.path.join(dirname, "octez_node.snapshot")
+    metadata_file = os.path.join(dirname, "octez_node.snapshot.sha256")
+
+    # updates or removes the 'metadata_file' containing the snapshot's SHA256
+    def dump_metadata(metadata_file=metadata_file, sha256=sha256):
+        if sha256:
+            with open(metadata_file, "w+") as f:
+                f.write(sha256)
+        else:
+            try:
+                os.remove(metadata_file)
+            except FileNotFoundError:
+                pass
+
+    # reads `metadata_file` if any or returns None
+    def read_metadata(metadata_file=metadata_file):
+        if os.path.exists(metadata_file):
+            with open(metadata_file, "r") as f:
+                sha256 = f.read()
+            return sha256
+        else:
+            return None
+
+    def download(filename=filename, url=url, args=""):
+        from subprocess import CalledProcessError
+
+        try:
+            proc_call(f"wget {args} --show-progress -O {filename} {url}")
+        except CalledProcessError as e:
+            # see here https://www.gnu.org/software/wget/manual/html_node/Exit-Status.html
+            if e.returncode >= 4:
+                raise urllib.error.URLError
+            else:
+                raise e
+
     print("Downloading the snapshot from", url)
-    filename = TMP_SNAPSHOT_LOCATION
-    urllib.request.urlretrieve(url, filename, progressbar_hook)
+
+    # expected for the (possibly) existing chunk
+    expected_sha256 = read_metadata()
+
+    os.makedirs(dirname, exist_ok=True)
+    if sha256 and expected_sha256 and expected_sha256 == sha256:
+        # that case means that the expected sha256 of snapshot
+        # we want to download is the same as the expected
+        # sha256 of the existing octez_node.snapshot file
+        # when it will be fully downloaded
+        # so that we can safely use `--continue` option here
+        download(args="--continue")
+    else:
+        # all other cases we just dump new metadata
+        # (so that we can resume download if we can ensure
+        # that existing octez_node.snapshot chunk belongs
+        # to the snapshot we want to download)
+        # and start download from scratch
+        dump_metadata()
+        download()
+
     print()
     return filename
 
@@ -383,7 +439,7 @@ class Setup(Setup):
             print("Snapshot imported.")
 
             try:
-                os.remove(TMP_SNAPSHOT_LOCATION)
+                shutil.rmtree(TMP_SNAPSHOT_LOCATION)
             except:
                 pass
             else:

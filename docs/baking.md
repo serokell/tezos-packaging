@@ -102,7 +102,7 @@ the rest of this guide.
 ## Setting up baking service
 
 By default `tezos-baking-<network>.service` will be using:
-* `/var/lib/.tezos-client` as the `tezos-client` data directory
+* `/var/lib/tezos/.tezos-client` as the `tezos-client` data directory
 * `/var/lib/tezos/node-<network>` as the `tezos-node` data directory
 * `http://localhost:8732` as the `tezos-node` RPC address.
 

@@ -16,7 +16,6 @@ We aim to provide packages for all [Ubuntu LTS releases](https://wiki.ubuntu.com
 supported by Canonical.
 
 Currently, these are versions:
-* 18.04 LTS (Bionic Beaver)
 * 20.04 LTS (Focal Fossa)
 * 22.04 LTS (Jammy Jellyfish)
 

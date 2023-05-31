@@ -230,7 +230,7 @@ export BLST_PORTABLE=yes
 {splice_if(binaries_dir)("export DEB_BUILD_OPTIONS=nostrip")}
 {pybuild_splice(f'''
 export PYBUILD_NAME={package_name}
-export PYBUILD_INTERPRETERS={"python3.8" if ubuntu_version == "bionic" else "python3"}
+export PYBUILD_INTERPRETERS=python3
 ''')}
 export DEB_CFLAGS_APPEND=-fPIC
 
@@ -695,14 +695,14 @@ Source: {self.name}
 Section: utils
 Priority: optional
 Maintainer: {self.meta.maintainer}
-Build-Depends: debhelper (>=11), {"dh-systemd (>= 1.5), " if ubuntu_version != "jammy" else ""}{"python3.8" if ubuntu_version == "bionic" else "python3-all"}, autotools-dev, dh-python, python3-setuptools
+Build-Depends: debhelper (>=11), {"dh-systemd (>= 1.5), " if ubuntu_version != "jammy" else ""} python3-all, autotools-dev, dh-python, python3-setuptools
 Standards-Version: 3.9.6
 Homepage: https://gitlab.com/tezos/tezos/
 X-Python3-Version: >= 3.8
 
 Package: {self.name.lower()}
 Architecture: amd64 arm64
-Depends: ${{shlibs:Depends}}, ${{misc:Depends}}, {run_deps}, ${{python3:Depends}}{", python3.8" if ubuntu_version == "bionic" else ""}
+Depends: ${{shlibs:Depends}}, ${{misc:Depends}}, {run_deps}, ${{python3:Depends}}
 Description: {self.desc}
 """
         with open(out, "w") as f:
@@ -753,7 +753,6 @@ Maintainer: {self.meta.maintainer}
             f.write(file_contents)
 
     def gen_buildfile(self, out, ubuntu_version, binaries_dir=None):
-        interpreter = "python3.8" if ubuntu_version == "bionic" else "python3"
         file_contents = f"""
 from setuptools import setup
 
@@ -766,14 +765,6 @@ setup(
             'tezos-setup=tezos_baking.tezos_setup_wizard:main',
             'tezos-vote=tezos_baking.tezos_voting_wizard:main',
         ]
-    ),
-    options=dict(
-        build_scripts=dict(
-            executable="/usr/bin/{interpreter}"
-        ),
-        console_scripts=dict(
-            executable="/usr/bin/{interpreter}"
-        )
     ),
 )
 """

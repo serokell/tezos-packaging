@@ -37,8 +37,8 @@ There are packages for `arm64` and `amd64` architectures.
 We aim to provide packages for all [currently supported Fedora releases](https://docs.fedoraproject.org/en-US/releases/).
 
 Currently, these are versions:
-* Fedora 36
 * Fedora 37
+* Fedora 38
 
 There are packages for `x86_64` and `aarch64` architectures.
 

@@ -227,7 +227,7 @@ In order to build packages for specific Fedora distribution (see [support policy
 use `-d` or `--distributions` option:
 ```
 export OCTEZ_VERSION="v14.1"
-cd .. && ./docker/package.py --os fedora -d 36 --type binary -p tezos-baking
+cd .. && ./docker/package.py --os fedora -d 38 --type binary -p tezos-baking
 ```
 
 The build can take some time due to the fact that we build tezos and its dependencies

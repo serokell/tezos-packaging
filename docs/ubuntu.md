@@ -39,11 +39,11 @@ You can add the PPA using:
 # Install software properties commons
 sudo apt-get install software-properties-common gnupg
 # Add PPA with Tezos binaries
-sudo add-apt-repository 'deb http://ppa.launchpad.net/serokell/tezos/ubuntu bionic main'
+sudo add-apt-repository 'deb http://ppa.launchpad.net/serokell/tezos/ubuntu jammy main'
 sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 37B8819B7D0D183812DCA9A8CE5A4D8933AE7CBB
 sudo apt-get update
 ```
-If packages for `bionic` are not suited for your Debian version, see the
+If packages for `jammy` are not suited for your Debian version, see the
 [related askubuntu thread](https://askubuntu.com/a/445496) to choose a valid one.
 
 Then install with `apt-get`, e.g. for `tezos-client`:

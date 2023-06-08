@@ -27,7 +27,7 @@ def upload_fedora(args: Arguments):
     elif re.search("v.*-rc[0-9]*", octez_version):
         copr_project = "@Serokell/Tezos-rc"
     else:
-        copr_project = "@Serokell/Tezos-test"
+        copr_project = "@Serokell/Tezos"
 
     source_packages_path = args.directory
 

@@ -145,9 +145,6 @@ steps:
      automatic:
        limit: 1
 
- # To avoid running two brew processes together
- - wait
-
  - label: Build Big Sur arm64 bottles
    key: build-bottles-big-sur-arm64
    if: build.tag =~ /^v.*/

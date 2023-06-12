@@ -40,8 +40,6 @@ steps:
    depends_on:
    - "build-ubuntu-source-packages"
    key: sign-ubuntu-source-packages
-   agents:
-     queue: "docker"
    commands:
    - eval "$SET_VERSION"
    - buildkite-agent artifact download "out/*" . --step build-ubuntu-source-packages
@@ -54,8 +52,6 @@ steps:
    depends_on:
    - "build-fedora-source-packages"
    key: sign-fedora-source-packages
-   agents:
-     queue: "docker"
    commands:
    - eval "$SET_VERSION"
    - buildkite-agent artifact download "out/*" . --step build-fedora-source-packages
@@ -111,8 +107,6 @@ steps:
  - label: Sign source packages built from static binaries
    key: sign-source-packages-built-from-static-binaries
    if: build.tag =~ /^v.*-1/
-   agents:
-     queue: "docker"
    depends_on:
    - "build-via-docker"
    commands:

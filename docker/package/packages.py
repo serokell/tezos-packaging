@@ -23,8 +23,8 @@ networks = {
     "nairobinet": "https://teztnets.xyz/nairobinet",
 }
 networks_protos = {
-    "mainnet": ["PtMumbai"],
-    "ghostnet": ["PtMumbai"],
+    "mainnet": ["PtMumbai", "PtNairob"],
+    "ghostnet": ["PtMumbai", "PtNairob"],
     "mumbainet": ["PtMumbai"],
     "nairobinet": ["PtNairob"],
 }

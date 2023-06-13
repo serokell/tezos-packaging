@@ -15,8 +15,7 @@ parser.add_argument(
     "--directory",
     "-d",
     help="provide a directory with packages to upload",
-    default=f"{os.path.join(os.getcwd(), '.')}",
-    type=os.path.abspath,
+    default=".",
 )
 parser.add_argument(
     "--os",

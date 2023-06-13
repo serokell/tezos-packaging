@@ -71,7 +71,7 @@ login       = anonymous
 
     for f in filter(lambda x: x.endswith(".changes"), packages):
         subprocess.call(
-            f"execute-dput -c dput.cfg {launchpad_ppa} {os.path.join(source_packages_path, f)}",
+            f"execute-dput -c dput.cfg {launchpad_ppa} {f}",
             shell=True,
         )
 

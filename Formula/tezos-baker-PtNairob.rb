@@ -26,6 +26,8 @@ class TezosBakerPtnairob < Formula
 
   bottle do
     root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosBakerPtnairob.version}/"
+    sha256 cellar: :any, big_sur: "e4fa45a09ba6e82b88e10c5d005f1bde37f0b0e20f097c4a6eb5fae56cf7e326"
+    sha256 cellar: :any, arm64_big_sur: "825c12207c9e7a690cca94dc1143984f209ea7bb998502b95197580d5ca58096"
     sha256 cellar: :any, monterey: "d56698da816266a42da2decc4b718b3d36ed3bcbf7371e42c8147a858eccc068"
   end
 

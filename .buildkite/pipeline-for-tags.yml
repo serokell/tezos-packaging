@@ -108,7 +108,7 @@ steps:
    key: sign-source-packages-built-from-static-binaries
    if: build.tag =~ /^v.*-1/
    depends_on:
-   - "build-via-docker"
+   - "build-source-packages-from-static-binaries"
    commands:
    - eval "$SET_VERSION"
    - buildkite-agent artifact download "epel/*" . --step build-source-packages-from-static-binaries

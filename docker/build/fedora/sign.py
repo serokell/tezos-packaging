@@ -24,7 +24,7 @@ def sign_fedora(args: Arguments):
 
     for f in artifacts:
         if f.endswith(".src.rpm"):
-            subprocess.call(
+            subprocess.check_call(
                 f'rpmsign --define="%_gpg_name {identity}" --define="%__gpg {gpg}" --addsign {f}',
                 shell=True,
             )

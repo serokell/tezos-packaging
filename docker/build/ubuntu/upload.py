@@ -70,7 +70,7 @@ login       = anonymous
     packages = get_artifact_list(args)
 
     for f in filter(lambda x: x.endswith(".changes"), packages):
-        subprocess.call(
+        subprocess.check_call(
             f"execute-dput -c dput.cfg {launchpad_ppa} {f}",
             shell=True,
         )

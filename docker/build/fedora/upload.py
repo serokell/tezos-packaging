@@ -44,7 +44,7 @@ def upload_fedora(args: Arguments):
     destination = args.destination
 
     if destination == "epel":
-        chroots = ["epel-x86_64"]
+        chroots = ["epel-7-x86_64"]
     else:
         archs = ["x86_64", "aarch64"]
         chroots = [
@@ -54,7 +54,7 @@ def upload_fedora(args: Arguments):
     chroots = " ".join(f"-r {chroot}" for chroot in chroots)
 
     for f in filter(lambda x: x.endswith(".src.rpm"), packages):
-        subprocess.call(
+        subprocess.check_call(
             f"copr-cli build {chroots} --nowait {copr_project} {f}",
             shell=True,
         )

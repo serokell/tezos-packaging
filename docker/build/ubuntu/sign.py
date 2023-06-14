@@ -24,10 +24,10 @@ def sign_ubuntu(args: Arguments):
 
     for f in artifacts:
         if f.endswith(".changes"):
-            subprocess.call(
+            subprocess.check_call(
                 f"sed -i 's/^Changed-By: .*$/Changed-By: {identity}/' {f}", shell=True
             )
-            subprocess.call(f"debsign {f}", shell=True)
+            subprocess.check_call(f"debsign {f}", shell=True)
 
 
 def main(args: Optional[Arguments] = None):

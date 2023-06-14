@@ -54,7 +54,7 @@ def upload_fedora(args: Arguments):
     chroots = " ".join(f"-r {chroot}" for chroot in chroots)
 
     for f in filter(lambda x: x.endswith(".src.rpm"), packages):
-        subprocess.call(
+        subprocess.check_call(
             f"copr-cli build {chroots} --nowait {copr_project} {f}",
             shell=True,
         )

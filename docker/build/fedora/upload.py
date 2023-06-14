@@ -44,7 +44,7 @@ def upload_fedora(args: Arguments):
     destination = args.destination
 
     if destination == "epel":
-        chroots = ["epel-x86_64"]
+        chroots = ["epel-7-x86_64"]
     else:
         archs = ["x86_64", "aarch64"]
         chroots = [

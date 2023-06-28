@@ -150,6 +150,20 @@ steps:
      queue: "docker"
    only_changes: *native_packaging_changes_regexes
 
+ - label: build deb packages with static binaries
+   key: build-static-deb
+   depends_on:
+    - "build-via-docker"
+   agents:
+     queue: "docker"
+   commands:
+   - eval "$SET_VERSION"
+   - buildkite-agent artifact download "docker/octez-*" . --step build-via-docker
+   - nix develop .#docker-tezos-packages -c ./docker/build/ubuntu/build.py --os ubuntu --type binary --binaries-dir docker --distributions focal
+   artifact_paths:
+    - ./out/*
+   only_changes: *native_packaging_changes_regexes
+
  - label: test gen_systemd_service_file.py script
    commands:
    - eval "$SET_VERSION"
@@ -160,6 +174,19 @@ steps:
    only_changes:
    - gen_systemd_service_file.py
    - docker/package/.*
+
+ - label: test bundled systemd services
+   # Used in .buildkite/hooks/pre-exit
+   key: test-systemd-services
+   depends_on:
+    - "build-static-deb"
+   only_changes: *native_packaging_changes_regexes
+   agents:
+     queue: "default"
+   commands:
+    - buildkite-agent artifact download "out/*~focal_amd64.deb" . --step build-static-deb
+    - cd tests/systemd
+    - nix shell ../..#legacyPackages.x86_64-linux.vagrant ../..#legacyPackages.x86_64-linux.curl -c vagrant --packages-directory=../../out up --provider=libvirt
 
  - label: create auto release/pre-release
    key: auto-release

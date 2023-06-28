@@ -1,0 +1,9 @@
+#! /usr/bin/env bash
+
+# SPDX-FileCopyrightText: 2023 Oxhead Alpha
+# SPDX-License-Identifier: LicenseRef-MIT-OA
+
+if [[ "$BUILDKITE_STEP_KEY" == "test-systemd-services" ]]; then
+    cd tests/systemd
+    nix shell ../..#legacyPackages.x86_64-linux.vagrant -c vagrant --packages-directory=../../out destroy --force
+fi

@@ -16,6 +16,8 @@ import time
 import urllib.request
 import json
 from typing import List
+import logging
+
 
 from tezos_baking.wizard_structure import *
 from tezos_baking.util import *
@@ -79,6 +81,8 @@ Type in 'exit' to quit.
 
 def fetch_snapshot(url, sha256=None):
 
+    logging.info("Fetching snapshot")
+
     dirname = TMP_SNAPSHOT_LOCATION
     filename = os.path.join(dirname, "octez_node.snapshot")
     metadata_file = os.path.join(dirname, "octez_node.snapshot.sha256")
@@ -115,13 +119,14 @@ def fetch_snapshot(url, sha256=None):
             else:
                 raise e
 
-    print("Downloading the snapshot from", url)
+    print_and_log(f"Downloading the snapshot from {url}")
 
     # expected for the (possibly) existing chunk
     expected_sha256 = read_metadata()
 
     os.makedirs(dirname, exist_ok=True)
     if sha256 and expected_sha256 and expected_sha256 == sha256:
+        logging.info("Continuing download")
         # that case means that the expected sha256 of snapshot
         # we want to download is the same as the expected
         # sha256 of the existing octez_node.snapshot file
@@ -361,13 +366,14 @@ class Setup(Setup):
     # Check if there is already some blockchain data in the octez-node data directory,
     # and ask the user if it can be overwritten.
     def check_blockchain_data(self):
+        logging.info("Checking blockchain data")
         node_dir = get_data_dir(self.config["network"])
         node_dir_contents = set()
         try:
             node_dir_contents = set(os.listdir(node_dir))
         except FileNotFoundError:
-            print("The Tezos node data directory does not exist.")
-            print("  Creating directory: " + node_dir)
+            print_and_log("The Tezos node data directory does not exist.")
+            print_and_log("  Creating directory: " + node_dir)
             proc_call("sudo mkdir " + node_dir)
             proc_call("sudo chown tezos:tezos " + node_dir)
 
@@ -376,8 +382,8 @@ class Setup(Setup):
 
         # Configure data dir if the config is missing
         if not node_dir_config.issubset(node_dir_contents):
-            print("The Tezos node data directory has not been configured yet.")
-            print("  Configuring directory: " + node_dir)
+            print_and_log("The Tezos node data directory has not been configured yet.")
+            print_and_log("  Configuring directory: " + node_dir)
             proc_call(
                 "sudo -u tezos octez-node-"
                 + self.config["network"]
@@ -390,12 +396,15 @@ class Setup(Setup):
 
         diff = node_dir_contents - node_dir_config
         if diff:
+            logging.info(
+                "The Tezos node data directory already has some blockchain data"
+            )
             print("The Tezos node data directory already has some blockchain data:")
             print("\n".join(["- " + os.path.join(node_dir, path) for path in diff]))
             if yes_or_no("Delete this data and bootstrap the node again? <y/N> ", "no"):
                 # We first stop the node service, because it's possible that it
                 # will re-create some of the files while we go on with the wizard
-                print("Stopping node service")
+                print_and_log("Stopping node service")
                 proc_call(
                     "sudo systemctl stop tezos-node-"
                     + self.config["network"]
@@ -405,6 +414,7 @@ class Setup(Setup):
                     try:
                         proc_call("sudo rm -r " + os.path.join(node_dir, path))
                     except:
+                        logging.error("Could not clean the Tezos node data directory.")
                         print(
                             "Could not clean the Tezos node data directory. "
                             "Please do so manually."
@@ -413,7 +423,7 @@ class Setup(Setup):
                             "'sudo rm -r " + os.path.join(node_dir, path) + "' failed."
                         )
 
-                print("Node directory cleaned.")
+                print_and_log("Node directory cleaned.")
                 return True
             return False
         return True
@@ -576,31 +586,37 @@ class Setup(Setup):
             snapshot_metadata = self.extract_relevant_snapshot(snapshot_array)
 
             if snapshot_metadata is None:
+                message = f"No suitable snapshot found from the {name} provider."
                 print(
                     color(
-                        f"No suitable snapshot found from the {name} provider.",
+                        message,
                         color_red,
                     )
                 )
+                logging.warning(message)
             else:
                 self.config["snapshots"][name] = snapshot_metadata
 
         except urllib.error.URLError:
+            message = f"\nCouldn't collect snapshot metadata from {json_url} due to networking issues.\n"
             print(
                 color(
-                    f"\nCouldn't collect snapshot metadata from {json_url} due to networking issues.\n",
+                    message,
                     color_red,
                 )
             )
+            logging.error(message)
         except ValueError:
+            message = f"\nCouldn't collect snapshot metadata from {json_url} due to format mismatch.\n"
             print(
                 color(
-                    f"\nCouldn't collect snapshot metadata from {json_url} due to format mismatch.\n",
+                    message,
                     color_red,
                 )
             )
+            logging.error(message)
         except Exception as e:
-            print(f"\nUnexpected error handling snapshot metadata:\n{e}\n")
+            print_and_log(f"\nUnexpected error handling snapshot metadata:\n{e}\n")
 
     def output_snapshot_metadata(self, name):
         from datetime import datetime
@@ -645,7 +661,9 @@ block timestamp: {timestamp} ({time_ago})
         except KeyError:
             raise InterruptStep
         except (ValueError, urllib.error.URLError):
-            print()
+            logging.error(
+                "The snapshot snapshot download option user have chosen is unavailable"
+            )
             print("The snapshot download option you chose is unavailable,")
             print("which normally shouldn't happen. Please check your")
             print("internet connection or choose another option.")
@@ -667,26 +685,26 @@ block timestamp: {timestamp} ({time_ago})
             sha256 = self.config["snapshot_sha256"]
             snapshot_file = fetch_snapshot(url, sha256)
             if sha256:
-                print("Checking the snapshot integrity...")
+                print_and_log("Checking the snapshot integrity...")
                 check_file_contents_integrity(snapshot_file, sha256)
-                print("Integrity verified.")
+                print_and_log("Integrity verified.")
             return (snapshot_file, None)
         except (ValueError, urllib.error.URLError):
             print()
+            logging.error("The snapshot url provided is unavailable.")
             print("The snapshot URL you provided is unavailable.")
             print("Please check the URL again or choose another option.")
             print()
             raise InterruptStep
         except Sha256Mismatch as e:
+            print_and_log("SHA256 mismatch.", logging.error)
+            print_and_log(f"Expected sha256: {e.expected_sha256}", logging.error)
+            print_and_log(f"Actual sha256: {e.actual_sha256}", logging.error)
             print()
-            print("SHA256 mismatch.")
-            print(f"Expected sha256: {e.expected_sha256}")
-            print(f"Actual sha256: {e.actual_sha256}")
-            print()
-            self.query_step(ignore_hash_mismatch_query)
             if self.config["ignore_hash_mismatch"] == "no":
                 raise InterruptStep
             else:
+                logging.info("Ignoring hash mismatch")
                 return (snapshot_file, None)
 
     def get_snapshot_from_provider_url(self, url):
@@ -709,6 +727,7 @@ block timestamp: {timestamp} ({time_ago})
         if do_import:
             self.query_step(history_mode_query)
 
+            logging.info("Updating history mode octez-node config")
             proc_call(
                 f"sudo -u tezos octez-node-{self.config['network']} config update "
                 f"--history-mode {self.config['history_mode']}"
@@ -716,7 +735,7 @@ block timestamp: {timestamp} ({time_ago})
 
             self.config["snapshots"] = {}
 
-            print("Getting snapshots' metadata from providers...")
+            print_and_log("Getting snapshots' metadata from providers...")
             for name, url in default_providers.items():
                 self.get_snapshot_metadata(name, url)
 
@@ -764,7 +783,7 @@ block timestamp: {timestamp} ({time_ago})
                                 snapshot_block_hash,
                             ) = self.get_snapshot_from_provider(name, url)
             except InterruptStep:
-                print("Getting back to the snapshot import mode step.")
+                print_and_log("Getting back to the snapshot import mode step.")
                 continue
 
             valid_choice = True
@@ -778,6 +797,7 @@ block timestamp: {timestamp} ({time_ago})
             if snapshot_block_hash is not None:
                 block_hash_option = " --block " + snapshot_block_hash
 
+            logging.info("Importing snapshot with the octez-node")
             proc_call(
                 "sudo -u tezos octez-node-"
                 + self.config["network"]
@@ -787,20 +807,21 @@ block timestamp: {timestamp} ({time_ago})
                 + block_hash_option
             )
 
-            print("Snapshot imported.")
+            print_and_log("Snapshot imported.")
 
             try:
                 shutil.rmtree(TMP_SNAPSHOT_LOCATION)
             except:
                 pass
             else:
-                print("Deleted the temporary snapshot file.")
+                print_and_log("Deleted the temporary snapshot file.")
 
     # Bootstrapping octez-node
     def bootstrap_node(self):
 
         self.import_snapshot()
 
+        logging.info("Starting the node service")
         print(
             "Starting the node service. This is expected to take some "
             "time, as the node needs a node identity to be generated."
@@ -808,7 +829,7 @@ block timestamp: {timestamp} ({time_ago})
 
         self.systemctl_simple_action("start", "node")
 
-        print("Waiting for the node service to start...")
+        print_and_log("Waiting for the node service to start...")
 
         while True:
             rpc_endpoint = self.config["node_rpc_endpoint"]
@@ -818,11 +839,12 @@ block timestamp: {timestamp} ({time_ago})
             except urllib.error.URLError:
                 proc_call("sleep 1")
 
-        print("Generated node identity and started the service.")
+        print_and_log("Generated node identity and started the service.")
 
         self.systemctl_enable()
 
         if self.config["mode"] == "node":
+            logging.info("The node setup is finished.")
             print(
                 "The node setup is finished. It will take some time for the node to bootstrap.",
                 "You can check the progress by running the following command:",
@@ -830,10 +852,10 @@ block timestamp: {timestamp} ({time_ago})
             print(f"systemctl status tezos-node-{self.config['network']}.service")
 
             print()
-            print("Exiting the Tezos Setup Wizard.")
+            print_and_log("Exiting the Tezos Setup Wizard.")
             sys.exit(0)
 
-        print("Waiting for the node to bootstrap...")
+        print_and_log("Waiting for the node to be bootstrapped...")
 
         tezos_client_options = self.get_tezos_client_options()
         proc_call(
@@ -841,7 +863,7 @@ block timestamp: {timestamp} ({time_ago})
         )
 
         print()
-        print("The Tezos node bootstrapped successfully.")
+        print_and_log("The Tezos node bootstrapped successfully.")
 
     # Importing the baker key
     def import_baker_key(self):
@@ -867,6 +889,7 @@ block timestamp: {timestamp} ({time_ago})
                                 color_green,
                             )
                         )
+                        logging.info("Running octez-client to setup ledger")
                         proc_call(
                             f"sudo -u tezos {suppress_warning_text} octez-client {tezos_client_options} "
                             f"setup ledger to bake for {baker_alias} --main-hwm {self.get_current_head_level()}"
@@ -874,10 +897,13 @@ block timestamp: {timestamp} ({time_ago})
                         baker_set_up = True
                     except Exception as e:
                         print("Something went wrong when calling octez-client:")
-                        print(str(e))
+                        print_and_log(str(e), logging.error)
                         print()
                         print("Please check your input and try again.")
-                        print("Going back to the import mode selection.")
+                        print_and_log(
+                            "Going back to the import mode selection.", logging.error
+                        )
+
                 else:
                     baker_set_up = True
 
@@ -907,6 +933,9 @@ block timestamp: {timestamp} ({time_ago})
         self.query_step(liquidity_toggle_vote_query)
 
         net = self.config["network"]
+        logging.info(
+            "Replacing tezos-baking service env with liquidity toggle vote setting"
+        )
         replace_systemd_service_env(
             f"tezos-baking-{net}",
             "LIQUIDITY_BAKING_TOGGLE_VOTE",
@@ -918,6 +947,8 @@ block timestamp: {timestamp} ({time_ago})
 
     def run_setup(self):
 
+        logging.info("Starting the Tezos Setup Wizard.")
+
         print(welcome_text)
 
         self.query_step(network_query)
@@ -927,25 +958,28 @@ block timestamp: {timestamp} ({time_ago})
         print()
         self.query_step(systemd_mode_query)
 
-        print("Trying to bootstrap octez-node")
+        print_and_log("Trying to bootstrap octez-node")
         self.bootstrap_node()
 
         # If we continue execution here, it means we need to set up baking as well.
         executed = False
         while not executed:
             print()
-            print("Importing the baker key")
+            print_and_log("Importing the baker key")
             self.import_baker_key()
 
             print()
-            print("Registering the baker")
+            print_and_log("Registering the baker")
             try:
                 self.register_baker()
             except EOFError:
+                logging.error("Got EOF")
                 raise EOFError
             except Exception as e:
-                print("Something went wrong when calling octez-client:")
-                print(str(e))
+                print_and_log(
+                    "Something went wrong when calling octez-client:", logging.error
+                )
+                print_and_log(str(e), logging.error)
                 print()
                 print("Going back to the previous step.")
                 print("Please check your input and try again.")
@@ -955,7 +989,7 @@ block timestamp: {timestamp} ({time_ago})
         self.set_liquidity_toggle_vote()
 
         print()
-        print("Starting the baking instance")
+        print_and_log("Starting the baking instance")
         self.start_baking()
 
         print()
@@ -976,6 +1010,7 @@ block timestamp: {timestamp} ({time_ago})
             "If you previously enabled the baking service and want to disable it, run:"
         )
         print(f"sudo systemctl disable tezos-baking-{self.config['network']}.service")
+        logging.info("Exiting the Tezos Setup Wizard.")
 
 
 def main():
@@ -983,25 +1018,28 @@ def main():
     readline.set_completer_delims(" ")
 
     try:
+        setup_logger("tezos-setup.log")
         setup = Setup()
         setup.run_setup()
-    except KeyboardInterrupt:
+    except KeyboardInterrupt as e:
         if "network" in setup.config:
             proc_call(
                 "sudo systemctl stop tezos-baking-"
                 + setup.config["network"]
                 + ".service"
             )
-        print("Exiting the Tezos Setup Wizard.")
+        logging.info(f"Received keyboard interrupt.")
+        print_and_log("Exiting the Tezos Setup Wizard.")
         sys.exit(1)
-    except EOFError:
+    except EOFError as e:
         if "network" in setup.config:
             proc_call(
                 "sudo systemctl stop tezos-baking-"
                 + setup.config["network"]
                 + ".service"
             )
-        print("Exiting the Tezos Setup Wizard.")
+        logging.info(f"Reached EOF.")
+        print_and_log("Exiting the Tezos Setup Wizard.")
         sys.exit(1)
     except Exception as e:
         if "network" in setup.config:
@@ -1010,7 +1048,8 @@ def main():
                 + setup.config["network"]
                 + ".service"
             )
-        print("Error in Tezos Setup Wizard, exiting.")
+        logging.error(f"{str(e)}")
+        print_and_log("Error in Tezos Setup Wizard, exiting.")
         logfile = "tezos_setup.log"
         with open(logfile, "a") as f:
             f.write(traceback.format_exc() + "\n")

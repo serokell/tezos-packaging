@@ -90,6 +90,7 @@ rec {
   };
 
   genSystemdService = node-name: node-cfg: service-name: {
+    inherit (node-cfg) enable;
     wantedBy = [ "multi-user.target" ];
     description = "Octez ${service-name}";
     environment = {

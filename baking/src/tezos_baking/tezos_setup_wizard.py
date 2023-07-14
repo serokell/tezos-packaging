@@ -138,6 +138,29 @@ def fetch_snapshot(url, sha256=None):
     return filename
 
 
+class Sha256Mismatch(Exception):
+    "Raised when the actual and expected sha256 don't match."
+
+    def __init__(self, actual_sha256=None, expected_sha256=None):
+        self.actual_sha256 = actual_sha256
+        self.expected_sha256 = expected_sha256
+
+
+def check_file_contents_integrity(filename, sha256):
+    import hashlib
+
+    sha256sum = hashlib.sha256()
+    with open(filename, "rb") as f:
+        contents = f.read()
+    sha256sum.update(contents)
+
+    actual_sha256 = str(sha256sum.hexdigest())
+    expected_sha256 = sha256
+
+    if actual_sha256 != expected_sha256:
+        raise Sha256Mismatch(actual_sha256, expected_sha256)
+
+
 def is_full_snapshot(snapshot_file, import_mode):
     if import_mode == "download full":
         return True
@@ -264,6 +287,20 @@ def get_key_mode_query(modes):
         options=modes,
         validator=Validator(enum_range_validator(modes)),
     )
+
+
+ignore_hash_mismatch_options = {
+    "no": "Discard the snapshot and return to the previous step",
+    "yes": "Continue the setup with this snapshot",
+}
+
+ignore_hash_mismatch_query = Step(
+    id="ignore_hash_mismatch",
+    prompt="Do you want to proceed with this snapshot anyway?",
+    help="It's possible, but not recommended, to ignore the sha256 mismatch and use this snapshot anyway.",
+    options=ignore_hash_mismatch_options,
+    validator=Validator(enum_range_validator(ignore_hash_mismatch_options)),
+)
 
 
 class Setup(Setup):
@@ -409,12 +446,25 @@ class Setup(Setup):
                     url = self.config["snapshot_url"]
                     sha256 = self.config["snapshot_sha256"]
                     snapshot_file = fetch_snapshot(url, sha256)
+                    if sha256:
+                        print("Checking the snapshot integrity...")
+                        check_file_contents_integrity(snapshot_file, sha256)
+                        print("Integrity verified.")
                 except (ValueError, urllib.error.URLError):
                     print()
                     print("The snapshot URL you provided is unavailable.")
                     print("Please check the URL again or choose another option.")
                     print()
                     continue
+                except Sha256Mismatch as e:
+                    print()
+                    print("SHA256 mismatch.")
+                    print(f"Expected sha256: {e.expected_sha256}")
+                    print(f"Actual sha256: {e.actual_sha256}")
+                    print()
+                    self.query_step(ignore_hash_mismatch_query)
+                    if self.config["ignore_hash_mismatch"] == "no":
+                        continue
             else:
                 url = self.config["snapshot_url"]
                 sha256 = self.config["snapshot_sha256"]

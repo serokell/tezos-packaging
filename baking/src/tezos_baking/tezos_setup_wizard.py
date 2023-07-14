@@ -232,6 +232,14 @@ snapshot_url_query = Step(
     validator=Validator([required_field_validator, reachable_url_validator()]),
 )
 
+snapshot_sha256_query = Step(
+    id="snapshot_sha256",
+    prompt="Provide the sha256 of the node snapshot file. (optional)",
+    help="With sha256 provided, an integrity check will be performed for you.\n"
+    "Also, it will be possible to resume incomplete snapshot downloads.",
+    default=None,
+)
+
 history_mode_query = Step(
     id="history_mode",
     prompt="Which history mode do you want your node to run in?",
@@ -349,6 +357,7 @@ class Setup(Setup):
             )
 
             self.config["snapshot_url"] = snapshot_metadata["url"]
+            self.config["snapshot_sha256"] = snapshot_metadata.get("sha256", None)
             self.config["snapshot_block_hash"] = snapshot_metadata["block_hash"]
         except (urllib.error.URLError, ValueError):
             print(f"Couldn't collect snapshot metadata from {json_url}")
@@ -396,7 +405,10 @@ class Setup(Setup):
             elif self.config["snapshot"] == "url":
                 self.query_step(snapshot_url_query)
                 try:
-                    snapshot_file = fetch_snapshot(self.config["snapshot_url"])
+                    self.query_step(snapshot_sha256_query)
+                    url = self.config["snapshot_url"]
+                    sha256 = self.config["snapshot_sha256"]
+                    snapshot_file = fetch_snapshot(url, sha256)
                 except (ValueError, urllib.error.URLError):
                     print()
                     print("The snapshot URL you provided is unavailable.")
@@ -405,9 +417,10 @@ class Setup(Setup):
                     continue
             else:
                 url = self.config["snapshot_url"]
+                sha256 = self.config["snapshot_sha256"]
                 snapshot_block_hash = self.config["snapshot_block_hash"]
                 try:
-                    snapshot_file = fetch_snapshot(url)
+                    snapshot_file = fetch_snapshot(url, sha256)
                 except (ValueError, urllib.error.URLError):
                     print()
                     print("The snapshot download option you chose is unavailable,")

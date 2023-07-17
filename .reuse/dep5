@@ -3,3 +3,7 @@ Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 Files: .github/* nix/nix/* nix/build/install_topfind_196.patch protocols.json meta.json tests/buildkite/golden/* tests/host.key tests/host.cert tests/ca.cert
 Copyright: 2022 Oxhead Alpha
 License: LicenseRef-MIT-OA
+
+Files: nix/build/install_topfind_196.patch baking/src/tezos_baking/__init__.py
+Copyright: 2023 Oxhead Alpha
+License: LicenseRef-MIT-OA

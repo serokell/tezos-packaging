@@ -14,7 +14,10 @@ with pkgs; mkShell {
     gnupg
     rename
     gnused
-    python3
+    (python3.withPackages (ps: [
+      ps.build
+      ps.pip
+    ]))
     copr-cli
     coreutils
     util-linux

@@ -1,0 +1,19 @@
+name: Test Tezos binaries
+
+on:
+  schedule:
+    - cron: "0 0 * * *"
+
+jobs:
+  test_binaries:
+    name: Install and test binaries
+    runs-on: [self-hosted, Linux, X64, nix-with-docker]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Test fedora binaries
+        run: nix develop .#buildkite -c ./docker/tests/scripts/test-fedora-binaries.sh
+
+      - name: Test ubuntu binaries
+        run: nix develop .#buildkite -c ./docker/tests/scripts/test-ubuntu-binaries.sh

@@ -1,0 +1,41 @@
+{
+    "released": [
+        "tezos-smart-rollup-client-Proxford",
+        "tezos-smart-rollup-client-PtNairob",
+        "tezos-smart-rollup-node-Proxford",
+        "tezos-smart-rollup-node-PtNairob",
+        "tezos-baking",
+        "tezos-sapling-params",
+        "tezos-accuser-Proxford",
+        "tezos-baker-Proxford",
+        "tezos-accuser-PtNairob",
+        "tezos-baker-PtNairob",
+        "tezos-node",
+        "tezos-dac-node",
+        "tezos-dac-client",
+        "tezos-codec",
+        "tezos-signer",
+        "tezos-admin-client",
+        "tezos-client",
+        "tezos-smart-rollup-wasm-debugger"
+    ],
+    "candidates": [
+        "tezos-smart-rollup-client-Proxford",
+        "tezos-smart-rollup-client-PtNairob",
+        "tezos-smart-rollup-node-Proxford",
+        "tezos-smart-rollup-node-PtNairob",
+        "tezos-baking",
+        "tezos-sapling-params",
+        "tezos-accuser-Proxford",
+        "tezos-baker-Proxford",
+        "tezos-accuser-PtNairob",
+        "tezos-baker-PtNairob",
+        "tezos-node",
+        "tezos-dac-node",
+        "tezos-dac-client",
+        "tezos-codec",
+        "tezos-signer",
+        "tezos-admin-client",
+        "tezos-client"
+    ]
+}

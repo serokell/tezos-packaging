@@ -10,6 +10,7 @@ Asks questions, validates answers, and executes the appropriate steps using the 
 
 import os, sys
 import readline
+import logging
 import re
 
 from tezos_baking.wizard_structure import *
@@ -74,6 +75,7 @@ Type in 'exit' to quit.
 # we don't need any data here, just a confirmation that a Tezos app is open
 # `app_name` here can only be `"Wallet"` or `"Baking"`
 def wait_for_ledger_app(app_name, client_dir):
+    logging.info(f"Waiting for the ledger {app_name} app to be opened")
     print(f"Please make sure the Tezos {app_name} app is open on your ledger.")
     print()
     search_string = b"Found a Tezos " + bytes(app_name, "utf8")
@@ -203,15 +205,22 @@ class Setup(Setup):
             print("If there should be, you can run 'tezos-setup' to set it up.")
             print()
             self.config["is_local_baking_setup"] = False
+        finally:
+            running = self.config["is_local_baking_setup"]
+            logging.info(f"The baking services are {'' if running else 'not'} running")
 
     def check_data_correctness(self):
+        logging.info("Querying data correctness")
         print("Baker data detected is as follows:")
         print(f"Data directory: {self.config['client_data_dir']}")
         print(f"Node RPC endpoint: {self.config['node_rpc_endpoint']}")
         print(f"Voter key: {self.config['baker_key_value']}")
-        return yes_or_no("Does this look correct? (Y/n) ", "yes")
+        answer = yes_or_no("Does this look correct? (Y/n) ", "yes")
+        logging.info(f"Answer is {answer}")
+        return answer
 
     def search_client_config(self, field, default):
+        logging.info("Searching client config")
         config_filepath = os.path.join(self.config["client_data_dir"], "config")
         if not os.path.isfile(config_filepath):
             return default
@@ -219,6 +228,8 @@ class Setup(Setup):
             return search_json_with_default(config_filepath, field, default)
 
     def collect_baking_info(self):
+        logging.info("Collecting baking info")
+        logging.info("Checking the local baking services")
         self.check_baking_service()
         if self.config.get("is_local_baking_setup", False):
             self.fill_baking_config()
@@ -234,6 +245,7 @@ class Setup(Setup):
 
             network_dir = "/var/lib/tezos/client-" + self.config["network"]
 
+            logging.info("Creating the network dir")
             proc_call(f"sudo -u tezos mkdir -p {network_dir}")
 
             print("With no tezos-baking.service running, this wizard will use")
@@ -283,10 +295,12 @@ class Setup(Setup):
             value, _ = baker_key_value
             self.config["baker_key_value"] = value
         else:  # if there is no key with this alias, query import
+            logging.info("No secret key found")
             key_mode_query = get_key_mode_query(key_import_modes)
             self.import_key(key_mode_query, "Wallet")
 
     def get_network(self):
+        logging.info("Getting network")
         if parsed_args.network in networks.keys():
             self.config["network"] = parsed_args.network
         else:
@@ -294,6 +308,8 @@ class Setup(Setup):
             self.config["network"] = "custom@" + parsed_args.network
 
     def fill_voting_period_info(self):
+        logging.info("Filling in voting period info")
+        logging.info("Getting voting period from octez-client")
         voting_proc = get_proc_output(
             f"sudo -u tezos {suppress_warning_text} octez-client "
             f"{self.config['tezos_client_options']} show voting period"
@@ -301,10 +317,8 @@ class Setup(Setup):
         if voting_proc.returncode == 0:
             info = voting_proc.stdout
         else:
-            print(
-                "Couldn't get the voting period info. Please check that the network",
-                "for voting has been set up correctly.",
-            )
+            print_and_log("Couldn't get the voting period info.", logging.error)
+            print("Please check that the network for voting has been set up correctly.")
             raise KeyboardInterrupt
 
         self.config["amendment_phase"] = (
@@ -315,6 +329,7 @@ class Setup(Setup):
         ]
 
     def process_proposal_period(self):
+        logging.info("Processing proposal period")
         self.query_step(get_proposal_period_hash(self.config["proposal_hashes"]))
 
         hash_to_submit = self.config["chosen_hash"]
@@ -322,6 +337,7 @@ class Setup(Setup):
             self.query_step(new_proposal_query)
             hash_to_submit = self.config["new_proposal_hash"]
 
+        logging.info("Submitting proposals")
         result = get_proc_output(
             f"sudo -u tezos {suppress_warning_text} octez-client {self.config['tezos_client_options']} "
             f"submit proposals for {self.config['baker_alias']} {hash_to_submit}"
@@ -331,11 +347,13 @@ class Setup(Setup):
             print()
 
             if re.search(b"[Ii]nvalid proposal", result.stderr) is not None:
+                logging.error("The submitted proposal hash is invalid")
                 print(color("The submitted proposal hash is invalid.", color_red))
                 print("Check your custom submitted proposal hash and try again.")
                 self.process_proposal_period()
                 return
             elif re.search(b"Unauthorized proposal", result.stderr) is not None:
+                logging.error("Cannot submit because of an unauthorized proposal.")
                 print(
                     color(
                         "Cannot submit because of an unauthorized proposal.", color_red
@@ -343,6 +361,9 @@ class Setup(Setup):
                 )
                 print("This means you are not present in the voting listings.")
             elif re.search(b"Not in a proposal period", result.stderr) is not None:
+                logging.error(
+                    "Cannot submit because the voting period is no longer 'proposal'."
+                )
                 print(
                     color(
                         "Cannot submit because the voting period is no longer 'proposal'.",
@@ -351,6 +372,7 @@ class Setup(Setup):
                 )
                 print("This means the voting period has already advanced.")
             elif re.search(b"Too many proposals", result.stderr) is not None:
+                logging.error("Cannot submit because of too many proposals submitted.")
                 print(
                     color(
                         "Cannot submit because of too many proposals submitted.",
@@ -361,6 +383,7 @@ class Setup(Setup):
             # No other "legitimate" proposal error ('empty_proposal', 'unexpected_proposal')
             # should be possible with the wizard, so we just raise an error with the whole output.
             else:
+                logging.error("Something went wrong when calling octez-client")
                 print(
                     "Something went wrong when calling octez-client. Please consult the logs."
                 )
@@ -369,6 +392,7 @@ class Setup(Setup):
             print("Please check your baker data and possibly try again.")
 
     def process_voting_period(self):
+        logging.info("Processing voting period")
         print("The current proposal is:")
         # there's only one in any voting (exploration/promotion) period
         print(self.config["proposal_hashes"][0])
@@ -376,6 +400,7 @@ class Setup(Setup):
 
         self.query_step(ballot_outcome_query)
 
+        logging.info("Submitting ballot")
         result = get_proc_output(
             f"sudo -u tezos {suppress_warning_text} octez-client {self.config['tezos_client_options']} "
             f"submit ballot for {self.config['baker_alias']} {self.config['proposal_hashes'][0]} "
@@ -388,6 +413,7 @@ class Setup(Setup):
             # both when the baker has already voted and when the baker was not in the voting listings
             # in the first place, so it's difficult to distinguish between the two cases.
             if re.search(b"Unauthorized ballot", result.stderr) is not None:
+                logging.error("Cannot vote because of an unauthorized ballot")
                 print()
                 print(
                     color("Cannot vote because of an unauthorized ballot.", color_red)
@@ -401,6 +427,9 @@ class Setup(Setup):
                 re.search(b"Not in Exploration or Promotion period", result.stderr)
                 is not None
             ):
+                logging.error(
+                    f"Cannot vote because the voting period is no longer '{self.config['amendment_phase']}'"
+                )
                 print()
                 print(
                     color("Cannot vote because the voting period is", color_red),
@@ -412,6 +441,7 @@ class Setup(Setup):
             # No other "legitimate" voting error ('invalid_proposal', 'unexpected_ballot')
             # should be possible with the wizard, so we just raise an error with the whole output.
             else:
+                logging.error("Something went wrong when calling octez-client")
                 print(
                     "Something went wrong when calling octez-client. Please consult the logs."
                 )
@@ -434,7 +464,7 @@ class Setup(Setup):
         # process 'tezos-client show voting period'
         self.fill_voting_period_info()
 
-        print(
+        print_and_log(
             f"The amendment is currently in the {self.config['amendment_phase']} period."
         )
         if self.config["amendment_phase"] == "proposal":
@@ -452,15 +482,15 @@ class Setup(Setup):
             print()
             self.process_voting_period()
         else:
-            print("Voting isn't possible at the moment.")
-            print("Exiting the Tezos Voting Wizard.")
+            print_and_log("Voting isn't possible at the moment.")
+            print_and_log("Exiting the Tezos Voting Wizard.")
 
         # if a ledger was used for baking on this machine, ask to open Tezos Baking app on it,
         # then restart the relevant baking service (due to issue: tezos/#4486)
         if self.config.get("is_local_baking_setup", False) and self.check_ledger_use():
             wait_for_ledger_app("Baking", self.config["client_data_dir"])
             net = self.config["network"]
-            print(f"Restarting local {net} baking setup")
+            print_and_log(f"Restarting local {net} baking setup")
             proc_call(f"sudo systemctl restart tezos-baking-{net}.service")
 
         print()
@@ -472,16 +502,24 @@ def main():
     readline.set_completer_delims(" ")
 
     try:
+        setup_logger("tezos-vote.log")
+        logging.info("Starting the Tezos Voting Wizard.")
         setup = Setup()
         setup.run_voting()
     except KeyboardInterrupt:
         print("Exiting the Tezos Voting Wizard.")
+        logging.info(f"Received keyboard interrupt.")
+        logging.info("Exiting the Tezos Voting Wizard.")
         sys.exit(1)
     except EOFError:
         print("Exiting the Tezos Voting Wizard.")
+        logging.error(f"Reached EOF.")
+        logging.info("Exiting the Tezos Voting Wizard.")
         sys.exit(1)
     except Exception as e:
         print("Error in Tezos Voting Wizard, exiting.")
+        logging.error(f"{str(e)}")
+        logging.info("Exiting the Tezos Voting Wizard.")
         logfile = "tezos_vote.log"
         with open(logfile, "a") as f:
             f.write(str(e) + "\n")

@@ -230,9 +230,8 @@ class Setup:
             )
             print("Its current address is", address)
 
-            return yes_or_no(
-                "Would you like to import a new key and replace this one? <y/N> ", "no"
-            )
+            self.query_step(replace_key_query)
+            return self.config["replace_key"] == "yes"
         else:
             return True
 

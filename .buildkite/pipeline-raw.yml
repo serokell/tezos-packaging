@@ -44,7 +44,7 @@ steps:
    branches: "!master"
  - label: check flake
    commands:
-   - nix flake check
+   - nix flake check -L
    branches: "!master"
    # nix builds are usually cached, so we don't care about only_changes setting for it
 

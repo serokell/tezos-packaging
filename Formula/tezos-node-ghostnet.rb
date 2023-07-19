@@ -3,7 +3,7 @@
 
 class TezosNodeGhostnet < Formula
   url "file:///dev/null"
-  version "v17.1-1"
+  version "v17.2-1"
 
   depends_on "tezos-node"
 

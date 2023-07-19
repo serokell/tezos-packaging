@@ -46,7 +46,7 @@ if [[ "$latest_upstream_tag" != "$our_tezos_tag" ]]; then
 
     sed -i 's/"release": "[0-9]\+"/"release": "1"/' ./meta.json
     # Update version of tezos-baking package
-    sed -i "s/version = .*/version = \"$latest_upstream_tag\"/" ./code/pyproject.toml
+    sed -i "s/version = .*/version = \"$latest_upstream_tag\"/" ./baking/pyproject.toml
     # Commit may fail when release number wasn't updated since the last release
     git commit -a -m "[Chore] Reset release number for $latest_upstream_tag" --gpg-sign="tezos-packaging@serokell.io" || \
       echo "release number wasn't updated"

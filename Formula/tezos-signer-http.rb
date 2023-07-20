@@ -43,41 +43,15 @@ class TezosSignerHttp < Formula
     File.write("tezos-signer-http-start", startup_contents)
     bin.install "tezos-signer-http-start"
   end
-  def plist
-    <<~EOS
-      <?xml version="1.0" encoding="UTF-8"?>
-      <!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN"
-      "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-      <plist version="1.0">
-        <dict>
-          <key>Label</key>
-          <string>#{plist_name}</string>
-          <key>Program</key>
-          <string>#{opt_bin}/tezos-signer-http-start</string>
-          <key>EnvironmentVariables</key>
-            <dict>
-              <key>ADDRESS</key>
-              <string>127.0.0.1</string>
-              <key>PORT</key>
-              <string>8080</string>
-              <key>TEZOS_CLIENT_DIR</key>
-              <string>#{var}/lib/tezos/signer-http</string>
-              <key>PIDFILE</key>
-              <string></string>
-              <key>MAGIC_BYTES</key>
-              <string></string>
-              <key>CHECK_HIGH_WATERMARK</key>
-              <string></string>
-          </dict>
-          <key>RunAtLoad</key><true/>
-          <key>StandardOutPath</key>
-          <string>#{var}/log/#{name}.log</string>
-          <key>StandardErrorPath</key>
-          <string>#{var}/log/#{name}.log</string>
-        </dict>
-      </plist>
-    EOS
+
+  service do
+    run opt_bin/"tezos-signer-http-start"
+    require_root true
+    environment_variables TEZOS_CLIENT_DIR: var/"lib/tezos/client", ADDRESS: "127.0.0.1", PORT:"8080", PIDFILE: "", MAGIC_BYTES: "", CHECK_HIGH_WATERMARK: ""
+    log_path var/"log/tezos-signer-http.log"
+    error_log_path var/"log/tezos-signer-http.log"
   end
+
   def post_install
     mkdir "#{var}/lib/tezos/signer-http"
   end

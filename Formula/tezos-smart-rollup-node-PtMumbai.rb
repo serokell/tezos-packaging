@@ -79,39 +79,16 @@ class TezosSmartRollupNodePtmumbai < Formula
                      "octez-smart-rollup-node-PtMumbai"
   end
   plist_options manual: "tezos-smart-rollup-node-PtMumbai run for"
-  def plist
-    <<~EOS
-      <?xml version="1.0" encoding="UTF-8"?>
-      <!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN"
-      "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-      <plist version="1.0">
-        <dict>
-          <key>Label</key>
-          <string>#{plist_name}</string>
-          <key>Program</key>
-          <string>#{opt_bin}/tezos-smart-rollup-node-PtMumbai-start</string>
-          <key>EnvironmentVariables</key>
-            <dict>
-              <key>TEZOS_CLIENT_DIR</key>
-              <string>#{var}/lib/tezos/client</string>
-              <key>NODE_RPC_ENDPOINT</key>
-              <string>http://localhost:8732</string>
-              <key>ROLLUP_NODE_RPC_ENDPOINT</key>
-              <string>127.0.0.1:8472</string>
-              <key>ROLLUP_MODE</key>
-              <string>observer</string>
-              <key>ROLLUP_ALIAS</key>
-              <string>rollup</string>
-          </dict>
-          <key>RunAtLoad</key><true/>
-          <key>StandardOutPath</key>
-          <string>#{var}/log/#{name}.log</string>
-          <key>StandardErrorPath</key>
-          <string>#{var}/log/#{name}.log</string>
-        </dict>
-      </plist>
-    EOS
+
+  service do
+    run opt_bin/"tezos-smart-rollup-node-PtMumbai-start"
+    require_root true
+    environment_variables TEZOS_CLIENT_DIR: var/"lib/tezos/client", NODE_RPC_ENDPOINT: "http://localhost:8732", ROLLUP_NODE_RPC_ENDPOINT: "127.0.0.1:8472", ROLLUP_MODE: "observer", ROLLUP_ALIAS: "rollup"
+    keep_alive true
+    log_path var/"log/tezos-smart-rollup-node-PtMumbai.log"
+    error_log_path var/"log/tezos-smart-rollup-node-PtMumbai.log"
   end
+
   def post_install
     mkdir "#{var}/lib/tezos/client"
   end

@@ -40,41 +40,18 @@ class TezosSignerUnix < Formula
         ${pid_file_args[@]+"${pid_file_args[@]}"} ${magic_bytes_args[@]+"${magic_bytes_args[@]}"} \
         ${check_high_watermark_args[@]+"${check_high_watermark_args[@]}"} "$@"
     EOS
-    File.write("tezos-signer-http-start", startup_contents)
-    bin.install "tezos-signer-http-start"
+    File.write("tezos-signer-unix-start", startup_contents)
+    bin.install "tezos-signer-unix-start"
   end
-  def plist
-    <<~EOS
-      <?xml version="1.0" encoding="UTF-8"?>
-      <!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN"
-      "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-      <plist version="1.0">
-        <dict>
-          <key>Label</key>
-          <string>#{plist_name}</string>
-          <key>Program</key>
-          <string>#{opt_bin}/tezos-signer-unix-start</string>
-          <key>EnvironmentVariables</key>
-            <dict>
-              <key>SOCKET</key>
-              <string></string>
-              <string>#{var}/lib/tezos/signer-unix</string>
-              <key>PIDFILE</key>
-              <string></string>
-              <key>MAGIC_BYTES</key>
-              <string></string>
-              <key>CHECK_HIGH_WATERMARK</key>
-              <string></string>
-          </dict>
-          <key>RunAtLoad</key><true/>
-          <key>StandardOutPath</key>
-          <string>#{var}/log/#{name}.log</string>
-          <key>StandardErrorPath</key>
-          <string>#{var}/log/#{name}.log</string>
-        </dict>
-      </plist>
-    EOS
+
+  service do
+    run opt_bin/"tezos-signer-unix-start"
+    require_root true
+    environment_variables TEZOS_CLIENT_DIR: var/"lib/tezos/client", SOCKET: var/"lib/tezos/signer-unix", PIDFILE: "", MAGIC_BYTES: "", CHECK_HIGH_WATERMARK: ""
+    log_path var/"log/tezos-signer-unix.log"
+    error_log_path var/"log/tezos-signer-unix.log"
   end
+
   def post_install
     mkdir "#{var}/lib/tezos/signer-unix"
   end

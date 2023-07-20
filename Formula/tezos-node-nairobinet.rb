@@ -49,37 +49,16 @@ class TezosNodeNairobinet < Formula
     bin.install "tezos-node-nairobinet-start"
     print "Installing tezos-node-nairobinet service"
   end
-  def plist
-    <<~EOS
-      <?xml version="1.0" encoding="UTF-8"?>
-      <!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN"
-      "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-      <plist version="1.0">
-        <dict>
-          <key>Label</key>
-          <string>#{plist_name}</string>
-          <key>Program</key>
-          <string>#{opt_bin}/tezos-node-nairobinet-start</string>
-          <key>EnvironmentVariables</key>
-            <dict>
-              <key>TEZOS_CLIENT_DIR</key>
-              <string>#{var}/lib/tezos/node-nairobinet</string>
-              <key>NODE_RPC_ADDR</key>
-              <string>127.0.0.1:8732</string>
-              <key>CERT_PATH</key>
-              <string></string>
-              <key>KEY_PATH</key>
-              <string></string>
-          </dict>
-          <key>RunAtLoad</key><true/>
-          <key>StandardOutPath</key>
-          <string>#{var}/log/#{name}.log</string>
-          <key>StandardErrorPath</key>
-          <string>#{var}/log/#{name}.log</string>
-        </dict>
-      </plist>
-    EOS
+
+  service do
+    run opt_bin/"tezos-node-nairobinet-start"
+    require_root true
+    environment_variables TEZOS_CLIENT_DIR: var/"lib/tezos/client", NODE_RPC_ADDR: "127.0.0.1:8732", CERT_PATH: "", KEY_PATH: ""
+    keep_alive true
+    log_path var/"log/tezos-node-nairobinet.log"
+    error_log_path var/"log/tezos-node-nairobinet.log"
   end
+
   def post_install
     mkdir_p "#{var}/lib/tezos/node-nairobinet"
     system "octez-node", "config", "init", "--data-dir" "#{var}/lib/tezos/node-nairobinet", "--network", "https://teztnets.xyz/nairobinet"

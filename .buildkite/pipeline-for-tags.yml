@@ -139,24 +139,24 @@ steps:
      automatic:
        limit: 1
 
- - label: Build Big Sur arm64 bottles
-   key: build-bottles-big-sur-arm64
-   if: build.tag =~ /^v.*/
-   agents:
-     queue: "arm64-darwin"
-   commands:
-   - nix develop .#autorelease-macos -c ./scripts/build-all-bottles.sh "arm64_big_sur"
-   artifact_paths:
-     - '*.bottle.*'
-   retry:
-     automatic:
-       limit: 1
+ #  - label: Build Big Sur arm64 bottles
+ #    key: build-bottles-big-sur-arm64
+ #    if: build.tag =~ /^v.*/
+ #    agents:
+ #      queue: "arm64-darwin"
+ #    commands:
+ #    - nix develop .#autorelease-macos -c ./scripts/build-all-bottles.sh "arm64_big_sur"
+ #    artifact_paths:
+ #      - '*.bottle.*'
+ #    retry:
+ #      automatic:
+ #        limit: 1
 
  # We use the tag that triggered the pipeline here. Normally, this isn't very resilient,
  # but in 'scripts/sync-bottle-hashes.sh' it's only used for informational purposes
  - label: Add Big Sur bottle hashes to formulae
    depends_on:
-   - "build-bottles-big-sur-arm64"
+ #    - "build-bottles-big-sur-arm64"
    - "build-bottles-big-sur-x86_64"
    if: build.tag =~ /^v.*/
    soft_fail: true # No artifacts to download if all the bottles are already built

@@ -47,37 +47,16 @@ class TezosNodeMainnet < Formula
     bin.install "tezos-node-mainnet-start"
     print "Installing tezos-node-mainnet service"
   end
-  def plist
-    <<~EOS
-      <?xml version="1.0" encoding="UTF-8"?>
-      <!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN"
-      "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-      <plist version="1.0">
-        <dict>
-          <key>Label</key>
-          <string>#{plist_name}</string>
-          <key>Program</key>
-          <string>#{opt_bin}/tezos-node-mainnet-start</string>
-          <key>EnvironmentVariables</key>
-            <dict>
-              <key>TEZOS_CLIENT_DIR</key>
-              <string>#{var}/lib/tezos/node-mainnet</string>
-              <key>NODE_RPC_ADDR</key>
-              <string>127.0.0.1:8732</string>
-              <key>CERT_PATH</key>
-              <string></string>
-              <key>KEY_PATH</key>
-              <string></string>
-          </dict>
-          <key>RunAtLoad</key><true/>
-          <key>StandardOutPath</key>
-          <string>#{var}/log/#{name}.log</string>
-          <key>StandardErrorPath</key>
-          <string>#{var}/log/#{name}.log</string>
-        </dict>
-      </plist>
-    EOS
+
+  service do
+    run opt_bin/"tezos-node-mainnet-start"
+    require_root true
+    environment_variables TEZOS_CLIENT_DIR: var/"lib/tezos/client", NODE_RPC_ADDR: "127.0.0.1:8732", CERT_PATH: "", KEY_PATH: ""
+    keep_alive true
+    log_path var/"log/tezos-node-mainnet.log"
+    error_log_path var/"log/tezos-node-mainnet.log"
   end
+
   def post_install
     mkdir_p "#{var}/lib/tezos/node-mainnet"
     system "octez-node", "config", "init", "--data-dir" "#{var}/lib/tezos/node-mainnet", "--network", "mainnet"

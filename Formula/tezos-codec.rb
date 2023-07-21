@@ -26,6 +26,8 @@ class TezosCodec < Formula
 
   bottle do
     root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosCodec.version}/"
+    sha256 cellar: :any, big_sur: "eecc18d7d2b1d7907a42f8ffaac189c0c570eadff644411fcfb1831a98d2751f"
+    sha256 cellar: :any, arm64_big_sur: "578f17c8161f44001377e81b5db2fe692a0a2a72878fb9c865626b48227294a4"
     sha256 cellar: :any, monterey: "6b21f735c0487b4a28ba68feed6b6c9d0cf6817f5c8f9deaf718d1f01865e563"
   end
 

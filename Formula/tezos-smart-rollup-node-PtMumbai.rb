@@ -78,7 +78,6 @@ class TezosSmartRollupNodePtmumbai < Formula
                      "_build/default/src/proto_016_PtMumbai/bin_sc_rollup_node/main_sc_rollup_node_016_PtMumbai.exe",
                      "octez-smart-rollup-node-PtMumbai"
   end
-  plist_options manual: "tezos-smart-rollup-node-PtMumbai run for"
 
   service do
     run opt_bin/"tezos-smart-rollup-node-PtMumbai-start"

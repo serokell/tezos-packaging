@@ -303,11 +303,11 @@ class TezosBinaryPackage(AbstractPackage):
 
         os.chdir("..")
 
-    def gen_control_file(self, deps, ubuntu_version, out):
-        str_build_deps = ", ".join(deps)
-        str_additional_native_deps = ", ".join(
-            self.__get_os_specific_native_deps("ubuntu")
+    def gen_control_file(self, build_deps, run_deps, ubuntu_version, out):
+        str_run_deps = ", ".join(
+            run_deps + self.__get_os_specific_native_deps("ubuntu")
         )
+        str_build_deps = ", ".join(build_deps)
         file_contents = f"""
 Source: {self.name.lower()}
 Section: utils
@@ -319,7 +319,7 @@ Homepage: https://gitlab.com/tezos/tezos/
 
 Package: {self.name.lower()}
 Architecture: amd64 arm64
-Depends: ${{shlibs:Depends}}, ${{misc:Depends}}, {str_additional_native_deps}
+Depends: ${{shlibs:Depends}}, ${{misc:Depends}}, {str_run_deps}
 Description: {self.desc}
 """
         with open(out, "w") as f:
@@ -500,7 +500,7 @@ class TezosSaplingParamsPackage(AbstractPackage):
             ]
         )
 
-    def gen_control_file(self, deps, ubuntu_version, out):
+    def gen_control_file(self, build_deps, run_deps, ubuntu_version, out):
         file_contents = f"""
 Source: {self.name}
 Section: utils
@@ -685,9 +685,9 @@ class TezosBakingServicesPackage(AbstractPackage):
             f"{os.path.dirname(__file__)}/baking/", out_dir, dirs_exist_ok=True
         )
 
-    def gen_control_file(self, deps, ubuntu_version, out):
-        run_deps_list = map(lambda x: x.lower(), self.additional_native_deps)
-        run_deps = ", ".join(run_deps_list)
+    def gen_control_file(self, build_deps, run_deps, ubuntu_version, out):
+        native_run_deps_list = [x.lower() for x in self.additional_native_deps]
+        str_run_deps = ", ".join(run_deps + native_run_deps_list)
         file_contents = f"""
 Source: {self.name}
 Section: utils
@@ -700,7 +700,7 @@ X-Python3-Version: >= 3.8
 
 Package: {self.name.lower()}
 Architecture: amd64 arm64
-Depends: ${{shlibs:Depends}}, ${{misc:Depends}}, {run_deps}, ${{python3:Depends}}
+Depends: ${{shlibs:Depends}}, ${{misc:Depends}}, {str_run_deps}, ${{python3:Depends}}
 Description: {self.desc}
 """
         with open(out, "w") as f:

@@ -52,7 +52,7 @@ toggle_vote_modes = {
 }
 
 
-TMP_SNAPSHOT_LOCATION = "/tmp/octez_node.snapshot"
+TMP_SNAPSHOT_LOCATION = "/tmp/octez_node.snapshot.d/"
 
 
 # Wizard CLI utility
@@ -74,12 +74,91 @@ Type in 'exit' to quit.
 """
 
 
-def fetch_snapshot(url):
+def fetch_snapshot(url, sha256=None):
+
+    dirname = TMP_SNAPSHOT_LOCATION
+    filename = os.path.join(dirname, "octez_node.snapshot")
+    metadata_file = os.path.join(dirname, "octez_node.snapshot.sha256")
+
+    # updates or removes the 'metadata_file' containing the snapshot's SHA256
+    def dump_metadata(metadata_file=metadata_file, sha256=sha256):
+        if sha256:
+            with open(metadata_file, "w+") as f:
+                f.write(sha256)
+        else:
+            try:
+                os.remove(metadata_file)
+            except FileNotFoundError:
+                pass
+
+    # reads `metadata_file` if any or returns None
+    def read_metadata(metadata_file=metadata_file):
+        if os.path.exists(metadata_file):
+            with open(metadata_file, "r") as f:
+                sha256 = f.read()
+            return sha256
+        else:
+            return None
+
+    def download(filename=filename, url=url, args=""):
+        from subprocess import CalledProcessError
+
+        try:
+            proc_call(f"wget {args} --show-progress -O {filename} {url}")
+        except CalledProcessError as e:
+            # see here https://www.gnu.org/software/wget/manual/html_node/Exit-Status.html
+            if e.returncode >= 4:
+                raise urllib.error.URLError
+            else:
+                raise e
+
     print("Downloading the snapshot from", url)
-    filename = TMP_SNAPSHOT_LOCATION
-    urllib.request.urlretrieve(url, filename, progressbar_hook)
+
+    # expected for the (possibly) existing chunk
+    expected_sha256 = read_metadata()
+
+    os.makedirs(dirname, exist_ok=True)
+    if sha256 and expected_sha256 and expected_sha256 == sha256:
+        # that case means that the expected sha256 of snapshot
+        # we want to download is the same as the expected
+        # sha256 of the existing octez_node.snapshot file
+        # when it will be fully downloaded
+        # so that we can safely use `--continue` option here
+        download(args="--continue")
+    else:
+        # all other cases we just dump new metadata
+        # (so that we can resume download if we can ensure
+        # that existing octez_node.snapshot chunk belongs
+        # to the snapshot we want to download)
+        # and start download from scratch
+        dump_metadata()
+        download()
+
     print()
     return filename
+
+
+class Sha256Mismatch(Exception):
+    "Raised when the actual and expected sha256 don't match."
+
+    def __init__(self, actual_sha256=None, expected_sha256=None):
+        self.actual_sha256 = actual_sha256
+        self.expected_sha256 = expected_sha256
+
+
+def check_file_contents_integrity(filename, sha256):
+    import hashlib
+
+    sha256sum = hashlib.sha256()
+    with open(filename, "rb") as f:
+        contents = f.read()
+    sha256sum.update(contents)
+
+    actual_sha256 = str(sha256sum.hexdigest())
+    expected_sha256 = sha256
+
+    if actual_sha256 != expected_sha256:
+        raise Sha256Mismatch(actual_sha256, expected_sha256)
 
 
 def is_full_snapshot(snapshot_file, import_mode):
@@ -176,6 +255,14 @@ snapshot_url_query = Step(
     validator=Validator([required_field_validator, reachable_url_validator()]),
 )
 
+snapshot_sha256_query = Step(
+    id="snapshot_sha256",
+    prompt="Provide the sha256 of the node snapshot file. (optional)",
+    help="With sha256 provided, an integrity check will be performed for you.\n"
+    "Also, it will be possible to resume incomplete snapshot downloads.",
+    default=None,
+)
+
 history_mode_query = Step(
     id="history_mode",
     prompt="Which history mode do you want your node to run in?",
@@ -200,6 +287,20 @@ def get_key_mode_query(modes):
         options=modes,
         validator=Validator(enum_range_validator(modes)),
     )
+
+
+ignore_hash_mismatch_options = {
+    "no": "Discard the snapshot and return to the previous step",
+    "yes": "Continue the setup with this snapshot",
+}
+
+ignore_hash_mismatch_query = Step(
+    id="ignore_hash_mismatch",
+    prompt="Do you want to proceed with this snapshot anyway?",
+    help="It's possible, but not recommended, to ignore the sha256 mismatch and use this snapshot anyway.",
+    options=ignore_hash_mismatch_options,
+    validator=Validator(enum_range_validator(ignore_hash_mismatch_options)),
+)
 
 
 class Setup(Setup):
@@ -293,6 +394,7 @@ class Setup(Setup):
             )
 
             self.config["snapshot_url"] = snapshot_metadata["url"]
+            self.config["snapshot_sha256"] = snapshot_metadata.get("sha256", None)
             self.config["snapshot_block_hash"] = snapshot_metadata["block_hash"]
         except (urllib.error.URLError, ValueError):
             print(f"Couldn't collect snapshot metadata from {json_url}")
@@ -340,18 +442,35 @@ class Setup(Setup):
             elif self.config["snapshot"] == "url":
                 self.query_step(snapshot_url_query)
                 try:
-                    snapshot_file = fetch_snapshot(self.config["snapshot_url"])
+                    self.query_step(snapshot_sha256_query)
+                    url = self.config["snapshot_url"]
+                    sha256 = self.config["snapshot_sha256"]
+                    snapshot_file = fetch_snapshot(url, sha256)
+                    if sha256:
+                        print("Checking the snapshot integrity...")
+                        check_file_contents_integrity(snapshot_file, sha256)
+                        print("Integrity verified.")
                 except (ValueError, urllib.error.URLError):
                     print()
                     print("The snapshot URL you provided is unavailable.")
                     print("Please check the URL again or choose another option.")
                     print()
                     continue
+                except Sha256Mismatch as e:
+                    print()
+                    print("SHA256 mismatch.")
+                    print(f"Expected sha256: {e.expected_sha256}")
+                    print(f"Actual sha256: {e.actual_sha256}")
+                    print()
+                    self.query_step(ignore_hash_mismatch_query)
+                    if self.config["ignore_hash_mismatch"] == "no":
+                        continue
             else:
                 url = self.config["snapshot_url"]
+                sha256 = self.config["snapshot_sha256"]
                 snapshot_block_hash = self.config["snapshot_block_hash"]
                 try:
-                    snapshot_file = fetch_snapshot(url)
+                    snapshot_file = fetch_snapshot(url, sha256)
                 except (ValueError, urllib.error.URLError):
                     print()
                     print("The snapshot download option you chose is unavailable,")
@@ -383,7 +502,7 @@ class Setup(Setup):
             print("Snapshot imported.")
 
             try:
-                os.remove(TMP_SNAPSHOT_LOCATION)
+                shutil.rmtree(TMP_SNAPSHOT_LOCATION)
             except:
                 pass
             else:

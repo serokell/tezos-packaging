@@ -12,6 +12,7 @@ def build_ubuntu_package(
     pkg: AbstractPackage,
     ubuntu_versions: List[str],
     build_deps: List[str],
+    run_deps: List[str],
     is_source: bool,
     source_archive_path: str = None,
     binaries_dir: str = None,
@@ -103,7 +104,7 @@ def build_ubuntu_package(
         pkg.gen_rules("debian/rules", ubuntu_version, binaries_dir)
         pkg.gen_postinst("debian/postinst")
         pkg.gen_postrm("debian/postrm")
-        pkg.gen_control_file(build_deps, ubuntu_version, "debian/control")
+        pkg.gen_control_file(build_deps, run_deps, ubuntu_version, "debian/control")
         # License is downloaded from the tezos repo, thus version should be without workarounds
         pkg.meta.version = old_version
         pkg.gen_license("debian/copyright")

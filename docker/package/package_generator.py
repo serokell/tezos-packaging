@@ -9,6 +9,7 @@ import urllib.request
 from .fedora import build_fedora_package
 from .ubuntu import build_ubuntu_package
 from .packages import packages as all_packages
+from .model import TezosBinaryPackage
 
 # fixed output dir in container
 output_dir = "out"
@@ -120,11 +121,7 @@ def build_fedora(args):
 
     binaries_dir = args.binaries_dir
 
-    run_deps = get_fedora_run_deps(binaries_dir)
-
     build_deps = get_build_deps(binaries_dir)
-
-    common_deps = run_deps + build_deps
 
     home = os.environ["HOME"]
 
@@ -138,6 +135,11 @@ def build_fedora(args):
         packages.append(all_packages[package_name])
 
     for package in packages:
+        run_deps = (
+            get_fedora_run_deps(binaries_dir)
+            if isinstance(package, TezosBinaryPackage)
+            else []
+        )
         build_fedora_package(
             package,
             build_deps,
@@ -172,11 +174,7 @@ def build_ubuntu(args):
 
     binaries_dir = args.binaries_dir
 
-    run_deps = get_ubuntu_run_deps(binaries_dir)
-
     build_deps = get_build_deps(binaries_dir)
-
-    common_deps = run_deps + build_deps
 
     home = os.environ["HOME"]
 
@@ -241,10 +239,16 @@ def build_ubuntu(args):
             sys.exit(1)
 
     for package in packages:
+        run_deps = (
+            get_ubuntu_run_deps(binaries_dir)
+            if isinstance(package, TezosBinaryPackage)
+            else []
+        )
         build_ubuntu_package(
             package,
             distributions,
-            common_deps,
+            build_deps,
+            run_deps,
             is_source,
             getattr(package, "source_archive", None),
             binaries_dir,

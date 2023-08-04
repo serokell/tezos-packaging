@@ -19,7 +19,7 @@ class TezosSmartRollupClientProxford < Formula
     depends_on dependency => :build
   end
 
-  dependencies = %w[gmp hidapi libev libffi tezos-sapling-params]
+  dependencies = %w[gmp hidapi libev tezos-sapling-params]
   dependencies.each do |dependency|
     depends_on dependency
   end

@@ -162,5 +162,5 @@ steps:
    soft_fail: true # No artifacts to download if all the bottles are already built
    commands:
    - mkdir -p "Big Sur"
-   - buildkite-agent artifact download "*bottle.tar.gz" "Big Sur/"
+   - gh release download build.tag -D "Big Sur/" -p "*.bottle.tar.gz"
    - nix develop .#autorelease -c ./scripts/sync-bottle-hashes.sh "$BUILDKITE_TAG" "Big Sur"

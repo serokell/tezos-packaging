@@ -668,8 +668,7 @@ class Setup:
             value, address = baker_key_value
             print()
             print("An account with the '" + baker_alias + "' alias already exists.")
-            print("Its current value is", value)
-            print("With a corresponding address:", address)
+            print("Its current address is", address)
 
             return yes_or_no(
                 "Would you like to import a new key and replace this one? <y/N> ", "no"

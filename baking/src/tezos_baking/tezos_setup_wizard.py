@@ -371,9 +371,6 @@ class Setup(Setup):
     # Check https://xtz-shots.io/tezos-snapshots.json and collect the most recent snapshot
     # that is suited for the chosen history mode and network
     def get_snapshot_link(self):
-        self.config["snapshot_url"] = None
-        self.config["snapshot_block_hash"] = None
-
         def hashes_comply(s1, s2):
             return s1.startswith(s2) or s2.startswith(s1)
 
@@ -406,9 +403,8 @@ class Setup(Setup):
                 {"url": None, "block_hash": None},
             )
 
-            self.config["snapshot_url"] = snapshot_metadata["url"]
-            self.config["snapshot_sha256"] = snapshot_metadata.get("sha256", None)
-            self.config["snapshot_block_hash"] = snapshot_metadata["block_hash"]
+            self.config["snapshot_metadata"] = snapshot_metadata
+
         except (urllib.error.URLError, ValueError):
             print(f"Couldn't collect snapshot metadata from {json_url}")
         except Exception as e:
@@ -429,7 +425,7 @@ class Setup(Setup):
 
             self.get_snapshot_link()
 
-            if self.config["snapshot_url"] is None:
+            if self.config["snapshot_metadata"] is None:
                 snapshot_import_modes.pop("download rolling", None)
                 snapshot_import_modes.pop("download full", None)
             elif self.config["history_mode"] == "rolling":
@@ -456,8 +452,8 @@ class Setup(Setup):
                 self.query_step(snapshot_url_query)
                 try:
                     self.query_step(snapshot_sha256_query)
-                    url = self.config["snapshot_url"]
-                    sha256 = self.config["snapshot_sha256"]
+                    url = self.config["snapshot_metadata"]["url"]
+                    sha256 = self.config["snapshot_metadata"]["sha256"]
                     snapshot_file = fetch_snapshot(url, sha256)
                     if sha256:
                         print("Checking the snapshot integrity...")
@@ -479,9 +475,9 @@ class Setup(Setup):
                     if self.config["ignore_hash_mismatch"] == "no":
                         continue
             else:
-                url = self.config["snapshot_url"]
-                sha256 = self.config["snapshot_sha256"]
-                snapshot_block_hash = self.config["snapshot_block_hash"]
+                url = self.config["snapshot_metadata"]["url"]
+                sha256 = self.config["snapshot_metadata"]["sha256"]
+                snapshot_block_hash = self.config["snapshot_metadata"]["block_hash"]
                 try:
                     snapshot_file = fetch_snapshot(url, sha256)
                 except (ValueError, urllib.error.URLError):

@@ -65,7 +65,7 @@ def reachable_url_validator(suffix=None):
     def _validator(input):
         full_url = mk_full_url(input, suffix)
         if url_is_reachable(full_url):
-            return input
+            return full_url
         else:
             raise ValueError(f"{full_url} is unreachable. Please input a valid URL.")
 
@@ -277,10 +277,17 @@ def yes_or_no(prompt, default=None):
 
 
 def mk_full_url(host_name, path):
-    if path is None:
-        return host_name.rstrip("/")
-    else:
-        return "/".join([host_name.rstrip("/"), path.lstrip("/")])
+    from urllib.parse import urlparse
+
+    url = host_name
+    if path is not None:
+        url = os.path.join(host_name, path)
+
+    # urllib doesn't make an assumption which scheme to use by default in case of absence
+    if urlparse(url).scheme == "":
+        url = "https://" + url
+
+    return url
 
 
 def url_is_reachable(url):

@@ -10,9 +10,9 @@ class TezosSmartRollupClientPtnairob < Formula
   end
   homepage "https://gitlab.com/tezos/tezos"
 
-  url "https://gitlab.com/tezos/tezos.git", :tag => "v17.3", :shallow => false
+  url "https://gitlab.com/tezos/tezos.git", :tag => "v18.0-rc1", :shallow => false
 
-  version "v17.3-1"
+  version "v18.0-rc1-1"
 
   build_dependencies = %w[pkg-config coreutils autoconf rsync wget rustup-init cmake]
   build_dependencies.each do |dependency|
@@ -27,9 +27,6 @@ class TezosSmartRollupClientPtnairob < Formula
 
   bottle do
     root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosSmartRollupClientPtnairob.version}/"
-    sha256 cellar: :any, monterey: "e3ec6b3abef855cc8ea1ed93b2c49bfff65c9b7dd12385c10cdd99182a585458"
-    sha256 cellar: :any, big_sur: "4ce7ac2c1c03eabb8dce4aa1afa2ea975c5c87d48875e53cfce99c8ee39fa7d3"
-    sha256 cellar: :any, arm64_big_sur: "3470927ae77f8bcf25715e8f0529fa401d08ef7fb442af588c48011cd6ee7c75"
   end
 
   def make_deps

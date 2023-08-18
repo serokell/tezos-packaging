@@ -7,8 +7,6 @@ with lib;
 
 let
   octez-baker-pkgs = {
-    "PtMumbai" =
-      "${pkgs.octezPackages.octez-baker-PtMumbai}/bin/octez-baker-PtMumbai";
     "PtNairob" =
       "${pkgs.octezPackages.octez-baker-PtNairob}/bin/octez-baker-PtNairob";
   };

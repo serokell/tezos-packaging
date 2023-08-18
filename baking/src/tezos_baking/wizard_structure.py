@@ -303,9 +303,8 @@ key_import_modes = {
 
 networks = {
     "mainnet": "Main Tezos network",
-    "ghostnet": "Long running test network, currently using the mumbai Tezos protocol",
-    "mumbainet": "Test network using the mumbai Tezos protocol",
-    "nairobinet": "Test network using the nairobi Tezos protocol",
+    "ghostnet": "Long running test network, currently using the Nairobi Tezos protocol",
+    "nairobinet": "Test network using the Nairobi Tezos protocol",
 }
 
 http_request_headers = {"User-Agent": "Mozilla/5.0"}

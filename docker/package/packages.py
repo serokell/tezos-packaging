@@ -19,18 +19,15 @@ from collections import ChainMap
 networks = {
     "mainnet": "mainnet",
     "ghostnet": "ghostnet",
-    "mumbainet": "mumbainet",
     "nairobinet": "https://teztnets.xyz/nairobinet",
 }
 networks_protos = {
-    "mainnet": ["PtMumbai", "PtNairob"],
-    "ghostnet": ["PtMumbai", "PtNairob"],
-    "mumbainet": ["PtMumbai"],
+    "mainnet": ["PtNairob"],
+    "ghostnet": ["PtNairob"],
     "nairobinet": ["PtNairob"],
 }
 
 protocol_numbers = {
-    "PtMumbai": "016",
     "PtNairob": "017",
 }
 
@@ -540,6 +537,6 @@ def mk_rollup_packages(*protos):
     ]
 
 
-packages.extend(mk_rollup_packages("PtMumbai", "PtNairob"))
+packages.extend(mk_rollup_packages("PtNairob"))
 
 packages = dict(ChainMap(*packages))

@@ -21,11 +21,11 @@ rec {
   daemonOptions = sharedOptions // {
 
     baseProtocols = mkOption {
-      type = types.listOf (types.enum [ "PtMumbai" "PtNairob" ]);
+      type = types.listOf (types.enum [ "PtNairob" ]);
       description = ''
         List of protocols for which daemons will be run.
       '';
-      example = ["PtMumbai"];
+      example = ["PtNairob"];
     };
 
     rpcPort = mkOption {

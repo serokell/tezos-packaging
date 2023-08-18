@@ -44,7 +44,7 @@ Then you can use the script, specifying the binary name as an argument, e.g.:
 ```
 ./gen_systemd_service_file.py tezos-node
 # or
-./gen_systemd_service_file.py tezos-baker-PtMumbai
+./gen_systemd_service_file.py tezos-baker-PtNairob
 ```
 After that you'll have `.service` files in the current directory.
 
@@ -62,7 +62,6 @@ It's possible to run multiple similar services, e.g. two `tezos-node`s that run 
 networks.
 
 `tezos-node` packages provide multiple services out of the box:
-- `tezos-node-mumbainet`
 - `tezos-node-nairobinet`
 - `tezos-node-ghostnet`
 - `tezos-node-mainnet`
@@ -78,7 +77,7 @@ Also, there are `tezos-node-<network>` binary aliases that are equivalent to
 running `tezos-node` with [the service options](./configuration.md) given.
 
 In addition to node services where the config is predefined to a specific network
-(e.g. `tezos-node-mainnet` or `tezos-node-mumbainet`), it's possible to run
+(e.g. `tezos-node-mainnet` or `tezos-node-nairobinet`), it's possible to run
 `tezos-node-custom` service.
 
 Another case for running multiple similar systemd services is when one wants to have

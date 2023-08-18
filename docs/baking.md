@@ -30,7 +30,7 @@ that you can use by following the [installation instructions](https://www.raspbe
 In order to run a baking instance, you'll need the following Tezos binaries:
 `tezos-client`, `tezos-node`, `tezos-baker-<proto>`.
 
-The currently supported protocol is `PtNairob` (used on `nairobinet`, `ghostnet` and `mainnet`).
+The currently supported protocol is `PtNairob` (used on `nairobinet`, `ghostnet` and `mainnet`) and `Proxford` (used on `oxfordnet`).
 Also, note that the corresponding packages have protocol
 suffix in lowercase, e.g. the list of available baker packages can be found
 [here](https://launchpad.net/~serokell/+archive/ubuntu/tezos/+packages?field.name_filter=tezos-baker&field.status_filter=published).

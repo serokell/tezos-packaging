@@ -20,15 +20,18 @@ networks = {
     "mainnet": "mainnet",
     "ghostnet": "ghostnet",
     "nairobinet": "https://teztnets.xyz/nairobinet",
+    "oxfordnet": "https://teztnets.xyz/oxfordnet",
 }
 networks_protos = {
     "mainnet": ["PtNairob"],
     "ghostnet": ["PtNairob"],
     "nairobinet": ["PtNairob"],
+    "oxfordnet": ["Proxford"],
 }
 
 protocol_numbers = {
     "PtNairob": "017",
+    "Proxford": "018",
 }
 
 signer_units = [
@@ -537,6 +540,6 @@ def mk_rollup_packages(*protos):
     ]
 
 
-packages.extend(mk_rollup_packages("PtNairob"))
+packages.extend(mk_rollup_packages("PtNairob", "Proxford"))
 
 packages = dict(ChainMap(*packages))

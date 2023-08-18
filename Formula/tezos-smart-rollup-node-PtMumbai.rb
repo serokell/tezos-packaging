@@ -28,6 +28,9 @@ class TezosSmartRollupNodePtmumbai < Formula
 
   bottle do
     root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosSmartRollupNodePtmumbai.version}/"
+    sha256 cellar: :any, monterey: "1d78ad8bce8ce313e34d4ee52e265fa5f683efe8fcd5c76698ee850ff170b798"
+    sha256 cellar: :any, big_sur: "2c629ed60b7902dd6adeacf1b46324682d66292f7aaf16909329d2df7bd90f3d"
+    sha256 cellar: :any, arm64_big_sur: "31df9fb1d365aa14f8025c484050a04185354b28b9456cb4428aa7d9b2a36f43"
   end
 
   def make_deps

@@ -12,6 +12,7 @@ steps:
    agents:
      queue: "x86_64-rosetta-darwin"
    commands:
+   - export LIBRARY_PATH="$(brew --prefix)/lib"
    - nix develop .#autorelease-macos -c ./scripts/build-all-bottles.sh "big_sur"
    artifact_paths:
      - '*.bottle.*'

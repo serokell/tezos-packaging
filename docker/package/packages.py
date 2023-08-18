@@ -176,6 +176,22 @@ packages = [
             dune_filepath="src/bin_codec/codec.exe",
         )
     },
+    {
+        "tezos-dac-client": TezosBinaryPackage(
+            "tezos-dac-client",
+            "A Data Availability Committee Tezos client",
+            meta=packages_meta,
+            dune_filepath="src/bin_dac_client/main_dac_client.exe",
+        )
+    },
+    {
+        "tezos-dac-node": TezosBinaryPackage(
+            "tezos-dac-node",
+            "A Data Availability Committee Tezos node",
+            meta=packages_meta,
+            dune_filepath="src/bin_dac_node/main_dac.exe",
+        )
+    },
 ]
 
 

@@ -8,7 +8,7 @@
 
 set -euo pipefail
 
-binaries=("octez-admin-client" "octez-client" "octez-node" "octez-signer" "octez-codec")
+binaries=("octez-admin-client" "octez-dac-client" "octez-dac-node" "octez-client" "octez-node" "octez-signer" "octez-codec")
 
 for proto in $(jq -r ".active | .[]" ../protocols.json); do
     binaries+=("octez-accuser-$proto" "octez-baker-$proto" "octez-smart-rollup-client-$proto" "octez-smart-rollup-node-$proto")

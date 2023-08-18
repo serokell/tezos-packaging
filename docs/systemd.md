@@ -63,6 +63,7 @@ networks.
 
 `tezos-node` packages provide multiple services out of the box:
 - `tezos-node-nairobinet`
+- `tezos-node-oxfordnet`
 - `tezos-node-ghostnet`
 - `tezos-node-mainnet`
 

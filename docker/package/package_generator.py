@@ -244,10 +244,11 @@ def build_ubuntu(args):
             if isinstance(package, TezosBinaryPackage)
             else []
         )
+        common_deps = build_deps + run_deps
         build_ubuntu_package(
             package,
             distributions,
-            build_deps,
+            common_deps,
             run_deps,
             is_source,
             getattr(package, "source_archive", None),

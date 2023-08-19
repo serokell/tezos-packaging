@@ -1,0 +1,8 @@
+# SPDX-FileCopyrightText: 2023 Oxhead Alpha
+# SPDX-License-Identifier: LicenseRef-MIT-OA
+opam-version: "2.0"
+build: [
+  ["rm" "-r" "vendors"]
+  ["dune" "build" "-p" name "-j" jobs]
+  ["dune" "runtest" "-p" name "-j" jobs] {with-test}
+]

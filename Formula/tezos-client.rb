@@ -9,9 +9,9 @@ class TezosClient < Formula
   end
   homepage "https://gitlab.com/tezos/tezos"
 
-  url "https://gitlab.com/tezos/tezos.git", :tag => "v17.3", :shallow => false
+  url "https://gitlab.com/tezos/tezos.git", :tag => "v18.0-rc1", :shallow => false
 
-  version "v17.3-1"
+  version "v18.0-rc1-1"
 
   build_dependencies = %w[pkg-config coreutils autoconf rsync wget rustup-init cmake]
   build_dependencies.each do |dependency|
@@ -26,9 +26,6 @@ class TezosClient < Formula
 
   bottle do
     root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosClient.version}/"
-    sha256 cellar: :any, monterey: "b1a940683048debcc1daf873503d6aa95dab71050a9db003f32435c28c7e9694"
-    sha256 cellar: :any, big_sur: "61ed45838dc649bd5264e3f1520ca9af5c37e152b07d6255987de7d58e15a325"
-    sha256 cellar: :any, arm64_big_sur: "8af7c78c67ed61f3d16b3ffd08dc82d4914172ee3eecb8811568d044eb661b9f"
   end
 
   def make_deps
@@ -42,7 +39,7 @@ class TezosClient < Formula
     system "curl", "-L", "https://github.com/ocaml/opam/releases/download/2.0.9/opam-2.0.9-#{arch}-macos", "--create-dirs", "-o", "#{ENV["HOME"]}/.opam-bin/opam"
     system "chmod", "+x", "#{ENV["HOME"]}/.opam-bin/opam"
     ENV["PATH"]="#{ENV["HOME"]}/.opam-bin:#{ENV["PATH"]}"
-    system "rustup-init", "--default-toolchain", "1.60.0", "-y"
+    system "rustup-init", "--default-toolchain", "1.64.0", "-y"
     system "opam", "init", "--bare", "--debug", "--auto-setup", "--disable-sandboxing"
     system ["source .cargo/env",  "make build-deps"].join(" && ")
   end

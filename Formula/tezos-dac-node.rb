@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2021 Oxhead Alpha
 # SPDX-License-Identifier: LicenseRef-MIT-OA
 
-class TezosCodec < Formula
+class TezosDacNode < Formula
   @all_bins = []
 
   class << self
@@ -18,14 +18,14 @@ class TezosCodec < Formula
     depends_on dependency => :build
   end
 
-  dependencies = %w[gmp hidapi libev libffi]
+  dependencies = %w[gmp hidapi libev libffi tezos-sapling-params]
   dependencies.each do |dependency|
     depends_on dependency
   end
-  desc "A client to decode and encode JSON"
+  desc "A Data Availability Committee Tezos node"
 
   bottle do
-    root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosCodec.version}/"
+    root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosDacNode.version}/"
   end
 
   def make_deps
@@ -54,8 +54,8 @@ class TezosCodec < Formula
 
   def install
     make_deps
-    install_template "src/bin_codec/codec.exe",
-                     "_build/default/src/bin_codec/codec.exe",
-                     "octez-codec"
+    install_template "src/bin_dac_node/main_dac.exe",
+                     "_build/default/src/bin_dac_node/main_dac.exe",
+                     "octez-dac-node"
   end
 end

@@ -1,7 +1,8 @@
-# SPDX-FileCopyrightText: 2021 Oxhead Alpha
+#!/usr/bin/env ruby
+# SPDX-FileCopyrightText: 2023 Oxhead Alpha
 # SPDX-License-Identifier: LicenseRef-MIT-OA
 
-class TezosCodec < Formula
+class TezosSmartRollupClientProxford < Formula
   @all_bins = []
 
   class << self
@@ -18,14 +19,14 @@ class TezosCodec < Formula
     depends_on dependency => :build
   end
 
-  dependencies = %w[gmp hidapi libev libffi]
+  dependencies = %w[gmp hidapi libev libffi tezos-sapling-params]
   dependencies.each do |dependency|
     depends_on dependency
   end
-  desc "A client to decode and encode JSON"
+  desc "Smart contract rollup CLI client for Proxford"
 
   bottle do
-    root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosCodec.version}/"
+    root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosSmartRollupClientProxford.version}/"
   end
 
   def make_deps
@@ -54,8 +55,8 @@ class TezosCodec < Formula
 
   def install
     make_deps
-    install_template "src/bin_codec/codec.exe",
-                     "_build/default/src/bin_codec/codec.exe",
-                     "octez-codec"
+    install_template "src/proto_018_Proxford/bin_sc_rollup_client/main_sc_rollup_client_018_Proxford.exe",
+                     "_build/default/src/proto_018_Proxford/bin_sc_rollup_client/main_sc_rollup_client_018_Proxford.exe",
+                     "octez-smart-rollup-client-Proxford"
   end
 end

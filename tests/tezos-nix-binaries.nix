@@ -3,26 +3,25 @@
 { nixpkgs, pkgs, ... }:
 let
   inherit (pkgs) system;
-  inherit (pkgs.octezPackages) octez-client octez-admin-client octez-node octez-signer octez-codec
-    octez-accuser-PtMumbai octez-baker-PtMumbai;
-in import "${nixpkgs}/nixos/tests/make-test-python.nix" ({ ... }:
-{
+  inherit (pkgs.octezPackages)
+    octez-client octez-admin-client octez-node octez-signer octez-codec
+    octez-accuser-PtNairob octez-baker-PtNairob;
+in import "${nixpkgs}/nixos/tests/make-test-python.nix" ({ ... }: {
   name = "tezos-nix-binaries-test";
   nodes.machine = { ... }: {
     virtualisation.memorySize = 1024;
     virtualisation.diskSize = 1024;
-    environment.systemPackages = with pkgs; [
-      libev
-    ];
+    environment.systemPackages = with pkgs; [ libev ];
     security.pki.certificateFiles = [ ./ca.cert ];
-    environment.sessionVariables.LD_LIBRARY_PATH =
-      [ "${pkgs.ocamlPackages.hacl-star-raw}/lib/ocaml/4.12.0/site-lib/hacl-star-raw" ];
+    environment.sessionVariables.LD_LIBRARY_PATH = [
+      "${pkgs.ocamlPackages.hacl-star-raw}/lib/ocaml/4.12.0/site-lib/hacl-star-raw"
+    ];
   };
 
   testScript = ''
-    octez_accuser = "${octez-accuser-PtMumbai}/bin/octez-accuser-PtMumbai"
+    octez_accuser = "${octez-accuser-PtNairob}/bin/octez-accuser-PtNairob"
     octez_admin_client = "${octez-admin-client}/bin/octez-admin-client"
-    octez_baker = "${octez-baker-PtMumbai}/bin/octez-baker-PtMumbai"
+    octez_baker = "${octez-baker-PtNairob}/bin/octez-baker-PtNairob"
     octez_client = (
         "${octez-client}/bin/octez-client"
     )

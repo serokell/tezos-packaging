@@ -19,19 +19,19 @@ from collections import ChainMap
 networks = {
     "mainnet": "mainnet",
     "ghostnet": "ghostnet",
-    "mumbainet": "mumbainet",
     "nairobinet": "https://teztnets.xyz/nairobinet",
+    "oxfordnet": "https://teztnets.xyz/oxfordnet",
 }
 networks_protos = {
-    "mainnet": ["PtMumbai", "PtNairob"],
-    "ghostnet": ["PtMumbai", "PtNairob"],
-    "mumbainet": ["PtMumbai"],
+    "mainnet": ["PtNairob"],
+    "ghostnet": ["PtNairob"],
     "nairobinet": ["PtNairob"],
+    "oxfordnet": ["Proxford"],
 }
 
 protocol_numbers = {
-    "PtMumbai": "016",
     "PtNairob": "017",
+    "Proxford": "018",
 }
 
 signer_units = [
@@ -174,6 +174,22 @@ packages = [
             "A client to decode and encode JSON",
             meta=packages_meta,
             dune_filepath="src/bin_codec/codec.exe",
+        )
+    },
+    {
+        "tezos-dac-client": TezosBinaryPackage(
+            "tezos-dac-client",
+            "A Data Availability Committee Tezos client",
+            meta=packages_meta,
+            dune_filepath="src/bin_dac_client/main_dac_client.exe",
+        )
+    },
+    {
+        "tezos-dac-node": TezosBinaryPackage(
+            "tezos-dac-node",
+            "A Data Availability Committee Tezos node",
+            meta=packages_meta,
+            dune_filepath="src/bin_dac_node/main_dac.exe",
         )
     },
 ]
@@ -540,6 +556,6 @@ def mk_rollup_packages(*protos):
     ]
 
 
-packages.extend(mk_rollup_packages("PtMumbai", "PtNairob"))
+packages.extend(mk_rollup_packages("PtNairob", "Proxford"))
 
 packages = dict(ChainMap(*packages))

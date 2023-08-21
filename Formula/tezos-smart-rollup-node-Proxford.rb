@@ -1,8 +1,9 @@
 #!/usr/bin/env ruby
+
 # SPDX-FileCopyrightText: 2023 Oxhead Alpha
 # SPDX-License-Identifier: LicenseRef-MIT-OA
 
-class TezosSmartRollupClientPtmumbai < Formula
+class TezosSmartRollupNodeProxford < Formula
   @all_bins = []
 
   class << self
@@ -10,9 +11,9 @@ class TezosSmartRollupClientPtmumbai < Formula
   end
   homepage "https://gitlab.com/tezos/tezos"
 
-  url "https://gitlab.com/tezos/tezos.git", :tag => "v17.3", :shallow => false
+  url "https://gitlab.com/tezos/tezos.git", :tag => "v18.0-rc1", :shallow => false
 
-  version "v17.3-1"
+  version "v18.0-rc1-1"
 
   build_dependencies = %w[pkg-config coreutils autoconf rsync wget rustup-init cmake]
   build_dependencies.each do |dependency|
@@ -23,13 +24,10 @@ class TezosSmartRollupClientPtmumbai < Formula
   dependencies.each do |dependency|
     depends_on dependency
   end
-  desc "Smart contract rollup CLI client for PtMumbai"
+  desc "Tezos smart contract rollup node for Proxford"
 
   bottle do
-    root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosSmartRollupClientPtmumbai.version}/"
-    sha256 cellar: :any, monterey: "dc56fe19714bcc58e9bde18bdefe1a7b9cbbfd5f239578a3fac99f76aa907de5"
-    sha256 cellar: :any, big_sur: "e9c60fe4bfb85c4199901458075ba54a28134994c3a1c306c4c8b8b2cf591727"
-    sha256 cellar: :any, arm64_big_sur: "1e423db1d4dd43e4a0fe431440c7a1dd3773fc02486b732f15a5200c59bb3216"
+    root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosSmartRollupNodeProxford.version}/"
   end
 
   def make_deps
@@ -43,7 +41,7 @@ class TezosSmartRollupClientPtmumbai < Formula
     system "curl", "-L", "https://github.com/ocaml/opam/releases/download/2.0.9/opam-2.0.9-#{arch}-macos", "--create-dirs", "-o", "#{ENV["HOME"]}/.opam-bin/opam"
     system "chmod", "+x", "#{ENV["HOME"]}/.opam-bin/opam"
     ENV["PATH"]="#{ENV["HOME"]}/.opam-bin:#{ENV["PATH"]}"
-    system "rustup-init", "--default-toolchain", "1.60.0", "-y"
+    system "rustup-init", "--default-toolchain", "1.64.0", "-y"
     system "opam", "init", "--bare", "--debug", "--auto-setup", "--disable-sandboxing"
     system ["source .cargo/env",  "make build-deps"].join(" && ")
   end
@@ -57,9 +55,40 @@ class TezosSmartRollupClientPtmumbai < Formula
   end
 
   def install
+    startup_contents =
+      <<~EOS
+      #!/usr/bin/env bash
+
+      set -euo pipefail
+
+      node="#{bin}/octez-smart-rollup-node-Proxford"
+
+      "$node" init "$ROLLUP_MODE" config \
+          for "$ROLLUP_ALIAS" \
+          --rpc-addr "$ROLLUP_NODE_RPC_ENDPOINT" \
+          --force
+
+      "$node" --endpoint "$NODE_RPC_SCHEME://$NODE_RPC_ADDR" \
+          run "$ROLLUP_MODE" for "$ROLLUP_ALIAS"
+      EOS
+    File.write("tezos-smart-rollup-node-Proxford-start", startup_contents)
+    bin.install "tezos-smart-rollup-node-Proxford-start"
     make_deps
-    install_template "src/proto_016_PtMumbai/bin_sc_rollup_client/main_sc_rollup_client_016_PtMumbai.exe",
-                     "_build/default/src/proto_016_PtMumbai/bin_sc_rollup_client/main_sc_rollup_client_016_PtMumbai.exe",
-                     "octez-smart-rollup-client-PtMumbai"
+    install_template "src/proto_018_Proxford/bin_sc_rollup_node/main_sc_rollup_node_018_Proxford.exe",
+                     "_build/default/src/proto_018_Proxford/bin_sc_rollup_node/main_sc_rollup_node_018_Proxford.exe",
+                     "octez-smart-rollup-node-Proxford"
+  end
+
+  service do
+    run opt_bin/"tezos-smart-rollup-node-Proxford-start"
+    require_root true
+    environment_variables TEZOS_CLIENT_DIR: var/"lib/tezos/client", NODE_RPC_ENDPOINT: "http://localhost:8732", ROLLUP_NODE_RPC_ENDPOINT: "127.0.0.1:8472", ROLLUP_MODE: "observer", ROLLUP_ALIAS: "rollup"
+    keep_alive true
+    log_path var/"log/tezos-smart-rollup-node-Proxford.log"
+    error_log_path var/"log/tezos-smart-rollup-node-Proxford.log"
+  end
+
+  def post_install
+    mkdir "#{var}/lib/tezos/client"
   end
 end

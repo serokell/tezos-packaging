@@ -13,7 +13,6 @@ with opam-nix.lib.${self.system}; let
   octezSourcesResolved =
     self.runCommand "resolve-octez-sources" {} ''
       cp --no-preserve=all -Lr ${sources.tezos} $out
-      cp ${./tezos-event-logging.opam} $out/opam/tezos-event-logging.opam
     '';
   octezScope = buildOpamProject' {
     repos = with sources; [opam-repository];

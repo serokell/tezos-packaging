@@ -1,0 +1,82 @@
+#!/usr/bin/env python3
+# SPDX-FileCopyrightText: 2023 Oxhead Alpha
+# SPDX-License-Identifier: LicenseRef-MIT-OA
+
+import os
+import time
+import json
+import shutil
+import argparse
+from subprocess import run, check_call
+
+
+def with_running_node(network, f):
+    check_call(f"sudo systemctl stop tezos-node-{network}.service", shell=True)
+    f(network)
+    check_call(f"sudo systemctl start tezos-node-{network}.service", shell=True)
+
+
+def reclaim_space(network):
+    node_env = run(
+        f"cat $(systemctl show -p EnvironmentFiles tezos-node-{network}.service | cut -d '=' -f2 | cut -d ' ' -f1 | tr '\n' ' ') | grep -v '^#' | xargs",
+        shell=True,
+        capture_output=True,
+        check=True,
+    ).stdout.strip().decode("ascii")
+
+    node_dir = next(
+        var.split("=")[1]
+        for var in node_env.split()
+        if var.startswith("TEZOS_NODE_DIR")
+    )
+
+    octez_node = f"{node_env} sudo -E -u tezos octez-node"
+
+    tmp_dir = f"/tmp/octez-node.export-{int(time.time())}"
+
+    snapshot = os.path.join(tmp_dir, 'octez-node.snapshot.rolling')
+
+    with open(f"{node_dir}/config.json") as f:
+        config = json.loads(f.read())
+
+    is_rolling = config["shell"]["history_mode"] == "rolling"
+
+    is_archive = config["shell"]["history_mode"] == "archive"
+
+    export_flag = "--rolling" if is_rolling else ""
+
+    import_flag = "--reconstruct" if is_archive else ""
+
+    check_call(f"""
+sudo -u tezos mkdir -p {tmp_dir};
+{octez_node} snapshot export {export_flag} {snapshot};
+sudo -u tezos cp {node_dir}/*.json {tmp_dir};
+sudo -u tezos rm -rf {node_dir}/*;
+sudo -u tezos cp {tmp_dir}/*.json {node_dir};
+{octez_node} snapshot import {import_flag} {snapshot};
+sudo -u tezos rm -rf {tmp_dir};
+    """, shell=True)
+
+
+parser = argparse.ArgumentParser()
+
+parser.add_argument(
+    "--network", required=True, type=str, choices=["oxfordnet", "nairobinet", "custom"]
+)
+
+args = parser.parse_args()
+
+node_state = run(
+    f"sudo systemctl is-active tezos-node-{args.network}.service",
+    capture_output=True,
+    shell=True,
+)
+node_is_active = node_state.returncode == 0
+# sometimes (especially with tezos-baking services) a node unit is still in
+# the process of being activated at this point
+node_is_activating = "activating" in node_state.stdout.decode().splitlines()
+
+if node_is_active or node_is_activating:
+    with_running_node(args.network, reclaim_space)
+else:
+    reclaim_space(args.network)

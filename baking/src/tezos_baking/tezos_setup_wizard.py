@@ -172,6 +172,10 @@ def is_full_snapshot(snapshot_file, import_mode):
     return False
 
 
+def get_node_version_hash():
+    return get_proc_output("octez-node --version").stdout.decode("ascii").split()[0]
+
+
 # Steps
 
 network_query = Step(
@@ -370,12 +374,17 @@ class Setup(Setup):
         self.config["snapshot_url"] = None
         self.config["snapshot_block_hash"] = None
 
+        def hashes_comply(s1, s2):
+            return s1.startswith(s2) or s2.startswith(s1)
+
         json_url = "https://xtz-shots.io/tezos-snapshots.json"
         try:
             snapshot_array = None
             with urllib.request.urlopen(json_url) as url:
                 snapshot_array = json.load(url)["data"]
             snapshot_array.sort(reverse=True, key=lambda x: x["block_height"])
+
+            node_version_hash = get_node_version_hash()
 
             snapshot_metadata = next(
                 filter(
@@ -387,6 +396,10 @@ class Setup(Setup):
                             self.config["history_mode"] == "archive"
                             and artifact["history_mode"] == "full"
                         )
+                    )
+                    and hashes_comply(
+                        artifact["tezos_version"]["commit_info"]["commit_hash"],
+                        node_version_hash,
                     ),
                     iter(snapshot_array),
                 ),

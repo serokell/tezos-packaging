@@ -12,11 +12,6 @@ in [
     supports = protocolsFormatted;
   }
   {
-    name = "octez-dac-client";
-    description = "A Data Availability Committee Tezos client";
-    supports = protocolsFormatted;
-  }
-  {
     name = "octez-admin-client";
     description = "Administration tool for the node";
     supports = protocolsFormatted;
@@ -25,12 +20,6 @@ in [
     name = "octez-node";
     description =
       "Entry point for initializing, configuring and running a Octez node";
-    supports = protocolsFormatted;
-  }
-  {
-    name = "octez-dac-node";
-    description =
-      "A Data Availability Committee Tezos node";
     supports = protocolsFormatted;
   }
   {

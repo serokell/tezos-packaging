@@ -3,19 +3,18 @@
 
 # This file needs to become empty.
 self: super: rec {
-  # For some reason octez-protocol-compiler wants some docs to be present in octez-libs
-  octez-libs = super.octez-libs.overrideAttrs (o: {
+  octez-protocol-compiler = super.octez-protocol-compiler.overrideAttrs (_: {
+    postFixup = ''
+      ln -s $OCAMLFIND_DESTDIR/octez-protocol-compiler/* $OCAMLFIND_DESTDIR
+    '';
+  });
+  # For some reason octez-protocol-compiler wants some docs to be present in tezos-protocol-environment
+  tezos-protocol-environment = super.tezos-protocol-environment.overrideAttrs (o: {
     postFixup = ''
       DUMMY_DOCS_DIR="$OCAMLFIND_DESTDIR/../doc/${o.pname}"
       mkdir -p "$DUMMY_DOCS_DIR"
       for doc in "README.md" "CHANGES.rst" "LICENSE"; do
         touch "$DUMMY_DOCS_DIR/$doc"
-      done
-
-      DUMMY_ODOC_PAGES_DIR="$DUMMY_DOCS_DIR/odoc-pages"
-      mkdir -p "$DUMMY_ODOC_PAGES_DIR"
-      for doc in "tezos_workers.mld" "tezos_lwt_result_stdlib.mld" "index.mld"; do
-        touch "$DUMMY_ODOC_PAGES_DIR/$doc"
       done
     '';
   });

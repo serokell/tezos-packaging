@@ -11,9 +11,11 @@ with opam-nix.lib.${self.system}; let
   zcash-overlay = import ./zcash-overlay.nix;
   hacks = import ./hacks.nix;
   octezSourcesResolved =
-    self.runCommand "resolve-octez-sources" {} "cp --no-preserve=all -Lr ${sources.tezos} $out";
+    self.runCommand "resolve-octez-sources" {} ''
+      cp --no-preserve=all -Lr ${sources.tezos} $out
+    '';
   octezScope = buildOpamProject' {
-    repos = [sources.opam-repository];
+    repos = with sources; [opam-repository];
     recursive = true;
     resolveArgs = { };
   } octezSourcesResolved { };

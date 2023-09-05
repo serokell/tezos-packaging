@@ -9,9 +9,9 @@ class TezosBakerPtnairob < Formula
   end
   homepage "https://gitlab.com/tezos/tezos"
 
-  url "https://gitlab.com/tezos/tezos.git", :tag => "v17.3", :shallow => false
+  url "https://gitlab.com/tezos/tezos.git", :tag => "v18.0-rc1", :shallow => false
 
-  version "v17.3-1"
+  version "v18.0-rc1-1"
 
   build_dependencies = %w[pkg-config coreutils autoconf rsync wget rustup-init cmake]
   build_dependencies.each do |dependency|
@@ -26,9 +26,9 @@ class TezosBakerPtnairob < Formula
 
   bottle do
     root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosBakerPtnairob.version}/"
-    sha256 cellar: :any, monterey: "b0a2b5e165f14b15292f9dc2b8f1ddb3941f94dcce76ef91dd174b883e53674b"
-    sha256 cellar: :any, big_sur: "536e0645af7de6373c2c0116cffbdd3a510369457fc23b00a0cfcc2452df5203"
-    sha256 cellar: :any, arm64_big_sur: "4314adb34e9e8f2733b8e9e9d9b9fcfc983f4480d8233a8c66e25adbe819d8cc"
+    sha256 cellar: :any, arm64_big_sur: "7297607bbe2b907a1d1c6b9deb3dc4c160a68162b47fdbbc30ae25b2a4ed04c8"
+    sha256 cellar: :any, big_sur: "0f06234ad073d83f7a79ae26a1abd6cfd595d0e37b7bdb493afc9c9a6e7ef907"
+    sha256 cellar: :any, monterey: "3a549bc7a2bd6f106e695913698291474873ce3c7cf9ee7f1496b603472c4460"
   end
 
   def make_deps
@@ -42,7 +42,7 @@ class TezosBakerPtnairob < Formula
     system "curl", "-L", "https://github.com/ocaml/opam/releases/download/2.0.9/opam-2.0.9-#{arch}-macos", "--create-dirs", "-o", "#{ENV["HOME"]}/.opam-bin/opam"
     system "chmod", "+x", "#{ENV["HOME"]}/.opam-bin/opam"
     ENV["PATH"]="#{ENV["HOME"]}/.opam-bin:#{ENV["PATH"]}"
-    system "rustup-init", "--default-toolchain", "1.60.0", "-y"
+    system "rustup-init", "--default-toolchain", "1.64.0", "-y"
     system "opam", "init", "--bare", "--debug", "--auto-setup", "--disable-sandboxing"
     system ["source .cargo/env",  "make build-deps"].join(" && ")
   end

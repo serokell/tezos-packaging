@@ -1,7 +1,7 @@
-# SPDX-FileCopyrightText: 2022 Oxhead Alpha
+# SPDX-FileCopyrightText: 2023 Oxhead Alpha
 # SPDX-License-Identifier: LicenseRef-MIT-OA
 
-class TezosAccuserPtmumbai < Formula
+class TezosAccuserProxford < Formula
   @all_bins = []
 
   class << self
@@ -9,9 +9,9 @@ class TezosAccuserPtmumbai < Formula
   end
   homepage "https://gitlab.com/tezos/tezos"
 
-  url "https://gitlab.com/tezos/tezos.git", :tag => "v17.3", :shallow => false
+  url "https://gitlab.com/tezos/tezos.git", :tag => "v18.0-rc1", :shallow => false
 
-  version "v17.3-1"
+  version "v18.0-rc1-1"
 
   build_dependencies = %w[pkg-config coreutils autoconf rsync wget rustup-init cmake]
   build_dependencies.each do |dependency|
@@ -25,10 +25,10 @@ class TezosAccuserPtmumbai < Formula
   desc "Daemon for accusing"
 
   bottle do
-    root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosAccuserPtmumbai.version}/"
-    sha256 cellar: :any, monterey: "d99450586bb48016307ffdf7d76e7eb0555c31ab1ccde19b3dffd6c36642bcc5"
-    sha256 cellar: :any, big_sur: "98de4a2dff6201ee2d6435ec8f83a4a943868ec030567809a437a19b1988e9e7"
-    sha256 cellar: :any, arm64_big_sur: "52c01ff7b363dc1c61426817688fa32946e8bf4f1d3227f24ba1b0aabf6cfa88"
+    root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosAccuserProxford.version}/"
+    sha256 cellar: :any, arm64_big_sur: "bc0441c5c881287a2fcca74ceb92d98e45d17032fe755f67dec8cce30ac5f53a"
+    sha256 cellar: :any, big_sur: "7ef8600cabf0fac5da4b6a039d2d64e822fbb647f626ba15c60321a8ba746769"
+    sha256 cellar: :any, monterey: "18afc3bd1220735856ef95996721867c6c540f29bfbbf4e4c896c09e82357780"
   end
 
   def make_deps
@@ -42,7 +42,7 @@ class TezosAccuserPtmumbai < Formula
     system "curl", "-L", "https://github.com/ocaml/opam/releases/download/2.0.9/opam-2.0.9-#{arch}-macos", "--create-dirs", "-o", "#{ENV["HOME"]}/.opam-bin/opam"
     system "chmod", "+x", "#{ENV["HOME"]}/.opam-bin/opam"
     ENV["PATH"]="#{ENV["HOME"]}/.opam-bin:#{ENV["PATH"]}"
-    system "rustup-init", "--default-toolchain", "1.60.0", "-y"
+    system "rustup-init", "--default-toolchain", "1.64.0", "-y"
     system "opam", "init", "--bare", "--debug", "--auto-setup", "--disable-sandboxing"
     system ["source .cargo/env",  "make build-deps"].join(" && ")
   end
@@ -62,7 +62,7 @@ class TezosAccuserPtmumbai < Formula
 
       set -euo pipefail
 
-      accuser="#{bin}/octez-accuser-PtMumbai"
+      accuser="#{bin}/octez-accuser-Proxford"
 
       accuser_config="$TEZOS_CLIENT_DIR/config"
       mkdir -p "$TEZOS_CLIENT_DIR"
@@ -77,21 +77,21 @@ class TezosAccuserPtmumbai < Formula
 
       exec "$accuser" --endpoint "$NODE_RPC_SCHEME://$NODE_RPC_ADDR" run
     EOS
-    File.write("tezos-accuser-PtMumbai-start", startup_contents)
-    bin.install "tezos-accuser-PtMumbai-start"
+    File.write("tezos-accuser-Proxford-start", startup_contents)
+    bin.install "tezos-accuser-Proxford-start"
     make_deps
-    install_template "src/proto_016_PtMumbai/bin_accuser/main_accuser_016_PtMumbai.exe",
-                     "_build/default/src/proto_016_PtMumbai/bin_accuser/main_accuser_016_PtMumbai.exe",
-                     "octez-accuser-PtMumbai"
+    install_template "src/proto_018_Proxford/bin_accuser/main_accuser_018_Proxford.exe",
+                     "_build/default/src/proto_018_Proxford/bin_accuser/main_accuser_018_Proxford.exe",
+                     "octez-accuser-Proxford"
   end
 
   service do
-    run opt_bin/"tezos-accuser-PtMumbai-start"
+    run opt_bin/"tezos-accuser-Proxford-start"
     require_root true
     environment_variables TEZOS_CLIENT_DIR: var/"lib/tezos/client", NODE_RPC_SCHEME: "http", NODE_RPC_ADDR: "localhost:8732"
     keep_alive true
-    log_path var/"log/tezos-accuser-PtMumbai.log"
-    error_log_path var/"log/tezos-accuser-PtMumbai.log"
+    log_path var/"log/tezos-accuser-Proxford.log"
+    error_log_path var/"log/tezos-accuser-Proxford.log"
   end
 
   def post_install

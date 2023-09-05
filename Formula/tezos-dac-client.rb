@@ -1,8 +1,7 @@
-#!/usr/bin/env ruby
-# SPDX-FileCopyrightText: 2023 Oxhead Alpha
+# SPDX-FileCopyrightText: 2021 Oxhead Alpha
 # SPDX-License-Identifier: LicenseRef-MIT-OA
 
-class TezosSmartRollupClientPtnairob < Formula
+class TezosDacClient < Formula
   @all_bins = []
 
   class << self
@@ -23,13 +22,13 @@ class TezosSmartRollupClientPtnairob < Formula
   dependencies.each do |dependency|
     depends_on dependency
   end
-  desc "Smart contract rollup CLI client for PtNairob"
+  desc "A Data Availability Committee Tezos client"
 
   bottle do
-    root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosSmartRollupClientPtnairob.version}/"
-    sha256 cellar: :any, arm64_big_sur: "4f6273c00de3610b68666fbeee659b191011679fca9b84d0a6125f32fd05a027"
-    sha256 cellar: :any, big_sur: "f4f85a8f3df9e28399deca0076be3c15b474e86df1c74ca2470e263818ada225"
-    sha256 cellar: :any, monterey: "07ce62ba3d2285e30dec4336a8f5a4ad9a1bc38644982b0826252dfc43140eab"
+    root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosDacClient.version}/"
+    sha256 cellar: :any, arm64_big_sur: "11621253b53e75235a8557b6fc5f763b7b4ddb6dd76276221d0ef7d98c9a84ed"
+    sha256 cellar: :any, big_sur: "285406c3a521f4dc10f3ba2dc7bf5d5d59c1ec622ec4e255135a778222c1ec5e"
+    sha256 cellar: :any, monterey: "12cf98c63842cca83b34348d7aad09ec908d819707364d2ac909388cd9c84e84"
   end
 
   def make_deps
@@ -58,8 +57,8 @@ class TezosSmartRollupClientPtnairob < Formula
 
   def install
     make_deps
-    install_template "src/proto_017_PtNairob/bin_sc_rollup_client/main_sc_rollup_client_017_PtNairob.exe",
-                     "_build/default/src/proto_017_PtNairob/bin_sc_rollup_client/main_sc_rollup_client_017_PtNairob.exe",
-                     "octez-smart-rollup-client-PtNairob"
+    install_template "src/bin_dac_client/main_dac_client.exe",
+                     "_build/default/src/bin_dac_client/main_dac_client.exe",
+                     "octez-dac-client"
   end
 end

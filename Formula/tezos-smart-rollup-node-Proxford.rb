@@ -3,7 +3,7 @@
 # SPDX-FileCopyrightText: 2023 Oxhead Alpha
 # SPDX-License-Identifier: LicenseRef-MIT-OA
 
-class TezosSmartRollupNodePtmumbai < Formula
+class TezosSmartRollupNodeProxford < Formula
   @all_bins = []
 
   class << self
@@ -11,9 +11,9 @@ class TezosSmartRollupNodePtmumbai < Formula
   end
   homepage "https://gitlab.com/tezos/tezos"
 
-  url "https://gitlab.com/tezos/tezos.git", :tag => "v17.3", :shallow => false
+  url "https://gitlab.com/tezos/tezos.git", :tag => "v18.0-rc1", :shallow => false
 
-  version "v17.3-1"
+  version "v18.0-rc1-1"
 
   build_dependencies = %w[pkg-config coreutils autoconf rsync wget rustup-init cmake]
   build_dependencies.each do |dependency|
@@ -24,13 +24,13 @@ class TezosSmartRollupNodePtmumbai < Formula
   dependencies.each do |dependency|
     depends_on dependency
   end
-  desc "Tezos smart contract rollup node for PtMumbai"
+  desc "Tezos smart contract rollup node for Proxford"
 
   bottle do
-    root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosSmartRollupNodePtmumbai.version}/"
-    sha256 cellar: :any, monterey: "1d78ad8bce8ce313e34d4ee52e265fa5f683efe8fcd5c76698ee850ff170b798"
-    sha256 cellar: :any, big_sur: "2c629ed60b7902dd6adeacf1b46324682d66292f7aaf16909329d2df7bd90f3d"
-    sha256 cellar: :any, arm64_big_sur: "31df9fb1d365aa14f8025c484050a04185354b28b9456cb4428aa7d9b2a36f43"
+    root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosSmartRollupNodeProxford.version}/"
+    sha256 cellar: :any, arm64_big_sur: "6e4cb3b4ede45d13f8d558544316fd2b1e9c4f985e02b05ec8863edc1e390757"
+    sha256 cellar: :any, big_sur: "420467457b304ffc8056212a0ea0627088adb18053e135a876c4890ae0454f3f"
+    sha256 cellar: :any, monterey: "bbe5f5dff795a63681b3ce0e5fedc47795010c1d021e4dca3e930a853cab01fb"
   end
 
   def make_deps
@@ -44,7 +44,7 @@ class TezosSmartRollupNodePtmumbai < Formula
     system "curl", "-L", "https://github.com/ocaml/opam/releases/download/2.0.9/opam-2.0.9-#{arch}-macos", "--create-dirs", "-o", "#{ENV["HOME"]}/.opam-bin/opam"
     system "chmod", "+x", "#{ENV["HOME"]}/.opam-bin/opam"
     ENV["PATH"]="#{ENV["HOME"]}/.opam-bin:#{ENV["PATH"]}"
-    system "rustup-init", "--default-toolchain", "1.60.0", "-y"
+    system "rustup-init", "--default-toolchain", "1.64.0", "-y"
     system "opam", "init", "--bare", "--debug", "--auto-setup", "--disable-sandboxing"
     system ["source .cargo/env",  "make build-deps"].join(" && ")
   end
@@ -64,7 +64,7 @@ class TezosSmartRollupNodePtmumbai < Formula
 
       set -euo pipefail
 
-      node="#{bin}/octez-smart-rollup-node-PtMumbai"
+      node="#{bin}/octez-smart-rollup-node-Proxford"
 
       "$node" init "$ROLLUP_MODE" config \
           for "$ROLLUP_ALIAS" \
@@ -74,21 +74,21 @@ class TezosSmartRollupNodePtmumbai < Formula
       "$node" --endpoint "$NODE_RPC_SCHEME://$NODE_RPC_ADDR" \
           run "$ROLLUP_MODE" for "$ROLLUP_ALIAS"
       EOS
-    File.write("tezos-smart-rollup-node-PtMumbai-start", startup_contents)
-    bin.install "tezos-smart-rollup-node-PtMumbai-start"
+    File.write("tezos-smart-rollup-node-Proxford-start", startup_contents)
+    bin.install "tezos-smart-rollup-node-Proxford-start"
     make_deps
-    install_template "src/proto_016_PtMumbai/bin_sc_rollup_node/main_sc_rollup_node_016_PtMumbai.exe",
-                     "_build/default/src/proto_016_PtMumbai/bin_sc_rollup_node/main_sc_rollup_node_016_PtMumbai.exe",
-                     "octez-smart-rollup-node-PtMumbai"
+    install_template "src/proto_018_Proxford/bin_sc_rollup_node/main_sc_rollup_node_018_Proxford.exe",
+                     "_build/default/src/proto_018_Proxford/bin_sc_rollup_node/main_sc_rollup_node_018_Proxford.exe",
+                     "octez-smart-rollup-node-Proxford"
   end
 
   service do
-    run opt_bin/"tezos-smart-rollup-node-PtMumbai-start"
+    run opt_bin/"tezos-smart-rollup-node-Proxford-start"
     require_root true
     environment_variables TEZOS_CLIENT_DIR: var/"lib/tezos/client", NODE_RPC_ENDPOINT: "http://localhost:8732", ROLLUP_NODE_RPC_ENDPOINT: "127.0.0.1:8472", ROLLUP_MODE: "observer", ROLLUP_ALIAS: "rollup"
     keep_alive true
-    log_path var/"log/tezos-smart-rollup-node-PtMumbai.log"
-    error_log_path var/"log/tezos-smart-rollup-node-PtMumbai.log"
+    log_path var/"log/tezos-smart-rollup-node-Proxford.log"
+    error_log_path var/"log/tezos-smart-rollup-node-Proxford.log"
   end
 
   def post_install

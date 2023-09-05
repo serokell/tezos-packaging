@@ -11,9 +11,9 @@ class TezosSmartRollupNodePtnairob < Formula
   end
   homepage "https://gitlab.com/tezos/tezos"
 
-  url "https://gitlab.com/tezos/tezos.git", :tag => "v17.3", :shallow => false
+  url "https://gitlab.com/tezos/tezos.git", :tag => "v18.0-rc1", :shallow => false
 
-  version "v17.3-1"
+  version "v18.0-rc1-1"
 
   build_dependencies = %w[pkg-config coreutils autoconf rsync wget rustup-init cmake]
   build_dependencies.each do |dependency|
@@ -28,9 +28,9 @@ class TezosSmartRollupNodePtnairob < Formula
 
   bottle do
     root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosSmartRollupNodePtnairob.version}/"
-    sha256 cellar: :any, monterey: "1a6bf892de65b2ea354da02f3c633033ead8b014efafa9fb475ef4588ba6d32f"
-    sha256 cellar: :any, big_sur: "dbbe954b7cfee4c010a633cfcb70a1835cf4acfdc521f8196ce45b42b779d519"
-    sha256 cellar: :any, arm64_big_sur: "33bb3146915095b4d190c1a9f7739dfc4f6b5c077a9f3b6a94a7c946ce916957"
+    sha256 cellar: :any, arm64_big_sur: "0264f3275f3bcd9725ade8d09bc130a10121f946436c52f43263b8137b7cb49c"
+    sha256 cellar: :any, big_sur: "0be328c657b19fab2e33b4d61a4cd832407a284fe83248149021c789a7e82fe4"
+    sha256 cellar: :any, monterey: "c3c148d671540495ee290b7fd0d980ffc8619beb6f3d2b5182d14a89709d11af"
   end
 
   def make_deps
@@ -44,7 +44,7 @@ class TezosSmartRollupNodePtnairob < Formula
     system "curl", "-L", "https://github.com/ocaml/opam/releases/download/2.0.9/opam-2.0.9-#{arch}-macos", "--create-dirs", "-o", "#{ENV["HOME"]}/.opam-bin/opam"
     system "chmod", "+x", "#{ENV["HOME"]}/.opam-bin/opam"
     ENV["PATH"]="#{ENV["HOME"]}/.opam-bin:#{ENV["PATH"]}"
-    system "rustup-init", "--default-toolchain", "1.60.0", "-y"
+    system "rustup-init", "--default-toolchain", "1.64.0", "-y"
     system "opam", "init", "--bare", "--debug", "--auto-setup", "--disable-sandboxing"
     system ["source .cargo/env",  "make build-deps"].join(" && ")
   end

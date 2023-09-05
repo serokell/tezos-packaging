@@ -1,7 +1,7 @@
-# SPDX-FileCopyrightText: 2023 Oxhead Alpha
+# SPDX-FileCopyrightText: 2022 Oxhead Alpha
 # SPDX-License-Identifier: LicenseRef-MIT-OA
 
-class TezosBakerProxford < Formula
+class TezosBakerPtmumbai < Formula
   @all_bins = []
 
   class << self
@@ -9,9 +9,9 @@ class TezosBakerProxford < Formula
   end
   homepage "https://gitlab.com/tezos/tezos"
 
-  url "https://gitlab.com/tezos/tezos.git", :tag => "v18.0-rc1", :shallow => false
+  url "https://gitlab.com/tezos/tezos.git", :tag => "v17.3", :shallow => false
 
-  version "v18.0-rc1-1"
+  version "v17.3-1"
 
   build_dependencies = %w[pkg-config coreutils autoconf rsync wget rustup-init cmake]
   build_dependencies.each do |dependency|
@@ -25,10 +25,10 @@ class TezosBakerProxford < Formula
   desc "Daemon for baking"
 
   bottle do
-    root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosBakerProxford.version}/"
-    sha256 cellar: :any, arm64_big_sur: "4130d6fde0bd567595b614fe873d4e279d9c0968038487302e5efb4716654e21"
-    sha256 cellar: :any, big_sur: "c8ba59f374b1d9f4f9f4740124220e8f7f81d05d6f649571f8f3cd98d4de4340"
-    sha256 cellar: :any, monterey: "79962f86efe8320920fcdc8ff3a1734ffce83fc1fb74fc6807a770db6fd690af"
+    root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosBakerPtmumbai.version}/"
+    sha256 cellar: :any, monterey: "697990bac2a711f4f535008b6453980882cd7686e6db7f14c3670730535a7197"
+    sha256 cellar: :any, big_sur: "66facd7620ac17308a96b2cf69888f6de5101577b257b267d2ffd3ccecfb2050"
+    sha256 cellar: :any, arm64_big_sur: "3ffcfb3985b202a62efd09c8855b4c39e485ad4c7e30da64dd210d54cbdec904"
   end
 
   def make_deps
@@ -42,7 +42,7 @@ class TezosBakerProxford < Formula
     system "curl", "-L", "https://github.com/ocaml/opam/releases/download/2.0.9/opam-2.0.9-#{arch}-macos", "--create-dirs", "-o", "#{ENV["HOME"]}/.opam-bin/opam"
     system "chmod", "+x", "#{ENV["HOME"]}/.opam-bin/opam"
     ENV["PATH"]="#{ENV["HOME"]}/.opam-bin:#{ENV["PATH"]}"
-    system "rustup-init", "--default-toolchain", "1.64.0", "-y"
+    system "rustup-init", "--default-toolchain", "1.60.0", "-y"
     system "opam", "init", "--bare", "--debug", "--auto-setup", "--disable-sandboxing"
     system ["source .cargo/env",  "make build-deps"].join(" && ")
   end
@@ -62,7 +62,7 @@ class TezosBakerProxford < Formula
 
       set -euo pipefail
 
-      baker="#{bin}/octez-baker-Proxford"
+      baker="#{bin}/octez-baker-PtMumbai"
 
       baker_config="$TEZOS_CLIENT_DIR/config"
       mkdir -p "$TEZOS_CLIENT_DIR"
@@ -87,21 +87,21 @@ class TezosBakerProxford < Formula
           launch_baker "$BAKER_ACCOUNT"
       fi
     EOS
-    File.write("tezos-baker-Proxford-start", startup_contents)
-    bin.install "tezos-baker-Proxford-start"
+    File.write("tezos-baker-PtMumbai-start", startup_contents)
+    bin.install "tezos-baker-PtMumbai-start"
     make_deps
-    install_template "src/proto_018_Proxford/bin_baker/main_baker_018_Proxford.exe",
-                     "_build/default/src/proto_018_Proxford/bin_baker/main_baker_018_Proxford.exe",
-                     "octez-baker-Proxford"
+    install_template "src/proto_016_PtMumbai/bin_baker/main_baker_016_PtMumbai.exe",
+                     "_build/default/src/proto_016_PtMumbai/bin_baker/main_baker_016_PtMumbai.exe",
+                     "octez-baker-PtMumbai"
   end
 
   service do
-    run opt_bin/"tezos-baker-Proxford-start"
+    run opt_bin/"tezos-baker-PtMumbai-start"
     require_root true
     environment_variables TEZOS_CLIENT_DIR: var/"lib/tezos/client", TEZOS_NODE_DIR: "", NODE_RPC_SCHEME: "http", NODE_RPC_ADDR: "localhost:8732", BAKER_ACCOUNT: ""
     keep_alive true
-    log_path var/"log/tezos-baker-Proxford.log"
-    error_log_path var/"log/tezos-baker-Proxford.log"
+    log_path var/"log/tezos-baker-PtMumbai.log"
+    error_log_path var/"log/tezos-baker-PtMumbai.log"
   end
 
   def post_install

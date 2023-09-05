@@ -19,12 +19,12 @@ let
 
   octez-accuser = {
     enable = true;
-    baseProtocols = ["PtNairob"];
+    baseProtocols = ["PtMumbai"];
   };
 
   octez-baker = {
     enable = true;
-    baseProtocols = ["PtNairob"];
+    baseProtocols = ["PtMumbai"];
     bakerAccountAlias = "baker";
     bakerSecretKey = "unencrypted:edsk3KaTNj1d8Xd3kMBrZkJrfkqsz4XwwiBXatuuVgTdPye2KpE98o";
   };
@@ -44,10 +44,10 @@ import "${nixpkgs}/nixos/tests/make-test-python.nix" ({ ... }:
               ];
 
     services = {
-      octez-node.instances.ghostnet = octez-node;
-      octez-signer.instances.ghostnet = octez-signer;
-      octez-accuser.instances.ghostnet = octez-accuser;
-      octez-baker.instances.ghostnet = octez-baker;
+      octez-node.instances.mumbainet = octez-node;
+      octez-signer.instances.mumbainet = octez-signer;
+      octez-accuser.instances.mumbainet = octez-accuser;
+      octez-baker.instances.mumbainet = octez-baker;
     };
 
   };
@@ -65,7 +65,7 @@ import "${nixpkgs}/nixos/tests/make-test-python.nix" ({ ... }:
     ]
 
     for s in services:
-        machine.wait_for_unit(f"tezos-ghostnet-{s}.service")
+        machine.wait_for_unit(f"tezos-mumbainet-{s}.service")
 
     ${if octez-node.enable then ''
     with subtest("check octez-node rpc response"):
@@ -78,6 +78,6 @@ import "${nixpkgs}/nixos/tests/make-test-python.nix" ({ ... }:
 
     with subtest("service status sanity check"):
         for s in services:
-            machine.succeed(f"systemctl status tezos-ghostnet-{s}.service")
+            machine.succeed(f"systemctl status tezos-mumbainet-{s}.service")
   '';
 }) { inherit pkgs system; }

@@ -3,13 +3,13 @@
 # SPDX-FileCopyrightText: 2023 Oxhead Alpha
 # SPDX-License-Identifier: LicenseRef-MIT-OA
 
-class TezosNodeOxfordnet < Formula
+class TezosNodeMumbainet < Formula
   url "file:///dev/null"
-  version "v18.0-rc1-1"
+  version "v17.3-1"
 
   depends_on "tezos-node"
 
-  desc "Meta formula that provides background tezos-node service that runs on oxfordnet"
+  desc "Meta formula that provides background tezos-node service that runs on mumbainet"
 
   def install
     startup_contents =
@@ -27,13 +27,13 @@ class TezosNodeOxfordnet < Formula
           echo "Configuring the node..."
           "$node" config init \
                   --rpc-addr "$NODE_RPC_ADDR" \
-                  --network=https://teztnets.xyz/oxfordnet\
+                  --network=mumbainet\
                   "$@"
       else
           echo "Updating the node configuration..."
           "$node" config update \
                   --rpc-addr "$NODE_RPC_ADDR" \
-                  --network=https://teztnets.xyz/oxfordnet\
+                  --network=mumbainet\
                   "$@"
       fi
 
@@ -45,22 +45,22 @@ class TezosNodeOxfordnet < Formula
               --rpc-tls="$CERT_PATH","$KEY_PATH"
       fi
     EOS
-    File.write("tezos-node-oxfordnet-start", startup_contents)
-    bin.install "tezos-node-oxfordnet-start"
-    print "Installing tezos-node-oxfordnet service"
+    File.write("tezos-node-mumbainet-start", startup_contents)
+    bin.install "tezos-node-mumbainet-start"
+    print "Installing tezos-node-mumbainet service"
   end
 
   service do
-    run opt_bin/"tezos-node-oxfordnet-start"
+    run opt_bin/"tezos-node-mumbainet-start"
     require_root true
     environment_variables TEZOS_CLIENT_DIR: var/"lib/tezos/client", NODE_RPC_ADDR: "127.0.0.1:8732", CERT_PATH: "", KEY_PATH: ""
     keep_alive true
-    log_path var/"log/tezos-node-oxfordnet.log"
-    error_log_path var/"log/tezos-node-oxfordnet.log"
+    log_path var/"log/tezos-node-mumbainet.log"
+    error_log_path var/"log/tezos-node-mumbainet.log"
   end
 
   def post_install
-    mkdir_p "#{var}/lib/tezos/node-oxfordnet"
-    system "octez-node", "config", "init", "--data-dir" "#{var}/lib/tezos/node-oxfordnet", "--network", "https://teztnets.xyz/oxfordnet"
+    mkdir_p "#{var}/lib/tezos/node-mumbainet"
+    system "octez-node", "config", "init", "--data-dir" "#{var}/lib/tezos/node-mumbainet", "--network", "mumbainet"
   end
 end

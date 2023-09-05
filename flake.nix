@@ -35,7 +35,7 @@
       path = inputs.tezos;
       name = "tezos";
       # we exclude optional development packages
-      filter = path: _: !(builtins.elem (baseNameOf path) [ "octez-dev-deps.opam" "tezos-time-measurement.opam" ]);
+      filter = path: _: baseNameOf path != "octez-dev-deps.opam";
     };
     sources = { inherit tezos; inherit (inputs) opam-repository; };
 

@@ -9,9 +9,9 @@ class TezosSigner < Formula
   end
   homepage "https://gitlab.com/tezos/tezos"
 
-  url "https://gitlab.com/tezos/tezos.git", :tag => "v18.0-rc1", :shallow => false
+  url "https://gitlab.com/tezos/tezos.git", :tag => "v17.3", :shallow => false
 
-  version "v18.0-rc1-1"
+  version "v17.3-1"
 
   build_dependencies = %w[pkg-config coreutils autoconf rsync wget rustup-init cmake]
   build_dependencies.each do |dependency|
@@ -26,9 +26,9 @@ class TezosSigner < Formula
 
   bottle do
     root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosSigner.version}/"
-    sha256 cellar: :any, arm64_big_sur: "4af9252ea4e22eb678f7b3eaad71e343e11b39e3ebb1d015bebf333b8a4a723f"
-    sha256 cellar: :any, big_sur: "709bd0df4af94e228a975843d69c2825b996233dad55f0be77e9bbf0e4454ad9"
-    sha256 cellar: :any, monterey: "cd1592983e06de32000694a12fb4380aa58042e18709b8e799580bc724697e22"
+    sha256 cellar: :any, monterey: "7459d361f7c3210980fcbb9c922efeb4a7976c9d4e4238ddb8319aebbbd73925"
+    sha256 cellar: :any, big_sur: "6755d624dbce5366c0e407ab50ce8345bc431f6a204dd354108eddf9d1839d4e"
+    sha256 cellar: :any, arm64_big_sur: "903bc14077b0ff00b6924938542af1094031888440f32a8919a57843ffee4516"
   end
 
   def make_deps
@@ -42,7 +42,7 @@ class TezosSigner < Formula
     system "curl", "-L", "https://github.com/ocaml/opam/releases/download/2.0.9/opam-2.0.9-#{arch}-macos", "--create-dirs", "-o", "#{ENV["HOME"]}/.opam-bin/opam"
     system "chmod", "+x", "#{ENV["HOME"]}/.opam-bin/opam"
     ENV["PATH"]="#{ENV["HOME"]}/.opam-bin:#{ENV["PATH"]}"
-    system "rustup-init", "--default-toolchain", "1.64.0", "-y"
+    system "rustup-init", "--default-toolchain", "1.60.0", "-y"
     system "opam", "init", "--bare", "--debug", "--auto-setup", "--disable-sandboxing"
     system ["source .cargo/env",  "make build-deps"].join(" && ")
   end

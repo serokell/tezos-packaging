@@ -28,12 +28,12 @@ otherwise improve our project, pull requests are most welcome.
   - To stop building protocol-specific binaries for a protocol, but keep supporting it in
     multi-protocol binaries, `./proto allow`.
   - To deprecate a protocol, `./proto ignore ...`.
-
+- Note that this script is location sensitive, and required to be used from the `scripts` folder.
 ### Nix specific maintenance
 
 All nix related files are located in the [nix](../nix) directory.
 
-If the build breaks because of a dependency issue, `nix repl pkgs.nix`
+If the build breaks because of a dependency issue, `nix repl --extra-experimental-features repl-flake .#`
 can be very useful to investigate it.
 
 ## Legal

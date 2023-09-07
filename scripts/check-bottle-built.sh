@@ -17,7 +17,7 @@ if [ ! -f "./Formula/$1.rb" ] ; then
     exit 2
 fi
 
-tag=$(sed -n "s/^\s\+version \"\(.*\)\"/\1/p" "./Formula/$1.rb")
+tag="test-release"
 
 set +e
 

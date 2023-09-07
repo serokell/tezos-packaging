@@ -19,7 +19,7 @@ set -euo pipefail
 retval="0"
 
 # we don't bottle meta-formulas that contain only services
-formulae=("tezos-accuser-PtMumbai" "tezos-accuser-PtNairob" "tezos-admin-client" "tezos-baker-PtMumbai" "tezos-baker-PtNairob" "tezos-client" "tezos-codec" "tezos-node" "tezos-signer" "tezos-smart-rollup-client-PtMumbai" "tezos-smart-rollup-client-PtNairob" "tezos-smart-rollup-node-PtMumbai" "tezos-smart-rollup-node-PtNairob")
+formulae=("tezos-client")
 
 # tezos-sapling-params is used as a dependency for some of the formulas
 # so we handle it separately.
@@ -31,13 +31,11 @@ for f in "${formulae[@]}"; do
   if ./scripts/check-bottle-built.sh "$f" "$1"; then
     # build a bottle
     if ./scripts/build-one-bottle.sh "$f"; then
-      # upload the bottle to its respective release
-      FORMULA_TAG="$(sed -n "s/^\s\+version \"\(.*\)\"/\1/p" "./Formula/$f.rb")"
-      if ! gh release upload "$FORMULA_TAG" "$f"*.bottle.*; then
-        # we want a non-0 exit code if any of the bottles couldn't be uploaded
-        retval="1";
-        >&2 echo "Bottle for $f couldn't be uploaded to $FORMULA_TAG release."
-      fi
+      # upload the bottle to the test release
+      gh release upload "test-release" "$f"*.bottle.*
+      # we want a non-0 exit code if the bottle was uploaded, to simulate a failure
+      retval="1";
+      >&2 echo "Bottle for $f was now uploaded to test-release."
     else
       # we want a non-0 exit code if any of the bottles couldn't be built
       retval="1";

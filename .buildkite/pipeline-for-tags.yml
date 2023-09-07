@@ -8,78 +8,10 @@ env:
 
 
 steps:
- - label: Check for new Octez release
-   if: build.source == "schedule" && build.branch == "master"
-   commands:
-   - nix develop .#autorelease -c ./scripts/update-tezos.sh
-
- - label: Build ubuntu source packages
-   key: build-ubuntu-source-packages
-   if: build.tag =~ /^v.*-1/
-   agents:
-     queue: "docker"
-   commands:
-   - eval "$SET_VERSION"
-   - nix develop .#docker-tezos-packages -c ./docker/build/ubuntu/build.py --type source
-   artifact_paths:
-     - ./out/*
-
- - label: Build fedora source packages
-   key: build-fedora-source-packages
-   if: build.tag =~ /^v.*-1/
-   agents:
-     queue: "docker"
-   commands:
-   - eval "$SET_VERSION"
-   - nix develop .#docker-tezos-packages -c ./docker/build/fedora/build.py --type source
-   artifact_paths:
-     - ./out/*
-
- - label: Sign ubuntu source packages
-   if: build.tag =~ /^v.*-1/
-   depends_on:
-   - "build-ubuntu-source-packages"
-   key: sign-ubuntu-source-packages
-   commands:
-   - eval "$SET_VERSION"
-   - buildkite-agent artifact download "out/*" . --step build-ubuntu-source-packages
-   - nix develop .#docker-tezos-packages -c ./docker/build/ubuntu/sign.py -d out -i 'Serokell <tezos-packaging@serokell.io>'
-   artifact_paths:
-     - ./out/*
-
- - label: Sign fedora source packages
-   if: build.tag =~ /^v.*-1/
-   depends_on:
-   - "build-fedora-source-packages"
-   key: sign-fedora-source-packages
-   commands:
-   - eval "$SET_VERSION"
-   - buildkite-agent artifact download "out/*" . --step build-fedora-source-packages
-   - nix develop .#docker-tezos-packages -c ./docker/build/fedora/sign.py -d out -i 'Serokell <tezos-packaging@serokell.io>'
-   artifact_paths:
-     - ./out/*
-
- - label: Publish ubuntu native packages
-   if: build.tag =~ /^v.*-1/
-   depends_on:
-   - "sign-ubuntu-source-packages"
-   commands:
-   - eval "$SET_VERSION"
-   - buildkite-agent artifact download "out/*" . --step sign-ubuntu-source-packages
-   - nix develop .#buildkite -c ./docker/build/ubuntu/upload.py -d out
-
- - label: Publish fedora native packages
-   if: build.tag =~ /^v.*-1/
-   depends_on:
-   - "sign-fedora-source-packages"
-   commands:
-   - eval "$SET_VERSION"
-   - buildkite-agent artifact download "out/*" . --step sign-fedora-source-packages
-   - nix develop .#buildkite -c ./docker/build/fedora/upload.py -d out
-
  - label: build-via-docker
-   if: build.tag =~ /^v.*-1/
+   # this step is used as a dependency, so we're defining 'key' explicitely
    key: build-via-docker
+   if: build.tag == "test-695"
    commands:
    - eval "$SET_VERSION"
    - cd docker
@@ -89,46 +21,42 @@ steps:
    agents:
      queue: "docker"
 
- - label: Build source packages from static binaries
-   key: build-source-packages-from-static-binaries
-   if: build.tag =~ /^v.*-1/
+ - label: build-arm-via-docker
+   # this step is used as a dependency, so we're defining 'key' explicitely
+   key: build-arm-via-docker
+   if: build.tag == "test-695"
+   commands:
+   - eval "$SET_VERSION"
+   - cd docker
+   - ./docker-static-build.sh
+   - >
+     for f in ./octez-*; do
+       mv "\$f" "\$f-arm64"
+     done
+   artifact_paths:
+     - ./docker/octez-*
    agents:
-     queue: "docker"
-   depends_on:
-   - "build-via-docker"
+     queue: "arm64-darwin"
+
+ - label: create auto release/pre-release
+   key: auto-release
+   if: build.tag == "test-695"
    commands:
-   - eval "$SET_VERSION"
    - mkdir binaries
-   - buildkite-agent artifact download "docker/*" binaries --step build-via-docker
-   - nix develop .#docker-tezos-packages -c ./docker/build/fedora/build.py --type source --output-dir epel --binaries-dir ./binaries/docker
-   artifact_paths:
-     - ./epel/*
-
- - label: Sign source packages built from static binaries
-   key: sign-source-packages-built-from-static-binaries
-   if: build.tag =~ /^v.*-1/
+   - mkdir arm-binaries
+   - buildkite-agent artifact download "docker/*" binaries --step "build-via-docker"
+   - buildkite-agent artifact download "docker/*" arm-binaries --step "build-arm-via-docker"
+   - ls binaries
+   - nix develop .#autorelease -c ./scripts/autorelease.sh "$BUILDKITE_MESSAGE"
    depends_on:
-   - "build-source-packages-from-static-binaries"
-   commands:
-   - eval "$SET_VERSION"
-   - buildkite-agent artifact download "epel/*" . --step build-source-packages-from-static-binaries
-   - nix develop .#docker-tezos-packages -c ./docker/build/fedora/sign.py -d epel -i 'Serokell <tezos-packaging@serokell.io>'
-   artifact_paths:
-     - ./epel/*
-
- - label: Publish epel packages
-   if: build.tag =~ /^v.*-1/
-   depends_on:
-   - "sign-source-packages-built-from-static-binaries"
-   commands:
-   - eval "$SET_VERSION"
-   - mkdir -p srcs
-   - buildkite-agent artifact download "epel/*" srcs --step sign-source-packages-built-from-static-binaries
-   - nix develop .#buildkite -c ./docker/build/fedora/upload.py -d srcs/epel --upload epel
+    - "build-via-docker"
+    - "build-arm-via-docker"
 
  - label: Build Big Sur x86_64 bottles
    key: build-bottles-big-sur-x86_64
-   if: build.tag =~ /^v.*/
+   if: build.tag == "test-695"
+   depends_on:
+    - "auto-release"
    agents:
      queue: "x86_64-rosetta-darwin"
    commands:
@@ -141,7 +69,9 @@ steps:
 
  - label: Build Big Sur arm64 bottles
    key: build-bottles-big-sur-arm64
-   if: build.tag =~ /^v.*/
+   if: build.tag == "test-695"
+   depends_on:
+    - "auto-release"
    agents:
      queue: "arm64-darwin"
    commands:
@@ -152,15 +82,23 @@ steps:
      automatic:
        limit: 1
 
- # We use the tag that triggered the pipeline here. Normally, this isn't very resilient,
- # but in 'scripts/sync-bottle-hashes.sh' it's only used for informational purposes
  - label: Add Big Sur bottle hashes to formulae
+   key: list-bottles
    depends_on:
    - "build-bottles-big-sur-arm64"
    - "build-bottles-big-sur-x86_64"
-   if: build.tag =~ /^v.*/
+   if: build.tag == "test-695"
    soft_fail: true # No artifacts to download if all the bottles are already built
    commands:
    - mkdir -p "Big Sur"
    - gh release download build.tag -D "Big Sur/" -p "*.bottle.tar.gz"
-   - nix develop .#autorelease -c ./scripts/sync-bottle-hashes.sh "$BUILDKITE_TAG" "Big Sur"
+   - ls "Big Sur"
+
+ - label: delete test-release pre-release
+   commands:
+   - nix develop .#autorelease -c ./scripts/del-test-release.sh "$BUILDKITE_MESSAGE"
+   if: build.tag == "test-695"
+   depends_on:
+    - "build-bottles-big-sur-x86_64"
+    - "build-bottles-big-sur-arm64"
+    - "list-bottles"

@@ -19,7 +19,7 @@ Static binaries building using custom alpine image.
 image defined in [Dockerfile](build/Dockerfile). In order to build them you should specify
 `OCTEZ_VERSION` env variable and run the script:
 ```
-export OCTEZ_VERSION="v14.1"
+export OCTEZ_VERSION="v17.3"
 ./docker-static-build.sh
 ```
 After that, directory will contain built static binaries.
@@ -32,7 +32,7 @@ one can build native binaries for current architecture or build `aarch64` binari
 In order to build only specific binaries, or experimental/dev ones, you should specify
 `OCTEZ_EXECUTABLES` env variable:
 ```
-export OCTEZ_VERSION="v14.1"
+export OCTEZ_VERSION="v17.3"
 export OCTEZ_EXECUTABLES="octez-smart-rollup-wasm-debugger octez-protocol-compiler octez-dal-node"
 ./docker-static-build.sh
 ```
@@ -92,7 +92,7 @@ To see all available options, run:
 In order to build binary `.deb` packages specify `OCTEZ_VERSION` and
 run the following command:
 ```
-export OCTEZ_VERSION="v14.1"
+export OCTEZ_VERSION="v17.3"
 cd .. && ./docker/package.py --os ubuntu --type binary
 ```
 
@@ -101,14 +101,14 @@ It is also possible to specify packages to build with `-p` or `--packages` optio
 ```
 # cd .. && ./docker/package.py -os ubuntu --type binary --packages <tezos-binary-1> <tezos-binary-2>
 # Example for baker
-export OCTEZ_VERSION="v14.1"
+export OCTEZ_VERSION="v17.3"
 cd .. && ./docker/package.py --os ubuntu --type binary -p tezos-client tezos-node
 ```
 
 In order to choose specific ubuntu distribution to build for (see [support policy](../docs/support-policy.md)),
 use `-d` or `--distributions` option:
 ```
-export OCTEZ_VERSION="v14.1"
+export OCTEZ_VERSION="v17.3"
 cd .. && ./docker/package.py --os ubuntu --type binary -d focal jammy -p tezos-client tezos-node
 ```
 
@@ -126,7 +126,7 @@ sudo apt install <path to deb file>
 
 In order to build source packages run the following commands:
 ```
-export OCTEZ_VERSION="v14.1"
+export OCTEZ_VERSION="v17.3"
 cd .. && ./docker/package.py --os ubuntu --type source
 # you can also build single source package
 cd .. && ./docker/package.py --os ubuntu --type source --packages tezos-client
@@ -145,7 +145,7 @@ the submitter info and signed.
 
 If you want to sign resulted source packages automatically, you can provide signer identity through `--gpg-sign` or `-s` option:
 ```
-export OCTEZ_VERSION="v14.1"
+export OCTEZ_VERSION="v17.3"
 cd .. && ./docker/package.py --os ubuntu --type source -d focal jammy -p tezos-client -s <signer_info>
 ```
 For example, `signer_info` can be the following: `Roman Melnikov <roman.melnikov@serokell.io>`
@@ -219,7 +219,7 @@ To see all available options, run:
 In order to build binary `.rpm` packages specify `OCTEZ_VERSION` and
 run the following command:
 ```
-export OCTEZ_VERSION="v14.1"
+export OCTEZ_VERSION="v17.3"
 cd .. && ./docker/package.py --os fedora --type binary
 ```
 
@@ -227,14 +227,14 @@ It is also possible to specify packages to build with `-p` or `--packages` optio
 ```
 # cd .. && ./docker/package.py --os fedora --type binary --packages <tezos-binary-1> <tezos-binary-2>
 # Example for baker
-export OCTEZ_VERSION="v14.1"
+export OCTEZ_VERSION="v17.3"
 cd .. && ./docker/package.py --os fedora --type binary -p tezos-client tezos-node
 ```
 
 In order to build packages for specific Fedora distribution (see [support policy](../docs/support-policy.md)),
 use `-d` or `--distributions` option:
 ```
-export OCTEZ_VERSION="v14.1"
+export OCTEZ_VERSION="v17.3"
 cd .. && ./docker/package.py --os fedora -d 38 --type binary -p tezos-baking
 ```
 
@@ -255,7 +255,7 @@ sudo dnf install <path to rpm file>
 
 In order to build source packages run the following commands:
 ```
-export OCTEZ_VERSION="v14.1"
+export OCTEZ_VERSION="v17.3"
 cd .. && ./docker/package.py --os fedora --type source
 # you can also build single source package
 cd .. && ./docker/package.py --os fedora --type source -p tezos-client
@@ -263,7 +263,7 @@ cd .. && ./docker/package.py --os fedora --type source -p tezos-client
 
 If you want to sign resulted source packages automatically, you can provide signer identity through `--gpg-sign` or `-s` option:
 ```
-export OCTEZ_VERSION="v14.1"
+export OCTEZ_VERSION="v17.3"
 cd .. && ./docker/package.py --os fedora --type source -p tezos-client -s <signer_info>
 ```
 For example, `signer_info` can be the following: `Roman Melnikov <roman.melnikov@serokell.io>`

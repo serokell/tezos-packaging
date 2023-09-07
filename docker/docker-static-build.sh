@@ -8,11 +8,18 @@
 
 set -euo pipefail
 
-binaries=("octez-admin-client" "octez-dac-client" "octez-dac-node" "octez-client" "octez-node" "octez-signer" "octez-codec")
+if [ -z ${OCTEZ_EXECUTABLES+x} ]; then
 
-for proto in $(jq -r ".active | .[]" ../protocols.json); do
-    binaries+=("octez-accuser-$proto" "octez-baker-$proto" "octez-smart-rollup-client-$proto" "octez-smart-rollup-node-$proto")
-done
+    binaries=("octez-admin-client" "octez-dac-client" "octez-dac-node" "octez-client" "octez-node" "octez-signer" "octez-codec")
+
+    for proto in $(jq -r ".active | .[]" ../protocols.json); do
+        binaries+=("octez-accuser-$proto" "octez-baker-$proto" "octez-smart-rollup-client-$proto" "octez-smart-rollup-node-$proto")
+    done
+
+    OCTEZ_EXECUTABLES="$( IFS=$' '; echo "${binaries[*]}" )"
+else
+    IFS=' ' read -r -a binaries <<< "$OCTEZ_EXECUTABLES"
+fi
 
 if [[ "${USE_PODMAN-}" == "True" ]]; then
     virtualisation_engine="podman"
@@ -40,7 +47,7 @@ if [[ $arch == "aarch64" && $(uname -m) != "x86_64" ]]; then
     echo "Compiling for aarch64 is supported only from aarch64 and x86_64"
 fi
 
-"$virtualisation_engine" build -t alpine-tezos -f "$docker_file" --build-arg OCTEZ_VERSION="$OCTEZ_VERSION" .
+"$virtualisation_engine" build -t alpine-tezos -f "$docker_file" --build-arg=OCTEZ_VERSION="$OCTEZ_VERSION" --build-arg=OCTEZ_EXECUTABLES="$OCTEZ_EXECUTABLES" .
 container_id="$("$virtualisation_engine" create alpine-tezos)"
 for b in "${binaries[@]}"; do
     "$virtualisation_engine" cp "$container_id:/tezos/$b" "$b"

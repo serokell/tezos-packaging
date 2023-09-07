@@ -29,6 +29,14 @@ Currently supported architectures are: `host` and `aarch64`, so that
 one can build native binaries for current architecture or build `aarch64` binaries on
 `x86_64` machine.
 
+In order to build only specific binaries, or experimental/dev ones, you should specify
+`OCTEZ_EXECUTABLES` env variable:
+```
+export OCTEZ_VERSION="v14.1"
+export OCTEZ_EXECUTABLES="octez-smart-rollup-wasm-debugger octez-protocol-compiler octez-dal-node"
+./docker-static-build.sh
+```
+
 ### Compiling for `aarch64` on `x86_64` prerequisites
 
 Docker image defined in [`Dockerfile.aarch64`](build/Dockerfile.aarch64) uses qemu for

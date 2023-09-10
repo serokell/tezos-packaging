@@ -410,6 +410,40 @@ class Setup(Setup):
         except Exception as e:
             print(f"Unexpected error handling snapshot metadata:\n{e}\n")
 
+    def output_snapshot_metadata(self):
+        from datetime import datetime
+        from locale import setlocale, getlocale, LC_TIME
+
+        # it is portable `C` locale by default
+        setlocale(LC_TIME, getlocale())
+
+        metadata = self.config["snapshot_metadata"]
+        timestamp_dt = datetime.strptime(
+            metadata["block_timestamp"], "%Y-%m-%dT%H:%M:%SZ"
+        )
+        timestamp = timestamp_dt.strftime("%c")
+        delta = datetime.now() - timestamp_dt
+        time_ago = (
+            "less than 1 day ago"
+            if delta.days == 0
+            else "1 day ago"
+            if delta.days == 1
+            else f"{delta.days} days ago"
+        )
+        print(
+            color(
+                f"""
+Snapshot metadata:
+url: {metadata["url"]}
+sha256: {metadata["sha256"]}
+filesize: {metadata["filesize"]}
+block height: {metadata["block_height"]}
+block timestamp: {timestamp} ({time_ago})
+""",
+                color_green,
+            )
+        )
+
     # Importing the snapshot for Node bootstrapping
     def import_snapshot(self):
         do_import = self.check_blockchain_data()
@@ -479,6 +513,7 @@ class Setup(Setup):
                 sha256 = self.config["snapshot_metadata"]["sha256"]
                 snapshot_block_hash = self.config["snapshot_metadata"]["block_hash"]
                 try:
+                    self.output_snapshot_metadata()
                     snapshot_file = fetch_snapshot(url, sha256)
                 except (ValueError, urllib.error.URLError):
                     print()

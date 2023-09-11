@@ -222,7 +222,7 @@ liquidity_toggle_vote_query = Step(
 # We define this step as a function to better tailor snapshot options to the chosen history mode
 def get_snapshot_mode_query(modes):
     return Step(
-        id="snapshot",
+        id="snapshot_mode",
         prompt="The Tezos node can take a significant time to bootstrap from scratch.\n"
         "Bootstrapping from a snapshot is suggested instead.\n"
         "How would you like to proceed?",
@@ -477,12 +477,12 @@ block timestamp: {timestamp} ({time_ago})
             snapshot_file = TMP_SNAPSHOT_LOCATION
             snapshot_block_hash = None
 
-            if self.config["snapshot"] == "skip":
+            if self.config["snapshot_mode"] == "skip":
                 return
-            elif self.config["snapshot"] == "file":
+            elif self.config["snapshot_mode"] == "file":
                 self.query_step(snapshot_file_query)
                 snapshot_file = self.config["snapshot_file"]
-            elif self.config["snapshot"] == "url":
+            elif self.config["snapshot_mode"] == "url":
                 self.query_step(snapshot_url_query)
                 try:
                     self.query_step(snapshot_sha256_query)
@@ -526,7 +526,7 @@ block timestamp: {timestamp} ({time_ago})
             valid_choice = True
 
             import_flag = ""
-            if is_full_snapshot(snapshot_file, self.config["snapshot"]):
+            if is_full_snapshot(snapshot_file, self.config["snapshot_mode"]):
                 if self.config["history_mode"] == "archive":
                     import_flag = "--reconstruct "
 

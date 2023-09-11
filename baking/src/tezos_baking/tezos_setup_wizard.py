@@ -144,6 +144,10 @@ class Sha256Mismatch(Exception):
         self.expected_sha256 = expected_sha256
 
 
+class InterruptStep(Exception):
+    "Raised when there is need to interrupt step handling flow."
+
+
 def check_file_contents_integrity(filename, sha256):
     import hashlib
 
@@ -222,7 +226,8 @@ def get_snapshot_mode_query(config):
 
     static_import_modes = {
         "file": "Import snapshot from a file",
-        "url": "Import snapshot from a url",
+        "direct url": "Import snapshot from a direct url",
+        "provider url": "Import snapshot from a provider",
         "skip": "Skip snapshot import and synchronize with the network from scratch",
     }
 
@@ -270,11 +275,19 @@ snapshot_file_query = Step(
     validator=Validator([required_field_validator, filepath_validator]),
 )
 
+provider_url_query = Step(
+    id="provider_url",
+    prompt="Provide the url of the snapshot provider.",
+    help="You have indicated wanting to fetch the snapshot from a custom provider.\n",
+    default=None,
+    validator=Validator([required_field_validator, reachable_url_validator()]),
+)
+
 snapshot_url_query = Step(
     id="snapshot_url",
     prompt="Provide the url of the node snapshot file.",
     help="You have indicated wanting to import the snapshot from a custom url.\n"
-    "You can use e.g. links to XTZ-Shots or Tezos Giganode Snapshots resources.",
+    "You can use e.g. links to XTZ-Shots or Marigold resources.",
     default=None,
     validator=Validator([required_field_validator, reachable_url_validator()]),
 )
@@ -474,6 +487,70 @@ block timestamp: {timestamp} ({time_ago})
             )
         )
 
+    def fetch_snapshot_from_provider(self, name):
+        try:
+            url = self.config["snapshots"][name]["url"]
+            sha256 = self.config["snapshots"][name]["sha256"]
+            return fetch_snapshot(url, sha256)
+        except KeyError:
+            raise InterruptStep
+        except (ValueError, urllib.error.URLError):
+            print()
+            print("The snapshot download option you chose is unavailable,")
+            print("which normally shouldn't happen. Please check your")
+            print("internet connection or choose another option.")
+            print()
+            raise InterruptStep
+
+    def get_snapshot_from_provider(self, name, url):
+        try:
+            self.config["snapshots"][name]
+        except KeyError:
+            self.get_snapshot_metadata(name, url)
+        snapshot_file = self.fetch_snapshot_from_provider(name)
+        snapshot_block_hash = self.config["snapshots"][name]["block_hash"]
+        return (snapshot_file, snapshot_block_hash)
+
+    def get_snapshot_from_direct_url(self, url):
+        try:
+            self.query_step(snapshot_sha256_query)
+            sha256 = self.config["snapshot_sha256"]
+            snapshot_file = fetch_snapshot(url, sha256)
+            if sha256:
+                print("Checking the snapshot integrity...")
+                check_file_contents_integrity(snapshot_file, sha256)
+                print("Integrity verified.")
+            return (snapshot_file, None)
+        except (ValueError, urllib.error.URLError):
+            print()
+            print("The snapshot URL you provided is unavailable.")
+            print("Please check the URL again or choose another option.")
+            print()
+            raise InterruptStep
+        except Sha256Mismatch as e:
+            print()
+            print("SHA256 mismatch.")
+            print(f"Expected sha256: {e.expected_sha256}")
+            print(f"Actual sha256: {e.actual_sha256}")
+            print()
+            self.query_step(ignore_hash_mismatch_query)
+            if self.config["ignore_hash_mismatch"] == "no":
+                raise InterruptStep
+            else:
+                return (snapshot_file, None)
+
+    def get_snapshot_from_provider_url(self, url):
+        name = "custom"
+        if os.path.basename(url) == "tezos-snapshots.json":
+            return self.get_snapshot_from_provider(name, url)
+        else:
+            try:
+                return self.get_snapshot_from_provider(name, url)
+            except InterruptStep:
+                return self.get_snapshot_from_provider(
+                    name, os.path.join(url, "tezos-snapshots.json")
+                )
+
     # Importing the snapshot for Node bootstrapping
     def import_snapshot(self):
         do_import = self.check_blockchain_data()
@@ -503,55 +580,36 @@ block timestamp: {timestamp} ({time_ago})
             snapshot_file = TMP_SNAPSHOT_LOCATION
             snapshot_block_hash = None
 
-            if self.config["snapshot_mode"] == "skip":
-                return
-            elif self.config["snapshot_mode"] == "file":
-                self.query_step(snapshot_file_query)
-                snapshot_file = self.config["snapshot_file"]
-            elif self.config["snapshot_mode"] == "url":
-                self.query_step(snapshot_url_query)
-                try:
-                    self.query_step(snapshot_sha256_query)
-                    url = self.config["snapshot_metadata"]["url"]
-                    sha256 = self.config["snapshot_metadata"]["sha256"]
-                    snapshot_file = fetch_snapshot(url, sha256)
-                    if sha256:
-                        print("Checking the snapshot integrity...")
-                        check_file_contents_integrity(snapshot_file, sha256)
-                        print("Integrity verified.")
-                except (ValueError, urllib.error.URLError):
-                    print()
-                    print("The snapshot URL you provided is unavailable.")
-                    print("Please check the URL again or choose another option.")
-                    print()
-                    continue
-                except Sha256Mismatch as e:
-                    print()
-                    print("SHA256 mismatch.")
-                    print(f"Expected sha256: {e.expected_sha256}")
-                    print(f"Actual sha256: {e.actual_sha256}")
-                    print()
-                    self.query_step(ignore_hash_mismatch_query)
-                    if self.config["ignore_hash_mismatch"] == "no":
-                        continue
-            else:
-                for name in default_providers.keys():
-                    if name in self.config["snapshot_mode"]:
-                        url = self.config["snapshots"][name]["url"]
-                        sha256 = self.config["snapshots"][name]["sha256"]
-                        snapshot_block_hash = self.config["snapshots"][name][
-                            "block_hash"
-                        ]
-                        try:
-                            snapshot_file = fetch_snapshot(url, sha256)
-                        except (ValueError, urllib.error.URLError):
-                            print()
-                            print(
-                                "The snapshot download option you chose is unavailable,"
-                            )
-                            print("which normally shouldn't happen. Please check your")
-                            print("internet connection or choose another option.")
-                            print()
+            try:
+                if self.config["snapshot_mode"] == "skip":
+                    return
+                elif self.config["snapshot_mode"] == "file":
+                    self.query_step(snapshot_file_query)
+                    snapshot_file = self.config["snapshot_file"]
+                elif self.config["snapshot_mode"] == "direct url":
+                    self.query_step(snapshot_url_query)
+                    url = self.config["snapshot_url"]
+                    (
+                        snapshot_file,
+                        snapshot_block_hash,
+                    ) = self.get_snapshot_from_direct_url(url)
+                elif self.config["snapshot_mode"] == "provider url":
+                    self.query_step(provider_url_query)
+                    name, url = "custom", self.config["provider_url"]
+                    (
+                        snapshot_file,
+                        snapshot_block_hash,
+                    ) = self.get_snapshot_from_provider_url(url)
+                else:
+                    for name, url in default_providers.items():
+                        if name in self.config["snapshot_mode"]:
+                            (
+                                snapshot_file,
+                                snapshot_block_hash,
+                            ) = self.get_snapshot_from_provider(name, url)
+            except InterruptStep:
+                print("Getting back to the snapshot import mode step.")
+                continue
 
             valid_choice = True
 

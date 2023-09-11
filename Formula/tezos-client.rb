@@ -13,7 +13,7 @@ class TezosClient < Formula
 
   version "v17.2-1"
 
-  build_dependencies = %w[pkg-config coreutils autoconf rsync wget rustup-init cmake]
+  build_dependencies = %w[pkg-config coreutils autoconf rsync wget rustup-init cmake opam]
   build_dependencies.each do |dependency|
     depends_on dependency => :build
   end
@@ -37,11 +37,6 @@ class TezosClient < Formula
     # Disable usage of instructions from the ADX extension to avoid incompatibility
     # with old CPUs, see https://gitlab.com/dannywillems/ocaml-bls12-381/-/merge_requests/135/
     ENV["BLST_PORTABLE"]="yes"
-    # Here is the workaround to use opam 2.0.9 because Tezos is currently not compatible with opam 2.1.0 and newer
-    arch = RUBY_PLATFORM.include?("arm64") ? "arm64" : "x86_64"
-    system "curl", "-L", "https://github.com/ocaml/opam/releases/download/2.0.9/opam-2.0.9-#{arch}-macos", "--create-dirs", "-o", "#{ENV["HOME"]}/.opam-bin/opam"
-    system "chmod", "+x", "#{ENV["HOME"]}/.opam-bin/opam"
-    ENV["PATH"]="#{ENV["HOME"]}/.opam-bin:#{ENV["PATH"]}"
     system "rustup-init", "--default-toolchain", "1.60.0", "-y"
     system "opam", "init", "--bare", "--debug", "--auto-setup", "--disable-sandboxing"
     system ["source .cargo/env",  "make build-deps"].join(" && ")

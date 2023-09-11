@@ -38,7 +38,7 @@ class TezosClient < Formula
     # with old CPUs, see https://gitlab.com/dannywillems/ocaml-bls12-381/-/merge_requests/135/
     ENV["BLST_PORTABLE"]="yes"
     system "rustup-init", "--default-toolchain", "1.60.0", "-y"
-    system "opam", "init", "--bare", "--debug", "--auto-setup", "--disable-sandboxing"
+    system "opam", "init", "--bare", "--debug", "--auto-setup"
     system ["source .cargo/env",  "make build-deps"].join(" && ")
   end
 

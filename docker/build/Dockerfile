@@ -19,5 +19,6 @@ ENV OPAMYES true
 COPY ./build/build-deps.sh /build-deps.sh
 RUN /build-deps.sh
 COPY ./build/build-tezos.sh /build-tezos.sh
+ARG OCTEZ_EXECUTABLES
 RUN /build-tezos.sh
 RUN upx octez-*

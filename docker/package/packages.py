@@ -192,6 +192,14 @@ packages = [
             dune_filepath="src/bin_dac_node/main_dac.exe",
         )
     },
+    {
+        "tezos-smart-rollup-wasm-debugger": TezosBinaryPackage(
+            "tezos-smart-rollup-wasm-debugger",
+            "Smart contract rollup wasm debugger",
+            meta=packages_meta,
+            dune_filepath="src/bin_wasm_debugger/main_wasm_debugger.exe",
+        )
+    },
 ]
 
 

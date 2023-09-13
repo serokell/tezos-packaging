@@ -1,0 +1,1 @@
+Command '['sudo', '-u', 'tezos', 'mkdir', '-p', '/var/lib/tezos/client-mainnet']' returned non-zero exit status 1.

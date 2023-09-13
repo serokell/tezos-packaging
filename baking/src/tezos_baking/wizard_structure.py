@@ -15,151 +15,8 @@ import urllib.request
 import json
 
 from tezos_baking.util import *
-
-
-# Input validators
-
-def enum_range_validator(options):
-    def _validator(input):
-        intrange = list(map(str, range(1, len(options) + 1)))
-        if input not in intrange and input not in options:
-            raise ValueError(
-                "Please choose one of the provided values or use their respective numbers."
-            )
-        try:
-            opt = int(input) - 1
-        except:
-            return input
-        else:
-            opts = options
-            if isinstance(options, dict):
-                opts = list(options.keys())
-            return opts[opt]
-
-    return _validator
-
-
-def dirpath_validator(input):
-    if input and not os.path.isdir(input):
-        raise ValueError("Please input a valid path to a directory.")
-    return input
-
-
-def filepath_validator(input):
-    if input and not os.path.isfile(input):
-        raise ValueError("Please input a valid file path.")
-    return input
-
-
-def reachable_url_validator(suffix=None):
-    def _validator(input):
-        full_url = mk_full_url(input, suffix)
-        if url_is_reachable(full_url):
-            return full_url
-        else:
-            raise ValueError(f"{full_url} is unreachable. Please input a valid URL.")
-
-    return _validator
-
-
-def required_field_validator(input):
-    if not input.strip():
-        raise ValueError("Please provide this required option.")
-    return input
-
-
-# The input has to be valid to at least one of the two passed validators.
-def or_validator(validator1, validator2):
-    def _validator(input):
-        try:
-            return validator1(input)
-        except:
-            return validator2(input)
-
-    return _validator
-
-
-# Runs the input through the passed validator, allowing for possible alteration,
-# but doesn't raise an exception if it doesn't validate to allow for custom options, too.
-def or_custom_validator(validator):
-    def _validator(input):
-        result = input
-        try:
-            result = validator(input)
-        except:
-            pass
-        return result
-
-    return _validator
-
-
-# To be validated, the input should adhere to the Tezos secret key format:
-# {encrypted, unencrypted}:<base58 encoded string with length 54 or 88>
-def secret_key_validator(input):
-    match = re.match(secret_key_regex.decode("utf-8"), input.strip())
-    if not bool(match):
-        raise ValueError(
-            "The input doesn't match the format for a Tezos secret key: "
-            "{{encrypted, unencrypted}:<base58 encoded string with length 54 or 88>}"
-            "\nPlease check the input and try again."
-        )
-    return input
-
-
-# To be validated, the input should adhere to the derivation path format:
-# [0-9]+h/[0-9]+h
-def derivation_path_validator(input):
-    derivation_path_regex_str = "[0-9]+h\/[0-9]+h"
-    match = re.match(derivation_path_regex_str, input.strip())
-    if not bool(match):
-        raise ValueError(
-            "The input doesn't match the format for a derivation path: "
-            + derivation_path_regex_str
-            + "\nPlease check the input and try again."
-        )
-    return input
-
-
-# To be validated, the input should adhere to the signer URI format:
-# (tcp|unix|https|http)://<host address>/tz[123]\w{33}
-def signer_uri_validator(input):
-    match = re.match(signer_uri_regex.decode("utf-8"), input.strip())
-    if not bool(match):
-        raise ValueError(
-            "The input doesn't match the format for a remote signer URI: "
-            + "(tcp|unix|https|http)://<host address>/<public key address>"
-            + "\nPlease check the input and try again."
-        )
-    return input
-
-
-# To be validated, the input should adhere to the protocol hash format:
-# <base58 encoded string with length 51 starting with P>
-def protocol_hash_validator(input):
-    proto_hash_regex_str = protocol_hash_regex.decode("utf-8")
-    match = re.match(proto_hash_regex_str, input.strip())
-    if not bool(match):
-        raise ValueError(
-            "The input doesn't match the format for a protocol hash: "
-            + proto_hash_regex_str
-            + "\nPlease check the input and try again."
-        )
-    return input
-
-
-class Validator:
-    def __init__(self, validator):
-        self.validator = validator
-
-    def validate(self, input):
-        if self.validator is not None:
-            if isinstance(self.validator, list):
-                for v in self.validator:
-                    input = v(input)
-                return input
-            else:
-                return self.validator(input)
-
+from tezos_baking.validators import Validator
+import tezos_baking.validators as validators
 
 # Command line argument parsing
 
@@ -364,7 +221,7 @@ secret_key_query = Step(
     help="The format is 'unencrypted:edsk...' for the unencrypted key, or 'encrypted:edesk...'"
     "for the encrypted key.",
     default=None,
-    validator=Validator([required_field_validator, secret_key_validator]),
+    validator=Validator([validators.required_field, validators.secret_key]),
 )
 
 remote_signer_uri_query = Step(
@@ -374,7 +231,7 @@ remote_signer_uri_query = Step(
     "i.e. something like http://127.0.0.1:6732/tz1V8fDHpHzN8RrZqiYCHaJM9EocsYZch5Cy\n"
     "The supported schemes are https, http, tcp, and unix.",
     default=None,
-    validator=Validator([required_field_validator, signer_uri_validator]),
+    validator=Validator([validators.required_field, validators.signer_uri]),
 )
 
 derivation_path_query = Step(
@@ -382,7 +239,7 @@ derivation_path_query = Step(
     prompt="Provide derivation path for the key stored on the ledger.",
     help="The format is '[0-9]+h/[0-9]+h'",
     default=None,
-    validator=Validator([required_field_validator, derivation_path_validator]),
+    validator=Validator([validators.required_field, validators.derivation_path]),
 )
 
 
@@ -391,7 +248,7 @@ json_filepath_query = Step(
     prompt="Provide the path to your downloaded faucet JSON file.",
     help="The file should contain the 'mnemonic' and 'secret' fields.",
     default=None,
-    validator=Validator([required_field_validator, filepath_validator]),
+    validator=Validator([validators.required_field, validators.filepath]),
 )
 
 
@@ -401,7 +258,9 @@ def get_ledger_url_query(ledgers):
         prompt="Choose a ledger to get the new derivation from.",
         options=ledgers,
         default=None,
-        validator=Validator([required_field_validator, enum_range_validator(ledgers)]),
+        validator=Validator(
+            [validators.required_field, validators.enum_range(ledgers)]
+        ),
         help="In order to specify new derivation path, you need to specify a ledger to get the derivation from.",
     )
 
@@ -427,8 +286,8 @@ def get_ledger_derivation_query(ledgers_derivations, node_endpoint, client_dir):
         + extra_options,
         validator=Validator(
             [
-                required_field_validator,
-                enum_range_validator(full_ledger_urls + extra_options),
+                validators.required_field,
+                validators.enum_range(full_ledger_urls + extra_options),
             ]
         ),
     )

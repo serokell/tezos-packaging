@@ -18,6 +18,8 @@ from typing import List
 
 from tezos_baking.wizard_structure import *
 from tezos_baking.util import *
+from tezos_baking.validators import Validator
+import tezos_baking.validators as validators
 
 # Global options
 
@@ -189,7 +191,7 @@ network_query = Step(
     "Keep in mind that you must select the test network (e.g. ghostnet)\n"
     "if you plan on baking with a faucet JSON file.\n",
     options=networks,
-    validator=Validator(enum_range_validator(networks)),
+    validator=Validator(validators.enum_range(networks)),
 )
 
 service_mode_query = Step(
@@ -199,7 +201,7 @@ service_mode_query = Step(
     "on different networks.\nSometimes, however, you might want to only run the Tezos node.\n"
     "When this option is chosen, this wizard will help you bootstrap the Tezos node only.",
     options=modes,
-    validator=Validator(enum_range_validator(modes)),
+    validator=Validator(validators.enum_range(modes)),
 )
 
 systemd_mode_query = Step(
@@ -208,7 +210,7 @@ systemd_mode_query = Step(
     help="Starting the service will make it available just for this session, great\n"
     "if you want to experiment. Enabling it will make it start on every boot.",
     options=systemd_enable,
-    validator=Validator(enum_range_validator(systemd_enable)),
+    validator=Validator(validators.enum_range(systemd_enable)),
 )
 
 liquidity_toggle_vote_query = Step(
@@ -219,7 +221,7 @@ liquidity_toggle_vote_query = Step(
     "\nYou can read more about this in the here:\n"
     "https://tezos.gitlab.io/active/liquidity_baking.html",
     options=toggle_vote_modes,
-    validator=Validator(enum_range_validator(toggle_vote_modes)),
+    validator=Validator(validators.enum_range(toggle_vote_modes)),
 )
 
 # We define this step as a function to better tailor snapshot options to the chosen history mode
@@ -263,7 +265,7 @@ def get_snapshot_mode_query(config):
         "that is sufficient for baking. You can read more about other Tezos node history modes here:\n"
         "https://tezos.gitlab.io/user/history_modes.html#history-modes",
         options=import_modes,
-        validator=Validator(enum_range_validator(import_modes)),
+        validator=Validator(validators.enum_range(import_modes)),
     )
 
 
@@ -273,7 +275,7 @@ snapshot_file_query = Step(
     help="You have indicated wanting to import the snapshot from a file.\n"
     "You can download the snapshot yourself e.g. from XTZ-Shots or Tezos Giganode Snapshots.",
     default=None,
-    validator=Validator([required_field_validator, filepath_validator]),
+    validator=Validator([validators.required_field, validators.filepath]),
 )
 
 provider_url_query = Step(
@@ -281,7 +283,7 @@ provider_url_query = Step(
     prompt="Provide the url of the snapshot provider.",
     help="You have indicated wanting to fetch the snapshot from a custom provider.\n",
     default=None,
-    validator=Validator([required_field_validator, reachable_url_validator()]),
+    validator=Validator([validators.required_field, validators.reachable_url()]),
 )
 
 snapshot_url_query = Step(
@@ -290,7 +292,7 @@ snapshot_url_query = Step(
     help="You have indicated wanting to import the snapshot from a custom url.\n"
     "You can use e.g. links to XTZ-Shots or Marigold resources.",
     default=None,
-    validator=Validator([required_field_validator, reachable_url_validator()]),
+    validator=Validator([validators.required_field, validators.reachable_url()]),
 )
 
 snapshot_sha256_query = Step(
@@ -309,7 +311,7 @@ history_mode_query = Step(
     "You can read more about different nodes history modes here:\n"
     "https://tezos.gitlab.io/user/history_modes.html",
     options=history_modes,
-    validator=Validator(enum_range_validator(history_modes)),
+    validator=Validator(validators.enum_range(history_modes)),
 )
 
 # We define the step as a function to disallow choosing json baking on mainnet
@@ -323,7 +325,7 @@ def get_key_mode_query(modes):
         "If you want to test baking with a faucet file, "
         "make sure you have chosen a test network like " + list(networks.keys())[1],
         options=modes,
-        validator=Validator(enum_range_validator(modes)),
+        validator=Validator(validators.enum_range(modes)),
     )
 
 
@@ -337,7 +339,7 @@ ignore_hash_mismatch_query = Step(
     prompt="Do you want to proceed with this snapshot anyway?",
     help="It's possible, but not recommended, to ignore the sha256 mismatch and use this snapshot anyway.",
     options=ignore_hash_mismatch_options,
-    validator=Validator(enum_range_validator(ignore_hash_mismatch_options)),
+    validator=Validator(validators.enum_range(ignore_hash_mismatch_options)),
 )
 
 

@@ -16,7 +16,8 @@ import urllib.request
 import json
 from typing import List
 
-from .wizard_structure import *
+from tezos_baking.wizard_structure import *
+from tezos_baking.util import *
 
 # Global options
 

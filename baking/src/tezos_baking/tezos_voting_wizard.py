@@ -14,6 +14,8 @@ import re
 
 from tezos_baking.wizard_structure import *
 from tezos_baking.util import *
+from tezos_baking.validators import Validator
+import tezos_baking.validators as validators
 
 # Global options
 
@@ -89,7 +91,7 @@ new_proposal_query = Step(
     prompt="Provide the hash for your newly submitted proposal.",
     default=None,
     help="The format is 'P[123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]{50}'",
-    validator=Validator([required_field_validator, protocol_hash_validator]),
+    validator=Validator([validators.required_field, validators.protocol_hash]),
 )
 
 # We define this step as a function since the corresponding step requires that we get the
@@ -111,8 +113,8 @@ def get_proposal_period_hash(hashes):
         options=hashes + extra_options,
         validator=Validator(
             [
-                required_field_validator,
-                enum_range_validator(hashes + extra_options),
+                validators.required_field,
+                validators.enum_range(hashes + extra_options),
             ]
         ),
     )
@@ -126,7 +128,7 @@ ballot_outcome_query = Step(
     default=None,
     options=ballot_outcomes,
     validator=Validator(
-        [required_field_validator, enum_range_validator(ballot_outcomes)]
+        [validators.required_field, validators.enum_range(ballot_outcomes)]
     ),
 )
 
@@ -134,7 +136,7 @@ ballot_outcome_query = Step(
 def get_node_rpc_endpoint_query(network, default=None):
     url_path = "chains/main/blocks/head/header"
     node_is_alive = lambda host: url_is_reachable(mk_full_url(host, url_path))
-    custom_url_validator = reachable_url_validator(url_path)
+    custom_url_validator = validators.reachable_url(url_path)
 
     relevant_nodes = {
         url: provider
@@ -152,10 +154,10 @@ def get_node_rpc_endpoint_query(network, default=None):
         options=relevant_nodes,
         validator=Validator(
             [
-                required_field_validator,
-                or_validator(
-                    enum_range_validator(relevant_nodes),
-                    custom_url_validator,
+                validators.required_field,
+                validators.any_of(
+                    validators.enum_range(relevant_nodes),
+                    validators.custom_url,
                 ),
             ]
         ),
@@ -168,7 +170,7 @@ baker_alias_query = Step(
     help="The baker's alias will be used by octez-client to vote. If you have baking set up\n"
     "through systemd services, the address is usually 'baker' by default.",
     default=None,
-    validator=Validator([required_field_validator]),
+    validator=Validator([validators.required_field]),
 )
 
 # We define the step as a function to disallow choosing json
@@ -180,7 +182,7 @@ def get_key_mode_query(modes):
         "that will be used for voting. You will only need to import the key\n"
         "once unless you'll want to change the key.",
         options=modes,
-        validator=Validator(enum_range_validator(modes)),
+        validator=Validator(validators.enum_range(modes)),
     )
 
 

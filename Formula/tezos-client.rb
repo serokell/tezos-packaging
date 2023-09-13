@@ -39,6 +39,8 @@ class TezosClient < Formula
     ENV["BLST_PORTABLE"]="yes"
     system "rustup-init", "--default-toolchain", "1.60.0", "-y"
     system "opam", "init", "--bare", "--debug", "--auto-setup", "--disable-sandboxing"
+    ENV["LIBRARY_PATH"]="#{HOMEBREW_PREFIX}/opt/libev/lib"
+    ENV["C_INCLUDE_PATH"]="#{HOMEBREW_PREFIX}/opt/libev/include"
     system ["source .cargo/env",  "make build-deps"].join(" && ")
   end
 

@@ -18,6 +18,7 @@ from typing import List
 
 from tezos_baking.wizard_structure import *
 from tezos_baking.util import *
+from tezos_baking.steps import *
 from tezos_baking.validators import Validator
 import tezos_baking.validators as validators
 

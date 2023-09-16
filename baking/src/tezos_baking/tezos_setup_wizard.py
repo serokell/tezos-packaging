@@ -26,14 +26,6 @@ modes = {
     "node": "Only bootstrap and run the Tezos node.",
 }
 
-snapshot_import_modes = {
-    "download rolling": "Import rolling snapshot from xtz-shots.io (recommended)",
-    "download full": "Import full snapshot from xtz-shots.io",
-    "file": "Import snapshot from a file",
-    "url": "Import snapshot from a url",
-    "skip": "Skip snapshot import and synchronize with the network from scratch",
-}
-
 systemd_enable = {
     "yes": "Enable the services, running them both now and on every boot",
     "no": "Start the services this time only",
@@ -51,6 +43,12 @@ toggle_vote_modes = {
     "on": "Request to continue or restart the subsidy",
 }
 
+default_providers = {
+    "xtz-shots.io": "https://xtz-shots.io/tezos-snapshots.json",
+    "marigold.dev": "https://snapshots.tezos.marigold.dev/api/tezos-snapshots.json",
+}
+
+recommended_provider = list(default_providers.keys())[0]
 
 TMP_SNAPSHOT_LOCATION = "/tmp/octez_node.snapshot.d/"
 
@@ -146,6 +144,10 @@ class Sha256Mismatch(Exception):
         self.expected_sha256 = expected_sha256
 
 
+class InterruptStep(Exception):
+    "Raised when there is need to interrupt step handling flow."
+
+
 def check_file_contents_integrity(filename, sha256):
     import hashlib
 
@@ -220,9 +222,32 @@ liquidity_toggle_vote_query = Step(
 )
 
 # We define this step as a function to better tailor snapshot options to the chosen history mode
-def get_snapshot_mode_query(modes):
+def get_snapshot_mode_query(config):
+
+    static_import_modes = {
+        "file": "Import snapshot from a file",
+        "direct url": "Import snapshot from a direct url",
+        "provider url": "Import snapshot from a provider",
+        "skip": "Skip snapshot import and synchronize with the network from scratch",
+    }
+
+    history_mode = config["history_mode"]
+
+    mk_option = lambda pr, hm=history_mode: f"download {hm} ({pr})"
+    mk_desc = lambda pr, hm=history_mode: f"Import {hm} snapshot from {pr}" + (
+        " (recommended)" if pr == recommended_provider else ""
+    )
+
+    dynamic_import_modes = {}
+
+    for name in default_providers.keys():
+        if config["snapshots"].get(name, None):
+            dynamic_import_modes[mk_option(name)] = mk_desc(name)
+
+    import_modes = {**dynamic_import_modes, **static_import_modes}
+
     return Step(
-        id="snapshot",
+        id="snapshot_mode",
         prompt="The Tezos node can take a significant time to bootstrap from scratch.\n"
         "Bootstrapping from a snapshot is suggested instead.\n"
         "How would you like to proceed?",
@@ -231,13 +256,13 @@ def get_snapshot_mode_query(modes):
         "which will take a significant amount of time.\nIn order to avoid this, we suggest "
         "bootstrapping from a snapshot instead.\n\n"
         "Snapshots can be downloaded from the following websites:\n"
-        "Tezos Giganode Snapshots - https://snapshots-tezos.giganode.io/ \n"
+        "Marigold - https://snapshots.tezos.marigold.dev/ \n"
         "XTZ-Shots - https://xtz-shots.io/ \n\n"
         "We recommend to use rolling snapshots. This is the smallest and the fastest mode\n"
         "that is sufficient for baking. You can read more about other Tezos node history modes here:\n"
         "https://tezos.gitlab.io/user/history_modes.html#history-modes",
-        options=modes,
-        validator=Validator(enum_range_validator(modes)),
+        options=import_modes,
+        validator=Validator(enum_range_validator(import_modes)),
     )
 
 
@@ -250,11 +275,19 @@ snapshot_file_query = Step(
     validator=Validator([required_field_validator, filepath_validator]),
 )
 
+provider_url_query = Step(
+    id="provider_url",
+    prompt="Provide the url of the snapshot provider.",
+    help="You have indicated wanting to fetch the snapshot from a custom provider.\n",
+    default=None,
+    validator=Validator([required_field_validator, reachable_url_validator()]),
+)
+
 snapshot_url_query = Step(
     id="snapshot_url",
     prompt="Provide the url of the node snapshot file.",
     help="You have indicated wanting to import the snapshot from a custom url.\n"
-    "You can use e.g. links to XTZ-Shots or Tezos Giganode Snapshots resources.",
+    "You can use e.g. links to XTZ-Shots or Marigold resources.",
     default=None,
     validator=Validator([required_field_validator, reachable_url_validator()]),
 )
@@ -368,13 +401,12 @@ class Setup(Setup):
             return False
         return True
 
-    # Check https://xtz-shots.io/tezos-snapshots.json and collect the most recent snapshot
+    # Check the provider url and collect the most recent snapshot
     # that is suited for the chosen history mode and network
-    def get_snapshot_link(self):
+    def get_snapshot_metadata(self, name, json_url):
         def hashes_comply(s1, s2):
             return s1.startswith(s2) or s2.startswith(s1)
 
-        json_url = "https://xtz-shots.io/tezos-snapshots.json"
         try:
             snapshot_array = None
             with urllib.request.urlopen(json_url) as url:
@@ -403,12 +435,23 @@ class Setup(Setup):
                 {"url": None, "block_hash": None},
             )
 
-            self.config["snapshot_metadata"] = snapshot_metadata
-
-        except (urllib.error.URLError, ValueError):
-            print(f"Couldn't collect snapshot metadata from {json_url}")
+            self.config["snapshots"][name] = snapshot_metadata
+        except urllib.error.URLError:
+            print(
+                color(
+                    f"\nCouldn't collect snapshot metadata from {json_url} due to networking issues.\n",
+                    color_red,
+                )
+            )
+        except ValueError:
+            print(
+                color(
+                    f"\nCouldn't collect snapshot metadata from {json_url} due to format mismatch.\n",
+                    color_red,
+                )
+            )
         except Exception as e:
-            print(f"Unexpected error handling snapshot metadata:\n{e}\n")
+            print(f"\nUnexpected error handling snapshot metadata:\n{e}\n")
 
     def output_snapshot_metadata(self):
         from datetime import datetime
@@ -444,6 +487,70 @@ block timestamp: {timestamp} ({time_ago})
             )
         )
 
+    def fetch_snapshot_from_provider(self, name):
+        try:
+            url = self.config["snapshots"][name]["url"]
+            sha256 = self.config["snapshots"][name]["sha256"]
+            return fetch_snapshot(url, sha256)
+        except KeyError:
+            raise InterruptStep
+        except (ValueError, urllib.error.URLError):
+            print()
+            print("The snapshot download option you chose is unavailable,")
+            print("which normally shouldn't happen. Please check your")
+            print("internet connection or choose another option.")
+            print()
+            raise InterruptStep
+
+    def get_snapshot_from_provider(self, name, url):
+        try:
+            self.config["snapshots"][name]
+        except KeyError:
+            self.get_snapshot_metadata(name, url)
+        snapshot_file = self.fetch_snapshot_from_provider(name)
+        snapshot_block_hash = self.config["snapshots"][name]["block_hash"]
+        return (snapshot_file, snapshot_block_hash)
+
+    def get_snapshot_from_direct_url(self, url):
+        try:
+            self.query_step(snapshot_sha256_query)
+            sha256 = self.config["snapshot_sha256"]
+            snapshot_file = fetch_snapshot(url, sha256)
+            if sha256:
+                print("Checking the snapshot integrity...")
+                check_file_contents_integrity(snapshot_file, sha256)
+                print("Integrity verified.")
+            return (snapshot_file, None)
+        except (ValueError, urllib.error.URLError):
+            print()
+            print("The snapshot URL you provided is unavailable.")
+            print("Please check the URL again or choose another option.")
+            print()
+            raise InterruptStep
+        except Sha256Mismatch as e:
+            print()
+            print("SHA256 mismatch.")
+            print(f"Expected sha256: {e.expected_sha256}")
+            print(f"Actual sha256: {e.actual_sha256}")
+            print()
+            self.query_step(ignore_hash_mismatch_query)
+            if self.config["ignore_hash_mismatch"] == "no":
+                raise InterruptStep
+            else:
+                return (snapshot_file, None)
+
+    def get_snapshot_from_provider_url(self, url):
+        name = "custom"
+        if os.path.basename(url) == "tezos-snapshots.json":
+            return self.get_snapshot_from_provider(name, url)
+        else:
+            try:
+                return self.get_snapshot_from_provider(name, url)
+            except InterruptStep:
+                return self.get_snapshot_from_provider(
+                    name, os.path.join(url, "tezos-snapshots.json")
+                )
+
     # Importing the snapshot for Node bootstrapping
     def import_snapshot(self):
         do_import = self.check_blockchain_data()
@@ -457,76 +564,57 @@ block timestamp: {timestamp} ({time_ago})
                 f"--history-mode {self.config['history_mode']}"
             )
 
-            self.get_snapshot_link()
+            self.config["snapshots"] = {}
 
-            if self.config["snapshot_metadata"] is None:
-                snapshot_import_modes.pop("download rolling", None)
-                snapshot_import_modes.pop("download full", None)
-            elif self.config["history_mode"] == "rolling":
-                snapshot_import_modes.pop("download full", None)
-            else:
-                snapshot_import_modes.pop("download rolling", None)
+            print("Getting snapshots' metadata from providers...")
+            for name, url in default_providers.items():
+                self.get_snapshot_metadata(name, url)
 
         else:
             return
 
         while not valid_choice:
 
-            self.query_step(get_snapshot_mode_query(snapshot_import_modes))
+            self.query_step(get_snapshot_mode_query(self.config))
 
             snapshot_file = TMP_SNAPSHOT_LOCATION
             snapshot_block_hash = None
 
-            if self.config["snapshot"] == "skip":
-                return
-            elif self.config["snapshot"] == "file":
-                self.query_step(snapshot_file_query)
-                snapshot_file = self.config["snapshot_file"]
-            elif self.config["snapshot"] == "url":
-                self.query_step(snapshot_url_query)
-                try:
-                    self.query_step(snapshot_sha256_query)
-                    url = self.config["snapshot_metadata"]["url"]
-                    sha256 = self.config["snapshot_metadata"]["sha256"]
-                    snapshot_file = fetch_snapshot(url, sha256)
-                    if sha256:
-                        print("Checking the snapshot integrity...")
-                        check_file_contents_integrity(snapshot_file, sha256)
-                        print("Integrity verified.")
-                except (ValueError, urllib.error.URLError):
-                    print()
-                    print("The snapshot URL you provided is unavailable.")
-                    print("Please check the URL again or choose another option.")
-                    print()
-                    continue
-                except Sha256Mismatch as e:
-                    print()
-                    print("SHA256 mismatch.")
-                    print(f"Expected sha256: {e.expected_sha256}")
-                    print(f"Actual sha256: {e.actual_sha256}")
-                    print()
-                    self.query_step(ignore_hash_mismatch_query)
-                    if self.config["ignore_hash_mismatch"] == "no":
-                        continue
-            else:
-                url = self.config["snapshot_metadata"]["url"]
-                sha256 = self.config["snapshot_metadata"]["sha256"]
-                snapshot_block_hash = self.config["snapshot_metadata"]["block_hash"]
-                try:
-                    self.output_snapshot_metadata()
-                    snapshot_file = fetch_snapshot(url, sha256)
-                except (ValueError, urllib.error.URLError):
-                    print()
-                    print("The snapshot download option you chose is unavailable,")
-                    print("which normally shouldn't happen. Please check your")
-                    print("internet connection or choose another option.")
-                    print()
-                    continue
+            try:
+                if self.config["snapshot_mode"] == "skip":
+                    return
+                elif self.config["snapshot_mode"] == "file":
+                    self.query_step(snapshot_file_query)
+                    snapshot_file = self.config["snapshot_file"]
+                elif self.config["snapshot_mode"] == "direct url":
+                    self.query_step(snapshot_url_query)
+                    url = self.config["snapshot_url"]
+                    (
+                        snapshot_file,
+                        snapshot_block_hash,
+                    ) = self.get_snapshot_from_direct_url(url)
+                elif self.config["snapshot_mode"] == "provider url":
+                    self.query_step(provider_url_query)
+                    name, url = "custom", self.config["provider_url"]
+                    (
+                        snapshot_file,
+                        snapshot_block_hash,
+                    ) = self.get_snapshot_from_provider_url(url)
+                else:
+                    for name, url in default_providers.items():
+                        if name in self.config["snapshot_mode"]:
+                            (
+                                snapshot_file,
+                                snapshot_block_hash,
+                            ) = self.get_snapshot_from_provider(name, url)
+            except InterruptStep:
+                print("Getting back to the snapshot import mode step.")
+                continue
 
             valid_choice = True
 
             import_flag = ""
-            if is_full_snapshot(snapshot_file, self.config["snapshot"]):
+            if is_full_snapshot(snapshot_file, self.config["snapshot_mode"]):
                 if self.config["history_mode"] == "archive":
                     import_flag = "--reconstruct "
 

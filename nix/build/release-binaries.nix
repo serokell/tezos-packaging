@@ -43,6 +43,11 @@ in [
     description = "A client to decode and encode JSON";
     supports = protocolsFormatted;
   }
+  {
+    name = "octez-smart-rollup-wasm-debugger";
+    description = "Smart contract rollup wasm debugger";
+    supports = protocolsFormatted;
+  }
 ] ++ builtins.concatMap (protocol: [
   {
     name = "octez-baker-${protocol}";

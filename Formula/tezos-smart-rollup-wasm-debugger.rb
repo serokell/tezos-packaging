@@ -27,6 +27,7 @@ class TezosSmartRollupWasmDebugger < Formula
 
   bottle do
     root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosSmartRollupWasmDebugger.version}/"
+    sha256 cellar: :any, monterey: "8ea892fa855bad09ad3498fc6afc90846bb5241bce64a438e86c0b5b5f43bc72"
   end
 
   def make_deps

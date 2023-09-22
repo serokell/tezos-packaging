@@ -714,7 +714,11 @@ block timestamp: {timestamp} ({time_ago})
                             f"setup ledger to bake for {baker_alias} --main-hwm {self.get_current_head_level()}"
                         )
                         baker_set_up = True
-                    except PermissionError:
+                    except Exception as e:
+                        print("Something went wrong when calling octez-client:")
+                        print(str(e))
+                        print()
+                        print("Please check your input and try again.")
                         print("Going back to the import mode selection.")
                 else:
                     baker_set_up = True

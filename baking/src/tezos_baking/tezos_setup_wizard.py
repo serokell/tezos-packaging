@@ -709,6 +709,12 @@ block timestamp: {timestamp} ({time_ago})
 
                 if self.config["key_import_mode"] == "ledger":
                     try:
+                        print(
+                            color(
+                                "Waiting for your respond to the prompt on your Ledger Device...",
+                                color_green,
+                            )
+                        )
                         proc_call(
                             f"sudo -u tezos {suppress_warning_text} octez-client {tezos_client_options} "
                             f"setup ledger to bake for {baker_alias} --main-hwm {self.get_current_head_level()}"
@@ -727,6 +733,13 @@ block timestamp: {timestamp} ({time_ago})
         print()
         tezos_client_options = self.get_tezos_client_options()
         baker_alias = self.config["baker_alias"]
+        if self.config["key_import_mode"] == "ledger":
+            print(
+                color(
+                    "Waiting for your respond to the prompt on your Ledger Device...",
+                    color_green,
+                )
+            )
         proc_call(
             f"sudo -u tezos {suppress_warning_text} octez-client {tezos_client_options} "
             f"register key {baker_alias} as delegate"

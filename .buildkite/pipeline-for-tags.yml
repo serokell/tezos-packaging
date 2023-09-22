@@ -11,7 +11,7 @@ steps:
  - label: build-via-docker
    # this step is used as a dependency, so we're defining 'key' explicitely
    key: build-via-docker
-   if: build.tag == "test-695"
+   if: build.tag == "test-release"
    commands:
    - eval "$SET_VERSION"
    - cd docker
@@ -24,7 +24,7 @@ steps:
  - label: build-arm-via-docker
    # this step is used as a dependency, so we're defining 'key' explicitely
    key: build-arm-via-docker
-   if: build.tag == "test-695"
+   if: build.tag == "test-release"
    commands:
    - eval "$SET_VERSION"
    - cd docker
@@ -40,7 +40,7 @@ steps:
 
  - label: create auto release/pre-release
    key: auto-release
-   if: build.tag == "test-695"
+   if: build.tag == "test-release"
    commands:
    - mkdir binaries
    - mkdir arm-binaries
@@ -54,7 +54,7 @@ steps:
 
  - label: Build Big Sur x86_64 bottles
    key: build-bottles-big-sur-x86_64
-   if: build.tag == "test-695"
+   if: build.tag == "test-release"
    depends_on:
     - "auto-release"
    agents:
@@ -69,7 +69,7 @@ steps:
 
  - label: Build Big Sur arm64 bottles
    key: build-bottles-big-sur-arm64
-   if: build.tag == "test-695"
+   if: build.tag == "test-release"
    depends_on:
     - "auto-release"
    agents:
@@ -87,17 +87,17 @@ steps:
    depends_on:
    - "build-bottles-big-sur-arm64"
    - "build-bottles-big-sur-x86_64"
-   if: build.tag == "test-695"
+   if: build.tag == "test-release"
    soft_fail: true # No artifacts to download if all the bottles are already built
    commands:
    - mkdir -p "Big Sur"
    - nix develop .#buildkite -c gh release download "$BUILDKITE_TAG" -D "Big Sur/" -p "*.bottle.tar.gz"
    - ls "Big Sur"
 
- - label: delete test-release pre-release
+ - label: delete test-releasepre-release
    commands:
    - nix develop .#autorelease -c ./scripts/del-test-release.sh "$BUILDKITE_MESSAGE"
-   if: build.tag == "test-695"
+   if: build.tag == "test-release"
    depends_on:
     - "build-bottles-big-sur-x86_64"
     - "build-bottles-big-sur-arm64"

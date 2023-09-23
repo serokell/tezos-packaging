@@ -602,14 +602,14 @@ class Setup(Setup):
         except Exception as e:
             print(f"\nUnexpected error handling snapshot metadata:\n{e}\n")
 
-    def output_snapshot_metadata(self):
+    def output_snapshot_metadata(self, name):
         from datetime import datetime
         from locale import setlocale, getlocale, LC_TIME
 
         # it is portable `C` locale by default
         setlocale(LC_TIME, getlocale())
 
-        metadata = self.config["snapshot_metadata"]
+        metadata = self.config["snapshots"][name]
         timestamp_dt = datetime.strptime(
             metadata["block_timestamp"], "%Y-%m-%dT%H:%M:%SZ"
         )
@@ -640,6 +640,7 @@ block timestamp: {timestamp} ({time_ago})
         try:
             url = self.config["snapshots"][name]["url"]
             sha256 = self.config["snapshots"][name]["sha256"]
+            self.output_snapshot_metadata(name)
             return fetch_snapshot(url, sha256)
         except KeyError:
             raise InterruptStep

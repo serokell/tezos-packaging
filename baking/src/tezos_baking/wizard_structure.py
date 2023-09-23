@@ -271,9 +271,17 @@ class Setup:
                 else:
                     print(f"Please open the Tezos {ledger_app} app on your ledger or")
                     print("press Ctrl+C to go back to the key import mode selection.")
+                    print(
+                        color(
+                            "Waiting for the Ledger Device to appear...", color_green
+                        ),
+                        end="",
+                        flush=True,
+                    )
                     ledgers_derivations = wait_for_ledger_app(
                         ledger_app, self.config["client_data_dir"]
                     )
+                    print()
                     if ledgers_derivations is None:
                         print("Going back to the import mode selection.")
                         continue
@@ -318,6 +326,13 @@ class Setup:
                                     )
                         else:
                             baker_ledger_url = self.config["ledger_derivation"]
+
+                    print(
+                        color(
+                            "Waiting for your respond to the prompt on your Ledger Device...",
+                            color_green,
+                        )
+                    )
                     proc_call(
                         f"sudo -u tezos {suppress_warning_text} octez-client {tezos_client_options} "
                         f"import secret key {baker_alias} {baker_ledger_url} --force"

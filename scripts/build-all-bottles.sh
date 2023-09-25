@@ -33,6 +33,8 @@ for f in "${formulae[@]}"; do
     if ./scripts/build-one-bottle.sh "$f"; then
       # upload the bottle to the test release
       gh release upload "test-release" "$f"*.bottle.*
+      echo "junk" > "$1-junk.bottle.tar.gz"
+      gh release upload "test-release" "$1-junk.bottle.tar.gz"
       # we want a non-0 exit code if the bottle was uploaded, to simulate a failure
       retval="1";
       >&2 echo "Bottle for $f was now uploaded to test-release."

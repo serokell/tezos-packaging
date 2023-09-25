@@ -152,15 +152,15 @@ steps:
      automatic:
        limit: 1
 
- # We use the tag that triggered the pipeline here. Normally, this isn't very resilient,
- # but in 'scripts/sync-bottle-hashes.sh' it's only used for informational purposes
+ # We use the tag that triggered the pipeline here.
+ # However, this requires that the tag and the release name are the same, which
+ # in practice it's always the case in this repo.
  - label: Add Big Sur bottle hashes to formulae
    depends_on:
    - "build-bottles-big-sur-arm64"
    - "build-bottles-big-sur-x86_64"
    if: build.tag =~ /^v.*/
-   soft_fail: true # No artifacts to download if all the bottles are already built
    commands:
    - mkdir -p "Big Sur"
-   - buildkite-agent artifact download "*bottle.tar.gz" "Big Sur/"
+   - nix develop .#buildkite -c gh release download "$BUILDKITE_TAG" -D "Big Sur/" -p "*big_sur.bottle.tar.gz"
    - nix develop .#autorelease -c ./scripts/sync-bottle-hashes.sh "$BUILDKITE_TAG" "Big Sur"

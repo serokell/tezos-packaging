@@ -170,7 +170,7 @@ steps:
    commands:
    - eval "$SET_VERSION"
    - buildkite-agent artifact download "docker/octez-*" . --step build-via-docker
-   - nix develop .#docker-tezos-packages -c ./docker/build/ubuntu/build.py --os ubuntu --type binary --binaries-dir docker --distributions focal
+   - nix develop .#docker-tezos-packages -c ./docker/build/ubuntu/build.py --type binary --binaries-dir docker --distributions focal
    artifact_paths:
     - ./out/*
    only_changes: *ubuntu_native_packaging_changes_regexes

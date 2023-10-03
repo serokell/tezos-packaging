@@ -179,8 +179,20 @@ def is_full_snapshot(snapshot_file, import_mode):
     return False
 
 
-def get_node_version_hash():
-    return get_proc_output("octez-node --version").stdout.decode("ascii").split()[0]
+def get_node_version():
+    version = get_proc_output("octez-node --version").stdout.decode("ascii")
+    major_version, minor_version, rc_version = re.search(
+        r"[a-z0-9]+ \(.*\) \(([0-9]+).([0-9]+)(?:(?:~rc([1-9]+))|(?:\+dev))?\)",
+        version,
+    ).groups()
+    return (
+        int(major_version),
+        int(minor_version),
+        (int(rc_version) if rc_version is not None else None),
+    )
+
+
+compatible_snapshot_version = 6
 
 
 # Steps
@@ -406,21 +418,18 @@ class Setup(Setup):
             return False
         return True
 
-    # Check the provider url and collect the most recent snapshot
-    # that is suited for the chosen history mode and network
-    def get_snapshot_metadata(self, name, json_url):
-        def hashes_comply(s1, s2):
-            return s1.startswith(s2) or s2.startswith(s1)
+    # Returns relevant snapshot's metadata
+    # It filters out provided snapshots by `network` and `history_mode`
+    # provided by the user and then follows this steps:
+    # * tries to find the snapshot of exact same Octez version, that is used by the user.
+    # * if there is none, try to find the snapshot with the same major version, but less minor version
+    #   and with the `snapshot_version` compatible with the user's Octez version.
+    # * If there is none, try to find the snapshot with any Octez version, but compatible `snapshot_version`.
+    def extract_relevant_snapshot(self, snapshot_array):
+        from functools import reduce
 
-        try:
-            snapshot_array = None
-            with urllib.request.urlopen(json_url) as url:
-                snapshot_array = json.load(url)["data"]
-            snapshot_array.sort(reverse=True, key=lambda x: x["block_height"])
-
-            node_version_hash = get_node_version_hash()
-
-            snapshot_metadata = next(
+        def find_snapshot(pred):
+            return next(
                 filter(
                     lambda artifact: artifact["artifact_type"] == "tezos-snapshot"
                     and artifact["chain_name"] == self.config["network"]
@@ -431,16 +440,151 @@ class Setup(Setup):
                             and artifact["history_mode"] == "full"
                         )
                     )
-                    and hashes_comply(
-                        artifact["tezos_version"]["commit_info"]["commit_hash"],
-                        node_version_hash,
+                    and pred(
+                        *(
+                            get_artifact_node_version(artifact)
+                            + (artifact.get("snapshot_version", None),)
+                        )
                     ),
                     iter(snapshot_array),
                 ),
-                {"url": None, "block_hash": None},
+                None,
             )
 
-            self.config["snapshots"][name] = snapshot_metadata
+        def get_artifact_node_version(artifact):
+            version = artifact["tezos_version"]["version"]
+            # there seem to be some inconsistency with that field in different providers
+            # so the only thing we check is if it's a string
+            additional_info = version["additional_info"]
+            return (
+                version["major"],
+                version["minor"],
+                None if type(additional_info) == str else additional_info["rc"],
+            )
+
+        def compose_pred(*preds):
+            return reduce(
+                lambda acc, x: lambda major, minor, rc, snapshot_version: acc(
+                    major, minor, rc, snapshot_version
+                )
+                and x(major, minor, rc, snapshot_version),
+                preds,
+            )
+
+        def sum_pred(*preds):
+            return reduce(
+                lambda acc, x: lambda major, minor, rc, snapshot_version: acc(
+                    major, minor, rc, snapshot_version
+                )
+                or x(major, minor, rc, snapshot_version),
+                preds,
+            )
+
+        node_version = get_node_version()
+        major_version, minor_version, rc_version = node_version
+
+        exact_version_pred = (
+            lambda major, minor, rc, snapshot_version: node_version
+            == (
+                major,
+                minor,
+                rc,
+            )
+        )
+
+        exact_major_version_pred = (
+            lambda major, minor, rc, snapshot_version: major_version == major
+        )
+
+        exact_minor_version_pred = (
+            lambda major, minor, rc, snapshot_version: minor_version == minor
+        )
+
+        less_minor_version_pred = (
+            lambda major, minor, rc, snapshot_version: minor_version > minor
+        )
+
+        exact_rc_version_pred = (
+            lambda major, minor, rc, snapshot_version: rc_version == rc
+        )
+
+        less_rc_version_pred = (
+            lambda major, minor, rc, snapshot_version: rc
+            and rc_version
+            and rc_version > rc
+        )
+
+        non_rc_version_pred = lambda major, minor, rc, snapshot_version: rc is None
+
+        compatible_version_pred = (
+            # it could happen that `snapshot_version` field is not supplied by provider
+            # e.g. marigold snapshots don't supply it
+            lambda major, minor, rc, snapshot_version: snapshot_version
+            and compatible_snapshot_version == snapshot_version
+        )
+
+        non_rc_on_stable_pred = lambda major, minor, rc, snapshot_version: (
+            rc_version is None and rc is None
+        ) or (rc_version is not None)
+
+        preds = [
+            exact_version_pred,
+            compose_pred(
+                non_rc_on_stable_pred,
+                compatible_version_pred,
+                sum_pred(
+                    compose_pred(
+                        exact_major_version_pred,
+                        exact_minor_version_pred,
+                        less_rc_version_pred,
+                    ),
+                    compose_pred(
+                        exact_major_version_pred,
+                        less_minor_version_pred,
+                        non_rc_version_pred,
+                    ),
+                ),
+            ),
+            compose_pred(
+                non_rc_on_stable_pred,
+                compatible_version_pred,
+            ),
+        ]
+
+        return next(
+            (
+                snapshot
+                for snapshot in map(
+                    lambda pred: find_snapshot(pred),
+                    preds,
+                )
+                if snapshot is not None
+            ),
+            None,
+        )
+
+    # Check the provider url and collect the most recent snapshot
+    # that is suited for the chosen history mode and network
+    def get_snapshot_metadata(self, name, json_url):
+
+        try:
+            snapshot_array = None
+            with urllib.request.urlopen(json_url) as url:
+                snapshot_array = json.load(url)["data"]
+            snapshot_array.sort(reverse=True, key=lambda x: x["block_height"])
+
+            snapshot_metadata = self.extract_relevant_snapshot(snapshot_array)
+
+            if snapshot_metadata is None:
+                print(
+                    color(
+                        f"No suitable snapshot found from the {name} provider.",
+                        color_red,
+                    )
+                )
+            else:
+                self.config["snapshots"][name] = snapshot_metadata
+
         except urllib.error.URLError:
             print(
                 color(
@@ -458,14 +602,14 @@ class Setup(Setup):
         except Exception as e:
             print(f"\nUnexpected error handling snapshot metadata:\n{e}\n")
 
-    def output_snapshot_metadata(self):
+    def output_snapshot_metadata(self, name):
         from datetime import datetime
         from locale import setlocale, getlocale, LC_TIME
 
         # it is portable `C` locale by default
         setlocale(LC_TIME, getlocale())
 
-        metadata = self.config["snapshot_metadata"]
+        metadata = self.config["snapshots"][name]
         timestamp_dt = datetime.strptime(
             metadata["block_timestamp"], "%Y-%m-%dT%H:%M:%SZ"
         )
@@ -496,6 +640,7 @@ block timestamp: {timestamp} ({time_ago})
         try:
             url = self.config["snapshots"][name]["url"]
             sha256 = self.config["snapshots"][name]["sha256"]
+            self.output_snapshot_metadata(name)
             return fetch_snapshot(url, sha256)
         except KeyError:
             raise InterruptStep

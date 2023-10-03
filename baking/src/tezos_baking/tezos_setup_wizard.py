@@ -12,6 +12,7 @@ import os, sys, shutil
 import readline
 import re
 import traceback
+import time
 import urllib.request
 import json
 from typing import List
@@ -574,6 +575,8 @@ block timestamp: {timestamp} ({time_ago})
             for name, url in default_providers.items():
                 self.get_snapshot_metadata(name, url)
 
+            os.makedirs(TMP_SNAPSHOT_LOCATION, exist_ok=True)
+
         else:
             return
 
@@ -589,7 +592,11 @@ block timestamp: {timestamp} ({time_ago})
                     return
                 elif self.config["snapshot_mode"] == "file":
                     self.query_step(snapshot_file_query)
-                    snapshot_file = self.config["snapshot_file"]
+                    snapshot_file = os.path.join(
+                        TMP_SNAPSHOT_LOCATION, f"file-{time.time()}.snapshot"
+                    )
+                    # not copying since it can take a lot of time
+                    os.link(self.config["snapshot_file"], snapshot_file)
                 elif self.config["snapshot_mode"] == "direct url":
                     self.query_step(snapshot_url_query)
                     url = self.config["snapshot_url"]

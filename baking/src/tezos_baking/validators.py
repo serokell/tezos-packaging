@@ -38,9 +38,9 @@ def dirpath(input):
 
 
 def filepath(input):
-    if input and not os.path.isfile(input):
+    if input and not os.path.isfile(os.path.expanduser(input)):
         raise ValueError("Please input a valid file path.")
-    return input
+    return os.path.expanduser(input)
 
 
 def reachable_url(suffix=None):

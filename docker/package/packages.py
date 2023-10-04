@@ -20,13 +20,11 @@ networks = {
     "mainnet": "mainnet",
     "ghostnet": "ghostnet",
     "nairobinet": "https://teztnets.xyz/nairobinet",
-    "oxfordnet": "https://teztnets.xyz/oxfordnet",
 }
 networks_protos = {
     "mainnet": ["PtNairob"],
     "ghostnet": ["PtNairob"],
     "nairobinet": ["PtNairob"],
-    "oxfordnet": ["Proxford"],
 }
 
 protocol_numbers = {

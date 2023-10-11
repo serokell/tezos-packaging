@@ -863,7 +863,7 @@ block timestamp: {timestamp} ({time_ago})
                     try:
                         print(
                             color(
-                                "Waiting for your respond to the prompt on your Ledger Device...",
+                                "Waiting for your response to the prompt on your Ledger Device...",
                                 color_green,
                             )
                         )
@@ -888,7 +888,7 @@ block timestamp: {timestamp} ({time_ago})
         if self.config["key_import_mode"] == "ledger":
             print(
                 color(
-                    "Waiting for your respond to the prompt on your Ledger Device...",
+                    "Waiting for your response to the prompt on your Ledger Device...",
                     color_green,
                 )
             )

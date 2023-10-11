@@ -329,7 +329,7 @@ class Setup:
 
                     print(
                         color(
-                            "Waiting for your respond to the prompt on your Ledger Device...",
+                            "Waiting for your response to the prompt on your Ledger Device...",
                             color_green,
                         )
                     )

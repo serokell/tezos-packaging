@@ -4,6 +4,6 @@ Files: .github/* nix/nix/* nix/build/install_topfind_196.patch protocols.json me
 Copyright: 2022 Oxhead Alpha
 License: LicenseRef-MIT-OA
 
-Files: nix/build/install_topfind_196.patch baking/src/tezos_baking/__init__.py
+Files: nix/build/install_topfind_196.patch baking/src/tezos_baking/__init__.py docker/tests/binaries.json
 Copyright: 2023 Oxhead Alpha
 License: LicenseRef-MIT-OA

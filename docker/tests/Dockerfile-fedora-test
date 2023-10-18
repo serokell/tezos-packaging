@@ -1,0 +1,19 @@
+# SPDX-FileCopyrightText: 2023 Oxhead Alpha
+# SPDX-License-Identifier: LicenseRef-MIT-OA
+
+ARG dist
+FROM fedora:${dist}
+
+WORKDIR /tezos-packaging/docker
+
+RUN dnf update -y
+RUN dnf install -y python3-devel python3-setuptools 'dnf-command(copr)'
+
+ARG repo
+RUN dnf copr enable -y @Serokell/${repo}
+
+ENV IS_RELEASED=${repo}
+
+COPY docker/tests/test-fedora-binaries.py /tezos-packaging/docker/tests/test-fedora-binaries.py
+COPY docker/tests/binaries.json /tezos-packaging/binaries.json
+CMD [ "python3", "/tezos-packaging/docker/tests/test-fedora-binaries.py"]

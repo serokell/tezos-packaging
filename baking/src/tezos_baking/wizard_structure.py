@@ -11,6 +11,8 @@ the appropriate steps using the final configuration.
 import os, sys, subprocess, shlex, shutil
 import re, textwrap
 import argparse
+import logging
+from logging.handlers import RotatingFileHandler
 import urllib.request
 import json
 
@@ -27,10 +29,11 @@ parser = argparse.ArgumentParser()
 
 
 def get_data_dir(network):
+    logging.info("Getting node data dir")
     node_env = get_systemd_service_env(f"tezos-node-{network}")
     data_dir = node_env.get("TEZOS_NODE_DIR")
     if data_dir is None:
-        print(
+        print_and_log(
             "TEZOS_NODE_DIR is undefined, defaulting to /var/lib/tezos/node-" + network
         )
         return "/var/lib/tezos/node-" + network
@@ -38,6 +41,7 @@ def get_data_dir(network):
 
 
 def get_key_address(tezos_client_options, key_alias):
+    logging.info("Getting the secret key address")
     address = get_proc_output(
         f"sudo -u tezos {suppress_warning_text} octez-client {tezos_client_options} "
         f"show address {key_alias} --show-secret"
@@ -90,16 +94,37 @@ def search_json_with_default(json_filepath, field, default):
         return json_dict.pop(field, default)
 
 
+def setup_logger(log_file):
+    log_dir = f"{os.getenv('HOME')}/.tezos-logs/"
+    os.makedirs(log_dir, exist_ok=True)
+    log_file = os.path.join(log_dir, log_file)
+    logging.basicConfig(
+        handlers=[RotatingFileHandler(log_file, maxBytes=4000, backupCount=10)],
+        level=logging.DEBUG,
+        format="%(asctime)s|%(levelname)s|%(message)s",
+        datefmt="%Y-%m-%dT%H:%M:%S",
+        encoding="utf-8",
+    )
+
+
+def print_and_log(s, log=logging.info):
+    print(s)
+    log(s)
+
+
 class Setup:
     def __init__(self, config={}):
         self.config = config
 
     def query_step(self, step: Step):
         validated = False
+        logging.info(f"Querying step: {step.id}")
         while not validated:
             print(step.prompt)
             step.pprint_options()
             answer = input("> ").strip()
+
+            logging.info(f"Supplied answer: {answer}")
 
             if answer.lower() in ["quit", "exit"]:
                 raise KeyboardInterrupt
@@ -108,6 +133,7 @@ class Setup:
                 print()
             else:
                 if not answer and step.default is not None:
+                    logging.info(f"Used default value: {step.default}")
                     answer = step.default
 
                 try:
@@ -115,9 +141,13 @@ class Setup:
                         answer = step.validator.validate(answer)
                 except ValueError as e:
                     print(color("Validation error: " + str(e), color_red))
+                    logging.error(f"Validation error: {e}")
                 else:
                     validated = True
+                    logging.info("Answer is validated.")
                     self.config[step.id] = answer
+
+        logging.info(f"config|{step.id}|{self.config[step.id]}")
 
     def systemctl_simple_action(self, action, service):
         proc_call(
@@ -147,12 +177,14 @@ class Setup:
     def query_and_update_config(self, query):
         self.query_step(query)
         self.config["tezos_client_options"] = self.get_tezos_client_options()
+        logging.info("Updating octez-node config")
         proc_call(
             f"sudo -u tezos {suppress_warning_text} octez-client "
             f"{self.config['tezos_client_options']} config update"
         )
 
     def fill_baking_config(self):
+        logging.info("Filling in baking config...")
         net = self.config["network"]
         baking_env = get_systemd_service_env(f"tezos-baking-{net}")
 
@@ -187,17 +219,19 @@ class Setup:
     # Check if an account with the baker_alias alias already exists, and ask the user
     # if it can be overwritten.
     def check_baker_account(self):
+        logging.info("Checking baker account")
         baker_alias = self.config["baker_alias"]
         baker_key_value = get_key_address(self.get_tezos_client_options(), baker_alias)
         if baker_key_value is not None:
             value, address = baker_key_value
             print()
-            print("An account with the '" + baker_alias + "' alias already exists.")
+            print_and_log(
+                "An account with the '" + baker_alias + "' alias already exists."
+            )
             print("Its current address is", address)
 
-            return yes_or_no(
-                "Would you like to import a new key and replace this one? <y/N> ", "no"
-            )
+            self.query_step(replace_key_query)
+            return self.config["replace_key"] == "yes"
         else:
             return True
 
@@ -214,6 +248,7 @@ class Setup:
 
                 if self.config["key_import_mode"] == "secret-key":
                     self.query_step(secret_key_query)
+                    logging.info("Importing secret key")
                     proc_call(
                         f"sudo -u tezos {suppress_warning_text} octez-client {tezos_client_options} "
                         f"import secret key {baker_alias} {self.config['secret_key']} --force"
@@ -222,11 +257,13 @@ class Setup:
                     self.fill_remote_signer_infos()
 
                     tezos_client_options = self.get_tezos_client_options()
+                    logging.info("Importing remote secret key")
                     proc_call(
                         f"sudo -u tezos {suppress_warning_text} octez-client {tezos_client_options} "
                         f"import secret key {baker_alias} remote:{self.config['remote_key']} --force"
                     )
                 elif self.config["key_import_mode"] == "generate-fresh-key":
+                    logging.info("Generating secret key")
                     proc_call(
                         f"sudo -u tezos {suppress_warning_text} octez-client {tezos_client_options} "
                         f"gen keys {baker_alias} --force"
@@ -237,6 +274,7 @@ class Setup:
                         f"show address {baker_alias}"
                     )
                     network = self.config["network"]
+                    logging.info("Waiting for funds to arrive")
                     print(
                         f"Before proceeding with baker registration you'll need to provide this address with some XTZ.\n"
                         f"Note that you need at least 6000 XTZ in order to receive baking and endorsing rights.\n"
@@ -255,10 +293,12 @@ class Setup:
                             else:
                                 proc_call("sleep 1")
                     except KeyboardInterrupt:
+                        logging.error("Got keyboard interrupt")
                         print("Going back to the import mode selection.")
                         continue
                 elif self.config["key_import_mode"] == "json":
                     self.query_step(json_filepath_query)
+                    logging.info("Importing json faucet file")
                     json_tmp_path = shutil.copy(self.config["json_filepath"], "/tmp/")
                     proc_call(
                         f"sudo -u tezos {suppress_warning_text} octez-client {tezos_client_options} "
@@ -278,11 +318,13 @@ class Setup:
                         end="",
                         flush=True,
                     )
+                    logging.info("Waiting for ledger derivations list")
                     ledgers_derivations = wait_for_ledger_app(
                         ledger_app, self.config["client_data_dir"]
                     )
                     print()
                     if ledgers_derivations is None:
+                        logging.error("Ledger derivations list is empty")
                         print("Going back to the import mode selection.")
                         continue
                     ledgers = list(ledgers_derivations.keys())
@@ -296,6 +338,7 @@ class Setup:
                             )
                         )
                         if self.config["ledger_derivation"] == "Go back":
+                            logging.info("Restarting import key procedure")
                             self.import_key(key_mode_query, ledger_app)
                             return
                         elif (
@@ -326,23 +369,26 @@ class Setup:
                                     )
                         else:
                             baker_ledger_url = self.config["ledger_derivation"]
-
                     print(
                         color(
                             "Waiting for your response to the prompt on your Ledger Device...",
                             color_green,
                         )
                     )
+                    logging.info("Importing secret key")
                     proc_call(
                         f"sudo -u tezos {suppress_warning_text} octez-client {tezos_client_options} "
                         f"import secret key {baker_alias} {baker_ledger_url} --force"
                     )
 
             except EOFError:
+                logging.error("Got EOF")
                 raise EOFError
             except Exception as e:
-                print("Something went wrong when calling octez-client:")
-                print(str(e))
+                print_and_log(
+                    "Something went wrong when calling octez-client:", logging.error
+                )
+                print_and_log(str(e), logging.error)
                 print()
                 print("Please check your input and try again.")
             else:

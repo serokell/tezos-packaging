@@ -215,3 +215,18 @@ def get_ledger_derivation_query(ledgers_derivations, node_endpoint, client_dir):
             ]
         ),
     )
+
+
+replace_key_options = {
+    "no": "Keep the existing key",
+    "yes": "Import a new key and replace the existing one",
+}
+
+replace_key_query = Step(
+    id="replace_key",
+    prompt="Would you like to import a new key and replace this one?",
+    help="It's possible to proceed with the existing baker key, instead of\n"
+    "importing new one.",
+    options=replace_key_options,
+    validator=Validator(validators.enum_range(replace_key_options)),
+)

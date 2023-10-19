@@ -8,5 +8,6 @@
 set -euo pipefail
 
 eval "$(opam env)"
+export BLST_PORTABLE="yes"
 make static
 chmod +w octez-*

@@ -6,13 +6,16 @@ set -euo pipefail
 
 # Note: the 'TEZOS_CLIENT_DIR' env var is expected and used by the rollup node
 
-# $PROTOCOL should be defined in the system unit environment
-node="/usr/bin/octez-$TYPE-rollup-node-$PROTOCOL"
+node="/usr/bin/octez-smart-rollup-node"
 
 "$node" init "$ROLLUP_MODE" config \
     for "$ROLLUP_ALIAS" \
-    --rpc-addr "$ROLLUP_NODE_RPC_ENDPOINT" \
+    with operators \
+    "$ROLLUP_OPERATORS" \
+    --data-dir "$ROLLUP_DATA_DIR" \
     --force
 
-"$node" --endpoint "$NODE_RPC_SCHEME://$NODE_RPC_ADDR" \
-    run "$ROLLUP_MODE" for "$ROLLUP_ALIAS" &
+exec "$node" --endpoint "$NODE_RPC_ENDPOINT" \
+    run "$ROLLUP_MODE" for "$ROLLUP_ALIAS" \
+    with operators "$ROLLUP_OPERATORS" \
+    --data-dir "$ROLLUP_DATA_DIR"

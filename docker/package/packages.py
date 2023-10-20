@@ -506,60 +506,39 @@ packages.append(
 )
 
 
-def mk_rollup_packages(*protos):
-    def mk_units(proto):
-        startup_script = f"/usr/bin/tezos-sc-rollup-node-{proto}-start"
-        service_file = ServiceFile(
-            Unit(after=["network.target"], description=f"Tezos smart rollup node"),
-            Service(
-                environment_files=[f"/etc/default/tezos-smart-rollup-node-{proto}"],
-                environment=[f"PROTOCOL={proto}"],
-                exec_start_pre=[
-                    "+/usr/bin/setfacl -m u:tezos:rwx /run/systemd/ask-password"
-                ],
-                exec_start=startup_script,
-                exec_stop_post=[
-                    "+/usr/bin/setfacl -x u:tezos /run/systemd/ask-password"
-                ],
-                state_directory="tezos",
-                user="tezos",
-                type_="forking",
-                keyring_mode="shared",
-            ),
-            Install(wanted_by=["multi-user.target"]),
-        )
-        return [
-            SystemdUnit(
-                service_file=service_file,
-                startup_script=startup_script.split("/")[-1],
-                startup_script_source="tezos-rollup-node-start",
-                config_file="tezos-rollup-node.conf",
-            ),
-        ]
-
-    def mk_rollup_package(name, proto):
-        proto_snake_case = protocol_numbers[proto] + "_" + proto
-        return TezosBinaryPackage(
-            f"tezos-smart-rollup-{name}-{proto}",
-            f"Tezos smart rollup {name} using {proto}",
-            meta=packages_meta,
-            systemd_units=mk_units(proto) if name == "node" else [],
-            target_proto=proto,
-            additional_native_deps=[
-                "tezos-client",
-                "tezos-node",
-                "tezos-sapling-params",
+def mk_rollup_node():
+    startup_script = f"/usr/bin/tezos-smart-rollup-node-start"
+    service_file = ServiceFile(
+        Unit(after=["network.target"], description=f"Tezos smart rollup node"),
+        Service(
+            environment_files=[f"/etc/default/tezos-smart-rollup-node"],
+            exec_start_pre=[
+                "+/usr/bin/setfacl -m u:tezos:rwx /run/systemd/ask-password"
             ],
-            postinst_steps=daemon_postinst_common,
-            dune_filepath=f"src/proto_{proto_snake_case}/bin_sc_rollup_{name}/main_sc_rollup_{name}_{proto_snake_case}.exe",
-        )
+            exec_start=startup_script,
+            exec_stop_post=["+/usr/bin/setfacl -x u:tezos /run/systemd/ask-password"],
+            state_directory="tezos",
+            user="tezos",
+            type_="simple",
+            keyring_mode="shared",
+        ),
+        Install(wanted_by=["multi-user.target"]),
+    )
+    systemd_units = [
+        SystemdUnit(
+            service_file=service_file,
+            startup_script=startup_script.split("/")[-1],
+            startup_script_source="tezos-rollup-node-start",
+            config_file="tezos-rollup-node.conf",
+        ),
+    ]
 
-    def mk_node_package():
-        return TezosBinaryPackage(
+    return {
+        f"tezos-smart-rollup-node": TezosBinaryPackage(
             f"tezos-smart-rollup-node",
             f"Tezos smart rollup node",
             meta=packages_meta,
-            systemd_units=[],
+            systemd_units=systemd_units,
             additional_native_deps=[
                 "tezos-client",
                 "tezos-node",
@@ -568,16 +547,33 @@ def mk_rollup_packages(*protos):
             postinst_steps=daemon_postinst_common,
             dune_filepath="src/bin_smart_rollup_node/main_smart_rollup_node.exe",
         )
+    }
 
-    packages = ["client"]
-    # FIXME with #740 PR
+
+def mk_rollup_clients(*protos):
+    def mk_rollup_client_package(proto):
+        proto_snake_case = protocol_numbers[proto] + "_" + proto
+        return TezosBinaryPackage(
+            f"tezos-smart-rollup-client-{proto}",
+            f"Tezos smart rollup client using {proto}",
+            meta=packages_meta,
+            target_proto=proto,
+            additional_native_deps=[
+                "tezos-client",
+                "tezos-node",
+                "tezos-sapling-params",
+            ],
+            postinst_steps=daemon_postinst_common,
+            dune_filepath=f"src/proto_{proto_snake_case}/bin_sc_rollup_client/main_sc_rollup_client_{proto_snake_case}.exe",
+        )
+
     return [
-        {f"tezos-smart-rollup-{name}-{proto}": mk_rollup_package(name, proto)}
-        for name in packages
+        {f"tezos-smart-rollup-client-{proto}": mk_rollup_client_package(proto)}
         for proto in protos
-    ] + [{f"tezos-smart-rollup-node": mk_node_package()}]
+    ]
 
 
-packages.extend(mk_rollup_packages("PtNairob", "Proxford"))
+packages.append(mk_rollup_node())
+packages.extend(mk_rollup_clients("PtNairob", "Proxford"))
 
 packages = dict(ChainMap(*packages))

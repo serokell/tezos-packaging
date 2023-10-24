@@ -37,6 +37,9 @@ class TezosBakerProxford < Formula
     # Disable usage of instructions from the ADX extension to avoid incompatibility
     # with old CPUs, see https://gitlab.com/dannywillems/ocaml-bls12-381/-/merge_requests/135/
     ENV["BLST_PORTABLE"]="yes"
+    # Force linker to use libraries from the current brew installation.
+    # Workaround for https://github.com/serokell/tezos-packaging/issues/700
+    ENV["LDFLAGS"] = "-L#{HOMEBREW_PREFIX}/lib"
     # Here is the workaround to use opam 2.0.9 because Tezos is currently not compatible with opam 2.1.0 and newer
     arch = RUBY_PLATFORM.include?("arm64") ? "arm64" : "x86_64"
     system "curl", "-L", "https://github.com/ocaml/opam/releases/download/2.0.9/opam-2.0.9-#{arch}-macos", "--create-dirs", "-o", "#{ENV["HOME"]}/.opam-bin/opam"

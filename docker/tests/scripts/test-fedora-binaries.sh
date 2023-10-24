@@ -7,7 +7,7 @@ set -euo pipefail
 
 for version in $(jq -r '.fedora[]' docker/supported_versions.json); do
     docker build --build-arg dist="$version" --build-arg repo="Tezos" -t fedora-test -f docker/tests/Dockerfile-fedora-test .
-    docker run -rm fedora-test
+    docker run --rm fedora-test
     docker build --build-arg dist="$version" --build-arg repo="Tezos-rc" -t fedora-test -f docker/tests/Dockerfile-fedora-test .
-    docker run -rm fedora-test
+    docker run --rm fedora-test
 done

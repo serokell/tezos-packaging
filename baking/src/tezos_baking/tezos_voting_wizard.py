@@ -513,6 +513,7 @@ class Setup(Setup):
 
         print()
         print("Thank you for voting!")
+        logging.info("Exiting the Tezos Voting Wizard.")
 
 
 def main():

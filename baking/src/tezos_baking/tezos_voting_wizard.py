@@ -139,7 +139,6 @@ ballot_outcome_query = Step(
 def get_node_rpc_endpoint_query(network, default=None):
     url_path = "chains/main/blocks/head/header"
     node_is_alive = lambda host: url_is_reachable(mk_full_url(host, url_path))
-    custom_url_validator = validators.reachable_url(url_path)
 
     relevant_nodes = {
         url: provider
@@ -160,7 +159,7 @@ def get_node_rpc_endpoint_query(network, default=None):
                 validators.required_field,
                 validators.any_of(
                     validators.enum_range(relevant_nodes),
-                    validators.custom_url,
+                    validators.reachable_url(url_path),
                 ),
             ]
         ),

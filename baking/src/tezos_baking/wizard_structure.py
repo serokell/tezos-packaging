@@ -313,7 +313,8 @@ class Setup:
                     print("press Ctrl+C to go back to the key import mode selection.")
                     print(
                         color(
-                            "Waiting for the Ledger Device to appear...", color_green
+                            f"Waiting for the Tezos {ledger_app} to be opened...",
+                            color_green,
                         ),
                         end="",
                         flush=True,

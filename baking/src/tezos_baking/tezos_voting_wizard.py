@@ -77,7 +77,12 @@ Type in 'exit' to quit.
 def wait_for_ledger_app(app_name, client_dir):
     logging.info(f"Waiting for the ledger {app_name} app to be opened")
     print(f"Please make sure the Tezos {app_name} app is open on your ledger.")
-    print()
+    print(
+        color(
+            f"Waiting for the Tezos {app_name} app to be opened...",
+            color_green,
+        )
+    )
     search_string = b"Found a Tezos " + bytes(app_name, "utf8")
     output = b""
     while re.search(search_string, output) is None:
@@ -139,7 +144,6 @@ ballot_outcome_query = Step(
 def get_node_rpc_endpoint_query(network, default=None):
     url_path = "chains/main/blocks/head/header"
     node_is_alive = lambda host: url_is_reachable(mk_full_url(host, url_path))
-    custom_url_validator = validators.reachable_url(url_path)
 
     relevant_nodes = {
         url: provider
@@ -160,7 +164,7 @@ def get_node_rpc_endpoint_query(network, default=None):
                 validators.required_field,
                 validators.any_of(
                     validators.enum_range(relevant_nodes),
-                    validators.custom_url,
+                    validators.reachable_url(url_path),
                 ),
             ]
         ),
@@ -338,6 +342,13 @@ class Setup(Setup):
             hash_to_submit = self.config["new_proposal_hash"]
 
         logging.info("Submitting proposals")
+        if self.check_ledger_use():
+            print(
+                color(
+                    "Waiting for your response to the prompt on your Ledger Device...",
+                    color_green,
+                )
+            )
         result = get_proc_output(
             f"sudo -u tezos {suppress_warning_text} octez-client {self.config['tezos_client_options']} "
             f"submit proposals for {self.config['baker_alias']} {hash_to_submit}"
@@ -401,6 +412,13 @@ class Setup(Setup):
         self.query_step(ballot_outcome_query)
 
         logging.info("Submitting ballot")
+        if self.check_ledger_use():
+            print(
+                color(
+                    "Waiting for your response to the prompt on your Ledger Device...",
+                    color_green,
+                )
+            )
         result = get_proc_output(
             f"sudo -u tezos {suppress_warning_text} octez-client {self.config['tezos_client_options']} "
             f"submit ballot for {self.config['baker_alias']} {self.config['proposal_hashes'][0]} "
@@ -495,6 +513,7 @@ class Setup(Setup):
 
         print()
         print("Thank you for voting!")
+        logging.info("Exiting the Tezos Voting Wizard.")
 
 
 def main():

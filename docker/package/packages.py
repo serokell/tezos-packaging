@@ -217,7 +217,7 @@ def mk_node_unit(
             part_of=[f"tezos-baking-{dependencies_suffix}.service"],
         ),
         Service(
-            environment_files=[f"/etc/default/tezos-node-{suffix}"],
+            environment_files=[f"/etc/default/tezos-node-{dependencies_suffix}"],
             exec_start="/usr/bin/tezos-node-start",
             exec_start_pre=["/usr/bin/tezos-node-prestart"],
             timeout_start_sec="2400s",

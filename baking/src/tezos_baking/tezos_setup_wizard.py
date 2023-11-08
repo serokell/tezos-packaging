@@ -543,7 +543,7 @@ class Setup(Setup):
             # it could happen that `snapshot_version` field is not supplied by provider
             # e.g. marigold snapshots don't supply it
             lambda major, minor, rc, snapshot_version: snapshot_version
-            and compatible_snapshot_version == snapshot_version
+            and compatible_snapshot_version - snapshot_version <= 1
         )
 
         non_rc_on_stable_pred = lambda major, minor, rc, snapshot_version: (

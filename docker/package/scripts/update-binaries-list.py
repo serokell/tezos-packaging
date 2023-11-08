@@ -22,7 +22,7 @@ def main():
     binaries_list_path = os.environ["PWD"] + binaries_list_path_suffix
     with open(binaries_list_path, 'r') as f:
         binaries = [l.strip() for l in f.readlines()]
-
+    print(binaries)
     if not binaries:
         raise Exception('Exception, while reading binaries list: binaries list is empty')
 

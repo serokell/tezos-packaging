@@ -15,5 +15,5 @@ python3 package/scripts/update-binaries-list.py
 
 git add --all
 git commit -m "Updated binaries for $BUILDKITE_TAG release" --gpg-sign="tezos-packaging@serokell.io"
-git push --set-upstream origin "$branch" --force-with-lease
-gh pr create -B master -t "Update list of binaries for $BUILDKITE_TAG" -F ../.github/binaries_update_pr.md
+git push --set-upstream origin "$branch"
+gh pr create -B master -t "Update list of binaries for $BUILDKITE_TAG" -b "Updated list of binaries for $BUILDKITE_TAG version"

@@ -53,4 +53,6 @@ for b in "${binaries[@]}"; do
     "$virtualisation_engine" cp "$container_id:/tezos/$b" "$b"
 done
 printf "%s\n" "${binaries[@]}" > "/tmp/binaries.txt"
+echo "${binaries[@]}"
+echo "$(ls /tmp | grep binaries.txt)"
 "$virtualisation_engine" rm -v "$container_id"

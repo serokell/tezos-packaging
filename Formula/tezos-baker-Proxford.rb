@@ -13,7 +13,7 @@ class TezosBakerProxford < Formula
 
   version "v18.0-1"
 
-  build_dependencies = %w[pkg-config coreutils autoconf rsync wget rustup-init cmake]
+  build_dependencies = %w[pkg-config coreutils autoconf rsync wget rustup-init cmake opam]
   build_dependencies.each do |dependency|
     depends_on dependency => :build
   end
@@ -42,9 +42,6 @@ class TezosBakerProxford < Formula
     ENV["LDFLAGS"] = "-L#{HOMEBREW_PREFIX}/lib"
     # Here is the workaround to use opam 2.0.9 because Tezos is currently not compatible with opam 2.1.0 and newer
     arch = RUBY_PLATFORM.include?("arm64") ? "arm64" : "x86_64"
-    system "curl", "-L", "https://github.com/ocaml/opam/releases/download/2.0.9/opam-2.0.9-#{arch}-macos", "--create-dirs", "-o", "#{ENV["HOME"]}/.opam-bin/opam"
-    system "chmod", "+x", "#{ENV["HOME"]}/.opam-bin/opam"
-    ENV["PATH"]="#{ENV["HOME"]}/.opam-bin:#{ENV["PATH"]}"
     system "rustup-init", "--default-toolchain", "1.64.0", "-y"
     system "opam", "init", "--bare", "--debug", "--auto-setup", "--disable-sandboxing"
     system ["source .cargo/env",  "make build-deps"].join(" && ")

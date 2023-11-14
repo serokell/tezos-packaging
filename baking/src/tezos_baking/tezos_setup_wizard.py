@@ -11,7 +11,6 @@ Asks questions, validates answers, and executes the appropriate steps using the 
 import os, sys, shutil
 import readline
 import re
-import traceback
 import time
 import urllib.request
 import json
@@ -1063,12 +1062,14 @@ def main():
                 + setup.config["network"]
                 + ".service"
             )
-        logging.error(f"{str(e)}")
-        print_and_log("Error in Tezos Setup Wizard, exiting.")
-        logfile = "tezos_setup.log"
-        with open(logfile, "a") as f:
-            f.write(traceback.format_exc() + "\n")
-        print("The error has been logged to", os.path.abspath(logfile))
+
+        message = "Error in the Tezos Setup Wizard, exiting."
+        print("\n" + color(message, color_red))
+        logging.error(message)
+
+        log_exception(exception=e, logfile="tezos-setup.log")
+
+        logging.info("Exiting the Tezos Setup Wizard.")
         sys.exit(1)
 
 

@@ -108,6 +108,7 @@ def color(input, colorcode):
 
 color_red = "\x1b[1;31m"
 color_green = "\x1b[1;32m"
+color_yellow = "\x1b[1;33m"
 
 
 def yes_or_no(prompt, default=None):

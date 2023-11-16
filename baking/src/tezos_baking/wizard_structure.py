@@ -95,7 +95,7 @@ def search_json_with_default(json_filepath, field, default):
 
 
 def setup_logger(log_file):
-    log_dir = f"{os.getenv('HOME')}/.tezos-logs/"
+    log_dir = f"{os.getenv('HOME')}/.tezos-logs/.debug"
     os.makedirs(log_dir, exist_ok=True)
     log_file = os.path.join(log_dir, log_file)
     logging.basicConfig(
@@ -107,9 +107,36 @@ def setup_logger(log_file):
     )
 
 
-def print_and_log(s, log=logging.info):
-    print(s)
-    log(s)
+def print_and_log(message, log=logging.info, colorcode=None):
+    print(color(message, colorcode) if colorcode else message)
+    log(message)
+
+
+def log_exception(exception, logfile):
+    import traceback
+    from datetime import datetime
+
+    logging.error(f"{str(exception)}")
+
+    error_output = traceback.format_exc()
+
+    print("\nHere are last 10 lines of the error output:")
+    print("\n".join(error_output.splitlines()[-9:]))
+
+    log_dir = f".tezos-logs/"
+
+    with open(os.path.join(os.getenv("HOME"), log_dir, logfile), "a") as f:
+        f.write(datetime.now().strftime("%H:%M:%S %d/%m/%Y:"))
+        f.write("\n")
+        f.write(error_output)
+        f.write("\n")
+
+    print(
+        "\nThe error has been logged to the log file:",
+        os.path.join("~", log_dir, logfile),
+    )
+    print("To see the full log, please run:")
+    print(f"> cat {os.path.join('~', log_dir, logfile)}")
 
 
 class Setup:

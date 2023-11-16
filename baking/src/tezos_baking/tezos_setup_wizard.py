@@ -11,7 +11,6 @@ Asks questions, validates answers, and executes the appropriate steps using the 
 import os, sys, shutil
 import readline
 import re
-import traceback
 import time
 import urllib.request
 import json
@@ -601,37 +600,31 @@ class Setup(Setup):
             snapshot_metadata = self.extract_relevant_snapshot(snapshot_array)
 
             if snapshot_metadata is None:
-                message = f"No suitable snapshot found from the {name} provider."
-                print(
-                    color(
-                        message,
-                        color_red,
-                    )
+                print_and_log(
+                    f"No suitable snapshot found from the {name} provider.",
+                    log=logging.warning,
+                    colorcode=color_yellow,
                 )
-                logging.warning(message)
             else:
                 self.config["snapshots"][name] = snapshot_metadata
 
         except urllib.error.URLError:
-            message = f"\nCouldn't collect snapshot metadata from {json_url} due to networking issues.\n"
-            print(
-                color(
-                    message,
-                    color_red,
-                )
+            print_and_log(
+                f"\nCouldn't collect snapshot metadata from {json_url} due to networking issues.\n",
+                log=logging.error,
+                colorcode=color_red,
             )
-            logging.error(message)
         except ValueError:
-            message = f"\nCouldn't collect snapshot metadata from {json_url} due to format mismatch.\n"
-            print(
-                color(
-                    message,
-                    color_red,
-                )
+            print_and_log(
+                f"\nCouldn't collect snapshot metadata from {json_url} due to format mismatch.\n",
+                log=logging.error,
+                colorcode=color_red,
             )
-            logging.error(message)
         except Exception as e:
-            print_and_log(f"\nUnexpected error handling snapshot metadata:\n{e}\n")
+            print_and_log(
+                f"\nUnexpected error handling snapshot metadata:\n{e}\n",
+                log=logging.error,
+            )
 
     def output_snapshot_metadata(self, name):
         from datetime import datetime
@@ -1063,12 +1056,16 @@ def main():
                 + setup.config["network"]
                 + ".service"
             )
-        logging.error(f"{str(e)}")
-        print_and_log("Error in Tezos Setup Wizard, exiting.")
-        logfile = "tezos_setup.log"
-        with open(logfile, "a") as f:
-            f.write(traceback.format_exc() + "\n")
-        print("The error has been logged to", os.path.abspath(logfile))
+
+        print_and_log(
+            "Error in the Tezos Setup Wizard, exiting.",
+            log=logging.error,
+            colorcode=color_red,
+        )
+
+        log_exception(exception=e, logfile="tezos-setup.log")
+
+        logging.info("Exiting the Tezos Setup Wizard.")
         sys.exit(1)
 
 

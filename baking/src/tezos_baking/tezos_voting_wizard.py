@@ -536,13 +536,16 @@ def main():
         logging.info("Exiting the Tezos Voting Wizard.")
         sys.exit(1)
     except Exception as e:
-        print("Error in Tezos Voting Wizard, exiting.")
-        logging.error(f"{str(e)}")
+
+        print_and_log(
+            "Error in the Tezos Voting Wizard, exiting.",
+            log=logging.error,
+            colorcode=color_red,
+        )
+
+        log_exception(exception=e, logfile="tezos-vote.log")
+
         logging.info("Exiting the Tezos Voting Wizard.")
-        logfile = "tezos_vote.log"
-        with open(logfile, "a") as f:
-            f.write(str(e) + "\n")
-        print("The error has been logged to", os.path.abspath(logfile))
         sys.exit(1)
 
 

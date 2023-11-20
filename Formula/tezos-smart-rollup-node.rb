@@ -3,7 +3,7 @@
 # SPDX-FileCopyrightText: 2023 Oxhead Alpha
 # SPDX-License-Identifier: LicenseRef-MIT-OA
 
-class TezosSmartRollupNodePtnairob < Formula
+class TezosSmartRollupNode < Formula
   @all_bins = []
 
   class << self
@@ -24,10 +24,10 @@ class TezosSmartRollupNodePtnairob < Formula
   dependencies.each do |dependency|
     depends_on dependency
   end
-  desc "Tezos smart contract rollup node for PtNairob"
+  desc "Tezos smart contract rollup node"
 
   bottle do
-    root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosSmartRollupNodePtnairob.version}/"
+    root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosSmartRollupNode.version}/"
   end
 
   def make_deps
@@ -61,7 +61,7 @@ class TezosSmartRollupNodePtnairob < Formula
 
       set -euo pipefail
 
-      node="#{bin}/octez-smart-rollup-node-PtNairob"
+      node="#{bin}/octez-smart-rollup-node"
 
       "$node" init "$ROLLUP_MODE" config \
           for "$ROLLUP_ALIAS" \
@@ -71,21 +71,21 @@ class TezosSmartRollupNodePtnairob < Formula
       "$node" --endpoint "$NODE_RPC_SCHEME://$NODE_RPC_ADDR" \
           run "$ROLLUP_MODE" for "$ROLLUP_ALIAS"
       EOS
-    File.write("tezos-smart-rollup-node-PtNairob-start", startup_contents)
-    bin.install "tezos-smart-rollup-node-PtNairob-start"
+    File.write("tezos-smart-rollup-node-start", startup_contents)
+    bin.install "tezos-smart-rollup-node-start"
     make_deps
-    install_template "src/proto_017_PtNairob/bin_sc_rollup_node/main_sc_rollup_node_017_PtNairob.exe",
-                     "_build/default/src/proto_017_PtNairob/bin_sc_rollup_node/main_sc_rollup_node_017_PtNairob.exe",
-                     "octez-smart-rollup-node-PtNairob"
+    install_template "src/bin_smart_rollup_node/main_smart_rollup_node.exe",
+                     "_build/default/src/bin_smart_rollup_node/main_smart_rollup_node.exe",
+                     "octez-smart-rollup-node"
   end
 
   service do
-    run opt_bin/"tezos-smart-rollup-node-PtNairob-start"
+    run opt_bin/"tezos-smart-rollup-node-start"
     require_root true
     environment_variables TEZOS_CLIENT_DIR: var/"lib/tezos/client", NODE_RPC_ENDPOINT: "http://localhost:8732", ROLLUP_NODE_RPC_ENDPOINT: "127.0.0.1:8472", ROLLUP_MODE: "observer", ROLLUP_ALIAS: "rollup"
     keep_alive true
-    log_path var/"log/tezos-smart-rollup-node-PtNairob.log"
-    error_log_path var/"log/tezos-smart-rollup-node-PtNairob.log"
+    log_path var/"log/tezos-smart-rollup-node.log"
+    error_log_path var/"log/tezos-smart-rollup-node.log"
   end
 
   def post_install

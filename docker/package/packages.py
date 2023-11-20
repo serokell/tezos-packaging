@@ -554,12 +554,28 @@ def mk_rollup_packages(*protos):
             dune_filepath=f"src/proto_{proto_snake_case}/bin_sc_rollup_{name}/main_sc_rollup_{name}_{proto_snake_case}.exe",
         )
 
-    packages = ["node", "client"]
+    def mk_node_package():
+        return TezosBinaryPackage(
+            f"tezos-smart-rollup-node",
+            f"Tezos smart rollup node",
+            meta=packages_meta,
+            systemd_units=[],
+            additional_native_deps=[
+                "tezos-client",
+                "tezos-node",
+                "tezos-sapling-params",
+            ],
+            postinst_steps=daemon_postinst_common,
+            dune_filepath="src/bin_smart_rollup_node/main_smart_rollup_node.exe",
+        )
+
+    packages = ["client"]
+    # FIXME with #740 PR
     return [
         {f"tezos-smart-rollup-{name}-{proto}": mk_rollup_package(name, proto)}
         for name in packages
         for proto in protos
-    ]
+    ] + [{f"tezos-smart-rollup-node": mk_node_package()}]
 
 
 packages.extend(mk_rollup_packages("PtNairob", "Proxford"))

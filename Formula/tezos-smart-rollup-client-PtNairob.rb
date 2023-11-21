@@ -27,6 +27,7 @@ class TezosSmartRollupClientPtnairob < Formula
 
   bottle do
     root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosSmartRollupClientPtnairob.version}/"
+    sha256 cellar: :any, monterey: "ca790dbd0a721d5e89ea43dabdcde671aa0feaa3895221496b3c19401adb7f5d"
   end
 
   def make_deps

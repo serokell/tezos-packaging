@@ -3,7 +3,7 @@
 # SPDX-FileCopyrightText: 2023 Oxhead Alpha
 # SPDX-License-Identifier: LicenseRef-MIT-OA
 
-class TezosSmartRollupNodeProxford < Formula
+class TezosSmartRollupNode < Formula
   @all_bins = []
 
   class << self
@@ -11,9 +11,9 @@ class TezosSmartRollupNodeProxford < Formula
   end
   homepage "https://gitlab.com/tezos/tezos"
 
-  url "https://gitlab.com/tezos/tezos.git", :tag => "v18.0", :shallow => false
+  url "https://gitlab.com/tezos/tezos.git", :tag => "v18.1", :shallow => false
 
-  version "v18.0-1"
+  version "v18.1-1"
 
   build_dependencies = %w[pkg-config coreutils autoconf rsync wget rustup-init cmake opam]
   build_dependencies.each do |dependency|
@@ -24,13 +24,10 @@ class TezosSmartRollupNodeProxford < Formula
   dependencies.each do |dependency|
     depends_on dependency
   end
-  desc "Tezos smart contract rollup node for Proxford"
+  desc "Tezos smart contract rollup node"
 
   bottle do
-    root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosSmartRollupNodeProxford.version}/"
-    sha256 cellar: :any, arm64_big_sur: "1ed9e06d27ae89c43efb580c45ca95f8194b25f3ae0374164e623e1cc4e5e8e9"
-    sha256 cellar: :any, big_sur: "a2c807efe7a2b4291c59cdd744e94beae94aefd6c3995dc6a7c79d96aba63693"
-    sha256 cellar: :any, monterey: "3e823434a9e2d4ad146f17c25c213686216c68463a047d14e16657776892a9ed"
+    root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosSmartRollupNode.version}/"
   end
 
   def make_deps
@@ -64,7 +61,7 @@ class TezosSmartRollupNodeProxford < Formula
 
       set -euo pipefail
 
-      node="#{bin}/octez-smart-rollup-node-Proxford"
+      node="#{bin}/octez-smart-rollup-node"
 
       "$node" init "$ROLLUP_MODE" config \
           for "$ROLLUP_ALIAS" \
@@ -74,21 +71,21 @@ class TezosSmartRollupNodeProxford < Formula
       "$node" --endpoint "$NODE_RPC_SCHEME://$NODE_RPC_ADDR" \
           run "$ROLLUP_MODE" for "$ROLLUP_ALIAS"
       EOS
-    File.write("tezos-smart-rollup-node-Proxford-start", startup_contents)
-    bin.install "tezos-smart-rollup-node-Proxford-start"
+    File.write("tezos-smart-rollup-node-start", startup_contents)
+    bin.install "tezos-smart-rollup-node-start"
     make_deps
-    install_template "src/proto_018_Proxford/bin_sc_rollup_node/main_sc_rollup_node_018_Proxford.exe",
-                     "_build/default/src/proto_018_Proxford/bin_sc_rollup_node/main_sc_rollup_node_018_Proxford.exe",
-                     "octez-smart-rollup-node-Proxford"
+    install_template "src/bin_smart_rollup_node/main_smart_rollup_node.exe",
+                     "_build/default/src/bin_smart_rollup_node/main_smart_rollup_node.exe",
+                     "octez-smart-rollup-node"
   end
 
   service do
-    run opt_bin/"tezos-smart-rollup-node-Proxford-start"
+    run opt_bin/"tezos-smart-rollup-node-start"
     require_root true
     environment_variables TEZOS_CLIENT_DIR: var/"lib/tezos/client", NODE_RPC_ENDPOINT: "http://localhost:8732", ROLLUP_NODE_RPC_ENDPOINT: "127.0.0.1:8472", ROLLUP_MODE: "observer", ROLLUP_ALIAS: "rollup"
     keep_alive true
-    log_path var/"log/tezos-smart-rollup-node-Proxford.log"
-    error_log_path var/"log/tezos-smart-rollup-node-Proxford.log"
+    log_path var/"log/tezos-smart-rollup-node.log"
+    error_log_path var/"log/tezos-smart-rollup-node.log"
   end
 
   def post_install

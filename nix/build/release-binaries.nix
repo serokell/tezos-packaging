@@ -67,6 +67,14 @@ in [
     '';
     supports = protocolsFormatted;
   }
+  {
+    name = "octez-smart-rollup-node";
+    description = ''
+      Tezos smart contract rollup node.
+      For more info please check - https://tezos.gitlab.io/active/smart_rollups.html#tools
+    '';
+    supports = protocolsFormatted;
+  }
 ] ++ builtins.concatMap (protocol: [
   {
     name = "octez-baker-${protocol}";
@@ -88,14 +96,6 @@ in [
     name = "octez-smart-rollup-client-${protocol}";
     description = ''
       Smart contract rollup CLI client for ${protocol}.
-      For more info please check - https://tezos.gitlab.io/active/smart_rollups.html#tools
-    '';
-    supports = protocol;
-  }
-  {
-    name = "octez-smart-rollup-node-${protocol}";
-    description = ''
-      Tezos smart contract rollup node for ${protocol}.
       For more info please check - https://tezos.gitlab.io/active/smart_rollups.html#tools
     '';
     supports = protocol;

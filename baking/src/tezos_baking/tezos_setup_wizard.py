@@ -211,7 +211,7 @@ def network_name_or_teztnets_url(network):
         return f"https://teztnets.xyz/{network}"
 
 
-compatible_snapshot_version = 6
+compatible_snapshot_version = 7
 
 
 # Steps
@@ -559,7 +559,7 @@ class Setup(Setup):
             # it could happen that `snapshot_version` field is not supplied by provider
             # e.g. marigold snapshots don't supply it
             lambda major, minor, rc, snapshot_version: snapshot_version
-            and compatible_snapshot_version - snapshot_version <= 1
+            and compatible_snapshot_version - snapshot_version <= 2
         )
 
         non_rc_on_stable_pred = lambda major, minor, rc, snapshot_version: (

@@ -47,9 +47,5 @@ for f in "${formulae[@]}"; do
 done
 
 brew uninstall ./Formula/tezos-sapling-params.rb
-# opam doesn't always handle the situation when the same library is present for
-# multiple architectures, see https://github.com/ocaml/opam-repository/issues/20941
-# so all dependencies are cleared after bottles builds to avoid errors
-brew autoremove
 
 exit "$retval"

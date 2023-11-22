@@ -2,7 +2,6 @@
 # SPDX-License-Identifier: LicenseRef-MIT-OA
 
 import os
-import sys
 import json
 
 binaries_json_path_suffix = "tests/binaries.json"

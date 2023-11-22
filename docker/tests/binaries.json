@@ -35,6 +35,7 @@
         "tezos-codec",
         "tezos-signer",
         "tezos-admin-client",
-        "tezos-client"
+        "tezos-client",
+        "tezos-fake-binary"
     ]
 }

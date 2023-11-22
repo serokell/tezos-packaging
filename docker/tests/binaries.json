@@ -1,20 +1,19 @@
 {
     "released": [
-        "tezos-smart-rollup-node",
-        "tezos-smart-rollup-wasm-debugger"
-        "tezos-baking",
-        "tezos-sapling-params",
-        "tezos-accuser-Proxford",
-        "tezos-baker-Proxford",
-        "tezos-accuser-PtNairob",
-        "tezos-baker-PtNairob",
-        "tezos-node",
-        "tezos-dac-node",
-        "tezos-dac-client",
-        "tezos-codec",
-        "tezos-signer",
-        "tezos-admin-client",
-        "tezos-client"
+        "octez-smart-rollup-wasm-debugger",
+        "octez-smart-rollup-node",
+        "octez-dac-client",
+        "octez-dac-node",
+        "octez-signer",
+        "octez-proxy-server",
+        "octez-codec",
+        "octez-client",
+        "octez-admin-client",
+        "octez-node",
+        "octez-accuser-Proxford",
+        "octez-baker-Proxford",
+        "octez-accuser-PtNairob",
+        "octez-baker-PtNairob"
     ],
     "candidates": [
         "tezos-smart-rollup-node",

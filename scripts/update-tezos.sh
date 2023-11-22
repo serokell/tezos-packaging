@@ -60,6 +60,9 @@ if [[ "$latest_upstream_tag" != "$our_tezos_tag" ]]; then
       (true; echo "letter_version wasn't reset")
 
     ./scripts/update-release-binaries.py
+    pushd docker
+    python3 -m package.update-test-binaries-list
+    popd
     git commit -a -m "[Chore] Update release binaries for $latest_upstream_tag" --gpg-sign="tezos-packaging@serokell.io" || \
       (true; echo "lists of binaries and protocols weren't updated")
 

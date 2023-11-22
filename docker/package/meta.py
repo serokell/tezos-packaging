@@ -25,16 +25,16 @@ class PackagesMeta:
         self.license_version = license_version
 
 
-tag = os.environ["OCTEZ_VERSION"]
-for (i, c) in enumerate(tag):
+meta_json_contents = json.load(
+    open(f"{os.path.dirname(__file__)}/../../meta.json", "r")
+)
+
+tag = os.environ.get("OCTEZ_VERSION", meta_json_contents["tezos_ref"])
+for i, c in enumerate(tag):
     if c.isdigit():
         digit_index = i
         break
 version = tag[digit_index:]
-
-meta_json_contents = json.load(
-    open(f"{os.path.dirname(__file__)}/../../meta.json", "r")
-)
 packages_meta = PackagesMeta(
     tag=tag,
     version=version,

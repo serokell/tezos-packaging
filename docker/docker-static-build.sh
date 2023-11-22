@@ -52,4 +52,5 @@ container_id="$("$virtualisation_engine" create alpine-tezos)"
 for b in "${binaries[@]}"; do
     "$virtualisation_engine" cp "$container_id:/tezos/$b" "$b"
 done
+printf "%s\n" "${binaries[@]}" > "/tmp/binaries.txt"
 "$virtualisation_engine" rm -v "$container_id"

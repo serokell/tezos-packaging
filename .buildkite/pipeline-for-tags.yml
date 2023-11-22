@@ -84,6 +84,7 @@ steps:
    - eval "$SET_VERSION"
    - cd docker
    - ./docker-static-build.sh
+   - buildkite-agent artifact upload /tmp/binaries.txt
    artifact_paths:
      - ./docker/octez-*
    agents:
@@ -164,3 +165,14 @@ steps:
    - mkdir -p "Big Sur"
    - nix develop .#buildkite -c gh release download "$BUILDKITE_TAG" -D "Big Sur/" -p "*big_sur.bottle.tar.gz"
    - nix develop .#autorelease -c ./scripts/sync-bottle-hashes.sh "$BUILDKITE_TAG" "Big Sur"
+
+ - label: Update binaries list
+   depends_on:
+   - "build-via-docker"
+   - "add-bigsur-hashes"
+   if: build.tag =~ /^v.*-1/
+   key: update-binaries
+   commands:
+    - buildkite-agent artifact download tmp/binaries.txt docker --step "build-via-docker"
+    - cd docker
+    - nix develop .#autorelease -c ./update-binaries.sh

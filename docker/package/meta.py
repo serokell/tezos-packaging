@@ -16,7 +16,6 @@ class PackagesMeta:
         self.maintainer = maintainer
         self.license_version = license_version
 
-
 version = ""
 with open("meta.json", "r") as f:
     version = json.load(f)["tezos_ref"]

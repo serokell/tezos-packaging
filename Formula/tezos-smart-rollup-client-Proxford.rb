@@ -27,6 +27,9 @@ class TezosSmartRollupClientProxford < Formula
 
   bottle do
     root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosSmartRollupClientProxford.version}/"
+    sha256 cellar: :any, big_sur: "4daff8a29e8f5db2efb83c6939b4a20f8076250c96f9da8713ddf836b823a03e"
+    sha256 cellar: :any, arm64_big_sur: "60b43a409235d8d52e2141a3474bb51887731f901fab8d363dde429c7899edf1"
+    sha256 cellar: :any, monterey: "5565e74bff9ccc7ded44b550562669b86b5e8ceaa2052b410c082cff63d58c56"
   end
 
   def make_deps

@@ -28,6 +28,9 @@ class TezosSmartRollupNode < Formula
 
   bottle do
     root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosSmartRollupNode.version}/"
+    sha256 cellar: :any, big_sur: "154ddf194df246355f55890f8191f73ebfc5b19e1dd494f6548efbb9a907454a"
+    sha256 cellar: :any, arm64_big_sur: "b1e852ffe893c84b0b6a246b71007c0339e076e3ebe873f6a0ed2fabd5b9f101"
+    sha256 cellar: :any, monterey: "07328eb0fc4639d19d2736d0342311c9842bc10050af9a644756a3802462c6d1"
   end
 
   def make_deps

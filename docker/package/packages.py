@@ -513,7 +513,7 @@ def mk_rollup_packages(*protos):
             Unit(after=["network.target"], description=f"Tezos smart rollup node"),
             Service(
                 environment_files=[f"/etc/default/tezos-smart-rollup-node-{proto}"],
-                environment=[f"PROTOCOL={proto}", f"TYPE=sc"],
+                environment=[f"PROTOCOL={proto}"],
                 exec_start_pre=[
                     "+/usr/bin/setfacl -m u:tezos:rwx /run/systemd/ask-password"
                 ],

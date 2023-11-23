@@ -36,7 +36,7 @@ tezos-setup
 You can also read [the dedicated article](./docs/baking.md) to find out more about
 this setup, the binaries, and the services used.
 
-For setting up experimental transaction rollup node, see [this doc](./docs/tx-rollup.md).
+For setting up experimental smart rollup node, see [this doc](./docs/smart-rollup.md).
 
 #### Voting on Ubuntu
 

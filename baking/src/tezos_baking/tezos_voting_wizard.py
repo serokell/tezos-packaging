@@ -194,11 +194,6 @@ def get_key_mode_query(modes):
 
 
 class Setup(Setup):
-
-    # Check whether the baker_alias account is set up to use ledger
-    def check_ledger_use(self):
-        return bool(re.match(ledger_regex.decode(), self.config["baker_key_value"]))
-
     def check_baking_service(self):
         net = self.config["network"]
         try:

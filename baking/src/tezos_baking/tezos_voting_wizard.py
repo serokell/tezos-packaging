@@ -49,13 +49,6 @@ parser.add_argument(
 
 parsed_args = parser.parse_args()
 
-# Regexes
-
-ledger_regex = b"ledger:\/\/[\w\-]+\/[\w\-]+\/[\w']+\/[\w']+"
-protocol_hash_regex = (
-    b"P[123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]{50}"
-)
-
 
 # Wizard CLI utility
 
@@ -194,11 +187,6 @@ def get_key_mode_query(modes):
 
 
 class Setup(Setup):
-
-    # Check whether the baker_alias account is set up to use ledger
-    def check_ledger_use(self):
-        return bool(re.match(ledger_regex.decode(), self.config["baker_key_value"]))
-
     def check_baking_service(self):
         net = self.config["network"]
         try:

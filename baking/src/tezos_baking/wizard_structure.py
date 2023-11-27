@@ -243,6 +243,10 @@ class Setup:
         )
         return str(json.load(response)["level"])
 
+    # Check whether the baker_alias account is set up to use ledger
+    def check_ledger_use(self, key=None):
+        return bool(re.match(ledger_regex.decode(), self.config["baker_key_value"]))
+
     # Check if an account with the baker_alias alias already exists, and ask the user
     # if it can be overwritten.
     def check_baker_account(self):

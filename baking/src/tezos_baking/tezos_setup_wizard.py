@@ -980,7 +980,11 @@ block timestamp: {timestamp} ({time_ago})
         print()
         tezos_client_options = self.get_tezos_client_options()
         baker_alias = self.config["baker_alias"]
-        if self.config["key_import_mode"] == "ledger":
+        self.config["baker_key_value"], _ = get_key_address(
+            tezos_client_options, baker_alias
+        )
+
+        if self.check_ledger_use():
             print(
                 color(
                     "Waiting for your response to the prompt on your Ledger Device...",

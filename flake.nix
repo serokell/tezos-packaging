@@ -10,7 +10,9 @@
 
     nixpkgs-unstable.url = "github:nixos/nixpkgs/nixos-unstable";
 
-    nixpkgs.url = "github:serokell/nixpkgs";
+    nixpkgs.url = "github:serokell/nixpkgs?ref=karandit/repin-23-11-2023";
+    serokell-nix.url = "github:serokell/serokell.nix?ref=karandit/OPS-1514-repin-nixpkgs";
+    serokell-nix.inputs.nixpkgs.follows = "nixpkgs";
 
     nix.url = "github:nixos/nix";
 

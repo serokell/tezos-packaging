@@ -982,31 +982,18 @@
         "type": "github"
       }
     },
-    "nixpkgs_10": {
-      "locked": {
-        "lastModified": 1674736538,
-        "narHash": "sha256-/DszFMkAgYyB9dTWKkoZa9i0zcrA6Z4hYrOr/u/FSxY=",
-        "owner": "serokell",
-        "repo": "nixpkgs",
-        "rev": "1dfdbb65d77430fc0935e8592d0abc4addcce711",
-        "type": "github"
-      },
-      "original": {
-        "id": "nixpkgs",
-        "type": "indirect"
-      }
-    },
     "nixpkgs_2": {
       "locked": {
-        "lastModified": 1674736538,
-        "narHash": "sha256-/DszFMkAgYyB9dTWKkoZa9i0zcrA6Z4hYrOr/u/FSxY=",
+        "lastModified": 1700813934,
+        "narHash": "sha256-IdlI60suH7yVBU8m4wGfDqTr4dLAzWc2eWCUpNeaKUs=",
         "owner": "serokell",
         "repo": "nixpkgs",
-        "rev": "1dfdbb65d77430fc0935e8592d0abc4addcce711",
+        "rev": "0f42a542b4dc890901c36d708eae797beb6c7d77",
         "type": "github"
       },
       "original": {
         "owner": "serokell",
+        "ref": "karandit/repin-23-11-2023",
         "repo": "nixpkgs",
         "type": "github"
       }
@@ -1268,19 +1255,23 @@
         "gitignore-nix": "gitignore-nix",
         "haskell-nix": "haskell-nix",
         "nix": "nix_3",
-        "nixpkgs": "nixpkgs_10"
+        "nixpkgs": [
+          "nixpkgs"
+        ]
       },
       "locked": {
-        "lastModified": 1691752608,
-        "narHash": "sha256-5rACo9LXUgvkp7MLqMVV7FOQSLsFoyqAXLwFvJ0BG/g=",
+        "lastModified": 1700818075,
+        "narHash": "sha256-4M8tf78g7eaIWVj7N4qmA+WWBAupER/sQCleo+nliqc=",
         "owner": "serokell",
         "repo": "serokell.nix",
-        "rev": "54e230e895e44049d45cca16433ddc9fa5ab6c6a",
+        "rev": "5c83153ddf3befead0a074091bb1c97b64990574",
         "type": "github"
       },
       "original": {
-        "id": "serokell-nix",
-        "type": "indirect"
+        "owner": "serokell",
+        "ref": "karandit/OPS-1514-repin-nixpkgs",
+        "repo": "serokell.nix",
+        "type": "github"
       }
     },
     "stackage": {

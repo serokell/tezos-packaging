@@ -49,13 +49,6 @@ parser.add_argument(
 
 parsed_args = parser.parse_args()
 
-# Regexes
-
-ledger_regex = b"ledger:\/\/[\w\-]+\/[\w\-]+\/[\w']+\/[\w']+"
-protocol_hash_regex = (
-    b"P[123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]{50}"
-)
-
 
 # Wizard CLI utility
 

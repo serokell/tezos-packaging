@@ -2,11 +2,10 @@
 # SPDX-License-Identifier: LicenseRef-MIT-OA
 
 import os
-import sys
 import json
+from .packages import packages as all_packages
 
 binaries_json_path_suffix = "tests/binaries.json"
-binaries_list_path_suffix = "tmp/binaries.txt"
 
 
 def update_binaries(binaries, field):
@@ -23,13 +22,7 @@ def update_binaries(binaries, field):
 def main():
     tag = os.environ["BUILDKITE_TAG"]
     binaries = []
-
-    binaries_list_path = os.path.join(os.environ["PWD"], binaries_list_path_suffix)
-    with open(binaries_list_path, "r") as f:
-        binaries = [l.strip().replace("octez", "tezos") for l in f.readlines()]
-
-    binaries += ["tezos-baking", "tezos-sampling-params"]
-
+    binaries = list(all_packages.keys())
     if not binaries:
         raise Exception(
             "Exception, while reading binaries list: binaries list is empty"
@@ -38,10 +31,7 @@ def main():
     field = "candidates" if "rc" in tag else "released"
 
     update_binaries(binaries, field)
-    os.remove(binaries_list_path)
 
 
 if __name__ == "__main__":
     main()
-
-

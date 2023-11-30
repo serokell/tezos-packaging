@@ -11,10 +11,14 @@ git config --local user.name "$bot_name"
 git fetch --all
 git checkout -B "$branch"
 
-python3 package/scripts/update-binaries-list.py
+python3 -m package.update-binaries-list
 
-git add --all
-git commit -m "Updated binaries for $BUILDKITE_TAG release" --gpg-sign="tezos-packaging@serokell.io"
-git push --set-upstream origin "$branch"
-gh pr create -B master -t "Update list of binaries for $BUILDKITE_TAG" -F ../.github/binaries_list_update_pull_request.md
+git add tests/binaries.json
+if [ -n "$(git diff --staged)" ]; then
+    git commit -m "Updated binaries for $BUILDKITE_TAG release" --gpg-sign="tezos-packaging@serokell.io"
+    git push --set-upstream origin "$branch"
+    gh pr create -B master -t "Update list of binaries for $BUILDKITE_TAG" -F ../.github/binaries_list_update_pull_request.md
+else
+    echo "Git diff is empty. Nothing to commit."
+fi
 

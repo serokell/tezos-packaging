@@ -84,7 +84,6 @@ steps:
    - eval "$SET_VERSION"
    - cd docker
    - ./docker-static-build.sh
-   - buildkite-agent artifact upload /tmp/binaries.txt
    artifact_paths:
      - ./docker/octez-*
    agents:
@@ -173,6 +172,4 @@ steps:
    if: build.tag =~ /^v.*-1/
    key: update-binaries
    commands:
-    - buildkite-agent artifact download tmp/binaries.txt docker --step "build-via-docker"
-    - cd docker
-    - nix develop .#autorelease -c ./update-binaries-list.sh
+      - nix develop .#autorelease -c ./update-binaries-list.sh

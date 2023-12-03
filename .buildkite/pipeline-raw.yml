@@ -57,8 +57,6 @@ steps:
    - ./docker-static-build.sh
    artifact_paths:
      - ./docker/octez-*
-   agents:
-     queue: "docker"
    only_changes: &static_binaries_changes_regexes
    - docker/build/.*.sh
    - docker/build/Dockerfile
@@ -105,8 +103,6 @@ steps:
      - ./out/*
    branches: "!master"
    timeout_in_minutes: 60
-   agents:
-     queue: "docker"
    only_changes: &ubuntu_native_packaging_changes_regexes
    - docker/package/.*
    - docker/build/ubuntu/build.py
@@ -125,8 +121,6 @@ steps:
    # It takes much time to build binary package, so we do it only on master
    branches: "master"
    timeout_in_minutes: 240
-   agents:
-     queue: "docker"
    only_changes: *ubuntu_native_packaging_changes_regexes
 
  - label: test rpm source packages via docker
@@ -137,8 +131,6 @@ steps:
      - ./out/*
    branches: "!master"
    timeout_in_minutes: 60
-   agents:
-     queue: "docker"
    only_changes: &fedora_native_packaging_changes_regexes
    - docker/package/.*
    - docker/build/fedora/build.py
@@ -157,16 +149,12 @@ steps:
    # It takes much time to build binary package, so we do it only on master
    branches: "master"
    timeout_in_minutes: 180
-   agents:
-     queue: "docker"
    only_changes: *fedora_native_packaging_changes_regexes
 
  - label: build deb packages with static binaries
    key: build-static-deb
    depends_on:
     - "build-via-docker"
-   agents:
-     queue: "docker"
    commands:
    - eval "$SET_VERSION"
    - buildkite-agent artifact download "docker/octez-*" . --step build-via-docker
@@ -180,8 +168,6 @@ steps:
    - eval "$SET_VERSION"
    - nix develop .#autorelease -c ./gen_systemd_service_file.py tezos-node
    branches: "!master"
-   agents:
-     queue: "docker"
    only_changes:
    - gen_systemd_service_file.py
    - docker/package/.*

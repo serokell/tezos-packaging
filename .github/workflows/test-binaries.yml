@@ -7,7 +7,7 @@ on:
 jobs:
   test_binaries:
     name: Install and test binaries
-    runs-on: [self-hosted, Linux, X64, nix-with-docker]
+    runs-on: [self-hosted, Linux, X64, nix]
     steps:
       - name: Checkout code
         uses: actions/checkout@v2

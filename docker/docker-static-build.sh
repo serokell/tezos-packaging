@@ -13,7 +13,7 @@ if [ -z ${OCTEZ_EXECUTABLES+x} ]; then
     binaries=("octez-admin-client" "octez-dac-client" "octez-dac-node" "octez-client" "octez-node" "octez-signer" "octez-codec" "octez-smart-rollup-wasm-debugger" "octez-smart-rollup-node")
 
     for proto in $(jq -r ".active | .[]" ../protocols.json); do
-        binaries+=("octez-accuser-$proto" "octez-baker-$proto" "octez-smart-rollup-client-$proto")
+        binaries+=("octez-accuser-$proto" "octez-baker-$proto")
     done
 
     OCTEZ_EXECUTABLES="$( IFS=$' '; echo "${binaries[*]}" )"

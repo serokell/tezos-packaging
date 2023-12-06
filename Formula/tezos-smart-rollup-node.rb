@@ -11,9 +11,9 @@ class TezosSmartRollupNode < Formula
   end
   homepage "https://gitlab.com/tezos/tezos"
 
-  url "https://gitlab.com/tezos/tezos.git", :tag => "v18.1", :shallow => false
+  url "https://gitlab.com/tezos/tezos.git", :tag => "v19.0-rc1", :shallow => false
 
-  version "v18.1-1"
+  version "v19.0-rc1-1"
 
   build_dependencies = %w[pkg-config coreutils autoconf rsync wget rustup-init cmake opam]
   build_dependencies.each do |dependency|
@@ -28,9 +28,6 @@ class TezosSmartRollupNode < Formula
 
   bottle do
     root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosSmartRollupNode.version}/"
-    sha256 cellar: :any, big_sur: "154ddf194df246355f55890f8191f73ebfc5b19e1dd494f6548efbb9a907454a"
-    sha256 cellar: :any, arm64_big_sur: "b1e852ffe893c84b0b6a246b71007c0339e076e3ebe873f6a0ed2fabd5b9f101"
-    sha256 cellar: :any, monterey: "07328eb0fc4639d19d2736d0342311c9842bc10050af9a644756a3802462c6d1"
   end
 
   def make_deps
@@ -44,7 +41,7 @@ class TezosSmartRollupNode < Formula
     ENV["LDFLAGS"] = "-L#{HOMEBREW_PREFIX}/lib"
     # Here is the workaround to use opam 2.0.9 because Tezos is currently not compatible with opam 2.1.0 and newer
     arch = RUBY_PLATFORM.include?("arm64") ? "arm64" : "x86_64"
-    system "rustup-init", "--default-toolchain", "1.64.0", "-y"
+    system "rustup-init", "--default-toolchain", "1.71.1", "-y"
     system "opam", "init", "--bare", "--debug", "--auto-setup", "--disable-sandboxing"
     system ["source .cargo/env",  "make build-deps"].join(" && ")
   end

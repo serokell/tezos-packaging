@@ -19,10 +19,7 @@
         "tezos-smart-rollup-wasm-debugger"
     ],
     "candidates": [
-        "tezos-smart-rollup-client-Proxford",
-        "tezos-smart-rollup-client-PtNairob",
-        "tezos-smart-rollup-node-Proxford",
-        "tezos-smart-rollup-node-PtNairob",
+        "tezos-smart-rollup-node",
         "tezos-baking",
         "tezos-sapling-params",
         "tezos-accuser-Proxford",

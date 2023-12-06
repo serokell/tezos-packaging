@@ -92,12 +92,4 @@ in [
     '';
     supports = protocol;
   }
-  {
-    name = "octez-smart-rollup-client-${protocol}";
-    description = ''
-      Smart contract rollup CLI client for ${protocol}.
-      For more info please check - https://tezos.gitlab.io/active/smart_rollups.html#tools
-    '';
-    supports = protocol;
-  }
 ]) protocols.active

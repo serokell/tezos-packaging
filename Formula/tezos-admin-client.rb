@@ -9,9 +9,9 @@ class TezosAdminClient < Formula
   end
   homepage "https://gitlab.com/tezos/tezos"
 
-  url "https://gitlab.com/tezos/tezos.git", :tag => "v18.1", :shallow => false
+  url "https://gitlab.com/tezos/tezos.git", :tag => "v19.0-rc1", :shallow => false
 
-  version "v18.1-1"
+  version "v19.0-rc1-1"
 
   build_dependencies = %w[pkg-config coreutils autoconf rsync wget rustup-init cmake opam]
   build_dependencies.each do |dependency|
@@ -26,9 +26,6 @@ class TezosAdminClient < Formula
 
   bottle do
     root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosAdminClient.version}/"
-    sha256 cellar: :any, big_sur: "b499b9327493ad54e50c204579a098f9886812f3bfdbef3e302a611f829bbc94"
-    sha256 cellar: :any, arm64_big_sur: "096727e1b84eac57efc2f2cd376e6a9fde8f2946950f59e710e6e12fa9bfe8da"
-    sha256 cellar: :any, monterey: "564f59643a7372a23d8570bd0ca75515276208775e8f4052343119c402d3c0ac"
   end
 
   def make_deps
@@ -42,7 +39,7 @@ class TezosAdminClient < Formula
     ENV["LDFLAGS"] = "-L#{HOMEBREW_PREFIX}/lib"
     # Here is the workaround to use opam 2.0.9 because Tezos is currently not compatible with opam 2.1.0 and newer
     arch = RUBY_PLATFORM.include?("arm64") ? "arm64" : "x86_64"
-    system "rustup-init", "--default-toolchain", "1.64.0", "-y"
+    system "rustup-init", "--default-toolchain", "1.71.1", "-y"
     system "opam", "init", "--bare", "--debug", "--auto-setup", "--disable-sandboxing"
     system ["source .cargo/env",  "make build-deps"].join(" && ")
   end

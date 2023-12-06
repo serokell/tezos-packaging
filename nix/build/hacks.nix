@@ -47,4 +47,7 @@ self: super: rec {
   ocamlfind = super.ocamlfind.overrideAttrs (drv: {
     patches = [ ./install_topfind_196.patch ];
   });
+  pyml = super.pyml.overrideAttrs (drv: {
+    sourceRoot = ".";
+  });
 }

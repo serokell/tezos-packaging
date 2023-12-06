@@ -550,30 +550,6 @@ def mk_rollup_node():
     }
 
 
-def mk_rollup_clients(*protos):
-    def mk_rollup_client_package(proto):
-        proto_snake_case = protocol_numbers[proto] + "_" + proto
-        return TezosBinaryPackage(
-            f"tezos-smart-rollup-client-{proto}",
-            f"Tezos smart rollup client using {proto}",
-            meta=packages_meta,
-            target_proto=proto,
-            additional_native_deps=[
-                "tezos-client",
-                "tezos-node",
-                "tezos-sapling-params",
-            ],
-            postinst_steps=daemon_postinst_common,
-            dune_filepath=f"src/proto_{proto_snake_case}/bin_sc_rollup_client/main_sc_rollup_client_{proto_snake_case}.exe",
-        )
-
-    return [
-        {f"tezos-smart-rollup-client-{proto}": mk_rollup_client_package(proto)}
-        for proto in protos
-    ]
-
-
 packages.append(mk_rollup_node())
-packages.extend(mk_rollup_clients("PtNairob", "Proxford"))
 
 packages = dict(ChainMap(*packages))

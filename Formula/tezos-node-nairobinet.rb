@@ -5,7 +5,7 @@
 
 class TezosNodeNairobinet < Formula
   url "file:///dev/null"
-  version "v18.1-1"
+  version "v19.0-rc1-1"
 
   depends_on "tezos-node"
 

@@ -7,4 +7,4 @@ set -euo pipefail
 
 wget https://sh.rustup.rs/rustup-init.sh
 chmod +x rustup-init.sh
-./rustup-init.sh --profile minimal --default-toolchain 1.64.0 -y
+./rustup-init.sh --profile minimal --default-toolchain 1.71.1 -y

@@ -26,6 +26,7 @@ class TezosAccuserPtnairob < Formula
 
   bottle do
     root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosAccuserPtnairob.version}/"
+    sha256 cellar: :any, monterey: "d65861c2abeddbe0218f7fc852af44d9654877ccf62fdc31b0a4cadc9ae2a22f"
   end
 
   def make_deps

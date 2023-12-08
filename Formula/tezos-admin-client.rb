@@ -26,6 +26,9 @@ class TezosAdminClient < Formula
 
   bottle do
     root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosAdminClient.version}/"
+    sha256 cellar: :any, big_sur: "27343ca502ed9e828b035f1cdc160c5e5b048204df511cd85e039c9982b755b1"
+    sha256 cellar: :any, arm64_big_sur: "522a74cd3cc9de7fda9f4082549f498d74735a2fc5f15a27eefe3027d4735c38"
+    sha256 cellar: :any, monterey: "73c401a72c26aae5116b279938c61ff149082cf4cf90710e60b7409e862aae87"
   end
 
   def make_deps

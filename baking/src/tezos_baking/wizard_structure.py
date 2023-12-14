@@ -107,11 +107,6 @@ def setup_logger(log_file):
     )
 
 
-def print_and_log(message, log=logging.info, colorcode=None):
-    print(color(message, colorcode) if colorcode else message)
-    log(message)
-
-
 def log_exception(exception, logfile):
     import traceback
     from datetime import datetime

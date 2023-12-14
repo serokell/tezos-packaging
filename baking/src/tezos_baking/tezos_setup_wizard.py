@@ -19,10 +19,10 @@ import logging
 
 
 from tezos_baking.wizard_structure import *
-from tezos_baking.util import *
 from tezos_baking.steps import *
 from tezos_baking.validators import Validator
 import tezos_baking.validators as validators
+import tezos_baking.util as utils
 
 # Global options
 
@@ -56,8 +56,6 @@ default_providers = {
 
 recommended_provider = list(default_providers.keys())[0]
 
-TMP_SNAPSHOT_LOCATION = "/tmp/octez_node.snapshot.d/"
-
 
 # Wizard CLI utility
 
@@ -76,73 +74,6 @@ All commands within the service are run under the 'tezos' user.
 To access help and possible options for each question, type in 'help' or '?'.
 Type in 'exit' to quit.
 """
-
-
-def fetch_snapshot(url, sha256=None):
-
-    logging.info("Fetching snapshot")
-
-    dirname = TMP_SNAPSHOT_LOCATION
-    filename = os.path.join(dirname, "octez_node.snapshot")
-    metadata_file = os.path.join(dirname, "octez_node.snapshot.sha256")
-
-    # updates or removes the 'metadata_file' containing the snapshot's SHA256
-    def dump_metadata(metadata_file=metadata_file, sha256=sha256):
-        if sha256:
-            with open(metadata_file, "w+") as f:
-                f.write(sha256)
-        else:
-            try:
-                os.remove(metadata_file)
-            except FileNotFoundError:
-                pass
-
-    # reads `metadata_file` if any or returns None
-    def read_metadata(metadata_file=metadata_file):
-        if os.path.exists(metadata_file):
-            with open(metadata_file, "r") as f:
-                sha256 = f.read()
-            return sha256
-        else:
-            return None
-
-    def download(filename=filename, url=url, args=""):
-        from subprocess import CalledProcessError
-
-        try:
-            proc_call(f"wget {args} --show-progress -O {filename} {url}")
-        except CalledProcessError as e:
-            # see here https://www.gnu.org/software/wget/manual/html_node/Exit-Status.html
-            if e.returncode >= 4:
-                raise urllib.error.URLError
-            else:
-                raise e
-
-    print_and_log(f"Downloading the snapshot from {url}")
-
-    # expected for the (possibly) existing chunk
-    expected_sha256 = read_metadata()
-
-    os.makedirs(dirname, exist_ok=True)
-    if sha256 and expected_sha256 and expected_sha256 == sha256:
-        logging.info("Continuing download")
-        # that case means that the expected sha256 of snapshot
-        # we want to download is the same as the expected
-        # sha256 of the existing octez_node.snapshot file
-        # when it will be fully downloaded
-        # so that we can safely use `--continue` option here
-        download(args="--continue")
-    else:
-        # all other cases we just dump new metadata
-        # (so that we can resume download if we can ensure
-        # that existing octez_node.snapshot chunk belongs
-        # to the snapshot we want to download)
-        # and start download from scratch
-        dump_metadata()
-        download()
-
-    print()
-    return filename
 
 
 class Sha256Mismatch(Exception):
@@ -176,24 +107,11 @@ def is_full_snapshot(snapshot_file, import_mode):
     if import_mode == "download full":
         return True
     if import_mode == "file" or import_mode == "url":
-        output = get_proc_output(
+        output = utils.get_proc_output(
             "sudo -u tezos octez-node snapshot info " + snapshot_file
         ).stdout
         return re.search(b"at level [0-9]+ in full", output) is not None
     return False
-
-
-def get_node_version():
-    version = get_proc_output("octez-node --version").stdout.decode("ascii")
-    major_version, minor_version, rc_version = re.search(
-        r"[a-z0-9]+ \(.*\) \(([0-9]+).([0-9]+)(?:(?:~rc([1-9]+))|(?:\+dev))?\)",
-        version,
-    ).groups()
-    return (
-        int(major_version),
-        int(minor_version),
-        (int(rc_version) if rc_version is not None else None),
-    )
 
 
 def is_non_protocol_testnet(network):
@@ -209,9 +127,6 @@ def network_name_or_teztnets_url(network):
         return network
     else:
         return f"https://teztnets.xyz/{network}"
-
-
-compatible_snapshot_version = 7
 
 
 # Steps
@@ -457,151 +372,6 @@ class Setup(Setup):
             return False
         return True
 
-    # Returns relevant snapshot's metadata
-    # It filters out provided snapshots by `network` and `history_mode`
-    # provided by the user and then follows this steps:
-    # * tries to find the snapshot of exact same Octez version, that is used by the user.
-    # * if there is none, try to find the snapshot with the same major version, but less minor version
-    #   and with the `snapshot_version` compatible with the user's Octez version.
-    # * If there is none, try to find the snapshot with any Octez version, but compatible `snapshot_version`.
-    def extract_relevant_snapshot(self, snapshot_array):
-        from functools import reduce
-
-        def find_snapshot(pred):
-            return next(
-                filter(
-                    lambda artifact: artifact["artifact_type"] == "tezos-snapshot"
-                    and artifact["chain_name"] == self.config["network"]
-                    and (
-                        artifact["history_mode"] == self.config["history_mode"]
-                        or (
-                            self.config["history_mode"] == "archive"
-                            and artifact["history_mode"] == "full"
-                        )
-                    )
-                    and pred(
-                        *(
-                            get_artifact_node_version(artifact)
-                            + (artifact.get("snapshot_version", None),)
-                        )
-                    ),
-                    iter(snapshot_array),
-                ),
-                None,
-            )
-
-        def get_artifact_node_version(artifact):
-            version = artifact["tezos_version"]["version"]
-            # there seem to be some inconsistency with that field in different providers
-            # so the only thing we check is if it's a string
-            additional_info = version["additional_info"]
-            return (
-                version["major"],
-                version["minor"],
-                None if type(additional_info) == str else additional_info["rc"],
-            )
-
-        def compose_pred(*preds):
-            return reduce(
-                lambda acc, x: lambda major, minor, rc, snapshot_version: acc(
-                    major, minor, rc, snapshot_version
-                )
-                and x(major, minor, rc, snapshot_version),
-                preds,
-            )
-
-        def sum_pred(*preds):
-            return reduce(
-                lambda acc, x: lambda major, minor, rc, snapshot_version: acc(
-                    major, minor, rc, snapshot_version
-                )
-                or x(major, minor, rc, snapshot_version),
-                preds,
-            )
-
-        node_version = get_node_version()
-        major_version, minor_version, rc_version = node_version
-
-        exact_version_pred = (
-            lambda major, minor, rc, snapshot_version: node_version
-            == (
-                major,
-                minor,
-                rc,
-            )
-        )
-
-        exact_major_version_pred = (
-            lambda major, minor, rc, snapshot_version: major_version == major
-        )
-
-        exact_minor_version_pred = (
-            lambda major, minor, rc, snapshot_version: minor_version == minor
-        )
-
-        less_minor_version_pred = (
-            lambda major, minor, rc, snapshot_version: minor_version > minor
-        )
-
-        exact_rc_version_pred = (
-            lambda major, minor, rc, snapshot_version: rc_version == rc
-        )
-
-        less_rc_version_pred = (
-            lambda major, minor, rc, snapshot_version: rc
-            and rc_version
-            and rc_version > rc
-        )
-
-        non_rc_version_pred = lambda major, minor, rc, snapshot_version: rc is None
-
-        compatible_version_pred = (
-            # it could happen that `snapshot_version` field is not supplied by provider
-            # e.g. marigold snapshots don't supply it
-            lambda major, minor, rc, snapshot_version: snapshot_version
-            and compatible_snapshot_version - snapshot_version <= 2
-        )
-
-        non_rc_on_stable_pred = lambda major, minor, rc, snapshot_version: (
-            rc_version is None and rc is None
-        ) or (rc_version is not None)
-
-        preds = [
-            exact_version_pred,
-            compose_pred(
-                non_rc_on_stable_pred,
-                compatible_version_pred,
-                sum_pred(
-                    compose_pred(
-                        exact_major_version_pred,
-                        exact_minor_version_pred,
-                        less_rc_version_pred,
-                    ),
-                    compose_pred(
-                        exact_major_version_pred,
-                        less_minor_version_pred,
-                        non_rc_version_pred,
-                    ),
-                ),
-            ),
-            compose_pred(
-                non_rc_on_stable_pred,
-                compatible_version_pred,
-            ),
-        ]
-
-        return next(
-            (
-                snapshot
-                for snapshot in map(
-                    lambda pred: find_snapshot(pred),
-                    preds,
-                )
-                if snapshot is not None
-            ),
-            None,
-        )
-
     # Check the provider url and collect the most recent snapshot
     # that is suited for the chosen history mode and network
     def get_snapshot_metadata(self, name, json_url):
@@ -612,7 +382,9 @@ class Setup(Setup):
                 snapshot_array = json.load(url)["data"]
             snapshot_array.sort(reverse=True, key=lambda x: x["block_height"])
 
-            snapshot_metadata = self.extract_relevant_snapshot(snapshot_array)
+            snapshot_metadata = utils.extract_relevant_snapshot(
+                snapshot_array, self.config
+            )
 
             if snapshot_metadata is None:
                 print_and_log(
@@ -680,7 +452,7 @@ block timestamp: {timestamp} ({time_ago})
             url = self.config["snapshots"][name]["url"]
             sha256 = self.config["snapshots"][name]["sha256"]
             self.output_snapshot_metadata(name)
-            return fetch_snapshot(url, sha256)
+            return utils.fetch_snapshot(url, sha256)
         except KeyError:
             raise InterruptStep
         except (ValueError, urllib.error.URLError):
@@ -748,7 +520,7 @@ block timestamp: {timestamp} ({time_ago})
         try:
             self.query_step(snapshot_sha256_query)
             sha256 = self.config["snapshot_sha256"]
-            snapshot_file = fetch_snapshot(url, sha256)
+            snapshot_file = utils.fetch_snapshot(url, sha256)
             if sha256:
                 print_and_log("Checking the snapshot integrity...")
                 check_file_contents_integrity(snapshot_file, sha256)
@@ -800,7 +572,7 @@ block timestamp: {timestamp} ({time_ago})
 
             self.config["snapshots"] = {}
 
-            os.makedirs(TMP_SNAPSHOT_LOCATION, exist_ok=True)
+            os.makedirs(utils.TMP_SNAPSHOT_LOCATION, exist_ok=True)
 
         else:
             return
@@ -809,7 +581,7 @@ block timestamp: {timestamp} ({time_ago})
 
             self.query_step(get_snapshot_mode_query(self.config))
 
-            snapshot_file = TMP_SNAPSHOT_LOCATION
+            snapshot_file = utils.TMP_SNAPSHOT_LOCATION
             snapshot_block_hash = None
 
             try:
@@ -818,7 +590,7 @@ block timestamp: {timestamp} ({time_ago})
                 elif self.config["snapshot_mode"] == "file":
                     self.query_step(snapshot_file_query)
                     snapshot_file = os.path.join(
-                        TMP_SNAPSHOT_LOCATION, f"file-{time.time()}.snapshot"
+                        utils.TMP_SNAPSHOT_LOCATION, f"file-{time.time()}.snapshot"
                     )
                     # not copying since it can take a lot of time
                     os.link(self.config["snapshot_file"], snapshot_file)
@@ -879,7 +651,7 @@ block timestamp: {timestamp} ({time_ago})
             print_and_log("Snapshot imported.")
 
             try:
-                shutil.rmtree(TMP_SNAPSHOT_LOCATION)
+                shutil.rmtree(utils._SNAPSHOT_LOCATION)
             except:
                 pass
             else:

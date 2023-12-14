@@ -262,6 +262,13 @@ for network, network_config in networks.items():
             transform=lambda x, network=network: x.replace("{network}", network),
         )
     )
+    node_additional_scripts.append(
+        AdditionalScript(
+            name="restore-from-corruption",
+            local_file_name="restore-from-corruption"
+        )
+    )
+    
     node_postinst_steps += f"""
 mkdir -p /var/lib/tezos/node-{network}
 [ ! -f /var/lib/tezos/node-{network}/config.json ] && octez-node config init --data-dir /var/lib/tezos/node-{network} --network {network_config}

@@ -8,10 +8,12 @@ Common utilities
 import sys, subprocess, shlex
 import re
 import urllib.request
-import json
 import os
+import logging
 
-# Regexes
+# Regexes and constants
+
+__all__ = ["TMP_SNAPSHOT_LOCATION"]
 
 secret_key_regex = b"(encrypted|unencrypted):(?:\w{54}|\w{88})"
 address_regex = b"tz[123]\w{33}"
@@ -21,6 +23,9 @@ protocol_hash_regex = (
 signer_uri_regex = b"((?:tcp|unix|https|http):\/\/.+)\/(tz[123]\w{33})\/?"
 ledger_regex = b"ledger:\/\/[\w\-]+\/[\w\-]+\/[\w']+\/[\w']+"
 derivation_path_regex = b"(?:bip25519|ed25519|secp256k1|P-256)\/[0-9]+h\/[0-9]+h"
+
+compatible_snapshot_version = 7
+TMP_SNAPSHOT_LOCATION = "/tmp/octez_node.snapshot.d/"
 
 
 # Utilities
@@ -54,6 +59,11 @@ def find_systemd_unit_env(show_systemd_output):
     if unit_env is not None:
         return unit_env.group(1).decode("utf-8")
     return ""
+
+
+def print_and_log(message, log=logging.info, colorcode=None):
+    print(color(message, colorcode) if colorcode else message)
+    log(message)
 
 
 # Returns all the environment variables of a systemd service unit
@@ -148,3 +158,222 @@ def url_is_reachable(url):
         return True
     except (urllib.error.URLError, ValueError):
         return False
+
+
+def fetch_snapshot(url, sha256=None):
+
+    logging.info("Fetching snapshot")
+
+    dirname = TMP_SNAPSHOT_LOCATION
+    filename = os.path.join(dirname, "octez_node.snapshot")
+    metadata_file = os.path.join(dirname, "octez_node.snapshot.sha256")
+
+    # updates or removes the 'metadata_file' containing the snapshot's SHA256
+    def dump_metadata(metadata_file=metadata_file, sha256=sha256):
+        if sha256:
+            with open(metadata_file, "w+") as f:
+                f.write(sha256)
+        else:
+            try:
+                os.remove(metadata_file)
+            except FileNotFoundError:
+                pass
+
+    # reads `metadata_file` if any or returns None
+    def read_metadata(metadata_file=metadata_file):
+        if os.path.exists(metadata_file):
+            with open(metadata_file, "r") as f:
+                sha256 = f.read()
+            return sha256
+        else:
+            return None
+
+    def download(filename=filename, url=url, args=""):
+        from subprocess import CalledProcessError
+
+        try:
+            proc_call(f"wget {args} --show-progress -O {filename} {url}")
+        except CalledProcessError as e:
+            # see here https://www.gnu.org/software/wget/manual/html_node/Exit-Status.html
+            if e.returncode >= 4:
+                raise urllib.error.URLError
+            else:
+                raise e
+
+    print_and_log(f"Downloading the snapshot from {url}")
+
+    # expected for the (possibly) existing chunk
+    expected_sha256 = read_metadata()
+
+    os.makedirs(dirname, exist_ok=True)
+    if sha256 and expected_sha256 and expected_sha256 == sha256:
+        logging.info("Continuing download")
+        # that case means that the expected sha256 of snapshot
+        # we want to download is the same as the expected
+        # sha256 of the existing octez_node.snapshot file
+        # when it will be fully downloaded
+        # so that we can safely use `--continue` option here
+        download(args="--continue")
+    else:
+        # all other cases we just dump new metadata
+        # (so that we can resume download if we can ensure
+        # that existing octez_node.snapshot chunk belongs
+        # to the snapshot we want to download)
+        # and start download from scratch
+        dump_metadata()
+        download()
+
+    print()
+    return filename
+
+
+def get_node_version():
+    version = get_proc_output("octez-node --version").stdout.decode("ascii")
+    major_version, minor_version, rc_version = re.search(
+        r"[a-z0-9]+ \(.*\) \(([0-9]+).([0-9]+)(?:(?:~rc([1-9]+))|(?:\+dev))?\)",
+        version,
+    ).groups()
+    return (
+        int(major_version),
+        int(minor_version),
+        (int(rc_version) if rc_version is not None else None),
+    )
+
+
+# Returns relevant snapshot's metadata
+# It filters out provided snapshots by `network` and `history_mode`
+# provided by the user and then follows this steps:
+# * tries to find the snapshot of exact same Octez version, that is used by the user.
+# * if there is none, try to find the snapshot with the same major version, but less minor version
+#   and with the `snapshot_version` compatible with the user's Octez version.
+# * If there is none, try to find the snapshot with any Octez version, but compatible `snapshot_version`.
+def extract_relevant_snapshot(snapshot_array, config):
+    from functools import reduce
+
+    def find_snapshot(pred):
+        return next(
+            filter(
+                lambda artifact: artifact["artifact_type"] == "tezos-snapshot"
+                and artifact["chain_name"] == config["network"]
+                and (
+                    artifact["history_mode"] == config["history_mode"]
+                    or (
+                        config["history_mode"] == "archive"
+                        and artifact["history_mode"] == "full"
+                    )
+                )
+                and pred(
+                    *(
+                        get_artifact_node_version(artifact)
+                        + (artifact.get("snapshot_version", None),)
+                    )
+                ),
+                iter(snapshot_array),
+            ),
+            None,
+        )
+
+    def get_artifact_node_version(artifact):
+        version = artifact["tezos_version"]["version"]
+        # there seem to be some inconsistency with that field in different providers
+        # so the only thing we check is if it's a string
+        additional_info = version["additional_info"]
+        return (
+            version["major"],
+            version["minor"],
+            None if type(additional_info) == str else additional_info["rc"],
+        )
+
+    def compose_pred(*preds):
+        return reduce(
+            lambda acc, x: lambda major, minor, rc, snapshot_version: acc(
+                major, minor, rc, snapshot_version
+            )
+            and x(major, minor, rc, snapshot_version),
+            preds,
+        )
+
+    def sum_pred(*preds):
+        return reduce(
+            lambda acc, x: lambda major, minor, rc, snapshot_version: acc(
+                major, minor, rc, snapshot_version
+            )
+            or x(major, minor, rc, snapshot_version),
+            preds,
+        )
+
+    node_version = get_node_version()
+    major_version, minor_version, rc_version = node_version
+
+    exact_version_pred = lambda major, minor, rc, snapshot_version: node_version == (
+        major,
+        minor,
+        rc,
+    )
+
+    exact_major_version_pred = (
+        lambda major, minor, rc, snapshot_version: major_version == major
+    )
+
+    exact_minor_version_pred = (
+        lambda major, minor, rc, snapshot_version: minor_version == minor
+    )
+
+    less_minor_version_pred = (
+        lambda major, minor, rc, snapshot_version: minor_version > minor
+    )
+
+    exact_rc_version_pred = lambda major, minor, rc, snapshot_version: rc_version == rc
+
+    less_rc_version_pred = (
+        lambda major, minor, rc, snapshot_version: rc and rc_version and rc_version > rc
+    )
+
+    non_rc_version_pred = lambda major, minor, rc, snapshot_version: rc is None
+
+    compatible_version_pred = (
+        # it could happen that `snapshot_version` field is not supplied by provider
+        # e.g. marigold snapshots don't supply it
+        lambda major, minor, rc, snapshot_version: snapshot_version
+        and compatible_snapshot_version - snapshot_version <= 2
+    )
+
+    non_rc_on_stable_pred = lambda major, minor, rc, snapshot_version: (
+        rc_version is None and rc is None
+    ) or (rc_version is not None)
+
+    preds = [
+        exact_version_pred,
+        compose_pred(
+            non_rc_on_stable_pred,
+            compatible_version_pred,
+            sum_pred(
+                compose_pred(
+                    exact_major_version_pred,
+                    exact_minor_version_pred,
+                    less_rc_version_pred,
+                ),
+                compose_pred(
+                    exact_major_version_pred,
+                    less_minor_version_pred,
+                    non_rc_version_pred,
+                ),
+            ),
+        ),
+        compose_pred(
+            non_rc_on_stable_pred,
+            compatible_version_pred,
+        ),
+    ]
+
+    return next(
+        (
+            snapshot
+            for snapshot in map(
+                lambda pred: find_snapshot(pred),
+                preds,
+            )
+            if snapshot is not None
+        ),
+        None,
+    )

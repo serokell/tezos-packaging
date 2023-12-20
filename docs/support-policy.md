@@ -45,12 +45,10 @@ There are packages for `x86_64` and `aarch64` architectures.
 ## macOS brew formulae
 
 Brew formulae provided by `tezos-packaging` aim to support all maintained macOS versions, currently:
-* macOS 11 (Big Sur)
 * macOS 12 (Monterey)
 * macOS 13 (Ventura)
 
 Unfortunately, the ability to provide pre-compiled brew bottles for formulae has
 a hard dependency on the available build infrastructure.
 Thus we currently only provide brew bottles for these two macOS versions:
-* macOS 11 (Big Sur) both `x86_64` and `arm64`
 * macOS 12 (Monterey) `x86_64` only

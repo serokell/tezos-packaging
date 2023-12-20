@@ -1015,6 +1015,19 @@ block timestamp: {timestamp} ({time_ago})
             f"\"{self.config['liquidity_toggle_vote']}\"",
         )
 
+    def baker_registered(self):
+        tezos_client_options = self.get_tezos_client_options()
+        baker_alias = self.config["baker_alias"]
+        _, baker_key_hash = get_key_address(tezos_client_options, baker_alias)
+        try:
+            output = get_proc_output(
+                f"curl {self.config['node_rpc_endpoint']}/chains/main/blocks/head/context/delegates/{baker_key_hash}"
+            ).stdout.decode("utf-8")
+            response = json.loads(output)
+            return baker_key_hash in response["delegated_contracts"]
+        except:
+            return False
+
     def start_baking(self):
         self.systemctl_simple_action("restart", "baking")
 
@@ -1042,9 +1055,10 @@ block timestamp: {timestamp} ({time_ago})
             self.import_baker_key()
 
             print()
-            print_and_log("Registering the baker")
             try:
-                self.register_baker()
+                if not self.baker_registered():
+                    print_and_log("Registering the baker")
+                    self.register_baker()
             except EOFError:
                 logging.error("Got EOF")
                 raise EOFError

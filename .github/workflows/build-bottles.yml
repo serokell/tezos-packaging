@@ -20,7 +20,7 @@ jobs:
         formula: [tezos-accuser-PtNairob, tezos-accuser-Proxford, tezos-admin-client, tezos-baker-PtNairob, tezos-baker-Proxford, tezos-client, tezos-codec, tezos-node, tezos-signer, tezos-smart-rollup-node, tezos-dac-client, tezos-dac-node, tezos-smart-rollup-wasm-debugger]
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Install GNU sed
         run: |
@@ -52,7 +52,7 @@ jobs:
 
       - name: Upload the bottle to Github Actions
         if: steps.check-built.outcome == 'failure'
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: homebrew-bottles-${{ matrix.os }}
           path: '*.bottle.*'
@@ -68,7 +68,7 @@ jobs:
     needs: build-bottles
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Install GNU sed
         run: |

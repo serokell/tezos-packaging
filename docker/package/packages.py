@@ -267,6 +267,10 @@ for network, network_config in networks.items():
     node_postinst_steps += f"""
 mkdir -p /var/lib/tezos/node-{network}
 [ ! -f /var/lib/tezos/node-{network}/config.json ] && octez-node config init --data-dir /var/lib/tezos/node-{network} --network {network_config}
+if [ $? -eq 124 ]; then
+    echo "Error: provided network config url is incorrect"
+    exit 1
+fi
 chown -R tezos:tezos /var/lib/tezos/node-{network}
 """
 

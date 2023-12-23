@@ -37,6 +37,12 @@ class TezosNodeNairobinet < Formula
                   "$@"
       fi
 
+      # Check if config initialization did not failed due to incorrect network url
+      if [ $? -eq 124 ]; then
+        echo "Error: provided network config url is incorrect"
+        exit 1
+      fi
+
       # Launching the node
       if [[ -z "$CERT_PATH" || -z "$KEY_PATH" ]]; then
           exec "$node" run --config-file="$config_file"
@@ -62,5 +68,8 @@ class TezosNodeNairobinet < Formula
   def post_install
     mkdir_p "#{var}/lib/tezos/node-nairobinet"
     system "octez-node", "config", "init", "--data-dir" "#{var}/lib/tezos/node-nairobinet", "--network", "https://teztnets.xyz/nairobinet"
+    if $?.exitstatus == 124
+      raise "Error: could not init config with network with \"https://teztnets.xyz/nairobinet\" url"
+    end
   end
 end

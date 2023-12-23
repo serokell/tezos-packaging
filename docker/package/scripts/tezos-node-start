@@ -26,6 +26,10 @@ if [[ -z "${CUSTOM_NODE_CONFIG:-}" ]]; then
                 ${NETWORK:+"--network=$NETWORK"} \
                 "$@"
     fi
+    if [ $? -eq 124 ]; then
+        echo "Error: provided network config url is incorrect"
+        exit 1
+    fi
     node_run_args=("--config-file" "$config_file")
 else
     echo "Run using custom node config file"

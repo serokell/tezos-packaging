@@ -152,6 +152,11 @@ class Sha256Mismatch(Exception):
         self.actual_sha256 = actual_sha256
         self.expected_sha256 = expected_sha256
 
+class IncorrectConfigNetworkUrlProvided(Exception):
+    "Raised when config initialization failed because of incorrect network url provided"
+
+    def __init__(self, network_url):
+        self.network_url = network_url
 
 class InterruptStep(Exception):
     "Raised when there is need to interrupt step handling flow."
@@ -412,15 +417,17 @@ class Setup(Setup):
             print_and_log("The Tezos node data directory has not been configured yet.")
             print_and_log("  Configuring directory: " + node_dir)
             network = self.config["network"]
-            proc_call(
+            proc_res = proc_call(
                 "sudo -u tezos octez-node-"
                 + self.config["network"]
                 + " config init"
                 + " --network "
-                + network_name_or_teztnets_url(self.config["network"])
+                + network_name_or_teztnets_url(network)
                 + " --rpc-addr "
                 + self.config["node_rpc_addr"]
             )
+            if proc_res.returncode == 124:
+                raise IncorrectConfigNetworkUrlProvided(network_name_or_teztnets_url(network))
 
         diff = node_dir_contents - node_dir_config
         if diff:

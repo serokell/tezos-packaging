@@ -20,6 +20,7 @@ with pkgs; mkShell {
     ]))
     copr-cli
     coreutils
+    moreutils
     util-linux
     shellcheck
     buildkite-agent

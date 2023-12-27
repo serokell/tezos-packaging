@@ -8,6 +8,7 @@ mkShell {
     # NOTE using the most recent nix for sticky nix flake lock update feature
     nix
     python3
+    moreutils
     coreutils
     gnused
     gh

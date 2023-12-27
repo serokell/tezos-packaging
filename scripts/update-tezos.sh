@@ -20,6 +20,9 @@ latest_upstream_tag="$(git describe --tags "$latest_upstream_tag_hash")"
 opam_repository_tag='' # will be set by version.sh
 git checkout "$latest_upstream_tag"
 source scripts/version.sh
+# copying metadata from octez repo
+cp script-inputs/released-executables ../docker/octez-executables
+cp script-inputs/active_protocol_versions_without_number ../docker/active-protocols
 cd ..
 rm -rf upstream-repo
 
@@ -55,6 +58,9 @@ if [[ "$latest_upstream_tag" != "$our_tezos_tag" ]]; then
     # Commit may fail when the letter version wasn't updated since the last release
     git commit -a -m "[Chore] Reset letter_version for $latest_upstream_tag" --gpg-sign="tezos-packaging@serokell.io" || \
       echo "letter_version wasn't reset"
+
+    ./scripts/update-release-binaries.py
+    git commit -a -m "[Chore] Update release binaries for $latest_upstream_tag" --gpg-sign="tezos-packaging@serokell.io"
 
     git push --set-upstream origin "$branch_name"
 

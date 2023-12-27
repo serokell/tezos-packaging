@@ -10,11 +10,7 @@ set -euo pipefail
 
 if [ -z ${OCTEZ_EXECUTABLES+x} ]; then
 
-    binaries=("octez-admin-client" "octez-dac-client" "octez-dac-node" "octez-client" "octez-node" "octez-signer" "octez-codec" "octez-smart-rollup-wasm-debugger" "octez-smart-rollup-node")
-
-    for proto in $(jq -r ".active | .[]" ../protocols.json); do
-        binaries+=("octez-accuser-$proto" "octez-baker-$proto")
-    done
+    readarray -t binaries < ./octez-executables
 
     OCTEZ_EXECUTABLES="$( IFS=$' '; echo "${binaries[*]}" )"
 else

@@ -19,7 +19,7 @@ set -euo pipefail
 retval="0"
 
 # we don't bottle meta-formulas that contain only services
-formulae=("tezos-accuser-PtNairob" "tezos-accuser-Proxford" "tezos-admin-client" "tezos-baker-PtNairob" "tezos-baker-Proxford" "tezos-client" "tezos-codec" "tezos-node" "tezos-signer" "tezos-smart-rollup-node" "tezos-dac-client" "tezos-dac-node" "tezos-smart-rollup-wasm-debugger")
+formulae=("tezos-smart-rollup-wasm-debugger" "tezos-smart-rollup-node" "tezos-dac-client" "tezos-dac-node" "tezos-signer" "tezos-codec" "tezos-client" "tezos-admin-client" "tezos-node" "tezos-accuser-Proxford" "tezos-baker-Proxford" "tezos-accuser-PtNairob" "tezos-baker-PtNairob")
 
 # tezos-sapling-params is used as a dependency for some of the formulas
 # so we handle it separately.

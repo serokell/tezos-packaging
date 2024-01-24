@@ -54,7 +54,7 @@ default_providers = {
     "marigold.dev": "https://snapshots.tezos.marigold.dev/api/tezos-snapshots.json",
 }
 
-recommended_provider = list(default_providers.keys())[0]
+recommended_provider = list(default_providers.keys())[1]
 
 TMP_SNAPSHOT_LOCATION = "/tmp/octez_node.snapshot.d/"
 

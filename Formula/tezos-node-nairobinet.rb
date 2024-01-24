@@ -27,13 +27,13 @@ class TezosNodeNairobinet < Formula
           echo "Configuring the node..."
           "$node" config init \
                   --rpc-addr "$NODE_RPC_ADDR" \
-                  --network=https://teztnets.xyz/nairobinet\
+                  --network=https://teztnets.com/nairobinet\
                   "$@"
       else
           echo "Updating the node configuration..."
           "$node" config update \
                   --rpc-addr "$NODE_RPC_ADDR" \
-                  --network=https://teztnets.xyz/nairobinet\
+                  --network=https://teztnets.com/nairobinet\
                   "$@"
       fi
 
@@ -61,6 +61,6 @@ class TezosNodeNairobinet < Formula
 
   def post_install
     mkdir_p "#{var}/lib/tezos/node-nairobinet"
-    system "octez-node", "config", "init", "--data-dir" "#{var}/lib/tezos/node-nairobinet", "--network", "https://teztnets.xyz/nairobinet"
+    system "octez-node", "config", "init", "--data-dir" "#{var}/lib/tezos/node-nairobinet", "--network", "https://teztnets.com/nairobinet"
   end
 end

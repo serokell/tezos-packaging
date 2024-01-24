@@ -187,7 +187,7 @@ In order to import such a key, run:
 sudo -u tezos tezos-client import secret key baker <secret-key>
 ```
 
-1) Alternatively, you can generate a fresh baker key and fill it using faucet from https://teztnets.xyz.
+1) Alternatively, you can generate a fresh baker key and fill it using faucet from https://teztnets.com.
 
 In order to generate a fresh key run:
 ```
@@ -195,7 +195,7 @@ sudo -u tezos tezos-client gen keys baker
 ```
 The newly generated address will be displayed as a part of the command output.
 
-Then visit https://teztnets.xyz and fill the address with at least 6000 XTZ on the desired testnet.
+Then visit https://teztnets.com and fill the address with at least 6000 XTZ on the desired testnet.
 
 <a name="registration"></a>
 ### Registering the baker

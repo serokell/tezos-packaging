@@ -208,7 +208,7 @@ def network_name_or_teztnets_url(network):
     if is_non_protocol_testnet(network):
         return network
     else:
-        return f"https://teztnets.xyz/{network}"
+        return f"https://teztnets.com/{network}"
 
 
 compatible_snapshot_version = 7

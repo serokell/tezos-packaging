@@ -54,7 +54,7 @@ default_providers = {
     "marigold.dev": "https://snapshots.tezos.marigold.dev/api/tezos-snapshots.json",
 }
 
-recommended_provider = list(default_providers.keys())[0]
+recommended_provider = list(default_providers.keys())[1]
 
 TMP_SNAPSHOT_LOCATION = "/tmp/octez_node.snapshot.d/"
 
@@ -208,7 +208,7 @@ def network_name_or_teztnets_url(network):
     if is_non_protocol_testnet(network):
         return network
     else:
-        return f"https://teztnets.xyz/{network}"
+        return f"https://teztnets.com/{network}"
 
 
 compatible_snapshot_version = 7

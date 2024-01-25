@@ -26,8 +26,8 @@ class TezosAccuserProxford < Formula
 
   bottle do
     root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosAccuserProxford.version}/"
-    sha256 cellar: :any, big_sur: "fd4e625b5544d0b5940f95417d5339d2c971f6f104b1ba2f6feff6bd531aa673"
-    sha256 cellar: :any, arm64_big_sur: "a7105d3fc24da2dcbac686e0e36a8df71450ba02abe44d9f945b605b2a3dd36f"
+    sha256 cellar: :any, monterey: "d1ed51375d78e5cd125a8049c2184f0aab5a4e16ca6851e5167238a8de51f71b"
+    sha256 cellar: :any, arm64_monterey: "4c2e563e854a77b504e8bcdea93b7d2e77c2d389830dd5295de6e78e61eb4f6a"
   end
 
   def make_deps

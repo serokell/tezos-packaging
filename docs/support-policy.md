@@ -50,5 +50,5 @@ Brew formulae provided by `tezos-packaging` aim to support all maintained macOS 
 
 Unfortunately, the ability to provide pre-compiled brew bottles for formulae has
 a hard dependency on the available build infrastructure.
-Thus we currently only provide brew bottles for these two macOS versions:
+Thus we currently only provide brew bottles for the following macOS versions:
 * macOS 12 (Monterey) both `x86_64` and `arm64`

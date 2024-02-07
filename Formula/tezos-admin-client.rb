@@ -9,9 +9,9 @@ class TezosAdminClient < Formula
   end
   homepage "https://gitlab.com/tezos/tezos"
 
-  url "https://gitlab.com/tezos/tezos.git", :tag => "v19.0", :shallow => false
+  url "https://gitlab.com/tezos/tezos.git", :tag => "v19.1", :shallow => false
 
-  version "v19.0-1"
+  version "v19.1-1"
 
   build_dependencies = %w[pkg-config coreutils autoconf rsync wget rustup-init cmake opam]
   build_dependencies.each do |dependency|
@@ -26,8 +26,6 @@ class TezosAdminClient < Formula
 
   bottle do
     root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosAdminClient.version}/"
-    sha256 cellar: :any, monterey: "77028d916c5f3fb232ccb2b033fbff5c41412f7e69a38df2dc4a55e721ff6e27"
-    sha256 cellar: :any, arm64_monterey: "04bd8631da0ea43ce17ea0519f7a7fa80f7ba5a648b6c52f358fafbc7a55830d"
   end
 
   def make_deps

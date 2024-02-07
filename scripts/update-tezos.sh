@@ -52,15 +52,16 @@ if [[ "$latest_upstream_tag" != "$our_tezos_tag" ]]; then
     sed -i "s/version = .*/version = \"$latest_upstream_tag\"/" ./baking/pyproject.toml
     # Commit may fail when release number wasn't updated since the last release
     git commit -a -m "[Chore] Reset release number for $latest_upstream_tag" --gpg-sign="tezos-packaging@serokell.io" || \
-      echo "release number wasn't updated"
+      (true; echo "release number wasn't updated")
 
     sed -i 's/letter_version *= *"[a-z]"/letter_version = ""/' ./docker/package/model.py
     # Commit may fail when the letter version wasn't updated since the last release
     git commit -a -m "[Chore] Reset letter_version for $latest_upstream_tag" --gpg-sign="tezos-packaging@serokell.io" || \
-      echo "letter_version wasn't reset"
+      (true; echo "letter_version wasn't reset")
 
     ./scripts/update-release-binaries.py
-    git commit -a -m "[Chore] Update release binaries for $latest_upstream_tag" --gpg-sign="tezos-packaging@serokell.io"
+    git commit -a -m "[Chore] Update release binaries for $latest_upstream_tag" --gpg-sign="tezos-packaging@serokell.io" || \
+      (true; echo "lists of binaries and protocols weren't updated")
 
     git push --set-upstream origin "$branch_name"
 

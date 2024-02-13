@@ -52,5 +52,5 @@ tezos-vote --network voting
 `tezos-vote` also supports voting on currently running testnets, for example:
 
 ```bash
-tezos-vote --network nairobinet
+tezos-vote --network oxfordnet
 ```

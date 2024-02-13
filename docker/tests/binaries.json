@@ -1,8 +1,7 @@
 {
     "released": [
-        "tezos-smart-rollup-client-Proxford",
-        "tezos-smart-rollup-client-PtNairob",
         "tezos-smart-rollup-node",
+        "tezos-smart-rollup-wasm-debugger"
         "tezos-baking",
         "tezos-sapling-params",
         "tezos-accuser-Proxford",
@@ -15,8 +14,7 @@
         "tezos-codec",
         "tezos-signer",
         "tezos-admin-client",
-        "tezos-client",
-        "tezos-smart-rollup-wasm-debugger"
+        "tezos-client"
     ],
     "candidates": [
         "tezos-smart-rollup-node",

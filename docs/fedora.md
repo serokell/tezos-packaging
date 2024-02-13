@@ -12,11 +12,11 @@ following commands:
 # use dnf
 sudo dnf copr enable @Serokell/Tezos
 sudo dnf install tezos-client
-sudo dnf install tezos-baker-PtNairob
+sudo dnf install tezos-baker-Proxford
 
 # or use yum
 sudo yum copr enable @Serokell/Tezos
-sudo yum install tezos-baker-PtNairob
+sudo yum install tezos-baker-Proxford
 ```
 Once you install these packages, the commands `tezos-*` and `octez-*` will be available.
 

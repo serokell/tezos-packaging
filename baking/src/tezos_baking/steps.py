@@ -105,8 +105,7 @@ key_import_modes = {
 
 networks = {
     "mainnet": "Main Tezos network",
-    "ghostnet": "Long running test network, currently using the Nairobi Tezos protocol",
-    "nairobinet": "Test network using the Nairobi Tezos protocol",
+    "ghostnet": "Long running test network, currently using the Oxford Tezos protocol",
     "oxfordnet": "Test network using the Oxford2 Tezos protocol",
 }
 

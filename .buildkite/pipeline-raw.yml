@@ -20,15 +20,7 @@ steps:
    key: build-ubuntu-source-packages
    commands:
    - eval "$SET_VERSION"
-   - nix develop .#docker-tezos-packages -c ./docker/build/ubuntu/build.py --type source --launchpad-sources
-   artifact_paths:
-     - ./out/*
-
- - label: Build fedora source packages
-   key: build-fedora-source-packages
-   commands:
-   - eval "$SET_VERSION"
-   - nix develop .#docker-tezos-packages -c ./docker/build/fedora/build.py --type source
+   - nix develop .#docker-tezos-packages -c ./docker/build/ubuntu/build.py --type source
    artifact_paths:
      - ./out/*
 
@@ -43,17 +35,6 @@ steps:
    artifact_paths:
      - ./out/*
 
- - label: Sign fedora source packages
-   depends_on:
-   - "build-fedora-source-packages"
-   key: sign-fedora-source-packages
-   commands:
-   - eval "$SET_VERSION"
-   - buildkite-agent artifact download "out/*" . --step build-fedora-source-packages
-   - nix develop .#docker-tezos-packages -c ./docker/build/fedora/sign.py -d out -i 'Serokell <tezos-packaging@serokell.io>'
-   artifact_paths:
-     - ./out/*
-
  - label: Publish ubuntu native packages
    depends_on:
    - "sign-ubuntu-source-packages"
@@ -62,51 +43,3 @@ steps:
    - buildkite-agent artifact download "out/*" . --step sign-ubuntu-source-packages
    - nix develop .#buildkite -c ./docker/build/ubuntu/upload.py -d out
 
- - label: Publish fedora native packages
-   depends_on:
-   - "sign-fedora-source-packages"
-   commands:
-   - eval "$SET_VERSION"
-   - buildkite-agent artifact download "out/*" . --step sign-fedora-source-packages
-   - nix develop .#buildkite -c ./docker/build/fedora/upload.py -d out
-
- - label: build-via-docker
-   key: build-via-docker
-   commands:
-   - eval "$SET_VERSION"
-   - cd docker
-   - ./docker-static-build.sh
-   artifact_paths:
-     - ./docker/octez-*
-
- - label: Build source packages from static binaries
-   key: build-source-packages-from-static-binaries
-   depends_on:
-   - "build-via-docker"
-   commands:
-   - eval "$SET_VERSION"
-   - mkdir binaries
-   - buildkite-agent artifact download "docker/*" binaries --step build-via-docker
-   - nix develop .#docker-tezos-packages -c ./docker/build/fedora/build.py --type source --output-dir epel --binaries-dir ./binaries/docker
-   artifact_paths:
-     - ./epel/*
-
- - label: Sign source packages built from static binaries
-   key: sign-source-packages-built-from-static-binaries
-   depends_on:
-   - "build-source-packages-from-static-binaries"
-   commands:
-   - eval "$SET_VERSION"
-   - buildkite-agent artifact download "epel/*" . --step build-source-packages-from-static-binaries
-   - nix develop .#docker-tezos-packages -c ./docker/build/fedora/sign.py -d epel -i 'Serokell <tezos-packaging@serokell.io>'
-   artifact_paths:
-     - ./epel/*
-
- - label: Publish epel packages
-   depends_on:
-   - "sign-source-packages-built-from-static-binaries"
-   commands:
-   - eval "$SET_VERSION"
-   - mkdir -p srcs
-   - buildkite-agent artifact download "epel/*" srcs --step sign-source-packages-built-from-static-binaries
-   - nix develop .#buildkite -c ./docker/build/fedora/upload.py -d srcs/epel --upload epel

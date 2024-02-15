@@ -17,11 +17,12 @@ class PackagesMeta:
         self.license_version = license_version
 
 
-version = os.environ["OCTEZ_VERSION"][1:]
-
 meta_json_contents = json.load(
     open(f"{os.path.dirname(__file__)}/../../meta.json", "r")
 )
+
+version = os.environ.get("OCTEZ_VERSION", meta_json_contents["tezos_ref"])[1:]
+
 packages_meta = PackagesMeta(
     version=version,
     release=str(meta_json_contents["release"]),

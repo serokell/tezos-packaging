@@ -2,13 +2,14 @@
 #
 # SPDX-License-Identifier: LicenseRef-MIT-TQ
 
+{inputs}:
 {config, lib, pkgs, ...}:
 
 with lib;
 
 let
   octez-signer-launch = "${pkgs.octezPackages.octez-signer}/bin/octez-signer launch";
-  common = import ./common.nix { inherit lib; inherit pkgs; };
+  common = import ./common.nix { inherit lib pkgs inputs; };
   cfg = config.services.octez-signer;
   instanceOptions = types.submodule ( {...} : {
     options = common.sharedOptions // {
@@ -98,7 +99,7 @@ in {
           "${octez-signer-launch} local signer --socket ${node-cfg.unixSocket}";
       };
       in {
-      services."tezos-${node-name}-octez-signer" = common.genSystemdService node-name node-cfg "signer" // {
+      services."tezos-${node-name}-octez-signer" = common.genSystemdService node-name node-cfg "signer" {} // {
         after = [ "network.target" ];
         script = ''
           ${octez-signers.${node-cfg.networkProtocol}}

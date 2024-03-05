@@ -1,6 +1,7 @@
 # SPDX-FileCopyrightText: 2021 Oxhead Alpha
 # SPDX-License-Identifier: LicenseRef-MIT-OA
 
+{inputs}:
 {config, lib, pkgs, ...}:
 
 with lib;
@@ -13,7 +14,7 @@ let
       "${pkgs.octezPackages.octez-accuser-Proxford}/bin/octez-accuser-Proxford";
   };
   cfg = config.services.octez-accuser;
-  common = import ./common.nix { inherit lib; inherit pkgs; };
+  common = import ./common.nix { inherit lib pkgs inputs; };
   instanceOptions = types.submodule ( {...} : {
     options = common.daemonOptions // {
 

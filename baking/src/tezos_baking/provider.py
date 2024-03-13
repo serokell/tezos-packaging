@@ -28,7 +28,6 @@ def get_node_version():
 @dataclass
 class Provider:
     title: str
-    metadata_url: str
 
     @abstractmethod
     def get_snapshot_metadata(self, network, history_mode):
@@ -37,6 +36,7 @@ class Provider:
 
 @dataclass
 class XtzShotsLike(Provider):
+    metadata_url: str
     # Returns relevant snapshot's metadata
     # It filters out provided snapshots by `network` and `history_mode`
     # provided by the user and then follows this steps:
@@ -190,13 +190,61 @@ class XtzShotsLike(Provider):
         return self.extract_relevant_snapshot(snapshot_array, network, history_mode)
 
 
+class TzInit(Provider):
+    def get_filesize(self, url):
+        request = urllib.request.Request(
+            url, headers=http_request_headers, method="HEAD"
+        )
+        content_length = next(
+            (
+                header[1]
+                for header in urllib.request.urlopen(request).info()._headers
+                if header[0] == "Content-Length"
+            ),
+            None,
+        )
+        if content_length is not None:
+            suffixes = ["B", "KB", "MB", "GB", "TB", "PB"]
+            nbytes = int(content_length)
+            i = 0
+            while nbytes >= 1024 and i < len(suffixes) - 1:
+                nbytes /= 1024.0
+                i += 1
+            f = ("%.2f" % nbytes).rstrip("0").rstrip(".")
+            return "%s%s" % (f, suffixes[i])
+        return content_length
+
+    def get_snapshot_metadata(self, network, history_mode):
+        history_mode = "full" if history_mode == "archive" else history_mode
+        self.metadata_url = (
+            f"https://snapshots.eu.tzinit.org/{network}/{history_mode}.json"
+        )
+        with urllib.request.urlopen(self.metadata_url) as url:
+            snapshot_metadata = json.load(url)["snapshot_header"]
+
+        snapshot_metadata["block_height"] = snapshot_metadata["level"]
+        snapshot_metadata[
+            "url"
+        ] = f"https://snapshots.eu.tzinit.org/{network}/{history_mode}"
+        snapshot_metadata["sha256"] = None
+        snapshot_metadata["filesize"] = (
+            "not provided"
+            if (filesize := self.get_filesize(snapshot_metadata["url"])) is None
+            else filesize
+        )
+        snapshot_metadata["block_timestamp"] = snapshot_metadata["timestamp"]
+
+        return snapshot_metadata
+
+
 compatible_snapshot_version = 7
 
 default_providers = [
-    XtzShotsLike("xtz-shots.io", "https://xtz-shots.io/tezos-snapshots.json"),
+    TzInit("tzinit"),
     XtzShotsLike(
         "marigold.dev", "https://snapshots.tezos.marigold.dev/api/tezos-snapshots.json"
     ),
+    XtzShotsLike("xtz-shots.io", "https://xtz-shots.io/tezos-snapshots.json"),
 ]
 
-recommended_provider = default_providers[1]
+recommended_provider = default_providers[0]

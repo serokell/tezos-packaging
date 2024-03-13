@@ -493,7 +493,7 @@ class Setup(Setup):
                 f"""
 Snapshot metadata:
 url: {metadata["url"]}
-sha256: {metadata["sha256"]}
+sha256: {"not provided" if metadata["sha256"] is None else metadata["sha256"]}
 filesize: {metadata["filesize"]}
 block height: {metadata["block_height"]}
 block timestamp: {timestamp} ({time_ago})

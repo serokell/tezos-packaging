@@ -35,7 +35,7 @@ class Provider:
 
 
 @dataclass
-class XtzShotsLike(Provider):
+class Marigold(Provider):
     metadata_url: str
     # Returns relevant snapshot's metadata
     # It filters out provided snapshots by `network` and `history_mode`
@@ -242,10 +242,9 @@ compatible_snapshot_version = 7
 
 default_providers = [
     TzInit("tzinit"),
-    XtzShotsLike(
+    Marigold(
         "marigold.dev", "https://snapshots.tezos.marigold.dev/api/tezos-snapshots.json"
     ),
-    XtzShotsLike("xtz-shots.io", "https://xtz-shots.io/tezos-snapshots.json"),
 ]
 
 recommended_provider = default_providers[0]

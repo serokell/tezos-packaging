@@ -283,8 +283,8 @@ def get_snapshot_mode_query(config):
         "which will take a significant amount of time.\nIn order to avoid this, we suggest "
         "bootstrapping from a snapshot instead.\n\n"
         "Snapshots can be downloaded from the following websites:\n"
+        "Tzinit - https://snapshots.tzinit.org/ \n\n"
         "Marigold - https://snapshots.tezos.marigold.dev/ \n"
-        "XTZ-Shots - https://xtz-shots.io/ \n\n"
         "We recommend to use rolling snapshots. This is the smallest and the fastest mode\n"
         "that is sufficient for baking. You can read more about other Tezos node history modes here:\n"
         "https://tezos.gitlab.io/user/history_modes.html#history-modes",
@@ -311,7 +311,7 @@ snapshot_file_query = Step(
     id="snapshot_file",
     prompt="Provide the path to the node snapshot file.",
     help="You have indicated wanting to import the snapshot from a file.\n"
-    "You can download the snapshot yourself e.g. from XTZ-Shots or Tezos Giganode Snapshots.",
+    "You can download the snapshot yourself e.g. from Tzinit or Tezos Giganode Snapshots.",
     default=None,
     validator=Validator([validators.required_field, validators.filepath]),
 )
@@ -328,7 +328,7 @@ snapshot_url_query = Step(
     id="snapshot_url",
     prompt="Provide the url of the node snapshot file.",
     help="You have indicated wanting to import the snapshot from a custom url.\n"
-    "You can use e.g. links to XTZ-Shots or Marigold resources.",
+    "You can use e.g. links to Tzinit or Marigold resources.",
     default=None,
     validator=Validator([validators.required_field, validators.reachable_url()]),
 )

@@ -234,6 +234,21 @@ liquidity_toggle_vote_query = Step(
     validator=Validator(validators.enum_range(toggle_vote_modes)),
 )
 
+regions = {
+    "eu": "European region",
+    "us": "US region",
+    "asia": "Asian region",
+}
+
+region_step = Step(
+    id="region",
+    prompt="Choose the snapshot service closest to your servers:",
+    help="Snapshot download can take significant time to finish.\n"
+    "Choosing correct region will provide you better download speed.",
+    options=regions,
+    validator=Validator(validators.enum_range(regions)),
+)
+
 # We define this step as a function to better tailor snapshot options to the chosen history mode
 def get_snapshot_mode_query(config):
 
@@ -439,7 +454,9 @@ class Setup(Setup):
     def get_snapshot_metadata(self, provider: Provider):
         try:
             snapshot_metadata = provider.get_snapshot_metadata(
-                self.config["network"], self.config["history_mode"]
+                self.config["network"],
+                self.config["history_mode"],
+                self.config["region"],
             )
             if snapshot_metadata is None:
                 print_and_log(
@@ -666,6 +683,9 @@ block timestamp: {timestamp} ({time_ago})
                     for provider in default_providers:
                         if provider.title in self.config["snapshot_mode"]:
                             selected_provider = provider
+                    self.config["region"] = None
+                    if isinstance(selected_provider, TzInit):
+                        self.query_step(region_step)
                     snapshot_info = self.get_snapshot_from_provider_with_fallback(
                         selected_provider
                     )

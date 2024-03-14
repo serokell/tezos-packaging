@@ -30,7 +30,7 @@ class Provider:
     title: str
 
     @abstractmethod
-    def get_snapshot_metadata(self, network, history_mode):
+    def get_snapshot_metadata(self, network, history_mode, region=None):
         pass
 
 
@@ -182,7 +182,7 @@ class XtzShotsLike(Provider):
             None,
         )
 
-    def get_snapshot_metadata(self, network, history_mode):
+    def get_snapshot_metadata(self, network, history_mode, region=None):
         snapshot_array = None
         with urllib.request.urlopen(self.metadata_url) as url:
             snapshot_array = json.load(url)["data"]
@@ -214,10 +214,11 @@ class TzInit(Provider):
             return "%s%s" % (f, suffixes[i])
         return content_length
 
-    def get_snapshot_metadata(self, network, history_mode):
+    def get_snapshot_metadata(self, network, history_mode, region=None):
+        region = "eu" if region is None else region
         history_mode = "full" if history_mode == "archive" else history_mode
         self.metadata_url = (
-            f"https://snapshots.eu.tzinit.org/{network}/{history_mode}.json"
+            f"https://snapshots.{region}.tzinit.org/{network}/{history_mode}.json"
         )
         with urllib.request.urlopen(self.metadata_url) as url:
             snapshot_metadata = json.load(url)["snapshot_header"]
@@ -225,7 +226,7 @@ class TzInit(Provider):
         snapshot_metadata["block_height"] = snapshot_metadata["level"]
         snapshot_metadata[
             "url"
-        ] = f"https://snapshots.eu.tzinit.org/{network}/{history_mode}"
+        ] = f"https://snapshots.{region}.tzinit.org/{network}/{history_mode}"
         snapshot_metadata["sha256"] = None
         snapshot_metadata["filesize"] = (
             "not provided"

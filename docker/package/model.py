@@ -465,7 +465,7 @@ set -e
                 "-q",
                 "-O",
                 out,
-                f"https://gitlab.com/tezos/tezos/-/raw/{self.meta.license_version}/LICENSE",
+                f"https://gitlab.com/tezos/tezos/-/raw/{self.meta.license_version}/LICENSES/MIT.txt",
             ],
             check=True,
         )

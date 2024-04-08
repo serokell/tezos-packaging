@@ -30,6 +30,7 @@ networks_protos = {
 protocol_numbers = {
     "PtNairob": "017",
     "Proxford": "018",
+    "PtParisB": "019",
 }
 
 signer_units = [

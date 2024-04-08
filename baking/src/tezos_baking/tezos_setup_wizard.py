@@ -17,10 +17,10 @@ import json
 from typing import List
 import logging
 
-
 from tezos_baking.wizard_structure import *
 from tezos_baking.util import *
 from tezos_baking.steps import *
+from tezos_baking.provider import *
 from tezos_baking.validators import Validator
 import tezos_baking.validators as validators
 
@@ -48,13 +48,6 @@ toggle_vote_modes = {
     "off": "Request to end the subsidy",
     "on": "Request to continue or restart the subsidy",
 }
-
-default_providers = {
-    "xtz-shots.io": "https://xtz-shots.io/tezos-snapshots.json",
-    "marigold.dev": "https://snapshots.tezos.marigold.dev/api/tezos-snapshots.json",
-}
-
-recommended_provider = list(default_providers.keys())[1]
 
 TMP_SNAPSHOT_LOCATION = "/tmp/octez_node.snapshot.d/"
 
@@ -183,19 +176,6 @@ def is_full_snapshot(snapshot_file, import_mode):
     return False
 
 
-def get_node_version():
-    version = get_proc_output("octez-node --version").stdout.decode("ascii")
-    major_version, minor_version, rc_version = re.search(
-        r"[a-z0-9]+ \(.*\) \(([0-9]+).([0-9]+)(?:(?:~rc([1-9]+))|(?:\+dev))?\)",
-        version,
-    ).groups()
-    return (
-        int(major_version),
-        int(minor_version),
-        (int(rc_version) if rc_version is not None else None),
-    )
-
-
 def is_non_protocol_testnet(network):
     return network == "mainnet" or network == "ghostnet"
 
@@ -209,9 +189,6 @@ def network_name_or_teztnets_url(network):
         return network
     else:
         return f"https://teztnets.com/{network}"
-
-
-compatible_snapshot_version = 7
 
 
 # Steps
@@ -257,6 +234,21 @@ liquidity_toggle_vote_query = Step(
     validator=Validator(validators.enum_range(toggle_vote_modes)),
 )
 
+regions = {
+    "eu": "European region",
+    "us": "US region",
+    "asia": "Asian region",
+}
+
+region_step = Step(
+    id="region",
+    prompt="Choose the snapshot service closest to your servers:",
+    help="Snapshot download can take significant time to finish.\n"
+    "Choosing correct region will provide you better download speed.",
+    options=regions,
+    validator=Validator(validators.enum_range(regions)),
+)
+
 # We define this step as a function to better tailor snapshot options to the chosen history mode
 def get_snapshot_mode_query(config):
 
@@ -276,8 +268,8 @@ def get_snapshot_mode_query(config):
 
     dynamic_import_modes = {}
 
-    for name in default_providers.keys():
-        dynamic_import_modes[mk_option(name)] = mk_desc(name)
+    for provider in default_providers:
+        dynamic_import_modes[mk_option(provider.title)] = mk_desc(provider.title)
 
     import_modes = {**dynamic_import_modes, **static_import_modes}
 
@@ -291,8 +283,8 @@ def get_snapshot_mode_query(config):
         "which will take a significant amount of time.\nIn order to avoid this, we suggest "
         "bootstrapping from a snapshot instead.\n\n"
         "Snapshots can be downloaded from the following websites:\n"
+        "Tzinit - https://snapshots.tzinit.org/ \n\n"
         "Marigold - https://snapshots.tezos.marigold.dev/ \n"
-        "XTZ-Shots - https://xtz-shots.io/ \n\n"
         "We recommend to use rolling snapshots. This is the smallest and the fastest mode\n"
         "that is sufficient for baking. You can read more about other Tezos node history modes here:\n"
         "https://tezos.gitlab.io/user/history_modes.html#history-modes",
@@ -319,7 +311,7 @@ snapshot_file_query = Step(
     id="snapshot_file",
     prompt="Provide the path to the node snapshot file.",
     help="You have indicated wanting to import the snapshot from a file.\n"
-    "You can download the snapshot yourself e.g. from XTZ-Shots or Tezos Giganode Snapshots.",
+    "You can download the snapshot yourself e.g. from Tzinit or Tezos Giganode Snapshots.",
     default=None,
     validator=Validator([validators.required_field, validators.filepath]),
 )
@@ -336,7 +328,7 @@ snapshot_url_query = Step(
     id="snapshot_url",
     prompt="Provide the url of the node snapshot file.",
     help="You have indicated wanting to import the snapshot from a custom url.\n"
-    "You can use e.g. links to XTZ-Shots or Marigold resources.",
+    "You can use e.g. links to Tzinit or Marigold resources.",
     default=None,
     validator=Validator([validators.required_field, validators.reachable_url()]),
 )
@@ -457,181 +449,33 @@ class Setup(Setup):
             return False
         return True
 
-    # Returns relevant snapshot's metadata
-    # It filters out provided snapshots by `network` and `history_mode`
-    # provided by the user and then follows this steps:
-    # * tries to find the snapshot of exact same Octez version, that is used by the user.
-    # * if there is none, try to find the snapshot with the same major version, but less minor version
-    #   and with the `snapshot_version` compatible with the user's Octez version.
-    # * If there is none, try to find the snapshot with any Octez version, but compatible `snapshot_version`.
-    def extract_relevant_snapshot(self, snapshot_array):
-        from functools import reduce
-
-        def find_snapshot(pred):
-            return next(
-                filter(
-                    lambda artifact: artifact["artifact_type"] == "tezos-snapshot"
-                    and artifact["chain_name"] == self.config["network"]
-                    and (
-                        artifact["history_mode"] == self.config["history_mode"]
-                        or (
-                            self.config["history_mode"] == "archive"
-                            and artifact["history_mode"] == "full"
-                        )
-                    )
-                    and pred(
-                        *(
-                            get_artifact_node_version(artifact)
-                            + (artifact.get("snapshot_version", None),)
-                        )
-                    ),
-                    iter(snapshot_array),
-                ),
-                None,
-            )
-
-        def get_artifact_node_version(artifact):
-            version = artifact["tezos_version"]["version"]
-            # there seem to be some inconsistency with that field in different providers
-            # so the only thing we check is if it's a string
-            additional_info = version["additional_info"]
-            return (
-                version["major"],
-                version["minor"],
-                None if type(additional_info) == str else additional_info["rc"],
-            )
-
-        def compose_pred(*preds):
-            return reduce(
-                lambda acc, x: lambda major, minor, rc, snapshot_version: acc(
-                    major, minor, rc, snapshot_version
-                )
-                and x(major, minor, rc, snapshot_version),
-                preds,
-            )
-
-        def sum_pred(*preds):
-            return reduce(
-                lambda acc, x: lambda major, minor, rc, snapshot_version: acc(
-                    major, minor, rc, snapshot_version
-                )
-                or x(major, minor, rc, snapshot_version),
-                preds,
-            )
-
-        node_version = get_node_version()
-        major_version, minor_version, rc_version = node_version
-
-        exact_version_pred = (
-            lambda major, minor, rc, snapshot_version: node_version
-            == (
-                major,
-                minor,
-                rc,
-            )
-        )
-
-        exact_major_version_pred = (
-            lambda major, minor, rc, snapshot_version: major_version == major
-        )
-
-        exact_minor_version_pred = (
-            lambda major, minor, rc, snapshot_version: minor_version == minor
-        )
-
-        less_minor_version_pred = (
-            lambda major, minor, rc, snapshot_version: minor_version > minor
-        )
-
-        exact_rc_version_pred = (
-            lambda major, minor, rc, snapshot_version: rc_version == rc
-        )
-
-        less_rc_version_pred = (
-            lambda major, minor, rc, snapshot_version: rc
-            and rc_version
-            and rc_version > rc
-        )
-
-        non_rc_version_pred = lambda major, minor, rc, snapshot_version: rc is None
-
-        compatible_version_pred = (
-            # it could happen that `snapshot_version` field is not supplied by provider
-            # e.g. marigold snapshots don't supply it
-            lambda major, minor, rc, snapshot_version: snapshot_version
-            and compatible_snapshot_version - snapshot_version <= 2
-        )
-
-        non_rc_on_stable_pred = lambda major, minor, rc, snapshot_version: (
-            rc_version is None and rc is None
-        ) or (rc_version is not None)
-
-        preds = [
-            exact_version_pred,
-            compose_pred(
-                non_rc_on_stable_pred,
-                compatible_version_pred,
-                sum_pred(
-                    compose_pred(
-                        exact_major_version_pred,
-                        exact_minor_version_pred,
-                        less_rc_version_pred,
-                    ),
-                    compose_pred(
-                        exact_major_version_pred,
-                        less_minor_version_pred,
-                        non_rc_version_pred,
-                    ),
-                ),
-            ),
-            compose_pred(
-                non_rc_on_stable_pred,
-                compatible_version_pred,
-            ),
-        ]
-
-        return next(
-            (
-                snapshot
-                for snapshot in map(
-                    lambda pred: find_snapshot(pred),
-                    preds,
-                )
-                if snapshot is not None
-            ),
-            None,
-        )
-
     # Check the provider url and collect the most recent snapshot
     # that is suited for the chosen history mode and network
-    def get_snapshot_metadata(self, name, json_url):
-
+    def get_snapshot_metadata(self, provider: Provider):
         try:
-            snapshot_array = None
-            with urllib.request.urlopen(json_url) as url:
-                snapshot_array = json.load(url)["data"]
-            snapshot_array.sort(reverse=True, key=lambda x: x["block_height"])
-
-            snapshot_metadata = self.extract_relevant_snapshot(snapshot_array)
-
+            snapshot_metadata = provider.get_snapshot_metadata(
+                self.config["network"],
+                self.config["history_mode"],
+                self.config["region"],
+            )
             if snapshot_metadata is None:
                 print_and_log(
-                    f"No suitable snapshot found from the {name} provider.",
+                    f"No suitable snapshot found from the {provider.title} provider.",
                     log=logging.warning,
                     colorcode=color_yellow,
                 )
             else:
-                self.config["snapshots"][name] = snapshot_metadata
+                self.config["snapshots"][provider.title] = snapshot_metadata
 
         except urllib.error.URLError:
             print_and_log(
-                f"\nCouldn't collect snapshot metadata from {json_url} due to networking issues.\n",
+                f"\nCouldn't collect snapshot metadata from {provider.metadata_url} due to networking issues.\n",
                 log=logging.error,
                 colorcode=color_red,
             )
         except ValueError:
             print_and_log(
-                f"\nCouldn't collect snapshot metadata from {json_url} due to format mismatch.\n",
+                f"\nCouldn't collect snapshot metadata from {provider.metadata_url} due to format mismatch.\n",
                 log=logging.error,
                 colorcode=color_red,
             )
@@ -666,7 +510,7 @@ class Setup(Setup):
                 f"""
 Snapshot metadata:
 url: {metadata["url"]}
-sha256: {metadata["sha256"]}
+sha256: {"not provided" if metadata["sha256"] is None else metadata["sha256"]}
 filesize: {metadata["filesize"]}
 block height: {metadata["block_height"]}
 block timestamp: {timestamp} ({time_ago})
@@ -693,30 +537,30 @@ block timestamp: {timestamp} ({time_ago})
             print()
             raise InterruptStep
 
-    def get_snapshot_from_provider(self, name, url):
+    def get_snapshot_from_provider(self, provider):
         try:
-            self.config["snapshots"][name]
+            self.config["snapshots"][provider.title]
         except KeyError:
-            self.get_snapshot_metadata(name, url)
-        snapshot_file = self.fetch_snapshot_from_provider(name)
-        snapshot_block_hash = self.config["snapshots"][name]["block_hash"]
+            self.get_snapshot_metadata(provider)
+        snapshot_file = self.fetch_snapshot_from_provider(provider.title)
+        snapshot_block_hash = self.config["snapshots"][provider.title]["block_hash"]
         return (snapshot_file, snapshot_block_hash)
 
     # check if a given provider has the compatible snapshot
     # available in its metadata and return the metadata of this
     # snapshot if it's available
-    def try_fallback_provider(self, name, url):
-        print(f"Getting snapshots' metadata from {name} instead...")
-        self.get_snapshot_metadata(name, url)
-        return self.config["snapshots"].get(name, None)
+    def try_fallback_provider(self, provider):
+        print(f"Getting snapshots' metadata from {provider.title} instead...")
+        self.get_snapshot_metadata(provider)
+        return self.config["snapshots"].get(provider.title, None)
 
     # check if some of the providers has the compatible snapshot
     # available in its metadadata and return the provider name
     def find_fallback_provider(self, providers):
-        for name, url in providers.items():
-            snapshot = self.try_fallback_provider(name, url)
+        for provider in providers:
+            snapshot = self.try_fallback_provider(provider)
             if snapshot is not None:
-                return name
+                return provider
         return None
 
     # tries to get the latest compatible snapshot from the given
@@ -724,24 +568,24 @@ block timestamp: {timestamp} ({time_ago})
     #
     # if the snapshot not found, tries to find it in other known
     # providers
-    def get_snapshot_from_provider_with_fallback(self, name, url):
-        print_and_log(f"Getting snapshots' metadata from {name}...")
+    def get_snapshot_from_provider_with_fallback(self, provider):
+        print_and_log(f"Getting snapshots' metadata from {provider.title}...")
 
-        self.get_snapshot_metadata(name, url)
-        snapshot = self.config["snapshots"].get(name, None)
+        self.get_snapshot_metadata(provider)
+        snapshot = self.config["snapshots"].get(provider.title, None)
 
         if snapshot is None:
             fallback_providers = default_providers.copy()
-            fallback_providers.pop(name)
+            fallback_providers.remove(provider)
             fallback_provider = self.find_fallback_provider(fallback_providers)
 
             if fallback_provider is None:
                 return None
             else:
-                name = fallback_provider
+                provider = fallback_provider
 
-        snapshot_file = self.fetch_snapshot_from_provider(name)
-        snapshot_block_hash = self.config["snapshots"][name]["block_hash"]
+        snapshot_file = self.fetch_snapshot_from_provider(provider.title)
+        snapshot_block_hash = self.config["snapshots"][provider.title]["block_hash"]
         return (snapshot_file, snapshot_block_hash)
 
     def get_snapshot_from_direct_url(self, url):
@@ -773,16 +617,15 @@ block timestamp: {timestamp} ({time_ago})
                 return (snapshot_file, None)
 
     def get_snapshot_from_provider_url(self, url):
-        name = "custom"
-        if os.path.basename(url) == "tezos-snapshots.json":
-            return self.get_snapshot_from_provider(name, url)
+        provider = XtzShotsLike("custom", url)
+        if os.path.basename(provider.metadata_url) == "tezos-snapshots.json":
+            return self.get_snapshot_from_provider(provider)
         else:
             try:
-                return self.get_snapshot_from_provider(name, url)
+                return self.get_snapshot_from_provider(provider)
             except InterruptStep:
-                return self.get_snapshot_from_provider(
-                    name, os.path.join(url, "tezos-snapshots.json")
-                )
+                provider.metadata_url = os.path.join(url, "tezos-snapshots.json")
+                return self.get_snapshot_from_provider(provider)
 
     # Importing the snapshot for Node bootstrapping
     def import_snapshot(self):
@@ -831,17 +674,20 @@ block timestamp: {timestamp} ({time_ago})
                     ) = self.get_snapshot_from_direct_url(url)
                 elif self.config["snapshot_mode"] == "provider url":
                     self.query_step(provider_url_query)
-                    name, url = "custom", self.config["provider_url"]
+                    url = self.config["provider_url"]
                     (
                         snapshot_file,
                         snapshot_block_hash,
                     ) = self.get_snapshot_from_provider_url(url)
                 else:
-                    for name, url in default_providers.items():
-                        if name in self.config["snapshot_mode"]:
-                            selected_provider = (name, url)
+                    for provider in default_providers:
+                        if provider.title in self.config["snapshot_mode"]:
+                            selected_provider = provider
+                    self.config["region"] = None
+                    if isinstance(selected_provider, TzInit):
+                        self.query_step(region_step)
                     snapshot_info = self.get_snapshot_from_provider_with_fallback(
-                        *selected_provider
+                        selected_provider
                     )
                     if snapshot_info is None:
                         print_and_log(

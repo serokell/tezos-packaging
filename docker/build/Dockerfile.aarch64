@@ -14,7 +14,8 @@ RUN apk --no-cache --virtual add rsync git m4 build-base patch unzip \
   bubblewrap wget pkgconfig gmp-dev libev-dev \
   hidapi-dev eudev-dev perl opam libusb-dev bash \
   autoconf automake libtool linux-headers cargo \
-  libffi-dev zlib-dev zlib-static coreutils perl-utils cmake
+  libffi-dev zlib-dev zlib-static coreutils perl-utils cmake \
+  protobuf protobuf-dev sqlite-dev
 COPY ./build/build-rust.sh /build-rust.sh
 RUN /build-rust.sh
 COPY ./build/build-upx.sh /build-upx.sh

@@ -20,16 +20,19 @@ networks = {
     "mainnet": "mainnet",
     "ghostnet": "ghostnet",
     "oxfordnet": "https://teztnets.com/oxfordnet",
+    "parisanet": "https://teztnets.com/parisanet",
 }
 networks_protos = {
     "mainnet": ["Proxford"],
     "ghostnet": ["Proxford"],
     "oxfordnet": ["Proxford"],
+    "parisanet": ["PtParisA"],
 }
 
 protocol_numbers = {
     "PtNairob": "017",
     "Proxford": "018",
+    "PtParisA": "019",
 }
 
 signer_units = [

@@ -7,8 +7,6 @@ with lib;
 
 let
   octez-accuser-pkgs = {
-    "PtNairob" =
-      "${pkgs.octezPackages.octez-accuser-PtNairob}/bin/octez-accuser-PtNairob";
     "Proxford" =
       "${pkgs.octezPackages.octez-accuser-Proxford}/bin/octez-accuser-Proxford";
   };

@@ -18,7 +18,7 @@
 
     flake-compat.flake = false;
 
-    opam-repository.url = "gitlab:tezos/opam-repository";
+    opam-repository.url = "github:ocaml/opam-repository";
     opam-repository.flake = false;
 
     tezos.url = "gitlab:tezos/tezos";

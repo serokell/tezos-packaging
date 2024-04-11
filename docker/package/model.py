@@ -465,7 +465,7 @@ set -e
                 "-q",
                 "-O",
                 out,
-                f"https://gitlab.com/tezos/tezos/-/raw/{self.meta.license_version}/LICENSE",
+                f"https://gitlab.com/tezos/tezos/-/raw/{self.meta.license_version}/LICENSES/MIT.txt",
             ],
             check=True,
         )
@@ -585,7 +585,7 @@ class TezosBakingServicesPackage(AbstractPackage):
     # native releases, so we append an extra letter to the version of
     # the package.
     # This should be reset to "" whenever the native version is bumped.
-    letter_version = "a"
+    letter_version = ""
 
     buildfile = "setup.py"
 

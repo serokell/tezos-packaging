@@ -1,7 +1,7 @@
-# SPDX-FileCopyrightText: 2023 Oxhead Alpha
+# SPDX-FileCopyrightText: 2024 Oxhead Alpha
 # SPDX-License-Identifier: LicenseRef-MIT-OA
 
-class TezosAccuserPtnairob < Formula
+class TezosAccuserPtparisb < Formula
   @all_bins = []
 
   class << self
@@ -9,9 +9,9 @@ class TezosAccuserPtnairob < Formula
   end
   homepage "https://gitlab.com/tezos/tezos"
 
-  url "https://gitlab.com/tezos/tezos.git", :tag => "v19.1", :shallow => false
+  url "https://gitlab.com/tezos/tezos.git", :tag => "octez-v20.0-rc1", :shallow => false
 
-  version "v19.1-1"
+  version "v20.0-rc1-1"
 
   build_dependencies = %w[pkg-config coreutils autoconf rsync wget rustup-init cmake opam]
   build_dependencies.each do |dependency|
@@ -25,9 +25,7 @@ class TezosAccuserPtnairob < Formula
   desc "Daemon for accusing"
 
   bottle do
-    root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosAccuserPtnairob.version}/"
-    sha256 cellar: :any, monterey: "ced7692b94b2a2e8c6bdbb66dc8bc6adf536cc88f109f6dcb527cdb3add5e289"
-    sha256 cellar: :any, arm64_monterey: "a6ee157acd7dc88fdd8b9b4a7730152bec7d4123957f8b19b1bbf522f6113df3"
+    root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosAccuserPtparisb.version}/"
   end
 
   def make_deps
@@ -61,7 +59,7 @@ class TezosAccuserPtnairob < Formula
 
       set -euo pipefail
 
-      accuser="#{bin}/octez-accuser-PtNairob"
+      accuser="#{bin}/octez-accuser-PtParisB"
 
       accuser_config="$TEZOS_CLIENT_DIR/config"
       mkdir -p "$TEZOS_CLIENT_DIR"
@@ -76,21 +74,21 @@ class TezosAccuserPtnairob < Formula
 
       exec "$accuser" --endpoint "$NODE_RPC_SCHEME://$NODE_RPC_ADDR" run
     EOS
-    File.write("tezos-accuser-PtNairob-start", startup_contents)
-    bin.install "tezos-accuser-PtNairob-start"
+    File.write("tezos-accuser-PtParisB-start", startup_contents)
+    bin.install "tezos-accuser-PtParisB-start"
     make_deps
-    install_template "src/proto_017_PtNairob/bin_accuser/main_accuser_017_PtNairob.exe",
-                     "_build/default/src/proto_017_PtNairob/bin_accuser/main_accuser_017_PtNairob.exe",
-                     "octez-accuser-PtNairob"
+    install_template "src/proto_019_PtParisB/bin_accuser/main_accuser_019_PtParisB.exe",
+                     "_build/default/src/proto_019_PtParisB/bin_accuser/main_accuser_019_PtParisB.exe",
+                     "octez-accuser-PtParisB"
   end
 
   service do
-    run opt_bin/"tezos-accuser-PtNairob-start"
+    run opt_bin/"tezos-accuser-PtParisB-start"
     require_root true
     environment_variables TEZOS_CLIENT_DIR: var/"lib/tezos/client", NODE_RPC_SCHEME: "http", NODE_RPC_ADDR: "localhost:8732"
     keep_alive true
-    log_path var/"log/tezos-accuser-PtNairob.log"
-    error_log_path var/"log/tezos-accuser-PtNairob.log"
+    log_path var/"log/tezos-accuser-PtParisB.log"
+    error_log_path var/"log/tezos-accuser-PtParisB.log"
   end
 
   def post_install

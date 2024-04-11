@@ -1,7 +1,7 @@
-# SPDX-FileCopyrightText: 2023 Oxhead Alpha
+# SPDX-FileCopyrightText: 2024 Oxhead Alpha
 # SPDX-License-Identifier: LicenseRef-MIT-OA
 
-class TezosBakerPtnairob < Formula
+class TezosBakerPtparisb < Formula
   @all_bins = []
 
   class << self
@@ -9,25 +9,23 @@ class TezosBakerPtnairob < Formula
   end
   homepage "https://gitlab.com/tezos/tezos"
 
-  url "https://gitlab.com/tezos/tezos.git", :tag => "v19.1", :shallow => false
+  url "https://gitlab.com/tezos/tezos.git", :tag => "octez-v20.0-rc1", :shallow => false
 
-  version "v19.1-1"
+  version "v20.0-rc1-1"
 
   build_dependencies = %w[pkg-config coreutils autoconf rsync wget rustup-init cmake opam]
   build_dependencies.each do |dependency|
     depends_on dependency => :build
   end
 
-  dependencies = %w[gmp hidapi libev  tezos-sapling-params]
+  dependencies = %w[gmp hidapi libev tezos-sapling-params]
   dependencies.each do |dependency|
     depends_on dependency
   end
   desc "Daemon for baking"
 
   bottle do
-    root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosBakerPtnairob.version}/"
-    sha256 cellar: :any, monterey: "267c0b2bf13ecad22a2f4e673ba8205120163f39383e6370253cfb99a8cbf216"
-    sha256 cellar: :any, arm64_monterey: "5b515e519922939d5400f451c51d649c4c01c83cca0b83d7addde0aa00abdbc2"
+    root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosBakerPtparisb.version}/"
   end
 
   def make_deps
@@ -61,7 +59,7 @@ class TezosBakerPtnairob < Formula
 
       set -euo pipefail
 
-      baker="#{bin}/octez-baker-PtNairob"
+      baker="#{bin}/octez-baker-PtParisB"
 
       baker_config="$TEZOS_CLIENT_DIR/config"
       mkdir -p "$TEZOS_CLIENT_DIR"
@@ -86,21 +84,21 @@ class TezosBakerPtnairob < Formula
           launch_baker "$BAKER_ACCOUNT"
       fi
     EOS
-    File.write("tezos-baker-PtNairob-start", startup_contents)
-    bin.install "tezos-baker-PtNairob-start"
+    File.write("tezos-baker-PtParisB-start", startup_contents)
+    bin.install "tezos-baker-PtParisB-start"
     make_deps
-    install_template "src/proto_017_PtNairob/bin_baker/main_baker_017_PtNairob.exe",
-                     "_build/default/src/proto_017_PtNairob/bin_baker/main_baker_017_PtNairob.exe",
-                     "octez-baker-PtNairob"
+    install_template "src/proto_019_PtParisB/bin_baker/main_baker_019_PtParisB.exe",
+                     "_build/default/src/proto_019_PtParisB/bin_baker/main_baker_019_PtParisB.exe",
+                     "octez-baker-PtParisB"
   end
 
   service do
-    run opt_bin/"tezos-baker-PtNairob-start"
+    run opt_bin/"tezos-baker-PtParisB-start"
     require_root true
     environment_variables TEZOS_CLIENT_DIR: var/"lib/tezos/client", TEZOS_NODE_DIR: "", NODE_RPC_SCHEME: "http", NODE_RPC_ADDR: "localhost:8732", BAKER_ACCOUNT: ""
     keep_alive true
-    log_path var/"log/tezos-baker-PtNairob.log"
-    error_log_path var/"log/tezos-baker-PtNairob.log"
+    log_path var/"log/tezos-baker-PtParisB.log"
+    error_log_path var/"log/tezos-baker-PtParisB.log"
   end
 
   def post_install

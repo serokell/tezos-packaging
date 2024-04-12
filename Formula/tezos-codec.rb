@@ -18,7 +18,7 @@ class TezosCodec < Formula
     depends_on dependency => :build
   end
 
-  dependencies = %w[gmp hidapi libev]
+  dependencies = %w[gmp hidapi libev protobuf sqlite]
   dependencies.each do |dependency|
     depends_on dependency
   end

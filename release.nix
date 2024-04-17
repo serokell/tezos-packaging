@@ -10,7 +10,8 @@ let
     license = "MIT";
     dependencies = "";
     branchName = meta.tezos_ref;
-    licenseFile = "${source}/LICENSES/MIT.txt";
+    # FIXME on next upstream release
+    licenseFile = "${source}/LICENSE";
   } // meta;
   release = pkgs.callPackage ./tezos-release.nix {
     binaries = docker-binaries;

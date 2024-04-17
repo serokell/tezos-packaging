@@ -7,9 +7,9 @@
 
 if [[ -d ./Formula ]]
 then
-    regex="(octez-(v.*))-([0-9]+)"
+    regex="((octez-|)(v.*))-([0-9]+)"
     if [[ $1 =~ $regex ]]; then
-        tag="${BASH_REMATCH[2]}-${BASH_REMATCH[3]}"
+        tag="${BASH_REMATCH[3]}-${BASH_REMATCH[4]}"
         version="${BASH_REMATCH[1]}"
         find ./Formula -type f \( -name 'tezos-*.rb' ! -name 'tezos-sapling-params.rb' \) \
             -exec sed -i "s/version \"v.*\"/version \"$tag\"/g" {} \; \

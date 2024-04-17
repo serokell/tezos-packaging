@@ -11,7 +11,7 @@ class TezosAccuserPtparisb < Formula
 
   url "https://gitlab.com/tezos/tezos.git", :tag => "octez-v20.0-rc1", :shallow => false
 
-  version "v20.0-rc1-1"
+  version "v19.2-1"
 
   build_dependencies = %w[pkg-config coreutils autoconf rsync wget rustup-init cmake opam]
   build_dependencies.each do |dependency|
@@ -26,8 +26,6 @@ class TezosAccuserPtparisb < Formula
 
   bottle do
     root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosAccuserPtparisb.version}/"
-    sha256 cellar: :any, monterey: "9eb015e73df7db42a5033bb1978e9fb5e3001a373aeba922843200ef62269af5"
-    sha256 cellar: :any, arm64_monterey: "01740a9252cba5feb31603739cc19cc23c2b7296e399f9459c1ae371f3d5feb5"
   end
 
   def make_deps

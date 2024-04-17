@@ -68,9 +68,6 @@ def get_ubuntu_run_deps(binaries_dir):
         "libffi-dev",
         "zlib1g-dev",
         "libpq-dev",
-        "protobuf-compiler",
-        "libprotobuf-dev",
-        "libsqlite3-dev",
     ]
 
 
@@ -88,9 +85,6 @@ def get_fedora_run_deps(binaries_dir):
         "libffi-devel",
         "zlib-devel",
         "libpq-devel",
-        "protobuf-compiler",
-        "protobuf-devel",
-        "sqlite-devel",
     ]
 
 

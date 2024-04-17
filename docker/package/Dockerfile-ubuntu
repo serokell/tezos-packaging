@@ -5,18 +5,20 @@ ARG dist
 FROM ubuntu:${dist}
 
 ENV DEBIAN_FRONTEND="noninteractive"
-RUN apt update
-RUN apt install -y libev-dev libgmp-dev libhidapi-dev libffi-dev \
-                   zlib1g-dev libpq-dev m4 perl pkg-config \
-                   debhelper dh-make dh-python devscripts autotools-dev \
-                   python3-all python3-setuptools wget rsync cmake \
-                   software-properties-common libprotobuf-dev libsqlite3-dev \
-                   protobuf-compiler
+RUN apt-get update
+RUN apt-get install -y libev-dev libgmp-dev libhidapi-dev libffi-dev \
+                       zlib1g-dev libpq-dev m4 perl pkg-config \
+                       debhelper dh-make dh-python devscripts autotools-dev \
+                       python3-all python3-setuptools wget rsync cmake \
+                       software-properties-common
 
 ARG dist
-RUN if [ "$dist" = "focal" ]; then apt-get install -y dh-systemd; fi
-
-RUN install -m 0755 /usr/bin/python3 /usr/bin/builder
+RUN if [ "$dist" = "focal" ]; then \
+        apt-get install -y dh-systemd; \
+        install -m 0755 /usr/bin/python3 /usr/bin/builder; \
+    else \
+        install -m 0755 /usr/bin/python3 /usr/bin/builder; \
+    fi
 
 RUN add-apt-repository ppa:ubuntu-mozilla-security/rust-next -y && apt-get update -y
 RUN apt-get -y install cargo opam

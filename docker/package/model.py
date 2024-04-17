@@ -465,7 +465,8 @@ set -e
                 "-q",
                 "-O",
                 out,
-                f"https://gitlab.com/tezos/tezos/-/raw/{self.meta.license_version}/LICENSES/MIT.txt",
+                # FIXME on next upstream release
+                f"https://gitlab.com/tezos/tezos/-/raw/{self.meta.license_version}/LICENSE",
             ],
             check=True,
         )

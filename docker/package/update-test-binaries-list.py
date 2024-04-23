@@ -30,6 +30,7 @@ def main():
         raise Exception(
             "Exception, while reading binaries list: binaries list is empty"
         )
+    binaries.extend(["tezos-sapling-params", "tezos-baking"])
 
     field = "candidates" if "rc" in tag else "released"
 

@@ -13,7 +13,9 @@
         "tezos-accuser-Proxford",
         "tezos-baker-Proxford",
         "tezos-accuser-PtNairob",
-        "tezos-baker-PtNairob"
+        "tezos-baker-PtNairob",
+        "tezos-sapling-params",
+        "tezos-baking"
     ],
     "candidates": [
         "tezos-smart-rollup-node",

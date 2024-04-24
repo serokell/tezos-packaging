@@ -25,11 +25,12 @@ def main():
     tag = packages_meta.tag
     binaries = []
     with open(f"{os.path.dirname(__file__)}/../octez-executables", "r") as f:
-        binaries = [l.strip() for l in f.readlines()]
+        binaries = [l.strip().replace("octez", "tezos") for l in f.readlines()]
     if not binaries:
         raise Exception(
             "Exception, while reading binaries list: binaries list is empty"
         )
+    binaries.extend(["tezos-sapling-params", "tezos-baking"])
 
     field = "candidates" if "rc" in tag else "released"
 

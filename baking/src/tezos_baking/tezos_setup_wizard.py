@@ -826,9 +826,6 @@ block timestamp: {timestamp} ({time_ago})
         print()
         tezos_client_options = self.get_tezos_client_options()
         baker_alias = self.config["baker_alias"]
-        self.config["baker_key_value"], _ = get_key_address(
-            tezos_client_options, baker_alias
-        )
 
         if self.check_ledger_use():
             print(
@@ -902,6 +899,12 @@ block timestamp: {timestamp} ({time_ago})
 
             print()
             try:
+                (
+                    self.config["baker_key_value"],
+                    self.config["baker_key_hash"],
+                ) = get_key_address(
+                    self.get_tezos_client_options(), self.config["baker_alias"]
+                )
                 if not self.baker_registered():
                     print_and_log("Registering the baker")
                     self.register_baker()

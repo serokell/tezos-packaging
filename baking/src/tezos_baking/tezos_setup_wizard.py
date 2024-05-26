@@ -381,6 +381,31 @@ ignore_hash_mismatch_query = Step(
 )
 
 
+def get_stake_tez_query(staked_balance, minimal_frozen_stake):
+    def show_tez(tez):
+        # smallest tz quantity is microtez, so we are sure
+        # no digits after the 6th after floating point can occur
+        if int(tez) == 0:
+            return "0"
+        elif int(tez) % (10**6) == 0:
+            return tez[:-6] + tez[-6:-1].rstrip("0")
+        else:
+            return tez[:-6] + "." + tez[-6:-1].rstrip("0")
+
+    at_least = int(minimal_frozen_stake) - int(staked_balance)
+    return Step(
+        id="stake_tez",
+        prompt=f"In order to get baking rights, you need to stake at least {show_tez(minimal_frozen_stake)}Tz.\n"
+        f"Your current stake amount is {show_tez(staked_balance)}Tz.\n"
+        f"You have to stake at least {show_tez(str(at_least))}Tz.\n"
+        "How much would you like to stake?",
+        help="It is not recommended to stake all the balance, since some funds could require to pay the fees.\n"
+        f"For more information, please visit https://tezos.gitlab.io/paris/adaptive_issuance.html#new-staking-mechanism.",
+        default=show_tez(str(at_least)),
+        validator=Validator([validators.tez_bigger_than(at_least / (10**6))]),
+    )
+
+
 class Setup(Setup):
     # Check if there is already some blockchain data in the octez-node data directory,
     # and ask the user if it can be overwritten.
@@ -822,6 +847,95 @@ block timestamp: {timestamp} ({time_ago})
                 else:
                     baker_set_up = True
 
+    def stake_tez(self):
+        def get_minimal_frozen_stake():
+            output = get_proc_output(
+                f"curl {self.config['node_rpc_endpoint']}/chains/main/blocks/head/context/constants"
+            ).stdout.decode("utf-8")
+            return json.loads(output)["minimal_frozen_stake"]
+
+        def get_staked_balance(pkh):
+            output = get_proc_output(
+                f"curl {self.config['node_rpc_endpoint']}/chains/main/blocks/head/context/contracts/{pkh}/staked_balance"
+            ).stdout.decode("utf-8")
+            return json.loads(output)
+
+        def get_adaptive_issuance_launch_cycle():
+            output = get_proc_output(
+                f"curl {self.config['node_rpc_endpoint']}/chains/main/blocks/head/context/adaptive_issuance_launch_cycle"
+            ).stdout.decode("utf-8")
+            return json.loads(output)
+
+        def get_current_cycle():
+            output = get_proc_output(
+                f"curl {self.config['node_rpc_endpoint']}/chains/main/blocks/head/metadata"
+            ).stdout.decode("utf-8")
+            return json.loads(output)["level_info"]["cycle"]
+
+        tezos_client_options = self.get_tezos_client_options()
+        baker_alias = self.config["baker_alias"]
+        baker_key_hash = self.config["baker_key_hash"]
+
+        adaptive_issuance_launch_cycle = get_adaptive_issuance_launch_cycle()
+
+        current_cycle = get_current_cycle()
+
+        # TODO remove this check when ParisB protocol is activated at mainnet
+        if adaptive_issuance_launch_cycle is not None and int(current_cycle) >= int(
+            adaptive_issuance_launch_cycle
+        ):
+            minimal_frozen_stake = get_minimal_frozen_stake()
+
+            staked_balance = get_staked_balance(baker_key_hash)
+
+            if int(staked_balance) < int(minimal_frozen_stake):
+
+                self.query_step(
+                    get_stake_tez_query(staked_balance, minimal_frozen_stake)
+                )
+
+                print_and_log(f"Staking {self.config['stake_tez']}Tz...")
+
+                if self.check_ledger_use():
+                    ledger_app = "Wallet"
+                    print(f"Please open the Tezos {ledger_app} app on your ledger.")
+                    print(
+                        color(
+                            "Please note, that if you are using Tezos Wallet app of version 3.0.0 or higher,\n"
+                            'you need to enable "expert mode" in the Tezos Wallet app settings on the Ledger device.',
+                            color_yellow,
+                        )
+                    )
+                    print(
+                        color(
+                            f"Waiting for the Tezos {ledger_app} to be opened...",
+                            color_green,
+                        ),
+                    )
+                    wait_for_ledger_app(ledger_app, self.config["client_data_dir"])
+                    print(
+                        color(
+                            "Waiting for your response to the prompt on your Ledger Device...",
+                            color_green,
+                        )
+                    )
+
+                get_proc_output(
+                    f"sudo -u tezos {suppress_warning_text} octez-client {tezos_client_options} "
+                    f"stake {self.config['stake_tez']} for {baker_alias}"
+                )
+
+                if self.check_ledger_use():
+                    ledger_app = "Baking"
+                    print(f"Please reopen the Tezos {ledger_app} app on your ledger.")
+                    print(
+                        color(
+                            f"Waiting for the Tezos {ledger_app} to be opened...",
+                            color_green,
+                        ),
+                    )
+                    wait_for_ledger_app(ledger_app, self.config["client_data_dir"])
+
     def register_baker(self):
         print()
         tezos_client_options = self.get_tezos_client_options()
@@ -837,10 +951,6 @@ block timestamp: {timestamp} ({time_ago})
         proc_call(
             f"sudo -u tezos {suppress_warning_text} octez-client {tezos_client_options} "
             f"register key {baker_alias} as delegate"
-        )
-        print(
-            "You can check a blockchain explorer (e.g. https://tzkt.io/ or https://tzstats.com/)\n"
-            "to see the baker status and baking rights of your account."
         )
 
     # There is no changing the toggle vote option at a glance,
@@ -908,6 +1018,13 @@ block timestamp: {timestamp} ({time_ago})
                 if not self.baker_registered():
                     print_and_log("Registering the baker")
                     self.register_baker()
+
+                self.stake_tez()
+
+                print(
+                    "You can check a blockchain explorer (e.g. https://tzkt.io/ or https://tzstats.com/)\n"
+                    "to see the baker status and baking rights of your account."
+                )
             except EOFError:
                 logging.error("Got EOF")
                 raise EOFError

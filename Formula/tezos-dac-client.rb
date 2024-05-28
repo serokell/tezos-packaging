@@ -11,7 +11,7 @@ class TezosDacClient < Formula
 
   url "https://gitlab.com/tezos/tezos.git", :tag => "octez-v20.0-rc1", :shallow => false
 
-  version "v19.2-1"
+  version "v20.0-1"
 
   build_dependencies = %w[pkg-config coreutils autoconf rsync wget rustup-init cmake opam]
   build_dependencies.each do |dependency|
@@ -26,8 +26,6 @@ class TezosDacClient < Formula
 
   bottle do
     root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosDacClient.version}/"
-    sha256 cellar: :any, monterey: "38fbe90f222a0f25f919629647cc0aae8ee309c016d580c024292cca7f68d93f"
-    sha256 cellar: :any, arm64_monterey: "10bcee98824dc0dbd374701f4ed51d2e79d341c122107b7dee1add6019d5f907"
   end
 
   def make_deps

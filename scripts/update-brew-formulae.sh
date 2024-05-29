@@ -13,7 +13,7 @@ then
         version="${BASH_REMATCH[1]}"
         find ./Formula -type f \( -name 'tezos-*.rb' ! -name 'tezos-sapling-params.rb' \) \
             -exec sed -i "s/version \"v.*\"/version \"$tag\"/g" {} \; \
-            -exec sed -i "s/:tag => \"v.*\"/:tag => \"$version\"/g" {} \; \
+            -exec sed -i "s/:tag => \".*\"/:tag => \"$version\"/g" {} \; \
             -exec sed -i "/catalina/d" {} \; \
             -exec sed -i "/monterey/d" {} \; \
             -exec sed -i "/arm64_monterey/d" {} \; \

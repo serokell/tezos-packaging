@@ -359,7 +359,7 @@ def get_key_mode_query(modes):
         prompt="How do you want to import the baker key?",
         help="To register the baker, its secret key needs to be imported to the data "
         "directory first.\nBy default tezos-baking-<network>.service will use the 'baker' "
-        "alias\nfor the key that will be used for baking and endorsing.\n"
+        "alias\nfor the key that will be used for baking and attesting.\n"
         "If you want to test baking with a faucet file, "
         "make sure you have chosen a test network like " + list(networks.keys())[1],
         options=modes,

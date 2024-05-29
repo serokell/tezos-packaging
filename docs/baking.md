@@ -151,7 +151,7 @@ sudo -u tezos tezos-client bootstrapped
 ```
 
 By default `tezos-baking-<network>.service` will use the `baker` alias for the
-key that will be used for baking and endorsing.
+key that will be used for baking and attesting.
 
 ### Setting the Liquidity Baking toggle vote option
 
@@ -275,7 +275,7 @@ sudo systemctl stop tezos-baking-custom@voting
 Manually resetting is possible through:
 
 1. Removing the custom chain node directory, `/var/lib/tezos/node-custom@<chain-name>` by default.
-2. Deleting `blocks`, `nonces`, and `endorsements` from the `tezos-client` data directory,
+2. Deleting `blocks`, `nonces`, and `attestations` from the `tezos-client` data directory,
   `/var/lib/tezos/.tezos-client` by default.
 
 ## Quick Start

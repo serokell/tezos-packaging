@@ -11,9 +11,9 @@ class TezosSmartRollupNode < Formula
   end
   homepage "https://gitlab.com/tezos/tezos"
 
-  url "https://gitlab.com/tezos/tezos.git", :tag => "octez-v20.0-rc1", :shallow => false
+  url "https://gitlab.com/tezos/tezos.git", :tag => "octez-v20.0", :shallow => false
 
-  version "v19.2-1"
+  version "v20.0-1"
 
   build_dependencies = %w[pkg-config coreutils autoconf rsync wget rustup-init cmake opam]
   build_dependencies.each do |dependency|
@@ -28,8 +28,6 @@ class TezosSmartRollupNode < Formula
 
   bottle do
     root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosSmartRollupNode.version}/"
-    sha256 cellar: :any, monterey: "989568498e09ee1b4a52003082ec51c62516dc2dd2d8a22e1c8cdfea1829536a"
-    sha256 cellar: :any, arm64_monterey: "3be648331e3d5d5c5ebf5db169f6a6fddd9e13649abea703222d07283d66f968"
   end
 
   def make_deps

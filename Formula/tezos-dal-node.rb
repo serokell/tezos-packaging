@@ -1,7 +1,7 @@
-# SPDX-FileCopyrightText: 2021 Oxhead Alpha
+# SPDX-FileCopyrightText: 2024 Oxhead Alpha
 # SPDX-License-Identifier: LicenseRef-MIT-OA
 
-class TezosSigner < Formula
+class TezosDalNode < Formula
   @all_bins = []
 
   class << self
@@ -18,14 +18,14 @@ class TezosSigner < Formula
     depends_on dependency => :build
   end
 
-  dependencies = %w[gmp hidapi libev protobuf sqlite]
+  dependencies = %w[gmp hidapi libev protobuf sqlite tezos-sapling-params]
   dependencies.each do |dependency|
     depends_on dependency
   end
-  desc "A client to remotely sign operations or blocks"
+  desc "A Data Availability Layer Tezos node"
 
   bottle do
-    root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosSigner.version}/"
+    root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosDalNode.version}/"
   end
 
   def make_deps
@@ -54,8 +54,8 @@ class TezosSigner < Formula
 
   def install
     make_deps
-    install_template "src/bin_signer/main_signer.exe",
-                     "_build/default/src/bin_signer/main_signer.exe",
-                     "octez-signer"
+    install_template "src/bin_dal_node/main.exe",
+                     "_build/default/src/bin_dal_node/main.exe",
+                     "octez-dal-node"
   end
 end

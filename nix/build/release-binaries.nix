@@ -44,6 +44,14 @@ in [
     supports = protocolsFormatted;
   }
   {
+    name = "octez-dal-node";
+    description =''
+      A Data Availability Layer Tezos node.
+      For more info on DAL please check https://tezos.gitlab.io/shell/dal_overview.html
+    '';
+    supports = protocolsFormatted;
+  }
+  {
     name = "octez-signer";
     description = ''
       A client to remotely sign operations or blocks.

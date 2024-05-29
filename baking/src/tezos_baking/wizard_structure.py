@@ -308,7 +308,7 @@ class Setup:
                     logging.info("Waiting for funds to arrive")
                     print(
                         f"Before proceeding with baker registration you'll need to provide this address with some XTZ.\n"
-                        f"Note that you need at least 6000 XTZ in order to receive baking and endorsing rights.\n"
+                        f"Note that you need at least 6000 XTZ in order to receive baking and attesting rights.\n"
                         f"You can fill your address using the faucet: https://faucet.{network}.teztnets.com/.\n"
                         f"Waiting for funds to arrive... (Ctrl + C to choose another option)."
                     )

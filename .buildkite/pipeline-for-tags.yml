@@ -15,7 +15,6 @@ steps:
 
  - label: Build ubuntu source packages
    key: build-ubuntu-source-packages
-   if: build.tag =~ /^v.*-1/
    commands:
    - eval "$SET_VERSION"
    - nix develop .#docker-tezos-packages -c ./docker/build/ubuntu/build.py --type source
@@ -24,7 +23,6 @@ steps:
 
  - label: Build fedora source packages
    key: build-fedora-source-packages
-   if: build.tag =~ /^v.*-1/
    commands:
    - eval "$SET_VERSION"
    - nix develop .#docker-tezos-packages -c ./docker/build/fedora/build.py --type source
@@ -32,7 +30,6 @@ steps:
      - ./out/*
 
  - label: Sign ubuntu source packages
-   if: build.tag =~ /^v.*-1/
    depends_on:
    - "build-ubuntu-source-packages"
    key: sign-ubuntu-source-packages
@@ -44,7 +41,6 @@ steps:
      - ./out/*
 
  - label: Sign fedora source packages
-   if: build.tag =~ /^v.*-1/
    depends_on:
    - "build-fedora-source-packages"
    key: sign-fedora-source-packages
@@ -56,7 +52,6 @@ steps:
      - ./out/*
 
  - label: Publish ubuntu native packages
-   if: build.tag =~ /^v.*-1/
    depends_on:
    - "sign-ubuntu-source-packages"
    commands:
@@ -65,7 +60,6 @@ steps:
    - nix develop .#buildkite -c ./docker/build/ubuntu/upload.py -d out
 
  - label: Publish fedora native packages
-   if: build.tag =~ /^v.*-1/
    depends_on:
    - "sign-fedora-source-packages"
    commands:
@@ -74,7 +68,6 @@ steps:
    - nix develop .#buildkite -c ./docker/build/fedora/upload.py -d out
 
  - label: build-via-docker
-   if: build.tag =~ /^v.*-1/
    key: build-via-docker
    commands:
    - eval "$SET_VERSION"
@@ -85,7 +78,6 @@ steps:
 
  - label: Build source packages from static binaries
    key: build-source-packages-from-static-binaries
-   if: build.tag =~ /^v.*-1/
    depends_on:
    - "build-via-docker"
    commands:
@@ -98,7 +90,6 @@ steps:
 
  - label: Sign source packages built from static binaries
    key: sign-source-packages-built-from-static-binaries
-   if: build.tag =~ /^v.*-1/
    depends_on:
    - "build-source-packages-from-static-binaries"
    commands:
@@ -109,7 +100,6 @@ steps:
      - ./epel/*
 
  - label: Publish epel packages
-   if: build.tag =~ /^v.*-1/
    depends_on:
    - "sign-source-packages-built-from-static-binaries"
    commands:

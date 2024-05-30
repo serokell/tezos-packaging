@@ -19,6 +19,7 @@ git fetch --all
 branch_name="auto/update-brew-formulae-$1"
 
 # Git doesn't have an easy way to check out a branch regardless of whether it exists.
+git branch --delete "$branch_name" || true
 if ! git switch "$branch_name"; then
     git switch -c "$branch_name"
     git push --set-upstream origin "$branch_name"

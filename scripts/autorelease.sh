@@ -33,7 +33,7 @@ for asset in "$assets_dir"/*; do
     gpg --armor --detach-sign "$asset"
 done
 
-msg_regex="Merge pull request .* from serokell\/auto\/(v.*)-release"
+msg_regex="Merge pull request .* from serokell\/auto\/(octez-v.*)-release"
 rc_regex="^v[0-9]+\.[0-9]+-(rc|beta)[0-9]+"
 
 # We create a pre-release in any case except if we are merging a stable version release PR

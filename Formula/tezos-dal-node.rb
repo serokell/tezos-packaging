@@ -26,6 +26,8 @@ class TezosDalNode < Formula
 
   bottle do
     root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosDalNode.version}/"
+    sha256 cellar: :any, monterey: "23bf1c6a2d6b952002cb119d56e0e8d654a933b512db3ec2b940e3642a66a3c7"
+    sha256 cellar: :any, arm64_monterey: "a20eb2e363c6bbf177dffc6b91e5b447924dcb41be12ddfbeebafa75f8b4a626"
   end
 
   def make_deps

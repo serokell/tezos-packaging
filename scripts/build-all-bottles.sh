@@ -32,7 +32,7 @@ for f in "${formulae[@]}"; do
     # build a bottle
     if ./scripts/build-one-bottle.sh "$f"; then
       # upload the bottle to its respective release
-      FORMULA_TAG="$(sed -n "s/^\s\+version \"\(.*\)\"/\1/p" "./Formula/$f.rb")"
+      FORMULA_TAG="octez-$(sed -n "s/^\s\+version \"\(.*\)\"/\1/p" "./Formula/$f.rb")"
       if ! gh release upload "$FORMULA_TAG" "$f"*.bottle.*; then
         # we want a non-0 exit code if any of the bottles couldn't be uploaded
         retval="1";

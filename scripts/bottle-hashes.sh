@@ -19,7 +19,7 @@ then
                 os="${BASH_REMATCH[2]}"
                 formula_file="./Formula/$formula_name.rb"
                 if [[ -f $formula_file ]]; then
-                    formula_tag="$(sed -n "s/^\s\+version \"\(.*\)\"/\1/p" "$formula_file")"
+                    formula_tag="octez-$(sed -n "s/^\s\+version \"\(.*\)\"/\1/p" "$formula_file")"
                     line="\    sha256 cellar: :any, $os: \"$bottle_hash\""
                     # Update only when formula has the same version as provided current tag
                     if [[ "$formula_tag" == "$2" ]]; then

@@ -23,4 +23,4 @@ steps:
    commands:
    - mkdir -p "Monterey"
    - nix develop .#buildkite -c gh release download "octez-v20.0-1" -D "Monterey/" -p "*monterey.bottle.tar.gz"
-   - nix develop .#autorelease -c ./scripts/sync-bottle-hashes.sh "octez-v20.0-1" "Monterey"
+   - nix develop .#autorelease -c ./scripts/sync-bottle-hashes.sh "v20.0-1" "Monterey"

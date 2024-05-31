@@ -116,7 +116,6 @@ In order to avoid this, we suggest bootstrapping from a snapshot instead.
 
 Snapshots can be downloaded from the following websites:
 * [Lambs on acid](https://lambsonacid.nl/)
-* [Marigold](https://snapshots.tezos.marigold.dev/)
 * [Tzinit](https://snapshots.eu.tzinit.org/)
 
 Download the snapshot for the desired network. We recommend to use rolling snapshots. This is

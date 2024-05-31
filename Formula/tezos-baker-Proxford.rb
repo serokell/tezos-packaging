@@ -26,6 +26,8 @@ class TezosBakerProxford < Formula
 
   bottle do
     root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosBakerProxford.version}/"
+    sha256 cellar: :any, monterey: "d10e05031349373fe0d1c4b1748fe0f888fe2f178abf9022038bd32c1261281d"
+    sha256 cellar: :any, arm64_monterey: "269938a965cc75fefd9123bf51a65e77e41d19e68170094b9a90d35d1ba5e884"
   end
 
   def make_deps

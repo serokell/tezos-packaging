@@ -39,7 +39,7 @@ monterey_bottle="$formula_name-v0.0-0.monterey.bottle.tar.gz"
 dd if=/dev/urandom of=$bottle_dir/$monterey_bottle count=2000 status=none
 
 # Run the hash inserting script
-../../scripts/bottle-hashes.sh "$bottle_dir" "v0.0-1"
+../../scripts/bottle-hashes.sh "$bottle_dir" "octez-v0.0-1"
 
 # Assert the info was inserted correctly
 monterey_hash="$(sha256sum $bottle_dir/$monterey_bottle | cut -d " " -f 1)"

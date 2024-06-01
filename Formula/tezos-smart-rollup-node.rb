@@ -13,7 +13,7 @@ class TezosSmartRollupNode < Formula
 
   url "https://gitlab.com/tezos/tezos.git", :tag => "octez-v20.0", :shallow => false
 
-  version "v20.0-1"
+  version "v20.0-2"
 
   build_dependencies = %w[pkg-config coreutils autoconf rsync wget rustup-init cmake opam]
   build_dependencies.each do |dependency|

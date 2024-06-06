@@ -103,7 +103,6 @@ def setup_logger(log_file):
         level=logging.DEBUG,
         format="%(asctime)s|%(levelname)s|%(message)s",
         datefmt="%Y-%m-%dT%H:%M:%S",
-        encoding="utf-8",
     )
 
 

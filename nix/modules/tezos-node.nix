@@ -1,6 +1,7 @@
 # SPDX-FileCopyrightText: 2021 Oxhead Alpha
 # SPDX-License-Identifier: LicenseRef-MIT-OA
 
+{inputs}:
 { config, lib, pkgs, ... }:
 
 with lib;
@@ -15,7 +16,14 @@ let
     --net-addr ":${toString netPort}" \
     --network "${network}" ${builtins.concatStringsSep " " options}
   '';
-  common = import ./common.nix { inherit lib; inherit pkgs; };
+  common = import ./common.nix { inherit lib pkgs inputs; };
+  extraServiceConfig = {
+    RestrictAddressFamilies = [
+      "AF_INET"
+      "AF_UNIX"
+      "AF_INET6"
+    ];
+  };
   instanceOptions = types.submodule ( {...} : {
     options = common.sharedOptions // {
       enable = mkEnableOption "Octez node service";
@@ -92,7 +100,7 @@ in {
   config = mkIf (cfg.instances != {}) {
     users = mkMerge (flip mapAttrsToList cfg.instances (node-name: node-cfg: common.genUsers node-name ));
     systemd = mkMerge (flip mapAttrsToList cfg.instances (node-name: node-cfg: {
-      services."tezos-${node-name}-octez-node" = common.genSystemdService node-name node-cfg "node" // {
+      services."tezos-${node-name}-octez-node" = common.genSystemdService node-name node-cfg "node" extraServiceConfig // {
         after = [ "network.target" ];
         preStart =
           ''

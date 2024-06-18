@@ -11,6 +11,8 @@
         "tezos-client",
         "tezos-admin-client",
         "tezos-node",
+        "tezos-accuser-PsParisC",
+        "tezos-baker-PsParisC",
         "tezos-accuser-PtParisB",
         "tezos-baker-PtParisB",
         "tezos-accuser-Proxford",

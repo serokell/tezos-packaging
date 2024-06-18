@@ -15,8 +15,6 @@
         "tezos-baker-PsParisC",
         "tezos-accuser-PtParisB",
         "tezos-baker-PtParisB",
-        "tezos-accuser-Proxford",
-        "tezos-baker-Proxford",
         "tezos-sapling-params",
         "tezos-baking"
     ],
@@ -31,8 +29,6 @@
         "tezos-client",
         "tezos-admin-client",
         "tezos-node",
-        "tezos-accuser-Proxford",
-        "tezos-baker-Proxford",
         "tezos-accuser-PtParisB",
         "tezos-baker-PtParisB",
         "tezos-sapling-params",

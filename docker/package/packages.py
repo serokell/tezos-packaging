@@ -19,13 +19,11 @@ from collections import ChainMap
 networks = {
     "mainnet": "mainnet",
     "ghostnet": "ghostnet",
-    "oxfordnet": "https://teztnets.com/oxfordnet",
     "paris2net": "https://teztnets.com/paris2net",
 }
 networks_protos = {
-    "mainnet": ["Proxford", "PtParisB"],
-    "ghostnet": ["Proxford", "PtParisB"],
-    "oxfordnet": ["Proxford"],
+    "mainnet": ["PtParisB"],
+    "ghostnet": ["PtParisB"],
     "paris2net": ["PtParisB"],
 }
 

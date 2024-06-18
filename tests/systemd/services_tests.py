@@ -128,16 +128,16 @@ def test_node_mainnet_service():
     node_service_test("mainnet")
 
 
-def test_node_oxfordnet_service():
-    node_service_test("oxfordnet")
+def test_node_paris2net_service():
+    node_service_test("paris2net")
 
 
-def test_baking_oxfordnet_service():
-    baking_service_test("oxfordnet", ["Proxford"])
+def test_baking_paris2net_service():
+    baking_service_test("paris2net", ["PtParisB"])
 
 
 def test_baking_mainnet_service():
-    baking_service_test("mainnet", ["Proxford"])
+    baking_service_test("mainnet", ["PtParisB"])
 
 
 def test_http_signer_service():
@@ -149,9 +149,9 @@ def test_tcp_signer_service():
 
 
 def test_standalone_accuser_service():
-    with unit(f"tezos-node-oxfordnet.service") as _:
-        with unit(f"tezos-accuser-proxford.service") as _:
-            assert check_running_process(f"octez-accuser-Proxford")
+    with unit(f"tezos-node-paris2net.service") as _:
+        with unit(f"tezos-accuser-ptparisb.service") as _:
+            assert check_running_process(f"octez-accuser-PtParisB")
 
 
 def test_unix_signer_service():
@@ -161,34 +161,34 @@ def test_unix_signer_service():
 
 def test_standalone_baker_service():
     replace_systemd_service_env(
-        "tezos-baker-proxford",
+        "tezos-baker-ptparisb",
         "TEZOS_NODE_DIR",
-        "/var/lib/tezos/node-oxfordnet",
+        "/var/lib/tezos/node-paris2net",
     )
     with account("baker") as _:
-        with unit(f"tezos-node-oxfordnet.service") as _:
-            with unit(f"tezos-baker-proxford.service") as _:
-                assert check_active_service(f"tezos-baker-proxford.service")
-                assert check_running_process(f"octez-baker-Proxford")
+        with unit(f"tezos-node-paris2net.service") as _:
+            with unit(f"tezos-baker-ptparisb.service") as _:
+                assert check_active_service(f"tezos-baker-ptparisb.service")
+                assert check_running_process(f"octez-baker-PtParisB")
 
 
 def test_nondefault_node_rpc_endpoint():
     rpc_addr = "127.0.0.1:8735"
-    replace_systemd_service_env("tezos-node-oxfordnet", "NODE_RPC_ADDR", rpc_addr)
-    proc_call("cat /etc/default/tezos-node-oxfordnet")
+    replace_systemd_service_env("tezos-node-paris2net", "NODE_RPC_ADDR", rpc_addr)
+    proc_call("cat /etc/default/tezos-node-paris2net")
     try:
-        node_service_test("oxfordnet", f"http://{rpc_addr}")
+        node_service_test("paris2net", f"http://{rpc_addr}")
     finally:
         replace_systemd_service_env(
-            "tezos-node-oxfordnet", "NODE_RPC_ADDR", "127.0.0.1:8732"
+            "tezos-node-paris2net", "NODE_RPC_ADDR", "127.0.0.1:8732"
         )
 
 
 def test_nondefault_baking_config():
     replace_systemd_service_env(
-        "tezos-baking-oxfordnet", "BAKER_ADDRESS_ALIAS", "another_baker"
+        "tezos-baking-paris2net", "BAKER_ADDRESS_ALIAS", "another_baker"
     )
     replace_systemd_service_env(
-        "tezos-baking-oxfordnet", "LIQUIDITY_BAKING_TOGGLE_VOTE", "on"
+        "tezos-baking-paris2net", "LIQUIDITY_BAKING_TOGGLE_VOTE", "on"
     )
-    baking_service_test("oxfordnet", ["Proxford"], "another_baker")
+    baking_service_test("paris2net", ["PtParisB"], "another_baker")

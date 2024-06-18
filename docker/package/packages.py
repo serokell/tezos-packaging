@@ -20,11 +20,13 @@ networks = {
     "mainnet": "mainnet",
     "ghostnet": "ghostnet",
     "paris2net": "https://teztnets.com/paris2net",
+    "pariscnet": "https://teztnets.com/pariscnet",
 }
 networks_protos = {
-    "mainnet": ["PtParisB"],
-    "ghostnet": ["PtParisB"],
+    "mainnet": ["PtParisB", "PsParisC"],
+    "ghostnet": ["PtParisB", "PsParisC"],
     "paris2net": ["PtParisB"],
+    "pariscnet": ["PsParisC"],
 }
 
 protocol_numbers = {

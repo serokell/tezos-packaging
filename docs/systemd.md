@@ -62,6 +62,7 @@ It's possible to run multiple similar services, e.g. two `tezos-node`s that run 
 networks.
 
 `tezos-node` packages provide multiple services out of the box:
+- `tezos-node-pariscnet`
 - `tezos-node-paris2net`
 - `tezos-node-ghostnet`
 - `tezos-node-mainnet`

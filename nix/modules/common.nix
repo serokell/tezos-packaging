@@ -21,7 +21,7 @@ rec {
   daemonOptions = sharedOptions // {
 
     baseProtocols = mkOption {
-      type = types.listOf (types.enum [ "PtParisB" ]);
+      type = types.listOf (types.enum [ "PtParisB" "PsParisC"]);
       description = ''
         List of protocols for which daemons will be run.
       '';

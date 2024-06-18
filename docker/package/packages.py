@@ -33,7 +33,7 @@ protocol_numbers = {
     "PtNairob": "017",
     "Proxford": "018",
     "PtParisB": "019",
-    "PtParisC": "020",
+    "PsParisC": "020",
 }
 
 signer_units = [

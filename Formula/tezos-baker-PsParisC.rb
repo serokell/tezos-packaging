@@ -1,7 +1,7 @@
-# SPDX-FileCopyrightText: 2023 Oxhead Alpha
+# SPDX-FileCopyrightText: 2024 Oxhead Alpha
 # SPDX-License-Identifier: LicenseRef-MIT-OA
 
-class TezosBakerProxford < Formula
+class TezosBakerPsparisc < Formula
   @all_bins = []
 
   class << self
@@ -9,9 +9,9 @@ class TezosBakerProxford < Formula
   end
   homepage "https://gitlab.com/tezos/tezos"
 
-  url "https://gitlab.com/tezos/tezos.git", :tag => "octez-v20.0", :shallow => false
+  url "https://gitlab.com/tezos/tezos.git", :tag => "octez-v20.1", :shallow => false
 
-  version "v20.0-2"
+  version "v20.1-1"
 
   build_dependencies = %w[pkg-config coreutils autoconf rsync wget rustup-init cmake opam]
   build_dependencies.each do |dependency|
@@ -25,9 +25,7 @@ class TezosBakerProxford < Formula
   desc "Daemon for baking"
 
   bottle do
-    root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosBakerProxford.version}/"
-    sha256 cellar: :any, monterey: "9b9481e800d43f208f7a62c0a85ea1ff942832b9853d7db87bf8f7168918b981"
-    sha256 cellar: :any, arm64_monterey: "c0b9273ca12572e0abfd10b3ac48ec0d942be13dfe7fec23573d58ccb30e4376"
+    root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosBakerPtparisb.version}/"
   end
 
   def make_deps
@@ -61,7 +59,7 @@ class TezosBakerProxford < Formula
 
       set -euo pipefail
 
-      baker="#{bin}/octez-baker-Proxford"
+      baker="#{bin}/octez-baker-PsParisC"
 
       baker_config="$TEZOS_CLIENT_DIR/config"
       mkdir -p "$TEZOS_CLIENT_DIR"
@@ -86,21 +84,21 @@ class TezosBakerProxford < Formula
           launch_baker "$BAKER_ACCOUNT"
       fi
     EOS
-    File.write("tezos-baker-Proxford-start", startup_contents)
-    bin.install "tezos-baker-Proxford-start"
+    File.write("tezos-baker-PsParisC-start", startup_contents)
+    bin.install "tezos-baker-PsParisC-start"
     make_deps
-    install_template "src/proto_018_Proxford/bin_baker/main_baker_018_Proxford.exe",
-                     "_build/default/src/proto_018_Proxford/bin_baker/main_baker_018_Proxford.exe",
-                     "octez-baker-Proxford"
+    install_template "src/proto_020_PsParisC/bin_baker/main_baker_020_PsParisC.exe",
+                     "_build/default/src/proto_020_PsParisC/bin_baker/main_baker_020_PsParisC.exe",
+                     "octez-baker-PsParisC"
   end
 
   service do
-    run opt_bin/"tezos-baker-Proxford-start"
+    run opt_bin/"tezos-baker-PsParisC-start"
     require_root true
     environment_variables TEZOS_CLIENT_DIR: var/"lib/tezos/client", TEZOS_NODE_DIR: "", NODE_RPC_SCHEME: "http", NODE_RPC_ADDR: "localhost:8732", BAKER_ACCOUNT: ""
     keep_alive true
-    log_path var/"log/tezos-baker-Proxford.log"
-    error_log_path var/"log/tezos-baker-Proxford.log"
+    log_path var/"log/tezos-baker-PsParisC.log"
+    error_log_path var/"log/tezos-baker-PsParisC.log"
   end
 
   def post_install

@@ -30,7 +30,7 @@ that you can use by following the [installation instructions](https://www.raspbe
 In order to run a baking instance, you'll need the following Tezos binaries:
 `tezos-client`, `tezos-node`, `tezos-baker-<proto>`.
 
-The currently supported protocol is `Proxford` (used on `oxfordnet`, `ghostnet` and `mainnet`) and `ParisB` (used on `paris2net`).
+The currently supported protocol is `ParisB` (used on `paris2net`, `ghostnet` and `mainnet`) and PsParisC (used on `pariscnet`, is going to be used on `ghostnet`, and `mainnet`).
 Also, note that the corresponding packages have protocol
 suffix in lowercase, e.g. the list of available baker packages can be found
 [here](https://launchpad.net/~serokell/+archive/ubuntu/tezos/+packages?field.name_filter=tezos-baker&field.status_filter=published).

@@ -19,12 +19,12 @@ let
 
   octez-accuser = {
     enable = true;
-    baseProtocols = ["Proxford"];
+    baseProtocols = ["PtParisB"];
   };
 
   octez-baker = {
     enable = true;
-    baseProtocols = ["Proxford"];
+    baseProtocols = ["PtParisB"];
     bakerAccountAlias = "baker";
     bakerSecretKey = "unencrypted:edsk3KaTNj1d8Xd3kMBrZkJrfkqsz4XwwiBXatuuVgTdPye2KpE98o";
   };

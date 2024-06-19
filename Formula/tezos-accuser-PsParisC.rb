@@ -1,7 +1,7 @@
-# SPDX-FileCopyrightText: 2023 Oxhead Alpha
+# SPDX-FileCopyrightText: 2024 Oxhead Alpha
 # SPDX-License-Identifier: LicenseRef-MIT-OA
 
-class TezosAccuserProxford < Formula
+class TezosAccuserPsparisc < Formula
   @all_bins = []
 
   class << self
@@ -9,9 +9,9 @@ class TezosAccuserProxford < Formula
   end
   homepage "https://gitlab.com/tezos/tezos"
 
-  url "https://gitlab.com/tezos/tezos.git", :tag => "octez-v20.0", :shallow => false
+  url "https://gitlab.com/tezos/tezos.git", :tag => "octez-v20.1", :shallow => false
 
-  version "v20.0-2"
+  version "v20.1-1"
 
   build_dependencies = %w[pkg-config coreutils autoconf rsync wget rustup-init cmake opam]
   build_dependencies.each do |dependency|
@@ -25,9 +25,7 @@ class TezosAccuserProxford < Formula
   desc "Daemon for accusing"
 
   bottle do
-    root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosAccuserProxford.version}/"
-    sha256 cellar: :any, monterey: "6ff39c11fcee917ec4c348fc0f67a3dbbb287a2653d969778bf5facbb446173f"
-    sha256 cellar: :any, arm64_monterey: "afbb69d071745e4f53c2d23399d4a8e37958f92c777404fa4c0cd4e5bc01fa00"
+    root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosAccuserPsparisc.version}/"
   end
 
   def make_deps
@@ -61,7 +59,7 @@ class TezosAccuserProxford < Formula
 
       set -euo pipefail
 
-      accuser="#{bin}/octez-accuser-Proxford"
+      accuser="#{bin}/octez-accuser-PsParisC"
 
       accuser_config="$TEZOS_CLIENT_DIR/config"
       mkdir -p "$TEZOS_CLIENT_DIR"
@@ -76,21 +74,21 @@ class TezosAccuserProxford < Formula
 
       exec "$accuser" --endpoint "$NODE_RPC_SCHEME://$NODE_RPC_ADDR" run
     EOS
-    File.write("tezos-accuser-Proxford-start", startup_contents)
-    bin.install "tezos-accuser-Proxford-start"
+    File.write("tezos-accuser-PsParisC-start", startup_contents)
+    bin.install "tezos-accuser-PsParisC-start"
     make_deps
-    install_template "src/proto_018_Proxford/bin_accuser/main_accuser_018_Proxford.exe",
-                     "_build/default/src/proto_018_Proxford/bin_accuser/main_accuser_018_Proxford.exe",
-                     "octez-accuser-Proxford"
+    install_template "src/proto_020_PsParisC/bin_accuser/main_accuser_020_PsParisC.exe",
+                     "_build/default/src/proto_20_PsParisC/bin_accuser/main_accuser_020_PsParisC.exe",
+                     "octez-accuser-PsParisC"
   end
 
   service do
-    run opt_bin/"tezos-accuser-Proxford-start"
+    run opt_bin/"tezos-accuser-PsParisC-start"
     require_root true
     environment_variables TEZOS_CLIENT_DIR: var/"lib/tezos/client", NODE_RPC_SCHEME: "http", NODE_RPC_ADDR: "localhost:8732"
     keep_alive true
-    log_path var/"log/tezos-accuser-Proxford.log"
-    error_log_path var/"log/tezos-accuser-Proxford.log"
+    log_path var/"log/tezos-accuser-PsParisC.log"
+    error_log_path var/"log/tezos-accuser-PsParisC.log"
   end
 
   def post_install

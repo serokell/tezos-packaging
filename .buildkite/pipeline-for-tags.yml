@@ -120,7 +120,7 @@ steps:
 
  - label: Build Monterey x86_64 bottles
    key: build-bottles-monterey-x86_64
-   if: build.tag =~ /^v.*-1/
+   if: build.tag =~ /^v.*/
    agents:
      queue: "x86_64-rosetta-darwin"
    commands:
@@ -133,7 +133,7 @@ steps:
 
  - label: Build Monterey arm64 bottles
    key: build-bottles-monterey-arm64
-   if: build.tag =~ /^v.*-1/
+   if: build.tag =~ /^v.*/
    agents:
      queue: "arm64-darwin"
    commands:
@@ -151,7 +151,7 @@ steps:
    depends_on:
    - "build-bottles-monterey-arm64"
    - "build-bottles-monterey-x86_64"
-   if: build.tag =~ /^v.*-1/
+   if: build.tag =~ /^v.*/
    commands:
    - mkdir -p "Monterey"
    - nix develop .#buildkite -c gh release download "$BUILDKITE_TAG" -D "Monterey/" -p "*monterey.bottle.tar.gz"

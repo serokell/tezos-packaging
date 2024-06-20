@@ -3,7 +3,7 @@
 
 class TezosNodeMainnet < Formula
   url "file:///dev/null"
-  version "v20.1-1"
+  version "v20.1-2"
 
   depends_on "tezos-node"
 

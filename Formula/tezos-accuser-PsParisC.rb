@@ -78,7 +78,7 @@ class TezosAccuserPsparisc < Formula
     bin.install "tezos-accuser-PsParisC-start"
     make_deps
     install_template "src/proto_020_PsParisC/bin_accuser/main_accuser_020_PsParisC.exe",
-                     "_build/default/src/proto_20_PsParisC/bin_accuser/main_accuser_020_PsParisC.exe",
+                     "_build/default/src/proto_020_PsParisC/bin_accuser/main_accuser_020_PsParisC.exe",
                      "octez-accuser-PsParisC"
   end
 

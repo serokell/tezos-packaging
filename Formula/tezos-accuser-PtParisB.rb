@@ -26,6 +26,8 @@ class TezosAccuserPtparisb < Formula
 
   bottle do
     root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosAccuserPtparisb.version}/"
+    sha256 cellar: :any, monterey: "b902c63817b6c0d3dfba523fc9e583e82ea9fe850f1d04a592a7c47b2bfb1283"
+    sha256 cellar: :any, arm64_monterey: "5d01e9a8646f0cb8fed42322fba30a0decedecde211af3751470c43428a491b4"
   end
 
   def make_deps

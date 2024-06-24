@@ -4,7 +4,6 @@
 
 import os
 import json
-from .packages import packages as all_packages
 from .meta import packages_meta
 
 binaries_json_path_suffix = "tests/binaries.json"

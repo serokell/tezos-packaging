@@ -46,7 +46,7 @@ if [[ "$latest_upstream_tag" != "$our_tezos_tag" ]]; then
     ./scripts/update-input.py opam-repository "$full_opam_repository_tag"
     git commit -a -m "[Chore] Bump Tezos sources to $packaging_tag" --gpg-sign="tezos-packaging@serokell.io"
 
-    ./scripts/update-brew-formulae.sh "$packaging_tag-1"
+    ./scripts/update-brew-formulae.sh "$latest_upstream_tag" "$packaging_tag-1"
     git commit -a -m "[Chore] Update brew formulae for $packaging_tag" --gpg-sign="tezos-packaging@serokell.io"
 
     sed -i 's/"release": "[0-9]\+"/"release": "1"/' ./meta.json

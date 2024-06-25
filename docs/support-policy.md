@@ -18,6 +18,7 @@ supported by Canonical.
 Currently, these are versions:
 * 20.04 LTS (Focal Fossa)
 * 22.04 LTS (Jammy Jellyfish)
+* 24.04 LTS (Noble Numbat)
 
 There are packages for `arm64` and `amd64` architectures.
 
@@ -37,8 +38,8 @@ There are packages for `arm64` and `amd64` architectures.
 We aim to provide packages for all [currently supported Fedora releases](https://docs.fedoraproject.org/en-US/releases/).
 
 Currently, these are versions:
-* Fedora 38
 * Fedora 39
+* Fedora 40
 
 There are packages for `x86_64` and `aarch64` architectures.
 

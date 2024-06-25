@@ -881,61 +881,57 @@ block timestamp: {timestamp} ({time_ago})
 
         current_cycle = get_current_cycle()
 
-        # TODO remove this check when ParisB protocol is activated at mainnet
-        if adaptive_issuance_launch_cycle is not None and int(current_cycle) >= int(
-            adaptive_issuance_launch_cycle
-        ):
-            minimal_frozen_stake = get_minimal_frozen_stake()
+        minimal_frozen_stake = get_minimal_frozen_stake()
 
-            staked_balance = get_staked_balance(baker_key_hash)
+        staked_balance = get_staked_balance(baker_key_hash)
 
-            if int(staked_balance) < int(minimal_frozen_stake):
+        if int(staked_balance) < int(minimal_frozen_stake):
 
-                self.query_step(
-                    get_stake_tez_query(staked_balance, minimal_frozen_stake)
+            print()
+
+            self.query_step(get_stake_tez_query(staked_balance, minimal_frozen_stake))
+
+            print_and_log(f"Staking {self.config['stake_tez']}Tz...")
+
+            if self.check_ledger_use():
+                ledger_app = "Wallet"
+                print(f"Please open the Tezos {ledger_app} app on your ledger.")
+                print(
+                    color(
+                        "Please note, that if you are using Tezos Wallet app of version 3.0.0 or higher,\n"
+                        'you need to enable "expert mode" in the Tezos Wallet app settings on the Ledger device.',
+                        color_yellow,
+                    )
+                )
+                print(
+                    color(
+                        f"Waiting for the Tezos {ledger_app} to be opened...",
+                        color_green,
+                    ),
+                )
+                wait_for_ledger_app(ledger_app, self.config["client_data_dir"])
+                print(
+                    color(
+                        "Waiting for your response to the prompt on your Ledger Device...",
+                        color_green,
+                    )
                 )
 
-                print_and_log(f"Staking {self.config['stake_tez']}Tz...")
+            get_proc_output(
+                f"sudo -u tezos {suppress_warning_text} octez-client {tezos_client_options} "
+                f"stake {self.config['stake_tez']} for {baker_alias}"
+            )
 
-                if self.check_ledger_use():
-                    ledger_app = "Wallet"
-                    print(f"Please open the Tezos {ledger_app} app on your ledger.")
-                    print(
-                        color(
-                            "Please note, that if you are using Tezos Wallet app of version 3.0.0 or higher,\n"
-                            'you need to enable "expert mode" in the Tezos Wallet app settings on the Ledger device.',
-                            color_yellow,
-                        )
-                    )
-                    print(
-                        color(
-                            f"Waiting for the Tezos {ledger_app} to be opened...",
-                            color_green,
-                        ),
-                    )
-                    wait_for_ledger_app(ledger_app, self.config["client_data_dir"])
-                    print(
-                        color(
-                            "Waiting for your response to the prompt on your Ledger Device...",
-                            color_green,
-                        )
-                    )
-
-                get_proc_output(
-                    f"sudo -u tezos {suppress_warning_text} octez-client {tezos_client_options} "
-                    f"stake {self.config['stake_tez']} for {baker_alias}"
+            if self.check_ledger_use():
+                ledger_app = "Baking"
+                print(f"Please reopen the Tezos {ledger_app} app on your ledger.")
+                print(
+                    color(
+                        f"Waiting for the Tezos {ledger_app} to be opened...",
+                        color_green,
+                    ),
                 )
-
-                if self.check_ledger_use():
-                    ledger_app = "Baking"
-                    print(f"Please reopen the Tezos {ledger_app} app on your ledger.")
-                    print(
-                        color(
-                            f"Waiting for the Tezos {ledger_app} to be opened...",
-                            color_green,
-                        ),
-                    )
-                    wait_for_ledger_app(ledger_app, self.config["client_data_dir"])
+                wait_for_ledger_app(ledger_app, self.config["client_data_dir"])
 
     def register_baker(self):
         print()

@@ -13,14 +13,14 @@ import os
 
 # Regexes
 
-secret_key_regex = b"(encrypted|unencrypted):(?:\w{54}|\w{88})"
-address_regex = b"tz[123]\w{33}"
+secret_key_regex = b"(encrypted|unencrypted):(?:\\w{54}|\\w{88})"
+address_regex = b"tz[123]\\w{33}"
 protocol_hash_regex = (
     b"P[123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]{50}"
 )
-signer_uri_regex = b"((?:tcp|unix|https|http):\/\/.+)\/(tz[123]\w{33})\/?"
-ledger_regex = b"ledger:\/\/[\w\-]+\/[\w\-]+\/[\w']+\/[\w']+"
-derivation_path_regex = b"(?:bip25519|ed25519|secp256k1|P-256)\/[0-9]+h\/[0-9]+h"
+signer_uri_regex = b"((?:tcp|unix|https|http):\\/\\/.+)\\/(tz[123]\\w{33})\\/?"
+ledger_regex = b"ledger:\\/\\/[\\w\\-]+\\/[\\w\\-]+\\/[\\w']+\\/[\\w']+"
+derivation_path_regex = b"(?:bip25519|ed25519|secp256k1|P-256)\\/[0-9]+h\\/[0-9]+h"
 
 
 # Utilities
@@ -65,7 +65,7 @@ def get_systemd_service_env(service_name):
     for env_file in find_systemd_env_files(sys_show):
         with open(env_file, "r") as f:
             for line in f:
-                env_def = re.search("^(\w+)=(.*)\n", line)
+                env_def = re.search("^(\\w+)=(.*)\n", line)
                 if env_def is not None:
                     env_var = env_def.group(1)
                     var_val = env_def.group(2).strip('"')

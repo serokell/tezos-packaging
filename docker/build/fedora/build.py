@@ -58,7 +58,7 @@ def build_fedora(args=None) -> List[str]:
 
     # copr build infrastructure uses latest stable fedora and `mock` for builds
     # so we should also keep that way
-    images = ["39"]
+    images = ["40"]
 
     packages_to_build = get_packages_to_build(args.packages)
 

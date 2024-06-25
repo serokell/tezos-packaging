@@ -129,7 +129,7 @@ def unencrypted_secret_key(input):
 # To be validated, the input should adhere to the derivation path format:
 # [0-9]+h/[0-9]+h
 def derivation_path(input):
-    derivation_path_regex_str = "[0-9]+h\/[0-9]+h"
+    derivation_path_regex_str = "[0-9]+h\\/[0-9]+h"
     match = re.match(derivation_path_regex_str, input.strip())
     if not bool(match):
         raise ValueError(

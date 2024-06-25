@@ -314,7 +314,7 @@ class Setup(Setup):
             raise KeyboardInterrupt
 
         self.config["amendment_phase"] = (
-            re.search(b'Current period: "(\w+)"', info).group(1).decode("utf-8")
+            re.search(b'Current period: "(\\w+)"', info).group(1).decode("utf-8")
         )
         self.config["proposal_hashes"] = [
             phash.decode() for phash in re.findall(protocol_hash_regex, info)

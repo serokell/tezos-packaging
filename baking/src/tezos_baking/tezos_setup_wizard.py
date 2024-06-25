@@ -891,6 +891,8 @@ block timestamp: {timestamp} ({time_ago})
 
             if int(staked_balance) < int(minimal_frozen_stake):
 
+                print()
+
                 self.query_step(
                     get_stake_tez_query(staked_balance, minimal_frozen_stake)
                 )

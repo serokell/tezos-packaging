@@ -197,8 +197,7 @@ network_query = Step(
     id="network",
     prompt="Which Tezos network would you like to use?\nCurrently supported:",
     help="The selected network will be used to set up all required services.\n"
-    "The currently supported protocol is PtParisB (used on `paris2net`, `ghostnet, and `mainnet`)\n"
-    "and PsParisC (used on `pariscnet`, is going to be used on `ghostnet`, and `mainnet`).\n"
+    "The currently supported protocol is PsParisC (used on `pariscnet`, `ghostnet`, and `mainnet`).\n"
     "Keep in mind that you must select the test network (e.g. ghostnet)\n"
     "if you plan on baking with a faucet JSON file.\n",
     options=networks,

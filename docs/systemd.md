@@ -63,7 +63,6 @@ networks.
 
 `tezos-node` packages provide multiple services out of the box:
 - `tezos-node-pariscnet`
-- `tezos-node-paris2net`
 - `tezos-node-ghostnet`
 - `tezos-node-mainnet`
 
@@ -78,7 +77,7 @@ Also, there are `tezos-node-<network>` binary aliases that are equivalent to
 running `tezos-node` with [the service options](./configuration.md) given.
 
 In addition to node services where the config is predefined to a specific network
-(e.g. `tezos-node-mainnet` or `tezos-node-paris2net`), it's possible to run
+(e.g. `tezos-node-mainnet` or `tezos-node-pariscnet`), it's possible to run
 `tezos-node-custom` service.
 
 Another case for running multiple similar systemd services is when one wants to have

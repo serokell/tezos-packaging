@@ -106,7 +106,6 @@ key_import_modes = {
 networks = {
     "mainnet": "Main Tezos network",
     "ghostnet": "Long running test network, currently using the Paris Tezos protocol",
-    "paris2net": "Test network using the PtParisB Tezos protocol",
     "pariscnet": "Test network using the PsParisC Tezos protocol",
 }
 

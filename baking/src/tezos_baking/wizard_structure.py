@@ -52,7 +52,7 @@ def get_key_address(tezos_client_options, key_alias):
             + ledger_regex
             + b")|(?:"
             + secret_key_regex
-            + b")|(?:remote\:"
+            + b")|(?:remote\\:"
             + address_regex
             + b")"
         )
@@ -76,7 +76,7 @@ def wait_for_ledger_app(ledger_app, client_dir):
     ledgers_derivations = {}
     for ledger_derivation in re.findall(ledger_regex, output):
         ledger_url = (
-            re.search(b"ledger:\/\/[\w\-]+\/", ledger_derivation).group(0).decode()
+            re.search(b"ledger:\\/\\/[\\w\\-]+\\/", ledger_derivation).group(0).decode()
         )
         derivation_path = (
             re.search(derivation_path_regex, ledger_derivation).group(0).decode()

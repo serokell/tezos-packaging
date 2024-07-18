@@ -313,7 +313,7 @@ Source: {self.name.lower()}
 Section: utils
 Priority: optional
 Maintainer: {self.meta.maintainer}
-Build-Depends: debhelper (>=9), {"dh-systemd (>= 1.5), " if ubuntu_version != "jammy" else ""} autotools-dev, {str_build_deps}
+Build-Depends: debhelper (>=9), {"dh-systemd (>= 1.5), " if ubuntu_version == "focal" else ""} autotools-dev, {str_build_deps}
 Standards-Version: 3.9.6
 Homepage: https://gitlab.com/tezos/tezos/
 
@@ -506,7 +506,7 @@ Source: {self.name}
 Section: utils
 Priority: optional
 Maintainer: {self.meta.maintainer}
-Build-Depends: debhelper (>=9), {"dh-systemd (>= 1.5), " if ubuntu_version != "jammy" else ""} autotools-dev, wget
+Build-Depends: debhelper (>=9), {"dh-systemd (>= 1.5), " if ubuntu_version == "focal" else ""} autotools-dev, wget
 Standards-Version: 3.9.6
 Homepage: https://gitlab.com/tezos/tezos/
 
@@ -693,7 +693,7 @@ Source: {self.name}
 Section: utils
 Priority: optional
 Maintainer: {self.meta.maintainer}
-Build-Depends: debhelper (>=11), {"dh-systemd (>= 1.5), " if ubuntu_version != "jammy" else ""} python3-all, autotools-dev, dh-python, python3-setuptools
+Build-Depends: debhelper (>=11), {"dh-systemd (>= 1.5), " if ubuntu_version == "focal" else ""} python3-all, autotools-dev, dh-python, python3-setuptools
 Standards-Version: 3.9.6
 Homepage: https://gitlab.com/tezos/tezos/
 X-Python3-Version: >= 3.8

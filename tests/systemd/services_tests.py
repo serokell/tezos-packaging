@@ -128,16 +128,8 @@ def test_node_mainnet_service():
     node_service_test("mainnet")
 
 
-def test_node_paris2net_service():
-    node_service_test("paris2net")
-
-
-def test_baking_paris2net_service():
-    baking_service_test("paris2net", ["PtParisB"])
-
-
 def test_baking_mainnet_service():
-    baking_service_test("mainnet", ["PtParisB"])
+    baking_service_test("mainnet", ["PsParisC"])
 
 
 def test_node_pariscnet_service():

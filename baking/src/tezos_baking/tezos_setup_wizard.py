@@ -197,8 +197,7 @@ network_query = Step(
     id="network",
     prompt="Which Tezos network would you like to use?\nCurrently supported:",
     help="The selected network will be used to set up all required services.\n"
-    "The currently supported protocol is PtParisB (used on `paris2net`, `ghostnet, and `mainnet`)\n"
-    "and PsParisC (used on `pariscnet`, is going to be used on `ghostnet`, and `mainnet`).\n"
+    "The currently supported protocol is PsParisC (used on `pariscnet`, `ghostnet`, and `mainnet`).\n"
     "Keep in mind that you must select the test network (e.g. ghostnet)\n"
     "if you plan on baking with a faucet JSON file.\n",
     options=networks,
@@ -861,81 +860,61 @@ block timestamp: {timestamp} ({time_ago})
             ).stdout.decode("utf-8")
             return json.loads(output)
 
-        def get_adaptive_issuance_launch_cycle():
-            output = get_proc_output(
-                f"curl {self.config['node_rpc_endpoint']}/chains/main/blocks/head/context/adaptive_issuance_launch_cycle"
-            ).stdout.decode("utf-8")
-            return json.loads(output)
-
-        def get_current_cycle():
-            output = get_proc_output(
-                f"curl {self.config['node_rpc_endpoint']}/chains/main/blocks/head/metadata"
-            ).stdout.decode("utf-8")
-            return json.loads(output)["level_info"]["cycle"]
-
         tezos_client_options = self.get_tezos_client_options()
         baker_alias = self.config["baker_alias"]
         baker_key_hash = self.config["baker_key_hash"]
 
-        adaptive_issuance_launch_cycle = get_adaptive_issuance_launch_cycle()
+        minimal_frozen_stake = get_minimal_frozen_stake()
 
-        current_cycle = get_current_cycle()
+        staked_balance = get_staked_balance(baker_key_hash)
 
-        # TODO remove this check when ParisB protocol is activated at mainnet
-        if adaptive_issuance_launch_cycle is not None and int(current_cycle) >= int(
-            adaptive_issuance_launch_cycle
-        ):
-            minimal_frozen_stake = get_minimal_frozen_stake()
+        if int(staked_balance) < int(minimal_frozen_stake):
 
-            staked_balance = get_staked_balance(baker_key_hash)
+            print()
 
-            if int(staked_balance) < int(minimal_frozen_stake):
+            self.query_step(get_stake_tez_query(staked_balance, minimal_frozen_stake))
 
-                self.query_step(
-                    get_stake_tez_query(staked_balance, minimal_frozen_stake)
+            print_and_log(f"Staking {self.config['stake_tez']}Tz...")
+
+            if self.check_ledger_use():
+                ledger_app = "Wallet"
+                print(f"Please open the Tezos {ledger_app} app on your ledger.")
+                print(
+                    color(
+                        "Please note, that if you are using Tezos Wallet app of version 3.0.0 or higher,\n"
+                        'you need to enable "expert mode" in the Tezos Wallet app settings on the Ledger device.',
+                        color_yellow,
+                    )
+                )
+                print(
+                    color(
+                        f"Waiting for the Tezos {ledger_app} to be opened...",
+                        color_green,
+                    ),
+                )
+                wait_for_ledger_app(ledger_app, self.config["client_data_dir"])
+                print(
+                    color(
+                        "Waiting for your response to the prompt on your Ledger Device...",
+                        color_green,
+                    )
                 )
 
-                print_and_log(f"Staking {self.config['stake_tez']}Tz...")
+            get_proc_output(
+                f"sudo -u tezos {suppress_warning_text} octez-client {tezos_client_options} "
+                f"stake {self.config['stake_tez']} for {baker_alias}"
+            )
 
-                if self.check_ledger_use():
-                    ledger_app = "Wallet"
-                    print(f"Please open the Tezos {ledger_app} app on your ledger.")
-                    print(
-                        color(
-                            "Please note, that if you are using Tezos Wallet app of version 3.0.0 or higher,\n"
-                            'you need to enable "expert mode" in the Tezos Wallet app settings on the Ledger device.',
-                            color_yellow,
-                        )
-                    )
-                    print(
-                        color(
-                            f"Waiting for the Tezos {ledger_app} to be opened...",
-                            color_green,
-                        ),
-                    )
-                    wait_for_ledger_app(ledger_app, self.config["client_data_dir"])
-                    print(
-                        color(
-                            "Waiting for your response to the prompt on your Ledger Device...",
-                            color_green,
-                        )
-                    )
-
-                get_proc_output(
-                    f"sudo -u tezos {suppress_warning_text} octez-client {tezos_client_options} "
-                    f"stake {self.config['stake_tez']} for {baker_alias}"
+            if self.check_ledger_use():
+                ledger_app = "Baking"
+                print(f"Please reopen the Tezos {ledger_app} app on your ledger.")
+                print(
+                    color(
+                        f"Waiting for the Tezos {ledger_app} to be opened...",
+                        color_green,
+                    ),
                 )
-
-                if self.check_ledger_use():
-                    ledger_app = "Baking"
-                    print(f"Please reopen the Tezos {ledger_app} app on your ledger.")
-                    print(
-                        color(
-                            f"Waiting for the Tezos {ledger_app} to be opened...",
-                            color_green,
-                        ),
-                    )
-                    wait_for_ledger_app(ledger_app, self.config["client_data_dir"])
+                wait_for_ledger_app(ledger_app, self.config["client_data_dir"])
 
     def register_baker(self):
         print()

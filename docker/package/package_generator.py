@@ -3,6 +3,7 @@
 
 import os
 import sys
+import json
 import shutil
 import argparse
 import urllib.request
@@ -218,25 +219,34 @@ def build_ubuntu(args):
                         "tezos-rc" if "rc" in version or "beta" in version else "tezos"
                     )
                     name = package.name.lower()
-                    # distributions list is always unempty at this point
-                    # and sources archive is the same for all distributions
-                    dist = distributions[0]
-                    url = f"https://launchpad.net/~serokell/+archive/ubuntu/{repo}/+sourcefiles/{name}/2:{version}-0ubuntu1~{dist}/{name}_{version}.orig.tar.gz"
-                    source_archive = f"{name}_{package.meta.version}.orig.tar.gz"
-                    try:
-                        urllib.request.urlretrieve(
-                            url,
-                            source_archive,
-                            lambda count, block_size, total_size: print(
-                                f"{package.name} source is downloading: "
-                                + str(round(count * block_size / total_size * 100, 2))
-                                + "%",
-                                end="\r",
-                            ),
-                        )
-                        print(f"{package.name} source was downloaded successfully")
-                        package.source_archive = os.path.realpath(source_archive)
-                    except (urllib.error.URLError, ValueError):
+
+                    with open("supported_versions.json", "r") as f:
+                        distributions = json.loads(f.read())["ubuntu"]
+
+                    success = False
+                    for dist in distributions:
+                        source_archive = f"{name}_{package.meta.version}.orig.tar.gz"
+                        url = f"https://launchpad.net/~serokell/+archive/ubuntu/{repo}/+sourcefiles/{name}/2:{version}-0ubuntu1~{dist}/{name}_{version}.orig.tar.gz"
+                        try:
+                            urllib.request.urlretrieve(
+                                url,
+                                source_archive,
+                                lambda count, block_size, total_size: print(
+                                    f"{package.name} source is downloading: "
+                                    + str(
+                                        round(count * block_size / total_size * 100, 2)
+                                    )
+                                    + "%",
+                                    end="\r",
+                                ),
+                            )
+                            print(f"{package.name} source was downloaded successfully")
+                            package.source_archive = os.path.realpath(source_archive)
+                            success = True
+                            break
+                        except (urllib.error.URLError, ValueError):
+                            continue
+                    if not success:
                         errors.append(
                             f"ERROR: source archive for {package.name} is not available"
                         )

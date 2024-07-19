@@ -34,6 +34,7 @@ RUN python3 fetch_tezos_sources.py
 WORKDIR /tezos-packaging/docker
 COPY meta.json /tezos-packaging/meta.json
 COPY protocols.json /tezos-packaging/protocols.json
+COPY docker/supported_versions.json /tezos-packaging/docker/supported_versions.json
 COPY docker/package/*.py /tezos-packaging/docker/package/
 COPY docker/package/defaults /tezos-packaging/docker/package/defaults
 COPY docker/package/scripts /tezos-packaging/docker/package/scripts

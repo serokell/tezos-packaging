@@ -19,7 +19,7 @@ eval "$(opam env)"
 OPAMASSUMEDEPEXTS=true opam install conf-rust conf-rust-2021
 
 export CFLAGS="-fPIC ${CFLAGS:-}"
-opam install opam/virtual/octez-deps.opam --deps-only --criteria="-notuptodate,-changed,-removed"
+OPAMASSUMEDEPEXTS=true opam install opam/virtual/octez-deps.opam --deps-only --criteria="-notuptodate,-changed,-removed"
 
 eval "$(opam env)"
 dune build "$dune_filepath"

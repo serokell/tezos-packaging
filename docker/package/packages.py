@@ -252,6 +252,9 @@ def mk_node_unit(
 node_units = []
 node_postinst_steps = postinst_steps_common
 node_additional_scripts = []
+node_postinst_steps += """
+curl -sSL https://teztnets.com/teztnets.json -o /var/lib/tezos/teztnets.json
+"""
 for network, network_config in networks.items():
     config_file_append = [
         f'TEZOS_NODE_DIR="/var/lib/tezos/node-{network}"',
@@ -273,9 +276,15 @@ for network, network_config in networks.items():
         )
     )
     node_postinst_steps += f"""
-mkdir -p /var/lib/tezos/node-{network}
-[ ! -f /var/lib/tezos/node-{network}/config.json ] && octez-node config init --data-dir /var/lib/tezos/node-{network} --network {network_config}
-chown -R tezos:tezos /var/lib/tezos/node-{network}
+config="$(cat /var/lib/tezos/teztnets.json | jq .{network})"
+if [ "$config" != "null" ]; then
+    mkdir -p /var/lib/tezos/node-{network}
+    [ ! -f /var/lib/tezos/node-{network}/config.json ] && octez-node config init --data-dir /var/lib/tezos/node-{network} --network {network_config}
+    chown -R tezos:tezos /var/lib/tezos/node-{network}
+else
+    echo "Network {network} not found in teztnets.json"
+    echo "Skipping node setup for {network}..."
+fi
 """
 
 # Add custom config service
@@ -317,6 +326,7 @@ packages.append(
             additional_native_deps=[
                 "tezos-sapling-params",
                 "curl",
+                "jq",
                 {"ubuntu": "netbase"},
             ],
             additional_scripts=node_additional_scripts,

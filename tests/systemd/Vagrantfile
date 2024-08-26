@@ -25,7 +25,7 @@ Vagrant.configure("2") do |config|
   config.vm.box = "generic/ubuntu2004"
   config.vm.provision "shell", run: "once", inline: <<-SHELL
     add-apt-repository -y ppa:serokell/tezos && apt-get update
-    apt-get install -y tezos-sapling-params acl python3-pystemd python3-pytest python3-psutil
+    apt-get install -y tezos-sapling-params acl python3-pystemd python3-pytest python3-psutil jq
   SHELL
   config.vm.provision "file", run: "always", source: "#{packagesDirectory}", destination: "$HOME/out"
   config.vm.provision "file", run: "always", source: "services_tests.py", destination: "$HOME/services_tests.py"

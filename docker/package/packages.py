@@ -32,6 +32,7 @@ protocol_numbers = {
     "Proxford": "018",
     "PtParisB": "019",
     "PsParisC": "020",
+    "PsquebeC": "021",
 }
 
 signer_units = [

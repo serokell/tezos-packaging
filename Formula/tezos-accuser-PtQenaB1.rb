@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2024 Oxhead Alpha
 # SPDX-License-Identifier: LicenseRef-MIT-OA
 
-class TezosAccuserPtparisb < Formula
+class TezosAccuserPtqenab1 < Formula
   @all_bins = []
 
   class << self
@@ -25,8 +25,7 @@ class TezosAccuserPtparisb < Formula
   desc "Daemon for accusing"
 
   bottle do
-    root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosAccuserPtparisb.version}/"
-    sha256 cellar: :any, ventura: "b8f6cb6a21cf2cf703cfdf61cf259414a5c6f7bfa950fc6470ff56c08ff9fe49"
+    root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosAccuserPtqenab1.version}/"
   end
 
   def make_deps
@@ -60,7 +59,7 @@ class TezosAccuserPtparisb < Formula
 
       set -euo pipefail
 
-      accuser="#{bin}/octez-accuser-PtParisB"
+      accuser="#{bin}/octez-accuser-PtQenaB1"
 
       accuser_config="$TEZOS_CLIENT_DIR/config"
       mkdir -p "$TEZOS_CLIENT_DIR"
@@ -75,21 +74,21 @@ class TezosAccuserPtparisb < Formula
 
       exec "$accuser" --endpoint "$NODE_RPC_SCHEME://$NODE_RPC_ADDR" run
     EOS
-    File.write("tezos-accuser-PtParisB-start", startup_contents)
-    bin.install "tezos-accuser-PtParisB-start"
+    File.write("tezos-accuser-PtQenaB1-start", startup_contents)
+    bin.install "tezos-accuser-PtQenaB1-start"
     make_deps
-    install_template "src/proto_019_PtParisB/bin_accuser/main_accuser_019_PtParisB.exe",
-                     "_build/default/src/proto_019_PtParisB/bin_accuser/main_accuser_019_PtParisB.exe",
-                     "octez-accuser-PtParisB"
+    install_template "src/proto_021_PtQenaB1/bin_accuser/main_accuser_021_PtQenaB1.exe",
+                     "_build/default/src/proto_021_PtQenaB1/bin_accuser/main_accuser_021_PtQenaB1.exe",
+                     "octez-accuser-PtQenaB1"
   end
 
   service do
-    run opt_bin/"tezos-accuser-PtParisB-start"
+    run opt_bin/"tezos-accuser-PtQenaB1-start"
     require_root true
     environment_variables TEZOS_CLIENT_DIR: var/"lib/tezos/client", NODE_RPC_SCHEME: "http", NODE_RPC_ADDR: "localhost:8732"
     keep_alive true
-    log_path var/"log/tezos-accuser-PtParisB.log"
-    error_log_path var/"log/tezos-accuser-PtParisB.log"
+    log_path var/"log/tezos-accuser-PtQenaB1.log"
+    error_log_path var/"log/tezos-accuser-PtQenaB1.log"
   end
 
   def post_install

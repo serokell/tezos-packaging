@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2024 Oxhead Alpha
 # SPDX-License-Identifier: LicenseRef-MIT-OA
 
-class TezosBakerPtparisb < Formula
+class TezosBakerPtqenab1 < Formula
   @all_bins = []
 
   class << self
@@ -25,8 +25,7 @@ class TezosBakerPtparisb < Formula
   desc "Daemon for baking"
 
   bottle do
-    root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosBakerPtparisb.version}/"
-    sha256 cellar: :any, ventura: "8836c1c1d5f4d7e0c8777b953e1a7e0d028ce686a84e1acd402e09420ba09009"
+    root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosBakerPtqenab1.version}/"
   end
 
   def make_deps
@@ -60,7 +59,7 @@ class TezosBakerPtparisb < Formula
 
       set -euo pipefail
 
-      baker="#{bin}/octez-baker-PtParisB"
+      baker="#{bin}/octez-baker-PtQenaB1"
 
       baker_config="$TEZOS_CLIENT_DIR/config"
       mkdir -p "$TEZOS_CLIENT_DIR"
@@ -85,21 +84,21 @@ class TezosBakerPtparisb < Formula
           launch_baker "$BAKER_ACCOUNT"
       fi
     EOS
-    File.write("tezos-baker-PtParisB-start", startup_contents)
-    bin.install "tezos-baker-PtParisB-start"
+    File.write("tezos-baker-PtQenaB1-start", startup_contents)
+    bin.install "tezos-baker-PtQenaB1-start"
     make_deps
-    install_template "src/proto_019_PtParisB/bin_baker/main_baker_019_PtParisB.exe",
-                     "_build/default/src/proto_019_PtParisB/bin_baker/main_baker_019_PtParisB.exe",
-                     "octez-baker-PtParisB"
+    install_template "src/proto_021_PtQenaB1/bin_baker/main_baker_021_PtQenaB1.exe",
+                     "_build/default/src/proto_021_PtQenaB1/bin_baker/main_baker_021_PtQenaB1.exe",
+                     "octez-baker-PtQenaB1"
   end
 
   service do
-    run opt_bin/"tezos-baker-PtParisB-start"
+    run opt_bin/"tezos-baker-PtQenaB1-start"
     require_root true
     environment_variables TEZOS_CLIENT_DIR: var/"lib/tezos/client", TEZOS_NODE_DIR: "", NODE_RPC_SCHEME: "http", NODE_RPC_ADDR: "localhost:8732", BAKER_ACCOUNT: ""
     keep_alive true
-    log_path var/"log/tezos-baker-PtParisB.log"
-    error_log_path var/"log/tezos-baker-PtParisB.log"
+    log_path var/"log/tezos-baker-PtQenaB1.log"
+    error_log_path var/"log/tezos-baker-PtQenaB1.log"
   end
 
   def post_install

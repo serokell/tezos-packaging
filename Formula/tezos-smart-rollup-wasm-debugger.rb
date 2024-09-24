@@ -10,9 +10,9 @@ class TezosSmartRollupWasmDebugger < Formula
   end
   homepage "https://gitlab.com/tezos/tezos"
 
-  url "https://gitlab.com/tezos/tezos.git", :tag => "octez-v20.2", :shallow => false
+  url "https://gitlab.com/tezos/tezos.git", :tag => "octez-v21.0-rc1", :shallow => false
 
-  version "v20.2-1"
+  version "v21.0-rc1-1"
 
   build_dependencies = %w[pkg-config coreutils autoconf rsync wget rustup-init cmake opam]
   build_dependencies.each do |dependency|
@@ -27,8 +27,6 @@ class TezosSmartRollupWasmDebugger < Formula
 
   bottle do
     root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosSmartRollupWasmDebugger.version}/"
-    sha256 cellar: :any, monterey: "b95be6fb96cf65068ab1e2666f613c21ec1c7616fa02de3e4fd28cd8060816d3"
-    sha256 cellar: :any, arm64_monterey: "bc85091063ba3c57d3c2f96e830c05b632af723e4b3b4126f17a18f6d1147028"
   end
 
   def make_deps

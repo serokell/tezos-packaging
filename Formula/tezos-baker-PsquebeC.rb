@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2024 Oxhead Alpha
 # SPDX-License-Identifier: LicenseRef-MIT-OA
 
-class TezosBakerPtparisb < Formula
+class TezosBakerPsquebec < Formula
   @all_bins = []
 
   class << self
@@ -25,7 +25,7 @@ class TezosBakerPtparisb < Formula
   desc "Daemon for baking"
 
   bottle do
-    root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosBakerPtparisb.version}/"
+    root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosBakerPsquebec.version}/"
   end
 
   def make_deps
@@ -59,7 +59,7 @@ class TezosBakerPtparisb < Formula
 
       set -euo pipefail
 
-      baker="#{bin}/octez-baker-PtParisB"
+      baker="#{bin}/octez-baker-PsquebeC"
 
       baker_config="$TEZOS_CLIENT_DIR/config"
       mkdir -p "$TEZOS_CLIENT_DIR"
@@ -84,21 +84,21 @@ class TezosBakerPtparisb < Formula
           launch_baker "$BAKER_ACCOUNT"
       fi
     EOS
-    File.write("tezos-baker-PtParisB-start", startup_contents)
-    bin.install "tezos-baker-PtParisB-start"
+    File.write("tezos-baker-PsquebeC-start", startup_contents)
+    bin.install "tezos-baker-PsquebeC-start"
     make_deps
-    install_template "src/proto_019_PtParisB/bin_baker/main_baker_019_PtParisB.exe",
-                     "_build/default/src/proto_019_PtParisB/bin_baker/main_baker_019_PtParisB.exe",
-                     "octez-baker-PtParisB"
+    install_template "src/proto_021_PsquebeC/bin_baker/main_baker_021_PsquebeC.exe",
+                     "_build/default/src/proto_021_PsquebeC/bin_baker/main_baker_021_PsquebeC.exe",
+                     "octez-baker-PsquebeC"
   end
 
   service do
-    run opt_bin/"tezos-baker-PtParisB-start"
+    run opt_bin/"tezos-baker-PsquebeC-start"
     require_root true
     environment_variables TEZOS_CLIENT_DIR: var/"lib/tezos/client", TEZOS_NODE_DIR: "", NODE_RPC_SCHEME: "http", NODE_RPC_ADDR: "localhost:8732", BAKER_ACCOUNT: ""
     keep_alive true
-    log_path var/"log/tezos-baker-PtParisB.log"
-    error_log_path var/"log/tezos-baker-PtParisB.log"
+    log_path var/"log/tezos-baker-PsquebeC.log"
+    error_log_path var/"log/tezos-baker-PsquebeC.log"
   end
 
   def post_install

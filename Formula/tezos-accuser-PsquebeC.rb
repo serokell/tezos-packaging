@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2024 Oxhead Alpha
 # SPDX-License-Identifier: LicenseRef-MIT-OA
 
-class TezosAccuserPtparisb < Formula
+class TezosAccuserPsquebec < Formula
   @all_bins = []
 
   class << self
@@ -25,7 +25,7 @@ class TezosAccuserPtparisb < Formula
   desc "Daemon for accusing"
 
   bottle do
-    root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosAccuserPtparisb.version}/"
+    root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosAccuserPsquebec.version}/"
   end
 
   def make_deps
@@ -59,7 +59,7 @@ class TezosAccuserPtparisb < Formula
 
       set -euo pipefail
 
-      accuser="#{bin}/octez-accuser-PtParisB"
+      accuser="#{bin}/octez-accuser-PsquebeC"
 
       accuser_config="$TEZOS_CLIENT_DIR/config"
       mkdir -p "$TEZOS_CLIENT_DIR"
@@ -74,21 +74,21 @@ class TezosAccuserPtparisb < Formula
 
       exec "$accuser" --endpoint "$NODE_RPC_SCHEME://$NODE_RPC_ADDR" run
     EOS
-    File.write("tezos-accuser-PtParisB-start", startup_contents)
-    bin.install "tezos-accuser-PtParisB-start"
+    File.write("tezos-accuser-PsquebeC-start", startup_contents)
+    bin.install "tezos-accuser-PsquebeC-start"
     make_deps
-    install_template "src/proto_019_PtParisB/bin_accuser/main_accuser_019_PtParisB.exe",
-                     "_build/default/src/proto_019_PtParisB/bin_accuser/main_accuser_019_PtParisB.exe",
-                     "octez-accuser-PtParisB"
+    install_template "src/proto_021_PsquebeC/bin_accuser/main_accuser_021_PsquebeC.exe",
+                     "_build/default/src/proto_021_PsquebeC/bin_accuser/main_accuser_021_PsquebeC.exe",
+                     "octez-accuser-PsquebeC"
   end
 
   service do
-    run opt_bin/"tezos-accuser-PtParisB-start"
+    run opt_bin/"tezos-accuser-PsquebeC-start"
     require_root true
     environment_variables TEZOS_CLIENT_DIR: var/"lib/tezos/client", NODE_RPC_SCHEME: "http", NODE_RPC_ADDR: "localhost:8732"
     keep_alive true
-    log_path var/"log/tezos-accuser-PtParisB.log"
-    error_log_path var/"log/tezos-accuser-PtParisB.log"
+    log_path var/"log/tezos-accuser-PsquebeC.log"
+    error_log_path var/"log/tezos-accuser-PsquebeC.log"
   end
 
   def post_install

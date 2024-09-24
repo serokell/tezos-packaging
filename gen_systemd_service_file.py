@@ -7,7 +7,8 @@
 # Note: if you modify this file, check if its usage in docs/systemd.md
 # needs to be updated too.
 
-from docker.package import *
+from docker.package.packages import packages
+from docker.package.systemd import print_service_file
 import sys
 
 if len(sys.argv) > 1:

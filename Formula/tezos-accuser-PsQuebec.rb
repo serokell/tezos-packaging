@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2024 Oxhead Alpha
 # SPDX-License-Identifier: LicenseRef-MIT-OA
 
-class TezosBakerPtparisb < Formula
+class TezosAccuserPsquebec < Formula
   @all_bins = []
 
   class << self
@@ -18,14 +18,14 @@ class TezosBakerPtparisb < Formula
     depends_on dependency => :build
   end
 
-  dependencies = %w[gmp hidapi libev protobuf sqlite tezos-sapling-params]
+  dependencies = %w[gmp hidapi libev protobuf sqlite]
   dependencies.each do |dependency|
     depends_on dependency
   end
-  desc "Daemon for baking"
+  desc "Daemon for accusing"
 
   bottle do
-    root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosBakerPtparisb.version}/"
+    root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosAccuserPsquebec.version}/"
   end
 
   def make_deps
@@ -37,7 +37,7 @@ class TezosBakerPtparisb < Formula
     # Force linker to use libraries from the current brew installation.
     # Workaround for https://github.com/serokell/tezos-packaging/issues/700
     ENV["LDFLAGS"] = "-L#{HOMEBREW_PREFIX}/lib"
-    # Here is the workaround to use opam 2.0.9 because Tezos is currently not compatible with opam 2.1.0 and newer
+    # Here is the workaround to use opam 2.0 because Tezos is currently not compatible with opam 2.1.0 and newer
     arch = RUBY_PLATFORM.include?("arm64") ? "arm64" : "x86_64"
     system "rustup-init", "--default-toolchain", "1.71.1", "-y"
     system "opam", "init", "--bare", "--debug", "--auto-setup", "--disable-sandboxing"
@@ -59,46 +59,36 @@ class TezosBakerPtparisb < Formula
 
       set -euo pipefail
 
-      baker="#{bin}/octez-baker-PtParisB"
+      accuser="#{bin}/octez-accuser-PsQuebec"
 
-      baker_config="$TEZOS_CLIENT_DIR/config"
+      accuser_config="$TEZOS_CLIENT_DIR/config"
       mkdir -p "$TEZOS_CLIENT_DIR"
 
-      if [ ! -f "$baker_config" ]; then
-          "$baker" --endpoint "$NODE_RPC_SCHEME://$NODE_RPC_ADDR" \
-                  config init --output "$baker_config" >/dev/null 2>&1
+      if [ ! -f "$accuser_config" ]; then
+          "$accuser" --endpoint "$NODE_RPC_SCHEME://$NODE_RPC_ADDR" \
+                    config init --output "$accuser_config" >/dev/null 2>&1
       else
-          "$baker" --endpoint "$NODE_RPC_SCHEME://$NODE_RPC_ADDR" \
-                  config update >/dev/null 2>&1
+          "$accuser" --endpoint "$NODE_RPC_SCHEME://$NODE_RPC_ADDR" \
+                    config update >/dev/null 2>&1
       fi
 
-      launch_baker() {
-          exec "$baker" \
-              --endpoint "$NODE_RPC_SCHEME://$NODE_RPC_ADDR" \
-              run with local node "$TEZOS_NODE_DIR" "$@"
-      }
-
-      if [[ -z "$BAKER_ACCOUNT" ]]; then
-          launch_baker
-      else
-          launch_baker "$BAKER_ACCOUNT"
-      fi
+      exec "$accuser" --endpoint "$NODE_RPC_SCHEME://$NODE_RPC_ADDR" run
     EOS
-    File.write("tezos-baker-PtParisB-start", startup_contents)
-    bin.install "tezos-baker-PtParisB-start"
+    File.write("tezos-accuser-PsQuebec-start", startup_contents)
+    bin.install "tezos-accuser-PsQuebec-start"
     make_deps
-    install_template "src/proto_019_PtParisB/bin_baker/main_baker_019_PtParisB.exe",
-                     "_build/default/src/proto_019_PtParisB/bin_baker/main_baker_019_PtParisB.exe",
-                     "octez-baker-PtParisB"
+    install_template "src/proto_021_PsQuebec/bin_accuser/main_accuser_021_PsQuebec.exe",
+                     "_build/default/src/proto_021_PsQuebec/bin_accuser/main_accuser_021_PsQuebec.exe",
+                     "octez-accuser-PsQuebec"
   end
 
   service do
-    run opt_bin/"tezos-baker-PtParisB-start"
+    run opt_bin/"tezos-accuser-PsQuebec-start"
     require_root true
-    environment_variables TEZOS_CLIENT_DIR: var/"lib/tezos/client", TEZOS_NODE_DIR: "", NODE_RPC_SCHEME: "http", NODE_RPC_ADDR: "localhost:8732", BAKER_ACCOUNT: ""
+    environment_variables TEZOS_CLIENT_DIR: var/"lib/tezos/client", NODE_RPC_SCHEME: "http", NODE_RPC_ADDR: "localhost:8732"
     keep_alive true
-    log_path var/"log/tezos-baker-PtParisB.log"
-    error_log_path var/"log/tezos-baker-PtParisB.log"
+    log_path var/"log/tezos-accuser-PsQuebec.log"
+    error_log_path var/"log/tezos-accuser-PsQuebec.log"
   end
 
   def post_install

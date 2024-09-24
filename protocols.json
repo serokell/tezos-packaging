@@ -26,10 +26,11 @@
     "PtLimaPt",
     "PtMumbai",
     "PtNairob",
-    "Proxford"
+    "Proxford",
+    "PtParisB"
   ],
   "active": [
-    "PtParisB",
-    "PsParisC"
+    "PsParisC",
+    "PsquebeC"
   ]
 }

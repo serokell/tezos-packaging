@@ -17,7 +17,7 @@ git clone https://gitlab.com/tezos/tezos.git upstream-repo
 cd upstream-repo
 latest_upstream_tag_hash="$(git rev-list --tags --max-count=1)"
 latest_upstream_tag="$(git describe --tags "$latest_upstream_tag_hash")"
-full_opam_repository_tag='' # will be set by version.sh
+opam_repository_tag='' # will be set by version.sh
 git checkout "$latest_upstream_tag"
 source scripts/version.sh
 # copying metadata from octez repo
@@ -43,7 +43,7 @@ if [[ "$latest_upstream_tag" != "$our_tezos_tag" ]]; then
     echo "Updating Tezos to $packaging_tag"
 
     ./scripts/update-input.py tezos "$latest_upstream_tag_hash"
-    ./scripts/update-input.py opam-repository "$full_opam_repository_tag"
+    ./scripts/update-input.py opam-repository "$opam_repository_tag"
     git commit -a -m "[Chore] Bump Tezos sources to $packaging_tag" --gpg-sign="tezos-packaging@serokell.io"
 
     ./scripts/update-brew-formulae.sh "$latest_upstream_tag" "$packaging_tag-1"

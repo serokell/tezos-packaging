@@ -18,8 +18,7 @@ RUN if [ "$dist" = "focal" ]; then apt-get install -y dh-systemd; fi
 
 RUN install -m 0755 /usr/bin/python3 /usr/bin/builder
 
-RUN if [ "$dist" != "noble"]; then add-apt-repository ppa:ubuntu-mozilla-security/rust-next -y && apt-get update -y; fi
-RUN apt-get -y install cargo opam
+RUN apt-get -y install opam
 
 ENV USER dockerbuilder
 RUN useradd dockerbuilder
@@ -30,6 +29,12 @@ ARG OCTEZ_VERSION
 WORKDIR /tezos-packaging/docker/sources
 COPY docker/fetch_tezos_sources.py .
 RUN python3 fetch_tezos_sources.py
+
+RUN apt-get -y install cargo cargo-1.78
+
+COPY docker/vendor-rust-deps.py .
+
+RUN python3 vendor-rust-deps.py
 
 WORKDIR /tezos-packaging/docker
 COPY meta.json /tezos-packaging/meta.json

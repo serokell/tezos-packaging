@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2020 TQ Tezos <https://tqtezos.com/>
 #
 # SPDX-License-Identifier: LicenseRef-MIT-TQ
-FROM alpine:3.17
+FROM alpine:3.20
 RUN apk update
 RUN apk --no-cache --virtual add rsync git m4 build-base patch unzip \
   bubblewrap wget pkgconfig gmp-dev libev-dev \

@@ -7,10 +7,10 @@ with lib;
 
 let
   octez-baker-pkgs = {
-    "PtParisB" =
-      "${pkgs.octezPackages.octez-baker-PtParisB}/bin/octez-baker-PtParisB";
     "PsParisC" =
-      "${pkgs.octezPackages.octez-baker-PtParisB}/bin/octez-baker-PsParisC";
+      "${pkgs.octezPackages.octez-baker-PsParisC}/bin/octez-baker-PsParisC";
+    "PsquebeC" =
+      "${pkgs.octezPackages.octez-baker-PsquebeC}/bin/octez-baker-PsParisC";
   };
   octez-client = "${pkgs.octezPackages.octez-client}/bin/octez-client";
   cfg = config.services.octez-baker;

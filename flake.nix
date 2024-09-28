@@ -27,16 +27,32 @@
 
   outputs = inputs@{ self, nixpkgs, nixpkgs-unstable, flake-utils, serokell-nix, nix, ... }:
   let
+    pkgs = import nixpkgs { system = "x86_64-linux"; };
     pkgs-darwin = nixpkgs-unstable.legacyPackages."aarch64-darwin";
     protocols = nixpkgs.lib.importJSON ./protocols.json;
     meta = nixpkgs.lib.importJSON ./meta.json;
 
-    tezos = builtins.path {
+    tezos-path = builtins.path {
       path = inputs.tezos;
       name = "tezos";
       # we exclude optional development packages
       filter = path: _: !(builtins.elem (baseNameOf path) [ "octez-dev-deps.opam" "tezos-time-measurement.opam" ]);
     };
+
+    # FIXME Dirty hack! Find out how to remove next release
+    tezos = pkgs.stdenv.mkDerivation {
+      name = "tezos";
+      src = tezos-path;
+      phases = [ "unpackPhase" "patchPhase" "installPhase" ];
+      patchPhase = ''
+        sed -i 's|"cohttp" { >= "5.3.1" }|"cohttp" { = "5.3.1" }|' opam/octez-libs.opam
+      '';
+      installPhase = ''
+        mkdir -p $out
+        cp -Lpr * $out
+      '';
+    };
+
     sources = { inherit tezos; inherit (inputs) opam-repository; };
 
     ocaml-overlay = import ./nix/build/ocaml-overlay.nix (inputs // { inherit sources protocols meta; });

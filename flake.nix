@@ -16,6 +16,10 @@
 
     opam-nix.url = "github:tweag/opam-nix";
 
+    rust-overlay.url = "github:oxalica/rust-overlay";
+
+    crane.url = "github:ipetkov/crane";
+
     flake-compat.flake = false;
 
     opam-repository.url = "github:ocaml/opam-repository";
@@ -25,9 +29,10 @@
     tezos.flake = false;
   };
 
-  outputs = inputs@{ self, nixpkgs, nixpkgs-unstable, flake-utils, serokell-nix, nix, ... }:
+  outputs = inputs@{ self, nixpkgs, nixpkgs-unstable, flake-utils, serokell-nix, nix, rust-overlay, crane, ... }:
   let
     pkgs = import nixpkgs { system = "x86_64-linux"; };
+    pkgs-unstable = import nixpkgs-unstable { system = "x86_64-linux"; overlays = [ rust-overlay.overlays.default ]; };
     pkgs-darwin = nixpkgs-unstable.legacyPackages."aarch64-darwin";
     protocols = nixpkgs.lib.importJSON ./protocols.json;
     meta = nixpkgs.lib.importJSON ./meta.json;
@@ -38,6 +43,12 @@
       # we exclude optional development packages
       filter = path: _: !(builtins.elem (baseNameOf path) [ "octez-dev-deps.opam" "tezos-time-measurement.opam" ]);
     };
+
+    toolchain-version = pkgs-unstable.lib.strings.trim (builtins.readFile "${tezos}/rust-toolchain");
+
+    rust-toolchain = pkgs-unstable.rust-bin.stable.${toolchain-version}.default;
+
+    craneLib = (crane.mkLib pkgs-unstable).overrideToolchain (p: p.rust-bin.stable.${toolchain-version}.default);
 
     opam-repository = pkgs.stdenv.mkDerivation {
       name = "opam-repository";
@@ -85,7 +96,7 @@
 
     sources = { inherit tezos opam-repository; };
 
-    ocaml-overlay = import ./nix/build/ocaml-overlay.nix (inputs // { inherit sources protocols meta; });
+    ocaml-overlay = import ./nix/build/ocaml-overlay.nix (inputs // { inherit sources protocols meta craneLib rust-toolchain; });
   in pkgs-darwin.lib.recursiveUpdate
   {
       nixosModules = {

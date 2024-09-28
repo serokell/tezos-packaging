@@ -27,6 +27,7 @@
 
   outputs = inputs@{ self, nixpkgs, nixpkgs-unstable, flake-utils, serokell-nix, nix, ... }:
   let
+    pkgs = import nixpkgs { system = "x86_64-linux"; };
     pkgs-darwin = nixpkgs-unstable.legacyPackages."aarch64-darwin";
     protocols = nixpkgs.lib.importJSON ./protocols.json;
     meta = nixpkgs.lib.importJSON ./meta.json;
@@ -37,7 +38,52 @@
       # we exclude optional development packages
       filter = path: _: !(builtins.elem (baseNameOf path) [ "octez-dev-deps.opam" "tezos-time-measurement.opam" ]);
     };
-    sources = { inherit tezos; inherit (inputs) opam-repository; };
+
+    opam-repository = pkgs.stdenv.mkDerivation {
+      name = "opam-repository";
+      src = inputs.opam-repository;
+      phases = [ "unpackPhase" "patchPhase" "installPhase" ];
+      patchPhase = ''
+        mkdir -p packages/octez-deps/octez-deps.dev
+        cp ${tezos}/opam/virtual/octez-deps.opam.locked packages/octez-deps/octez-deps.dev/opam
+
+        # This package adds some constraints to the solution found by the opam solver.
+        dummy_pkg=octez-dummy
+        dummy_opam_dir="packages/$dummy_pkg/$dummy_pkg.dev"
+        dummy_opam="$dummy_opam_dir/opam"
+        mkdir -p "$dummy_opam_dir"
+        echo 'opam-version: "2.0"' > "$dummy_opam"
+        echo "depends: [ \"ocaml\" { = \"$ocaml_version\" } ]" >> "$dummy_opam"
+        echo 'conflicts:[' >> "$dummy_opam"
+        grep -r "^flags: *\[ *avoid-version *\]" -l packages |
+          LC_COLLATE=C sort -u |
+          while read -r f; do
+            f=$(dirname "$f")
+            f=$(basename "$f")
+            p=$(echo "$f" | cut -d '.' -f '1')
+            v=$(echo "$f" | cut -d '.' -f '2-')
+            echo "\"$p\" {= \"$v\"}" >> $dummy_opam
+          done
+        # FIXME: https://gitlab.com/tezos/tezos/-/issues/5832
+        # opam unintentionally picks up a windows dependency. We add a
+        # conflict here to work around it.
+        echo '"ocamlbuild" {= "0.14.2+win" }' >> $dummy_opam
+        echo ']' >> "$dummy_opam"
+
+        OPAMSOLVERTIMEOUT=600 ${pkgs.opam}/bin/opam admin filter --yes --resolve \
+          "octez-deps,ocaml,ocaml-base-compiler,odoc<2.3.0,ledgerwallet-tezos,caqti-driver-postgresql,$dummy_pkg" \
+          --environment "os=linux,arch=x86_64,os-family=debian"
+
+        rm -rf packages/"$dummy_pkg" packages/octez-deps
+      '';
+
+      installPhase = ''
+        mkdir -p $out
+        cp -Lpr * $out
+      '';
+    };
+
+    sources = { inherit tezos opam-repository; };
 
     ocaml-overlay = import ./nix/build/ocaml-overlay.nix (inputs // { inherit sources protocols meta; });
   in pkgs-darwin.lib.recursiveUpdate

@@ -15,6 +15,7 @@
     nix.url = "github:nixos/nix";
 
     opam-nix.url = "github:tweag/opam-nix";
+    opam-nix.inputs.nixpkgs.follows = "nixpkgs";
 
     flake-compat.flake = false;
 
@@ -23,6 +24,8 @@
 
     tezos.url = "gitlab:tezos/tezos";
     tezos.flake = false;
+
+    serokell-nix.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   outputs = inputs@{ self, nixpkgs, nixpkgs-unstable, flake-utils, serokell-nix, nix, ... }:

@@ -186,6 +186,9 @@ steps:
     - buildkite-agent artifact download "out/*~focal_amd64.deb" . --step build-static-deb
     - cd tests/systemd
     - nix shell ../..#legacyPackages.x86_64-linux.vagrant ../..#legacyPackages.x86_64-linux.curl -c vagrant --packages-directory=../../out up --provider=libvirt
+   retry:
+     automatic:
+       limit: 3
 
  - label: create auto release/pre-release
    key: auto-release

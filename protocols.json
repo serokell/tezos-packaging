@@ -25,11 +25,12 @@
     "PtKathma",
     "PtLimaPt",
     "PtMumbai",
-    "PtNairob"
+    "PtNairob",
+    "Proxford",
+    "PtParisB"
   ],
   "active": [
-    "Proxford",
-    "PtParisB",
-    "PsParisC"
+    "PsParisC",
+    "PtQenaB1"
   ]
 }

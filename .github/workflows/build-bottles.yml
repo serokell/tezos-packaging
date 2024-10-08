@@ -17,7 +17,7 @@ jobs:
       matrix:
         os: [ { id: macos-13, name: "ventura" } ]
         # we don't bottle meta-formulas that contain only services
-        formula: [tezos-smart-rollup-wasm-debugger, tezos-smart-rollup-node, tezos-dac-client, tezos-dac-node, tezos-dal-node, tezos-signer, tezos-codec, tezos-client, tezos-admin-client, tezos-node, tezos-accuser-PsParisC, tezos-baker-PsParisC, tezos-accuser-PtParisB, tezos-baker-PtParisB, tezos-accuser-Proxford, tezos-baker-Proxford]
+        formula: [tezos-smart-rollup-wasm-debugger, tezos-smart-rollup-node, tezos-dac-client, tezos-dac-node, tezos-dal-node, tezos-signer, tezos-codec, tezos-client, tezos-admin-client, tezos-node, tezos-accuser-PtQenaB1, tezos-baker-PtQenaB1, tezos-accuser-PsParisC, tezos-baker-PsParisC]
     steps:
       - name: Checkout
         uses: actions/checkout@v4

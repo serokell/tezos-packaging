@@ -19,7 +19,9 @@ cd tezos
 
 echo "******* Creating switch *******"
 
-. scripts/version.sh
+ocaml_version=''
+
+source scripts/version.sh
 
 opam switch create . --repositories=tezos "ocaml-base-compiler.$ocaml_version" --no-install
 
@@ -27,6 +29,15 @@ export OPAMSWITCH="$PWD"
 opam repository remove default > /dev/null 2>&1
 
 eval "$(opam env)"
+echo '#!/bin/sh' >> cargo
+echo 'cargo-1.78 "$@"' >> cargo
+
+echo '#!/bin/sh' >> rustc
+echo 'rustc-1.78 "$@"' >> rustc
+
+chmod +x cargo rustc
+export PATH="$PWD:$PATH"
+
 OPAMASSUMEDEPEXTS=true opam install conf-rust conf-rust-2021
 
 export CFLAGS="-fPIC ${CFLAGS:-}"

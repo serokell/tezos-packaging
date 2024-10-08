@@ -112,7 +112,6 @@ def get_build_deps(binaries_dir):
         "unzip",
         "rsync",
         "gcc",
-        "cargo",
         "opam",
         "git",
         "autoconf",

@@ -19,12 +19,14 @@ from collections import ChainMap
 networks = {
     "mainnet": "mainnet",
     "ghostnet": "ghostnet",
+    "qenanet": "https://teztnets.com/qenanet",
     "pariscnet": "https://teztnets.com/pariscnet",
 }
 networks_protos = {
     "mainnet": ["PsParisC"],
     "ghostnet": ["PsParisC"],
     "pariscnet": ["PsParisC"],
+    "qenanet": ["PtQenaB1"],
 }
 
 protocol_numbers = {
@@ -32,6 +34,7 @@ protocol_numbers = {
     "Proxford": "018",
     "PtParisB": "019",
     "PsParisC": "020",
+    "PtQenaB1": "021",
 }
 
 signer_units = [

@@ -15,9 +15,9 @@ in import "${nixpkgs}/nixos/tests/make-test-python.nix" ({ ... }: {
 
   testScript = ''
     path_to_binaries = "${path-to-binaries}"
-    octez_accuser = f"{path_to_binaries}/octez-accuser-PtParisB"
+    octez_accuser = f"{path_to_binaries}/octez-accuser-PsParisC"
     octez_admin_client = f"{path_to_binaries}/octez-admin-client"
-    octez_baker = f"{path_to_binaries}/octez-baker-PtParisB"
+    octez_baker = f"{path_to_binaries}/octez-baker-PsParisC"
     octez_client = f"{path_to_binaries}/octez-client"
     octez_node = f"{path_to_binaries}/octez-node"
     octez_signer = f"{path_to_binaries}/octez-signer"

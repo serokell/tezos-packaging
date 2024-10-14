@@ -2,8 +2,8 @@ name: Build homebrew bottles
 on:
   # Run when a release is tagged
   push:
-    tags:
-      - "v*"
+    branches:
+      - krendelhoff/chore-setup-macos-13-workflow
 permissions:
   # Restrict GITHUB_TOKEN permissions
   contents: write
@@ -15,7 +15,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ { id: macos-12, name: "monterey" } ]
+        os: [ { id: macos-13, name: "ventura" } ]
         # we don't bottle meta-formulas that contain only services
         formula: [tezos-smart-rollup-wasm-debugger, tezos-smart-rollup-node, tezos-dac-client, tezos-dac-node, tezos-dal-node, tezos-signer, tezos-codec, tezos-client, tezos-admin-client, tezos-node, tezos-accuser-PsParisC, tezos-baker-PsParisC, tezos-accuser-PtParisB, tezos-baker-PtParisB, tezos-accuser-Proxford, tezos-baker-Proxford]
     steps:
@@ -64,7 +64,7 @@ jobs:
         run: gh release upload "${{ env.tag }}" *.bottle.*
 
   sync-hashes:
-    runs-on: macos-12
+    runs-on: macos-13
     needs: build-bottles
     steps:
       - name: Checkout
@@ -86,12 +86,12 @@ jobs:
 
        # It's possible we have had to rerun the building workflow, skipping some jobs and
        # erasing the previously built bottles, so we use the release to download them all
-      - name: Download Monterey bottles from the release
+      - name: Download Ventura bottles from the release
         env:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
-        run: gh release download "${{ github.ref_name }}" -p "*.monterey.bottle.tar.gz" -D "./Monterey"
+        run: gh release download "${{ github.ref_name }}" -p "*.ventura.bottle.tar.gz" -D "./Ventura"
 
       - name: Add bottle hashes to formulae
         env:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
-        run: ./scripts/sync-bottle-hashes.sh "${{ github.ref_name }}" "Monterey"
+        run: ./scripts/sync-bottle-hashes.sh "${{ github.ref_name }}" "Ventura"

@@ -20,6 +20,7 @@ ENV HOME /tezos-packaging
 WORKDIR /tezos-packaging/docker/sources
 ARG OCTEZ_VERSION
 COPY docker/fetch_tezos_sources.py .
+COPY docker/create_opam_repo.sh .
 RUN python3 fetch_tezos_sources.py
 
 WORKDIR /tezos-packaging/docker

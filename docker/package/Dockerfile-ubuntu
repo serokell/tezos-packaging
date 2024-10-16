@@ -28,6 +28,7 @@ ENV HOME /tezos-packaging
 ARG OCTEZ_VERSION
 WORKDIR /tezos-packaging/docker/sources
 COPY docker/fetch_tezos_sources.py .
+COPY docker/create_opam_repo.sh .
 RUN python3 fetch_tezos_sources.py
 
 RUN apt-get -y install cargo cargo-1.78

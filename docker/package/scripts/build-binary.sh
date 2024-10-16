@@ -11,7 +11,7 @@ export OPAMROOT=$PWD/opamroot
 dune_filepath="$1"
 binary_name="$2"
 
-opam init tezos ./opam-repository --bare --disable-sandboxing
+opam init local ./opam-repository --bare --disable-sandboxing
 
 cd tezos
 
@@ -19,14 +19,14 @@ ocaml_version=''
 
 source scripts/version.sh
 
-opam switch create . --repositories=tezos "ocaml-base-compiler.$ocaml_version" --no-install
+opam switch create . --repositories=local "ocaml-base-compiler.$ocaml_version" --no-install
 
 export OPAMSWITCH="$PWD"
 opam repository remove default > /dev/null 2>&1
 
 eval "$(opam env)"
 
-OPAMASSUMEDEPEXTS=true opam install conf-rust conf-rust-2021
+OPAMASSUMEDEPEXTS=true opam install conf-rust
 
 export CFLAGS="-fPIC ${CFLAGS:-}"
 OPAMASSUMEDEPEXTS=true opam install opam/virtual/octez-deps.opam.locked --deps-only --criteria="-notuptodate,-changed,-removed"

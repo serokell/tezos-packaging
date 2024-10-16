@@ -5,6 +5,7 @@ ARG dist
 FROM ubuntu:${dist}
 
 ENV DEBIAN_FRONTEND="noninteractive"
+
 RUN apt update
 RUN apt install -y libev-dev libgmp-dev libhidapi-dev libffi-dev \
                    zlib1g-dev libpq-dev m4 perl pkg-config \
@@ -18,7 +19,7 @@ RUN if [ "$dist" = "focal" ]; then apt-get install -y dh-systemd; fi
 
 RUN install -m 0755 /usr/bin/python3 /usr/bin/builder
 
-RUN apt-get -y install opam
+RUN apt-get -y install opam cargo cargo-1.78
 
 ENV USER dockerbuilder
 RUN useradd dockerbuilder
@@ -30,11 +31,12 @@ WORKDIR /tezos-packaging/docker/sources
 COPY docker/fetch_tezos_sources.py .
 RUN python3 fetch_tezos_sources.py
 
-RUN apt-get -y install cargo cargo-1.78
-
 COPY docker/vendor-rust-deps.py .
 
 RUN python3 vendor-rust-deps.py
+
+COPY docker/create_opam_repo.sh .
+RUN ./create_opam_repo.sh
 
 WORKDIR /tezos-packaging/docker
 COPY meta.json /tezos-packaging/meta.json

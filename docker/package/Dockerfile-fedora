@@ -22,6 +22,9 @@ ARG OCTEZ_VERSION
 COPY docker/fetch_tezos_sources.py .
 RUN python3 fetch_tezos_sources.py
 
+COPY docker/create_opam_repo.sh .
+RUN ./create_opam_repo.sh
+
 WORKDIR /tezos-packaging/docker
 COPY meta.json /tezos-packaging/meta.json
 COPY protocols.json /tezos-packaging/protocols.json

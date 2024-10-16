@@ -88,7 +88,7 @@ def run_build(args: Arguments) -> List[str]:
         f"""
     {virtualisation_engine}
     build -t tezos-{target_os}-{image}
-    -f docker/package/Dockerfile-{target_os} --build-arg OCTEZ_VERSION={octez_version} --build-arg dist={image} .
+    -f docker/package/Dockerfile-{target_os} --build-arg dist={image} .
     """
     )
 

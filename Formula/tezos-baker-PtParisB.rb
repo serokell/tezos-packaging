@@ -9,9 +9,9 @@ class TezosBakerPtparisb < Formula
   end
   homepage "https://gitlab.com/tezos/tezos"
 
-  url "https://gitlab.com/tezos/tezos.git", :tag => "octez-v20.3", :shallow => false
+  url "https://gitlab.com/tezos/tezos.git", :tag => "octez-v21.0", :shallow => false
 
-  version "v20.3-1"
+  version "v21.0-1"
 
   build_dependencies = %w[pkg-config coreutils autoconf rsync wget rustup-init cmake opam]
   build_dependencies.each do |dependency|
@@ -26,7 +26,6 @@ class TezosBakerPtparisb < Formula
 
   bottle do
     root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosBakerPtparisb.version}/"
-    sha256 cellar: :any, ventura: "8836c1c1d5f4d7e0c8777b953e1a7e0d028ce686a84e1acd402e09420ba09009"
   end
 
   def make_deps

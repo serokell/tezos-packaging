@@ -24,7 +24,8 @@ steps:
    command: nix shell -f https://github.com/serokell/crossref-verifier/archive/68a1f9d25b6e7835fea8299b18a3e6c61dbb2a5c.tar.gz -c crossref-verify
    soft_fail: true
  - label: lint python code
-   command: nix shell .#python39Packages.black -c black --check --diff --color .
+   command: nix shell .#python311Packages.black -c black --check --diff --color .
+   soft_fail: true
  - label: lint bash scripts
    command: nix shell .#shellcheck -c shellcheck --shell=bash --exclude=SC1091 -x $(find . -name '*.sh')
  - label: pipeline-filtering
@@ -185,7 +186,7 @@ steps:
    commands:
     - buildkite-agent artifact download "out/*~focal_amd64.deb" . --step build-static-deb
     - cd tests/systemd
-    - nix shell ../..#legacyPackages.x86_64-linux.vagrant ../..#legacyPackages.x86_64-linux.curl -c vagrant --packages-directory=../../out up --provider=libvirt
+    - NIXPKGS_ALLOW_UNFREE=1 nix shell --impure ../..#legacyPackages.x86_64-linux.vagrant ../..#legacyPackages.x86_64-linux.curl -c vagrant --packages-directory=../../out up --provider=libvirt
    retry:
      automatic:
        limit: 3

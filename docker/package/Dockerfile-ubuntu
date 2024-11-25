@@ -2,11 +2,29 @@
 # SPDX-License-Identifier: LicenseRef-MIT-OA
 
 ARG dist
+FROM ubuntu:focal AS srcs
+RUN apt update -y
+RUN apt install -y cargo-1.78 opam rsync python3
+
+WORKDIR /sources
+
+COPY meta.json meta.json
+COPY docker/fetch_tezos_sources.py .
+RUN python3 fetch_tezos_sources.py
+
+COPY docker/vendor-rust-deps.py .
+RUN python3 vendor-rust-deps.py
+
+COPY docker/create_opam_repo.sh .
+RUN ./create_opam_repo.sh
+
+ARG dist
 FROM ubuntu:${dist}
 
 ENV DEBIAN_FRONTEND="noninteractive"
-RUN apt update
-RUN apt install -y libev-dev libgmp-dev libhidapi-dev libffi-dev \
+
+RUN apt-get update -y
+RUN apt-get install -y libev-dev libgmp-dev libhidapi-dev libffi-dev \
                    zlib1g-dev libpq-dev m4 perl pkg-config \
                    debhelper dh-make dh-python devscripts autotools-dev \
                    python3-all python3-setuptools wget rsync cmake \
@@ -18,18 +36,17 @@ RUN if [ "$dist" = "focal" ]; then apt-get install -y dh-systemd; fi
 
 RUN install -m 0755 /usr/bin/python3 /usr/bin/builder
 
-RUN if [ "$dist" != "noble"]; then add-apt-repository ppa:ubuntu-mozilla-security/rust-next -y && apt-get update -y; fi
-RUN apt-get -y install cargo opam
+RUN apt-get -y install opam cargo cargo-1.78
 
 ENV USER dockerbuilder
 RUN useradd dockerbuilder
 
 ENV HOME /tezos-packaging
 
-ARG OCTEZ_VERSION
 WORKDIR /tezos-packaging/docker/sources
-COPY docker/fetch_tezos_sources.py .
-RUN python3 fetch_tezos_sources.py
+
+COPY --from=srcs /sources/tezos tezos
+COPY --from=srcs /sources/opam-repository opam-repository
 
 WORKDIR /tezos-packaging/docker
 COPY meta.json /tezos-packaging/meta.json

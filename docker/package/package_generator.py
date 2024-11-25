@@ -95,7 +95,7 @@ def get_fedora_run_deps(binaries_dir):
     ]
 
 
-def get_build_deps(binaries_dir):
+def get_build_deps(binaries_dir, extra_deps=[]):
     """
     List all the common build dependencies. Return an empty list when using prebuilt static binaries.
     """
@@ -111,13 +111,13 @@ def get_build_deps(binaries_dir):
         "wget",
         "unzip",
         "rsync",
-        "gcc",
         "cargo",
+        "gcc",
         "opam",
         "git",
         "autoconf",
         "coreutils",
-    ]
+    ] + extra_deps
 
 
 def build_fedora(args):
@@ -181,7 +181,7 @@ def build_ubuntu(args):
 
     binaries_dir = args.binaries_dir
 
-    build_deps = get_build_deps(binaries_dir)
+    build_deps = get_build_deps(binaries_dir, ["cargo-1.78"])
 
     home = os.environ["HOME"]
 

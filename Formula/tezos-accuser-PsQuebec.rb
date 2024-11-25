@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2024 Oxhead Alpha
 # SPDX-License-Identifier: LicenseRef-MIT-OA
 
-class TezosAccuserPtparisb < Formula
+class TezosAccuserPsquebec < Formula
   @all_bins = []
 
   class << self
@@ -9,9 +9,9 @@ class TezosAccuserPtparisb < Formula
   end
   homepage "https://gitlab.com/tezos/tezos"
 
-  url "https://gitlab.com/tezos/tezos.git", :tag => "octez-v20.3", :shallow => false
+  url "https://gitlab.com/tezos/tezos.git", :tag => "octez-v21.0", :shallow => false
 
-  version "v20.3-1"
+  version "v21.0-1"
 
   build_dependencies = %w[pkg-config coreutils autoconf rsync wget rustup-init cmake opam]
   build_dependencies.each do |dependency|
@@ -25,8 +25,7 @@ class TezosAccuserPtparisb < Formula
   desc "Daemon for accusing"
 
   bottle do
-    root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosAccuserPtparisb.version}/"
-    sha256 cellar: :any, ventura: "b8f6cb6a21cf2cf703cfdf61cf259414a5c6f7bfa950fc6470ff56c08ff9fe49"
+    root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosAccuserPsquebec.version}/"
   end
 
   def make_deps
@@ -60,7 +59,7 @@ class TezosAccuserPtparisb < Formula
 
       set -euo pipefail
 
-      accuser="#{bin}/octez-accuser-PtParisB"
+      accuser="#{bin}/octez-accuser-PsQuebec"
 
       accuser_config="$TEZOS_CLIENT_DIR/config"
       mkdir -p "$TEZOS_CLIENT_DIR"
@@ -75,21 +74,21 @@ class TezosAccuserPtparisb < Formula
 
       exec "$accuser" --endpoint "$NODE_RPC_SCHEME://$NODE_RPC_ADDR" run
     EOS
-    File.write("tezos-accuser-PtParisB-start", startup_contents)
-    bin.install "tezos-accuser-PtParisB-start"
+    File.write("tezos-accuser-PsQuebec-start", startup_contents)
+    bin.install "tezos-accuser-PsQuebec-start"
     make_deps
-    install_template "src/proto_019_PtParisB/bin_accuser/main_accuser_019_PtParisB.exe",
-                     "_build/default/src/proto_019_PtParisB/bin_accuser/main_accuser_019_PtParisB.exe",
-                     "octez-accuser-PtParisB"
+    install_template "src/proto_021_PsQuebec/bin_accuser/main_accuser_021_PsQuebec.exe",
+                     "_build/default/src/proto_021_PsQuebec/bin_accuser/main_accuser_021_PsQuebec.exe",
+                     "octez-accuser-PsQuebec"
   end
 
   service do
-    run opt_bin/"tezos-accuser-PtParisB-start"
+    run opt_bin/"tezos-accuser-PsQuebec-start"
     require_root true
     environment_variables TEZOS_CLIENT_DIR: var/"lib/tezos/client", NODE_RPC_SCHEME: "http", NODE_RPC_ADDR: "localhost:8732"
     keep_alive true
-    log_path var/"log/tezos-accuser-PtParisB.log"
-    error_log_path var/"log/tezos-accuser-PtParisB.log"
+    log_path var/"log/tezos-accuser-PsQuebec.log"
+    error_log_path var/"log/tezos-accuser-PsQuebec.log"
   end
 
   def post_install

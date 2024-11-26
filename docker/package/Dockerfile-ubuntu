@@ -23,7 +23,7 @@ FROM ubuntu:${dist}
 
 ENV DEBIAN_FRONTEND="noninteractive"
 
-RUN apt-get update -y
+RUN apt update -y
 RUN apt-get install -y libev-dev libgmp-dev libhidapi-dev libffi-dev \
                    zlib1g-dev libpq-dev m4 perl pkg-config \
                    debhelper dh-make dh-python devscripts autotools-dev \
@@ -31,7 +31,7 @@ RUN apt-get install -y libev-dev libgmp-dev libhidapi-dev libffi-dev \
                    software-properties-common libprotobuf-dev libsqlite3-dev \
                    protobuf-compiler
 
-ARG dist
+ARG dist=focal
 RUN if [ "$dist" = "focal" ]; then apt-get install -y dh-systemd; fi
 
 RUN install -m 0755 /usr/bin/python3 /usr/bin/builder

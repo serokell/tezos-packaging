@@ -13,7 +13,7 @@ if [ -z "$1" ] ; then
 fi
 
 # shellcheck disable=SC2046
-brew install --formula --build-bottle "./Formula/$1.rb"
+brew install -v --formula --build-bottle "./Formula/$1.rb"
 # Newer brew versions fail when checking for a rebuild version of non-core taps.
 # So for now we skip the check with '--no-rebuild'
 brew bottle --force-core-tap --no-rebuild "./Formula/$1.rb"

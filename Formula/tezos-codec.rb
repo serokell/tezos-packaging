@@ -18,7 +18,7 @@ class TezosCodec < Formula
     depends_on dependency => :build
   end
 
-  dependencies = %w[gmp hidapi libev protobuf sqlite]
+  dependencies = %w[gmp hidapi libev protobuf sqlite libpq]
   dependencies.each do |dependency|
     depends_on dependency
   end
@@ -39,7 +39,7 @@ class TezosCodec < Formula
     ENV["LDFLAGS"] = "-L#{HOMEBREW_PREFIX}/lib"
     # Here is the workaround to use opam 2.0.9 because Tezos is currently not compatible with opam 2.1.0 and newer
     arch = RUBY_PLATFORM.include?("arm64") ? "arm64" : "x86_64"
-    system "rustup-init", "--default-toolchain", "1.71.1", "-y"
+    system "rustup-init", "--default-toolchain", "1.78.0", "-y"
     system "opam", "init", "--bare", "--debug", "--auto-setup", "--disable-sandboxing"
     system ["source .cargo/env",  "make build-deps"].join(" && ")
   end

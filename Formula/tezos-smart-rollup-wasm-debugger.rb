@@ -48,7 +48,7 @@ class TezosSmartRollupWasmDebugger < Formula
   def install_template(dune_path, exec_path, name)
     bin.mkpath
     self.class.all_bins << name
-    system ["source .cargo/env", "eval $(opam env)", "dune build #{dune_path}", "cp #{exec_path} #{name}"].join(" && ")
+    system ["eval $(opam env)", "dune build #{dune_path}", "cp #{exec_path} #{name}"].join(" && ")
     bin.install name
     ln_sf "#{bin}/#{name}", "#{bin}/#{name.gsub("octez", "tezos")}"
   end

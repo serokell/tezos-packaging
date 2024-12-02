@@ -35,7 +35,7 @@ class TezosClient < Formula
     ENV["BLST_PORTABLE"]="yes"
     # Force linker to use libraries from the current brew installation.
     # Workaround for https://github.com/serokell/tezos-packaging/issues/700
-    ENV["LDFLAGS"] = "-L#{HOMEBREW_PREFIX}/lib"
+    ENV["LDFLAGS"] = "-L_opam/lib"
     # Here is the workaround to use opam 2.0.9 because Tezos is currently not compatible with opam 2.1.0 and newer
     arch = RUBY_PLATFORM.include?("arm64") ? "arm64" : "x86_64"
     system "rustup", "install", "1.78.0"

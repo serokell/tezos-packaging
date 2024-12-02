@@ -15,7 +15,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ { id: macos-14, name: "sonoma" } ]
+        os: [ { id: macos-13, name: "ventura" } ]
         # we don't bottle meta-formulas that contain only services
         formula: [tezos-client]
     steps:

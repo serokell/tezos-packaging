@@ -13,12 +13,12 @@ class TezosBakerPsparisc < Formula
 
   version "v21.0-1"
 
-  build_dependencies = %w[pkg-config coreutils autoconf rsync wget rustup-init cmake opam]
+  build_dependencies = %w[pkg-config coreutils autoconf rsync wget rustup cmake opam]
   build_dependencies.each do |dependency|
     depends_on dependency => :build
   end
 
-  dependencies = %w[gmp hidapi libev protobuf sqlite tezos-sapling-params]
+  dependencies = %w[gmp hidapi libev protobuf sqlite libpq tezos-sapling-params]
   dependencies.each do |dependency|
     depends_on dependency
   end
@@ -26,6 +26,7 @@ class TezosBakerPsparisc < Formula
 
   bottle do
     root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosBakerPsparisc.version}/"
+    sha256 cellar: :any, ventura: "014069ca270d7eb061ab472c98c4051641058f9dbad68e889b91ca100db5a96e"
   end
 
   def make_deps
@@ -37,11 +38,13 @@ class TezosBakerPsparisc < Formula
     # Force linker to use libraries from the current brew installation.
     # Workaround for https://github.com/serokell/tezos-packaging/issues/700
     ENV["LDFLAGS"] = "-L#{HOMEBREW_PREFIX}/lib"
+    # Workaround to avoid linking problem on mac
+    ENV["RUSTFLAGS"]= "-C link-args=-Wl,-undefined,dynamic_lookup"
     # Here is the workaround to use opam 2.0.9 because Tezos is currently not compatible with opam 2.1.0 and newer
     arch = RUBY_PLATFORM.include?("arm64") ? "arm64" : "x86_64"
-    system "rustup-init", "--default-toolchain", "1.71.1", "-y"
+    system "rustup", "install", "1.78.0"
     system "opam", "init", "--bare", "--debug", "--auto-setup", "--disable-sandboxing"
-    system ["source .cargo/env",  "make build-deps"].join(" && ")
+    system "make build-deps"
   end
 
   def install_template(dune_path, exec_path, name)

@@ -14,12 +14,12 @@ class TezosSmartRollupWasmDebugger < Formula
 
   version "v21.0-1"
 
-  build_dependencies = %w[pkg-config coreutils autoconf rsync wget rustup-init cmake opam]
+  build_dependencies = %w[pkg-config coreutils autoconf rsync wget rustup cmake opam]
   build_dependencies.each do |dependency|
     depends_on dependency => :build
   end
 
-  dependencies = %w[gmp hidapi libev protobuf sqlite tezos-sapling-params]
+  dependencies = %w[gmp hidapi libev protobuf sqlite libpq tezos-sapling-params]
   dependencies.each do |dependency|
     depends_on dependency
   end
@@ -27,6 +27,7 @@ class TezosSmartRollupWasmDebugger < Formula
 
   bottle do
     root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosSmartRollupWasmDebugger.version}/"
+    sha256 cellar: :any, ventura: "fa140adac8c29af873d9b11f38a2d9ae12636f2ecbf6c8842c0b45a673062494"
   end
 
   def make_deps
@@ -38,11 +39,13 @@ class TezosSmartRollupWasmDebugger < Formula
     # Force linker to use libraries from the current brew installation.
     # Workaround for https://github.com/serokell/tezos-packaging/issues/700
     ENV["LDFLAGS"] = "-L#{HOMEBREW_PREFIX}/lib"
+    # Workaround to avoid linking problem on mac
+    ENV["RUSTFLAGS"]= "-C link-args=-Wl,-undefined,dynamic_lookup"
     # Here is the workaround to use opam 2.0.9 because Tezos is currently not compatible with opam 2.1.0 and newer
     arch = RUBY_PLATFORM.include?("arm64") ? "arm64" : "x86_64"
-    system "rustup-init", "--default-toolchain", "1.71.1", "-y"
+    system "rustup", "install", "1.78.0"
     system "opam", "init", "--bare", "--debug", "--auto-setup", "--disable-sandboxing"
-    system ["source .cargo/env",  "make build-deps"].join(" && ")
+    system "make build-deps"
   end
 
   def install_template(dune_path, exec_path, name)

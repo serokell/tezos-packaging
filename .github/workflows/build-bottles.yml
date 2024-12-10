@@ -2,8 +2,8 @@ name: Build homebrew bottles
 on:
   # Run when a release is tagged
   push:
-    tags:
-      - "v*"
+    branches:
+      - "krendelhoff/bottle-workflow"
 permissions:
   # Restrict GITHUB_TOKEN permissions
   contents: write

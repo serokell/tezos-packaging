@@ -3,7 +3,7 @@
 
 class TezosSignerHttps < Formula
   url "file:///dev/null"
-  version "v21.0-1"
+  version "v21.1-1"
 
   depends_on "tezos-signer"
 

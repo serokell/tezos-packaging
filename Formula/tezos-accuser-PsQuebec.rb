@@ -26,6 +26,7 @@ class TezosAccuserPsquebec < Formula
 
   bottle do
     root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosAccuserPsquebec.version}/"
+    sha256 cellar: :any, ventura: "90e49deac256adf038bd9dddfa13972c7716fd54b39758e0071a2e3e4f873084"
   end
 
   def make_deps

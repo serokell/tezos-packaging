@@ -131,6 +131,8 @@ signer_units = [
 ]
 
 postinst_steps_common = """
+echo "\e[33mNOTE: This project is deprecated.\e[0m"
+echo "\e[33mIt is no longer maintained since the activation of protocol ...\e[0m"
 if [ -z $(getent passwd tezos) ]; then
     useradd -r -s /bin/false -m -d /var/lib/tezos tezos
     chmod 0755 /var/lib/tezos

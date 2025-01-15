@@ -1416,11 +1416,11 @@
     "tezos": {
       "flake": false,
       "locked": {
-        "lastModified": 1734442953,
-        "narHash": "sha256-yvGFDVspecWO2pWH26sJg54p52Zdv75TRwDHXTZU1MM=",
+        "lastModified": 1736950260,
+        "narHash": "sha256-Mq2ddGENXKqf2BOnLtD1I4GDBs75XX5QpxN6wkActwU=",
         "owner": "tezos",
         "repo": "tezos",
-        "rev": "5ab976bcc0449bcefd4a6079c0dec3c132eeb68e",
+        "rev": "4945ba697e358948f4a931e1679c6c71df29562e",
         "type": "gitlab"
       },
       "original": {

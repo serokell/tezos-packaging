@@ -23,7 +23,13 @@ else
              config update >/dev/null 2>&1
 fi
 
-vote_args=(--liquidity-baking-toggle-vote "$LIQUIDITY_BAKING_TOGGLE_VOTE")
+if [ -z "$TEZOS_DAL_NODE_ADDR" ]; then
+    dal_arg="--without-dal"
+else
+    dal_arg="--dal-node $TEZOS_DAL_NODE_ADDR"
+fi
+
+args=(--liquidity-baking-toggle-vote "$LIQUIDITY_BAKING_TOGGLE_VOTE" "$dal_arg")
 
 launch_baker() {
     if [[ -n ${1-} ]]; then
@@ -33,10 +39,10 @@ launch_baker() {
         password="$(systemd-ask-password --keyname="tezos-$BAKER_ADDRESS_ALIAS" --accept-cached \
             "Enter password for $BAKER_ADDRESS_ALIAS key:")"
         "$baker" --endpoint "$NODE_RPC_SCHEME://$NODE_RPC_ADDR" \
-            run with local node "$TEZOS_NODE_DIR" "${vote_args[@]}" "$@" <<< "$password" &
+            run with local node "$TEZOS_NODE_DIR" "${args[@]}" "$@" <<< "$password" &
     else
         "$baker" --endpoint "$NODE_RPC_SCHEME://$NODE_RPC_ADDR" \
-            run with local node "$TEZOS_NODE_DIR" "${vote_args[@]}" "$@" &
+            run with local node "$TEZOS_NODE_DIR" "${args[@]}" "$@" &
     fi
 }
 

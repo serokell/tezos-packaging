@@ -217,16 +217,14 @@ class TzInit(Provider):
     def get_snapshot_metadata(self, network, history_mode, region=None):
         region = "eu" if region is None else region
         history_mode = "full" if history_mode == "archive" else history_mode
-        # FIXME remove or update after pariscnet is down
-        hacked_network = "parisnet" if network == "pariscnet" else network
-        self.metadata_url = f"https://snapshots.{region}.tzinit.org/{hacked_network}/{history_mode}.json"
+        self.metadata_url = f"https://snapshots.{region}.tzinit.org/{network}/{history_mode}.json"
         with urllib.request.urlopen(self.metadata_url) as url:
             snapshot_metadata = json.load(url)["snapshot_header"]
 
         snapshot_metadata["block_height"] = snapshot_metadata["level"]
         snapshot_metadata[
             "url"
-        ] = f"https://snapshots.{region}.tzinit.org/{hacked_network}/{history_mode}"
+        ] = f"https://snapshots.{region}.tzinit.org/{network}/{history_mode}"
         snapshot_metadata["sha256"] = None
         snapshot_metadata["filesize"] = (
             "not provided"

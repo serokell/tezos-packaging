@@ -129,15 +129,15 @@ def test_node_mainnet_service():
 
 
 def test_baking_mainnet_service():
-    baking_service_test("mainnet", ["PsParisC"])
+    baking_service_test("mainnet", ["PsQuebec"])
 
 
-def test_node_pariscnet_service():
-    node_service_test("pariscnet")
+def test_node_quebecnet_service():
+    node_service_test("quebecnet")
 
 
-def test_baking_pariscnet_service():
-    baking_service_test("pariscnet", ["PsParisC"])
+def test_baking_quebecnet_service():
+    baking_service_test("quebecnet", ["PsQuebec"])
 
 
 def test_http_signer_service():
@@ -149,9 +149,9 @@ def test_tcp_signer_service():
 
 
 def test_standalone_accuser_service():
-    with unit(f"tezos-node-pariscnet.service") as _:
-        with unit(f"tezos-accuser-psparisc.service") as _:
-            assert check_running_process(f"octez-accuser-PsParisC")
+    with unit(f"tezos-node-quebecnet.service") as _:
+        with unit(f"tezos-accuser-psquebec.service") as _:
+            assert check_running_process(f"octez-accuser-PsQuebec")
 
 
 def test_unix_signer_service():
@@ -161,34 +161,34 @@ def test_unix_signer_service():
 
 def test_standalone_baker_service():
     replace_systemd_service_env(
-        "tezos-baker-psparisc",
+        "tezos-baker-psquebec",
         "TEZOS_NODE_DIR",
-        "/var/lib/tezos/node-pariscnet",
+        "/var/lib/tezos/node-quebecnet",
     )
     with account("baker") as _:
-        with unit(f"tezos-node-pariscnet.service") as _:
-            with unit(f"tezos-baker-psparisc.service") as _:
-                assert check_active_service(f"tezos-baker-psparisc.service")
-                assert check_running_process(f"octez-baker-PsParisC")
+        with unit(f"tezos-node-quebecnet.service") as _:
+            with unit(f"tezos-baker-psquebec.service") as _:
+                assert check_active_service(f"tezos-baker-psquebec.service")
+                assert check_running_process(f"octez-baker-PsQuebec")
 
 
 def test_nondefault_node_rpc_endpoint():
     rpc_addr = "127.0.0.1:8735"
-    replace_systemd_service_env("tezos-node-pariscnet", "NODE_RPC_ADDR", rpc_addr)
-    proc_call("cat /etc/default/tezos-node-pariscnet")
+    replace_systemd_service_env("tezos-node-quebecnet", "NODE_RPC_ADDR", rpc_addr)
+    proc_call("cat /etc/default/tezos-node-quebecnet")
     try:
-        node_service_test("pariscnet", f"http://{rpc_addr}")
+        node_service_test("quebecnet", f"http://{rpc_addr}")
     finally:
         replace_systemd_service_env(
-            "tezos-node-pariscnet", "NODE_RPC_ADDR", "127.0.0.1:8732"
+            "tezos-node-quebecnet", "NODE_RPC_ADDR", "127.0.0.1:8732"
         )
 
 
 def test_nondefault_baking_config():
     replace_systemd_service_env(
-        "tezos-baking-pariscnet", "BAKER_ADDRESS_ALIAS", "another_baker"
+        "tezos-baking-quebecnet", "BAKER_ADDRESS_ALIAS", "another_baker"
     )
     replace_systemd_service_env(
-        "tezos-baking-pariscnet", "LIQUIDITY_BAKING_TOGGLE_VOTE", "on"
+        "tezos-baking-quebecnet", "LIQUIDITY_BAKING_TOGGLE_VOTE", "on"
     )
-    baking_service_test("pariscnet", ["PsParisC"], "another_baker")
+    baking_service_test("quebecnet", ["PsQuebec"], "another_baker")

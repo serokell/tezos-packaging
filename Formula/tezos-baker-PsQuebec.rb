@@ -9,9 +9,9 @@ class TezosBakerPsquebec < Formula
   end
   homepage "https://gitlab.com/tezos/tezos"
 
-  url "https://gitlab.com/tezos/tezos.git", :tag => "octez-v21.3", :shallow => false
+  url "https://gitlab.com/tezos/tezos.git", :tag => "octez-v21.4", :shallow => false
 
-  version "v21.3-1"
+  version "v21.4-1"
 
   build_dependencies = %w[pkg-config coreutils autoconf rsync wget rustup cmake opam]
   build_dependencies.each do |dependency|
@@ -26,8 +26,6 @@ class TezosBakerPsquebec < Formula
 
   bottle do
     root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosBakerPsquebec.version}/"
-    sha256 cellar: :any, ventura: "2fb8e544f7d67d89177a1d2a0cd5295b2974741b4dc84fdcd958fea373d12624"
-    sha256 cellar: :any, arm64_ventura: "15c55db5d18e98b04a3c0b5d399c0c14fe8a02cbb537ff479143bfcecdcf02af"
   end
 
   def make_deps

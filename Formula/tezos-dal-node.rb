@@ -9,9 +9,9 @@ class TezosDalNode < Formula
   end
   homepage "https://gitlab.com/tezos/tezos"
 
-  url "https://gitlab.com/tezos/tezos.git", :tag => "octez-v21.3", :shallow => false
+  url "https://gitlab.com/tezos/tezos.git", :tag => "octez-v21.4", :shallow => false
 
-  version "v21.3-1"
+  version "v21.4-1"
 
   build_dependencies = %w[pkg-config coreutils autoconf rsync wget rustup cmake opam]
   build_dependencies.each do |dependency|
@@ -26,8 +26,6 @@ class TezosDalNode < Formula
 
   bottle do
     root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosDalNode.version}/"
-    sha256 cellar: :any, ventura: "c38fb50d58677ef4a6d89d4703ab6890ca5f619abc9fbf9cf86913568f078213"
-    sha256 cellar: :any, arm64_ventura: "50e30eb1937deaa0ff62fe4c8b272f7384267a00747bf3a71c8a0c8e46e8e0a6"
   end
 
   def make_deps

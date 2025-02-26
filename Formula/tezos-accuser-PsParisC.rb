@@ -26,6 +26,7 @@ class TezosAccuserPsparisc < Formula
 
   bottle do
     root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosAccuserPsparisc.version}/"
+    sha256 cellar: :any, ventura: "57d5060867fd1d70439f2918aadfe8d64a5ad6d7c75ab5dcdac6a7c7b6dd9072"
   end
 
   def make_deps

@@ -33,6 +33,7 @@ protocol_numbers = {
     "PtParisB": "019",
     "PsParisC": "020",
     "PsQuebec": "021",
+    "PsRiotum": "022",
 }
 
 signer_units = [

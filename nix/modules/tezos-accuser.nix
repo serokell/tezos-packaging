@@ -7,10 +7,8 @@ with lib;
 
 let
   octez-accuser-pkgs = {
-    "PsParisC" =
-      "${pkgs.octezPackages.octez-accuser-PsParisC}/bin/octez-accuser-PsParisC";
-    "PsquebeC" =
-      "${pkgs.octezPackages.octez-accuser-PsquebeC}/bin/octez-baker-PsquebeC";
+    "PsQuebec" =
+      "${pkgs.octezPackages.octez-accuser-PsQuebec}/bin/octez-baker-PsQuebec";
   };
   cfg = config.services.octez-accuser;
   common = import ./common.nix { inherit lib; inherit pkgs; };

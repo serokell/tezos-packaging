@@ -186,22 +186,6 @@ packages = [
         )
     },
     {
-        "tezos-dac-node": TezosBinaryPackage(
-            "tezos-dac-node",
-            "A Data Availability Committee Tezos node",
-            meta=packages_meta,
-            dune_filepath="src/bin_dac_node/main_dac.exe",
-        )
-    },
-    {
-        "tezos-dal-node": TezosBinaryPackage(
-            "tezos-dal-node",
-            "A Data Availability Layer Tezos node",
-            meta=packages_meta,
-            dune_filepath="src/bin_dal_node/main.exe",
-        )
-    },
-    {
         "tezos-smart-rollup-wasm-debugger": TezosBinaryPackage(
             "tezos-smart-rollup-wasm-debugger",
             "Smart contract rollup wasm debugger",

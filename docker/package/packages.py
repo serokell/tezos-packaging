@@ -20,11 +20,13 @@ networks = {
     "mainnet": "mainnet",
     "ghostnet": "ghostnet",
     "quebecnet": "https://teztnets.com/quebecnet",
+    "rionet": "https://teztnets.com/rionet",
 }
 networks_protos = {
     "mainnet": ["PsQuebec"],
     "ghostnet": ["PsQuebec"],
     "quebecnet": ["PsQuebec"],
+    "rionet": ["PsRiotum"],
 }
 
 protocol_numbers = {

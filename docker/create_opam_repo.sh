@@ -24,6 +24,8 @@ cd ..
 # copying virtual opam file which depends on everything octez need
 mkdir -p opam-repository/packages/octez-deps/octez-deps.dev
 cp tezos/opam/virtual/octez-deps.opam.locked opam-repository/packages/octez-deps/octez-deps.dev/opam
+mkdir -p opam-repository/packages/stdcompat/stdcompat.19
+cp tezos/opam/virtual/stdcompat.opam.locked opam-repository/packages/stdcompat/stdcompat.19/opam
 
 # This package adds some constraints to the solution found by the opam solver.
 dummy_pkg=octez-dummy
@@ -57,7 +59,7 @@ mv opam-repository arm64
 filter() {
  pushd "$1"
  OPAMSOLVERTIMEOUT=600 opam admin filter --yes --resolve \
-   "octez-deps,ocaml,ocaml-base-compiler,odoc<2.3.0,ledgerwallet-tezos,caqti-driver-postgresql,$dummy_pkg" \
+   "octez-deps,ocaml,ocaml-base-compiler,odoc,ledgerwallet-tezos,caqti-driver-postgresql,$dummy_pkg" \
    --environment "os=linux,arch=$1,os-family=debian"
  rm -rf packages/"$dummy_pkg" packages/octez-deps
  popd

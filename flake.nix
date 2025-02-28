@@ -57,6 +57,8 @@
       patchPhase = ''
         mkdir -p packages/octez-deps/octez-deps.dev
         cp ${tezos}/opam/virtual/octez-deps.opam.locked packages/octez-deps/octez-deps.dev/opam
+        mkdir -p packages/stdcompat/stdcompat.19
+        cp ${tezos}/opam/virtual/stdcompat.opam.locked packages/stdcompat/stdcompat.19/opam
 
         # This package adds some constraints to the solution found by the opam solver.
         dummy_pkg=octez-dummy
@@ -82,7 +84,7 @@
         echo ']' >> "$dummy_opam"
 
         OPAMSOLVERTIMEOUT=600 ${pkgs.opam}/bin/opam admin filter --yes --resolve \
-          "octez-deps,ocaml,ocaml-base-compiler,odoc<2.3.0,ledgerwallet-tezos,caqti-driver-postgresql,$dummy_pkg" \
+          "octez-deps,ocaml,ocaml-base-compiler,odoc,ledgerwallet-tezos,caqti-driver-postgresql,$dummy_pkg,ounit2" \
           --environment "os=linux,arch=x86_64,os-family=debian"
 
         rm -rf packages/"$dummy_pkg" packages/octez-deps

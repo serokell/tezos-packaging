@@ -9,7 +9,7 @@ RUN apk --no-cache --virtual add rsync git m4 build-base patch unzip \
   autoconf automake libtool linux-headers \
   libffi-dev zlib-dev zlib-static coreutils perl-utils cmake \
   protobuf protobuf-dev sqlite-dev sqlite-libs cargo upx libc-dev \
-  sqlite-static
+  sqlite-static openssl-libs-static
 COPY ./build/build-rust.sh /build-rust.sh
 RUN /build-rust.sh
 ARG OCTEZ_VERSION

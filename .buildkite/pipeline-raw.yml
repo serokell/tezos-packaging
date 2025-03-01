@@ -38,17 +38,6 @@ steps:
    - cd tests/bottle-hashes/
    - ./test-hash-insert.sh
 
- - label: build via nix
-   commands:
-   # NOTE: if this changes, remember to update the instructions in the nix/README.md too
-   - nix build . -o binaries
-   branches: "!master"
- - label: check flake
-   commands:
-   - nix flake check -L
-   branches: "!master"
-   # nix builds are usually cached, so we don't care about only_changes setting for it
-
  - label: build-via-docker
    # this step is used as a dependency, so we're defining 'key' explicitely
    key: build-via-docker

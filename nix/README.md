@@ -5,6 +5,8 @@
 
 # Building and packaging tezos using nix
 
+**⚠️ Deprecation Warning:** *Nix build is deprecated.*
+
 ## Dynamically built binaries
 
 In order to build all binaries run at the root of this project:

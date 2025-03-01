@@ -23,7 +23,7 @@ FROM ubuntu:${dist}
 
 ENV DEBIAN_FRONTEND="noninteractive"
 
-RUN apt-get update -y
+RUN apt-get update   -y
 RUN apt-get install -y libev-dev libgmp-dev libhidapi-dev libffi-dev \
                    zlib1g-dev libpq-dev m4 perl pkg-config \
                    debhelper dh-make dh-python devscripts autotools-dev \

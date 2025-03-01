@@ -10,7 +10,7 @@ RUN dnf install -y libev-devel gmp-devel hidapi-devel libffi-devel \
                    rpmdevtools python3-devel python3-setuptools \
                    wget opam rsync which cargo autoconf mock systemd \
                    systemd-rpm-macros cmake python3-wheel python3-tox-current-env \
-                   protobuf-compiler protobuf-devel sqlite-devel
+                   protobuf-compiler protobuf-devel sqlite-devel openssl-devel
 
 ENV USER dockerbuilder
 RUN useradd dockerbuilder

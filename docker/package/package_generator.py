@@ -63,6 +63,7 @@ def get_ubuntu_run_deps(binaries_dir):
         return []
 
     return [
+        "libssl-dev",
         "libev-dev",
         "libgmp-dev",
         "libhidapi-dev",
@@ -83,6 +84,7 @@ def get_fedora_run_deps(binaries_dir):
         return []
 
     return [
+        "openssl-devel",
         "libev-devel",
         "gmp-devel",
         "hidapi-devel",

@@ -29,16 +29,16 @@ in {
       zcash-overlay
       (final: prev:
         let
-          vendored-deps =
+          vendored-deps = dir:
           let
             src = sources.tezos;
             commonArgs = {
               inherit src;
               buildInputs = [ pkgs.ocaml ];
-              cargoToml = "${src}/src/rust_deps/Cargo.toml";
-              cargoLock = "${src}/src/rust_deps/Cargo.lock";
+              cargoToml = "${src}/src/${dir}/Cargo.toml";
+              cargoLock = "${src}/src/${dir}/Cargo.lock";
               postUnpack = ''
-                cd $sourceRoot/src/rust_deps
+                cd $sourceRoot/src/${dir}
                 sourceRoot="."
               '';
               strictDeps = true;
@@ -48,19 +48,22 @@ in {
             };
           in craneLib.vendorCargoDeps commonArgs;
 
-          injectRustDeps = drv: {
+          injectRustDeps = dir: drv:
+            let deps = vendored-deps dir;
+            in {
             buildInputs = drv.buildInputs ++ [
-              vendored-deps
+              deps
               rust-toolchain
             ];
             configurePhase = ''
               export PATH="${rust-toolchain}/bin:$PATH"
-              cat ${vendored-deps}/config.toml >> ./src/rust_deps/.cargo/config.toml
+              cat ${deps}/config.toml >> ./src/${dir}/.cargo/config.toml
             '' + drv.configurePhase;
           };
         in {
-        octez-rust-deps = prev.octez-rust-deps.overrideAttrs injectRustDeps;
-        octez-l2-libs = prev.octez-l2-libs.overrideAttrs injectRustDeps;
+        octez-rust-deps = prev.octez-rust-deps.overrideAttrs (injectRustDeps "rust_deps");
+        octez-rustzcash-deps = prev.octez-rustzcash-deps.overrideAttrs (injectRustDeps "rustzcash_deps");
+        octez-l2-libs = (prev.octez-l2-libs.overrideAttrs (injectRustDeps "rust_deps")).overrideAttrs (injectRustDeps "rustzcash_deps");
       })
     ]));
 }

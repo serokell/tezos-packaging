@@ -16,19 +16,8 @@ steps:
  # To avoid race-conditions for the gpg key between jobs which sometimes leads to weird errors
  - wait
 
- - label: test deb binary packages via docker
+ - label: build via nix
    commands:
-   - eval "$SET_VERSION"
-   # Building all binary packages will take significant amount of time, so we build only one
-   # in order to ensure package generation sanity
-   - nix develop .#docker-tezos-packages -c ./docker/build/ubuntu/build.py --type binary -p tezos-baker-PsQuebec
-   - rm -rf out
-   # It takes much time to build binary package, so we do it only on master
-   timeout_in_minutes: 240
-   only_changes: &ubuntu_native_packaging_changes_regexes
-   - docker/package/.*
-   - docker/build/ubuntu/build.py
-   - docker/build/util/build.py
-   - docker/baking/.*
-   - meta.json
-   - protocols.json
+   # NOTE: if this changes, remember to update the instructions in the nix/README.md too
+   - nix build . -o binaries -L
+   branches: "!master"

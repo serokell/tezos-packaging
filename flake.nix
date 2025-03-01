@@ -41,7 +41,7 @@
       path = inputs.tezos;
       name = "tezos";
       # we exclude optional development packages
-      filter = path: _: !(builtins.elem (baseNameOf path) [ "lib_parameters" "octez-dev-deps.opam" "tezos-time-measurement.opam" ]);
+      filter = path: _: !(builtins.elem (baseNameOf path) [ "octez-dev-deps.opam" "tezos-time-measurement.opam" ]);
     };
 
     toolchain-version = pkgs-unstable.lib.strings.trim (builtins.readFile "${tezos}/rust-toolchain");

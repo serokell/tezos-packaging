@@ -34,4 +34,7 @@ self: super: rec {
   pyml = super.pyml.overrideAttrs (drv: {
     sourceRoot = ".";
   });
+  ctypes = super.ctypes.overrideAttrs (drv: {
+    nativeBuildInputs = [];
+  });
 }

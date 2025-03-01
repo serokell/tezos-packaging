@@ -41,7 +41,7 @@
       path = inputs.tezos;
       name = "tezos";
       # we exclude optional development packages
-      filter = path: _: !(builtins.elem (baseNameOf path) [ "octez-dev-deps.opam" "tezos-time-measurement.opam" ]);
+      filter = path: _: !(builtins.elem (baseNameOf path) [ "lib_parameters" "octez-dev-deps.opam" "tezos-time-measurement.opam" ]);
     };
 
     toolchain-version = pkgs-unstable.lib.strings.trim (builtins.readFile "${tezos}/rust-toolchain");
@@ -84,7 +84,7 @@
         echo ']' >> "$dummy_opam"
 
         OPAMSOLVERTIMEOUT=600 ${pkgs.opam}/bin/opam admin filter --yes --resolve \
-          "octez-deps,ocaml,ocaml-base-compiler,odoc,ledgerwallet-tezos,caqti-driver-postgresql,$dummy_pkg,ounit2" \
+          "octez-deps,ocaml,ocaml-base-compiler,odoc,ledgerwallet-tezos,caqti-driver-postgresql,$dummy_pkg,ounit2,ctypes-foreign" \
           --environment "os=linux,arch=x86_64,os-family=debian"
 
         rm -rf packages/"$dummy_pkg" packages/octez-deps
@@ -155,6 +155,8 @@
 
       packages = octez-binaries // tezos-binaries
         // { default = pkgs.linkFarmFromDrvs "binaries" (builtins.attrValues octez-binaries); };
+
+      ocaml-packages = pkgs.octezPackages;
 
       devShells = {
         buildkite = callPackage ./.buildkite/shell.nix {};

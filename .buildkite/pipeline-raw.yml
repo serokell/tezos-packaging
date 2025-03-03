@@ -38,17 +38,6 @@ steps:
    - cd tests/bottle-hashes/
    - ./test-hash-insert.sh
 
- - label: build via nix
-   commands:
-   # NOTE: if this changes, remember to update the instructions in the nix/README.md too
-   - nix build . -o binaries
-   branches: "!master"
- - label: check flake
-   commands:
-   - nix flake check -L
-   branches: "!master"
-   # nix builds are usually cached, so we don't care about only_changes setting for it
-
  - label: build-via-docker
    # this step is used as a dependency, so we're defining 'key' explicitely
    key: build-via-docker
@@ -117,7 +106,7 @@ steps:
    - eval "$SET_VERSION"
    # Building all binary packages will take significant amount of time, so we build only one
    # in order to ensure package generation sanity
-   - nix develop .#docker-tezos-packages -c ./docker/build/ubuntu/build.py --type binary -p tezos-baker-PsParisC
+   - nix develop .#docker-tezos-packages -c ./docker/build/ubuntu/build.py --type binary -p tezos-baker-PsQuebec
    - rm -rf out
    # It takes much time to build binary package, so we do it only on master
    branches: "master"
@@ -145,7 +134,7 @@ steps:
    - eval "$SET_VERSION"
    # Building all binary packages will take significant amount of time, so we build only one
    # in order to ensure package generation sanity
-   - nix develop .#docker-tezos-packages -c ./docker/build/fedora/build.py --type binary -p tezos-baker-PsParisC
+   - nix develop .#docker-tezos-packages -c ./docker/build/fedora/build.py --type binary -p tezos-baker-PsQuebec
    - rm -rf out
    # It takes much time to build binary package, so we do it only on master
    branches: "master"

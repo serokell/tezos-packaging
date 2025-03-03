@@ -20,11 +20,13 @@ networks = {
     "mainnet": "mainnet",
     "ghostnet": "ghostnet",
     "quebecnet": "https://teztnets.com/quebecnet",
+    "rionet": "https://teztnets.com/rionet",
 }
 networks_protos = {
     "mainnet": ["PsQuebec"],
     "ghostnet": ["PsQuebec"],
     "quebecnet": ["PsQuebec"],
+    "rionet": ["PsRiotum"],
 }
 
 protocol_numbers = {
@@ -33,6 +35,7 @@ protocol_numbers = {
     "PtParisB": "019",
     "PsParisC": "020",
     "PsQuebec": "021",
+    "PsRiotum": "022",
 }
 
 signer_units = [
@@ -175,22 +178,6 @@ packages = [
             "A client to decode and encode JSON",
             meta=packages_meta,
             dune_filepath="src/bin_codec/codec.exe",
-        )
-    },
-    {
-        "tezos-dac-client": TezosBinaryPackage(
-            "tezos-dac-client",
-            "A Data Availability Committee Tezos client",
-            meta=packages_meta,
-            dune_filepath="src/bin_dac_client/main_dac_client.exe",
-        )
-    },
-    {
-        "tezos-dac-node": TezosBinaryPackage(
-            "tezos-dac-node",
-            "A Data Availability Committee Tezos node",
-            meta=packages_meta,
-            dune_filepath="src/bin_dac_node/main_dac.exe",
         )
     },
     {

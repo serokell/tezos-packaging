@@ -15,11 +15,6 @@ in [
     supports = protocolsFormatted;
   }
   {
-    name = "octez-dac-client";
-    description = "A Data Availability Committee Tezos client";
-    supports = protocolsFormatted;
-  }
-  {
     name = "octez-admin-client";
     description = ''
       CLI administrator tool for peers management
@@ -32,14 +27,6 @@ in [
     description = ''
       Entry point for initializing, configuring and running a Octez node
       For more information please check - https://tezos.gitlab.io/introduction/howtouse.html#node
-    '';
-    supports = protocolsFormatted;
-  }
-  {
-    name = "octez-dac-node";
-    description =''
-      A Data Availability Committee Tezos node.
-      For more info on DAC please check https://research-development.nomadic-labs.com/introducing-data-availability-committees.html
     '';
     supports = protocolsFormatted;
   }

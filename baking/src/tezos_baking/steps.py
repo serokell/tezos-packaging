@@ -107,6 +107,7 @@ networks = {
     "mainnet": "Main Tezos network",
     "ghostnet": "Long running test network, currently using the Paris Tezos protocol",
     "quebecnet": "Test network using the PsQuebec Tezos protocol",
+    "rionet": "Test network using the PsRiotum Tezos protocol",
 }
 
 # Steps

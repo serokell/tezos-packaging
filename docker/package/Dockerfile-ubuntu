@@ -23,13 +23,13 @@ FROM ubuntu:${dist}
 
 ENV DEBIAN_FRONTEND="noninteractive"
 
-RUN apt-get update -y
+RUN apt-get update  -y
 RUN apt-get install -y libev-dev libgmp-dev libhidapi-dev libffi-dev \
                    zlib1g-dev libpq-dev m4 perl pkg-config \
                    debhelper dh-make dh-python devscripts autotools-dev \
                    python3-all python3-setuptools wget rsync cmake \
                    software-properties-common libprotobuf-dev libsqlite3-dev \
-                   protobuf-compiler
+                   protobuf-compiler libssl-dev
 
 ARG dist
 RUN if [ "$dist" = "focal" ]; then apt-get install -y dh-systemd; fi

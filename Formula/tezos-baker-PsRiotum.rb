@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2024 Oxhead Alpha
 # SPDX-License-Identifier: LicenseRef-MIT-OA
 
-class TezosAccuserPsparisc < Formula
+class TezosBakerPsriotum < Formula
   @all_bins = []
 
   class << self
@@ -9,24 +9,23 @@ class TezosAccuserPsparisc < Formula
   end
   homepage "https://gitlab.com/tezos/tezos"
 
-  url "https://gitlab.com/tezos/tezos.git", :tag => "octez-v21.4", :shallow => false
+  url "https://gitlab.com/tezos/tezos.git", :tag => "octez-v22.0-rc1", :shallow => false
 
-  version "v21.4-1"
+  version "v22.0-rc1-1"
 
   build_dependencies = %w[pkg-config coreutils autoconf rsync wget rustup cmake opam]
   build_dependencies.each do |dependency|
     depends_on dependency => :build
   end
 
-  dependencies = %w[gmp hidapi libev protobuf sqlite libpq]
+  dependencies = %w[gmp hidapi libev protobuf sqlite libpq tezos-sapling-params]
   dependencies.each do |dependency|
     depends_on dependency
   end
-  desc "Daemon for accusing"
+  desc "Daemon for baking"
 
   bottle do
-    root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosAccuserPsparisc.version}/"
-    sha256 cellar: :any, ventura: "57d5060867fd1d70439f2918aadfe8d64a5ad6d7c75ab5dcdac6a7c7b6dd9072"
+    root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosBakerPsriotum.version}/"
   end
 
   def make_deps
@@ -40,7 +39,7 @@ class TezosAccuserPsparisc < Formula
     ENV["LDFLAGS"] = "-L#{HOMEBREW_PREFIX}/lib"
     # Workaround to avoid linking problem on mac
     ENV["RUSTFLAGS"]= "-C link-args=-Wl,-undefined,dynamic_lookup"
-    # Here is the workaround to use opam 2.0 because Tezos is currently not compatible with opam 2.1.0 and newer
+    # Here is the workaround to use opam 2.0.9 because Tezos is currently not compatible with opam 2.1.0 and newer
     arch = RUBY_PLATFORM.include?("arm64") ? "arm64" : "x86_64"
     system "rustup", "install", "1.78.0"
     system "opam", "init", "--bare", "--debug", "--auto-setup", "--disable-sandboxing"
@@ -62,36 +61,46 @@ class TezosAccuserPsparisc < Formula
 
       set -euo pipefail
 
-      accuser="#{bin}/octez-accuser-PsParisC"
+      baker="#{bin}/octez-baker-PsRiotum"
 
-      accuser_config="$TEZOS_CLIENT_DIR/config"
+      baker_config="$TEZOS_CLIENT_DIR/config"
       mkdir -p "$TEZOS_CLIENT_DIR"
 
-      if [ ! -f "$accuser_config" ]; then
-          "$accuser" --endpoint "$NODE_RPC_SCHEME://$NODE_RPC_ADDR" \
-                    config init --output "$accuser_config" >/dev/null 2>&1
+      if [ ! -f "$baker_config" ]; then
+          "$baker" --endpoint "$NODE_RPC_SCHEME://$NODE_RPC_ADDR" \
+                  config init --output "$baker_config" >/dev/null 2>&1
       else
-          "$accuser" --endpoint "$NODE_RPC_SCHEME://$NODE_RPC_ADDR" \
-                    config update >/dev/null 2>&1
+          "$baker" --endpoint "$NODE_RPC_SCHEME://$NODE_RPC_ADDR" \
+                  config update >/dev/null 2>&1
       fi
 
-      exec "$accuser" --endpoint "$NODE_RPC_SCHEME://$NODE_RPC_ADDR" run
+      launch_baker() {
+          exec "$baker" \
+              --endpoint "$NODE_RPC_SCHEME://$NODE_RPC_ADDR" \
+              run with local node "$TEZOS_NODE_DIR" "$@"
+      }
+
+      if [[ -z "$BAKER_ACCOUNT" ]]; then
+          launch_baker
+      else
+          launch_baker "$BAKER_ACCOUNT"
+      fi
     EOS
-    File.write("tezos-accuser-PsParisC-start", startup_contents)
-    bin.install "tezos-accuser-PsParisC-start"
+    File.write("tezos-baker-PsRiotum-start", startup_contents)
+    bin.install "tezos-baker-PsRiotum-start"
     make_deps
-    install_template "src/proto_020_PsParisC/bin_accuser/main_accuser_020_PsParisC.exe",
-                     "_build/default/src/proto_020_PsParisC/bin_accuser/main_accuser_020_PsParisC.exe",
-                     "octez-accuser-PsParisC"
+    install_template "src/proto_022_PsRiotum/bin_baker/main_baker_022_PsRiotum.exe",
+                     "_build/default/src/proto_022_PsRiotum/bin_baker/main_baker_022_PsRiotum.exe",
+                     "octez-baker-PsRiotum"
   end
 
   service do
-    run opt_bin/"tezos-accuser-PsParisC-start"
+    run opt_bin/"tezos-baker-PsRiotum-start"
     require_root true
-    environment_variables TEZOS_CLIENT_DIR: var/"lib/tezos/client", NODE_RPC_SCHEME: "http", NODE_RPC_ADDR: "localhost:8732"
+    environment_variables TEZOS_CLIENT_DIR: var/"lib/tezos/client", TEZOS_NODE_DIR: "", NODE_RPC_SCHEME: "http", NODE_RPC_ADDR: "localhost:8732", BAKER_ACCOUNT: ""
     keep_alive true
-    log_path var/"log/tezos-accuser-PsParisC.log"
-    error_log_path var/"log/tezos-accuser-PsParisC.log"
+    log_path var/"log/tezos-baker-PsRiotum.log"
+    error_log_path var/"log/tezos-baker-PsRiotum.log"
   end
 
   def post_install

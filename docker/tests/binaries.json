@@ -19,16 +19,17 @@
     "candidates": [
         "tezos-smart-rollup-wasm-debugger",
         "tezos-smart-rollup-node",
-        "tezos-dac-client",
-        "tezos-dac-node",
+        "tezos-dal-node",
         "tezos-signer",
-        "tezos-proxy-server",
         "tezos-codec",
         "tezos-client",
         "tezos-admin-client",
+        "tezos-experimental-agnostic-baker",
         "tezos-node",
-        "tezos-accuser-PtParisB",
-        "tezos-baker-PtParisB",
+        "tezos-accuser-PsRiotum",
+        "tezos-baker-PsRiotum",
+        "tezos-accuser-PsQuebec",
+        "tezos-baker-PsQuebec",
         "tezos-sapling-params",
         "tezos-baking"
     ]

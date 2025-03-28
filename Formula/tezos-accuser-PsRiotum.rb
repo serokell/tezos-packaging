@@ -26,6 +26,7 @@ class TezosAccuserPsriotum < Formula
 
   bottle do
     root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosAccuserPsriotum.version}/"
+    sha256 cellar: :any, ventura: "9d3b836754c912148155d23262d083adc79ebf0c497c699a9f4885e2cb6a1014"
   end
 
   def make_deps

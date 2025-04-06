@@ -1,6 +1,7 @@
 # SPDX-FileCopyrightText: 2021 Oxhead Alpha
 # SPDX-License-Identifier: LicenseRef-MIT-OA
 
+{inputs}:
 {config, lib, pkgs, ...}:
 
 with lib;
@@ -12,7 +13,7 @@ let
   };
   octez-client = "${pkgs.octezPackages.octez-client}/bin/octez-client";
   cfg = config.services.octez-baker;
-  common = import ./common.nix { inherit lib; inherit pkgs; };
+  common = import ./common.nix { inherit lib pkgs inputs; };
   instanceOptions = types.submodule ( {...} : {
     options = common.daemonOptions // {
 
@@ -74,5 +75,8 @@ in {
       service-pkgs = octez-baker-pkgs;
       service-start-script = baker-start-script;
       service-prestart-script = baker-prestart-script;
+      extraServiceConfig = {
+        PrivateDevices = "no";
+      };
     };
 }

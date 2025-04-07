@@ -9,9 +9,9 @@ class TezosClient < Formula
   end
   homepage "https://gitlab.com/tezos/tezos"
 
-  url "https://gitlab.com/tezos/tezos.git", :tag => "octez-v22.0-rc3", :shallow => false
+  url "https://gitlab.com/tezos/tezos.git", :tag => "octez-v22.0", :shallow => false
 
-  version "v22.0-rc3-1"
+  version "v22.0-1"
 
   build_dependencies = %w[pkg-config coreutils autoconf rsync wget rustup cmake opam opam]
   build_dependencies.each do |dependency|

@@ -28,6 +28,7 @@ class TezosSmartRollupNode < Formula
 
   bottle do
     root_url "https://github.com/serokell/tezos-packaging/releases/download/#{TezosSmartRollupNode.version}/"
+    sha256 cellar: :any, ventura: "8f5182c7fc306379f142a9c6273788d76c6fba17921ac3b80c4eb21ca99c2c17"
     sha256 cellar: :any, ventura: "cf5d887225485a9e33850153c02625ec49c22f89ca9c6492b83821294248bedd"
   end
 

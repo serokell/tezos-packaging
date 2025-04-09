@@ -123,41 +123,41 @@ steps:
    - buildkite-agent artifact download "epel/*" srcs --step sign-source-packages-built-from-static-binaries
    - nix develop .#buildkite -c ./docker/build/fedora/upload.py -d srcs/epel --upload epel
 
- - label: Build Monterey x86_64 bottles
-   key: build-bottles-monterey-x86_64
-   if: build.tag =~ /^v.*/
-   agents:
-     queue: "x86_64-rosetta-darwin"
-   commands:
-   - nix develop .#autorelease-macos -c ./scripts/build-all-bottles.sh "monterey"
-   artifact_paths:
-     - '*.bottle.*'
-   retry:
-     automatic:
-       limit: 1
+ # - label: Build Monterey x86_64 bottles
+ #   key: build-bottles-monterey-x86_64
+ #   if: build.tag =~ /^v.*/
+ #   agents:
+ #     queue: "x86_64-rosetta-darwin"
+ #   commands:
+ #   - nix develop .#autorelease-macos -c ./scripts/build-all-bottles.sh "monterey"
+ #   artifact_paths:
+ #     - '*.bottle.*'
+ #   retry:
+ #     automatic:
+ #       limit: 1
 
- - label: Build Monterey arm64 bottles
-   key: build-bottles-monterey-arm64
-   if: build.tag =~ /^v.*/
-   agents:
-     queue: "arm64-darwin"
-   commands:
-   - nix develop .#autorelease-macos -c ./scripts/build-all-bottles.sh "arm64_monterey"
-   artifact_paths:
-     - '*.bottle.*'
-   retry:
-     automatic:
-       limit: 1
+ # - label: Build Monterey arm64 bottles
+ #   key: build-bottles-monterey-arm64
+ #   if: build.tag =~ /^v.*/
+ #   agents:
+ #     queue: "arm64-darwin"
+ #   commands:
+ #   - nix develop .#autorelease-macos -c ./scripts/build-all-bottles.sh "arm64_monterey"
+ #   artifact_paths:
+ #     - '*.bottle.*'
+ #   retry:
+ #     automatic:
+ #       limit: 1
 
- # We use the tag that triggered the pipeline here.
- # However, this requires that the tag and the release name are the same, which
- # in practice it's always the case in this repo.
- - label: Add Monterey bottle hashes to formulae
-   depends_on:
-   - "build-bottles-monterey-arm64"
-   - "build-bottles-monterey-x86_64"
-   if: build.tag =~ /^v.*/
-   commands:
-   - mkdir -p "Monterey"
-   - nix develop .#buildkite -c gh release download "$BUILDKITE_TAG" -D "Monterey/" -p "*monterey.bottle.tar.gz"
-   - nix develop .#autorelease -c ./scripts/sync-bottle-hashes.sh "$BUILDKITE_TAG" "Monterey"
+ # # We use the tag that triggered the pipeline here.
+ # # However, this requires that the tag and the release name are the same, which
+ # # in practice it's always the case in this repo.
+ # - label: Add Monterey bottle hashes to formulae
+ #   depends_on:
+ #   - "build-bottles-monterey-arm64"
+ #   - "build-bottles-monterey-x86_64"
+ #   if: build.tag =~ /^v.*/
+ #   commands:
+ #   - mkdir -p "Monterey"
+ #   - nix develop .#buildkite -c gh release download "$BUILDKITE_TAG" -D "Monterey/" -p "*monterey.bottle.tar.gz"
+ #   - nix develop .#autorelease -c ./scripts/sync-bottle-hashes.sh "$BUILDKITE_TAG" "Monterey"

@@ -14,7 +14,7 @@ description = "Package that provides systemd services that orchestrate other ser
 license = { text = "LicenseRef-MIT-OA" }
 requires-python = ">=3.8"
 readme = "README.md"
-version = "v22.0"
+version = "v22.0a"
 
 [tool.setuptools.packages.find]
 where= ["src"]

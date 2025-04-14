@@ -23,8 +23,8 @@ networks = {
     "rionet": "https://teztnets.com/rionet",
 }
 networks_protos = {
-    "mainnet": ["PsQuebec"],
-    "ghostnet": ["PsQuebec"],
+    "mainnet": ["PsQuebec", "PsRiotum"],
+    "ghostnet": ["PsQuebec", "PsRiotum"],
     "quebecnet": ["PsQuebec"],
     "rionet": ["PsRiotum"],
 }

@@ -1,5 +1,5 @@
 #! /usr/bin/env nix-shell
-#! nix-shell .. -A devShells.x86_64-linux.buildkite -i bash
+#! nix-shell ../default.nix -A devShells.x86_64-linux.buildkite -i bash
 
 # SPDX-FileCopyrightText: 2021 TQ Tezos <https://tqtezos.com/>
 #

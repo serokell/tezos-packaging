@@ -8,6 +8,11 @@
 
 [![Build status](https://badge.buildkite.com/e899e9e54babcd14139e3bd4381bad39b5d680e08e7b7766d4.svg?branch=master)](https://buildkite.com/serokell/tezos-packaging)
 
+> ⚠️ **DEPRECATION NOTICE**
+>
+> tezos-packaging is deprecated starting from the Rio protocol activation.
+> We recommend switching to Nomadic Labs packaging instead. Please use [the official migration guide](https://octez.tezos.com/docs/introduction/serokell.html).
+
 This repo provides various forms of distribution for [Tezos](http://tezos.gitlab.io/) executables based on the [Octez](https://gitlab.com/tezos/tezos) implementation.
 
 See the [official documentation](http://tezos.gitlab.io/introduction/howtouse.html)

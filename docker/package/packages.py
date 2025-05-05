@@ -136,6 +136,9 @@ if [ -z $(getent passwd tezos) ]; then
     useradd -r -s /bin/false -m -d /var/lib/tezos tezos
     chmod 0755 /var/lib/tezos
 fi
+echo "\033[1;33mWarning: This package is deprecated.\033[0m"
+echo "\033[1;33mWe recommend switching to Nomadic Labs packaging instead.\033[0m"
+echo "\033[1;33mPlease use official migration guide https://octez.tezos.com/docs/introduction/serokell.html\033[0m"
 """
 
 ledger_udev_postinst = open(

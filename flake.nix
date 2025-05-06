@@ -100,10 +100,10 @@
   in pkgs-darwin.lib.recursiveUpdate
   {
       nixosModules = {
-        tezos-node = import ./nix/modules/tezos-node.nix;
-        tezos-accuser = import ./nix/modules/tezos-accuser.nix;
-        tezos-baker = import ./nix/modules/tezos-baker.nix;
-        tezos-signer = import ./nix/modules/tezos-signer.nix;
+        tezos-node = import ./nix/modules/tezos-node.nix { inherit inputs; };
+        tezos-accuser = import ./nix/modules/tezos-accuser.nix { inherit inputs; };
+        tezos-baker = import ./nix/modules/tezos-baker.nix { inherit inputs; };
+        tezos-signer = import ./nix/modules/tezos-signer.nix { inherit inputs; };
       };
 
       devShells."aarch64-darwin".autorelease-macos =

@@ -38,6 +38,32 @@ steps:
    - cd tests/bottle-hashes/
    - ./test-hash-insert.sh
 
+ - label: Build ubuntu source packages
+   key: build-ubuntu-source-packages
+   commands:
+     nix develop .#docker-tezos-packages -c ./docker/build/ubuntu/build.py --type source --launchpad-sources -p tezos-client tezos-node tezos-baker-PsQuebec tezos-baker-PsRiotum
+   artifact_paths:
+     - ./out/*
+
+ - label: Sign ubuntu source packages
+   depends_on:
+   - "build-ubuntu-source-packages"
+   key: sign-ubuntu-source-packages
+   commands:
+   - eval "$SET_VERSION"
+   - buildkite-agent artifact download "out/*" . --step build-ubuntu-source-packages
+   - nix develop .#docker-tezos-packages -c ./docker/build/ubuntu/sign.py -d out -i 'Serokell <tezos-packaging@serokell.io>'
+   artifact_paths:
+     - ./out/*
+
+ - label: Publish ubuntu native packages
+   depends_on:
+   - "sign-ubuntu-source-packages"
+   commands:
+   - eval "$SET_VERSION"
+   - buildkite-agent artifact download "out/*" . --step sign-ubuntu-source-packages
+   - nix develop .#buildkite -c ./docker/build/ubuntu/upload.py -d out
+
  # - label: build-via-docker
  #   # this step is used as a dependency, so we're defining 'key' explicitely
  #   key: build-via-docker

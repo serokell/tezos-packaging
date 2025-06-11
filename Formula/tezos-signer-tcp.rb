@@ -3,7 +3,7 @@
 
 class TezosSignerTcp < Formula
   url "file:///dev/null"
-  version "v22.0-1"
+  version "v22.1-1"
 
   depends_on "tezos-signer"
 

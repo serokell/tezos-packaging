@@ -1243,11 +1243,11 @@
     "opam-repository_2": {
       "flake": false,
       "locked": {
-        "lastModified": 1738066957,
-        "narHash": "sha256-zUOPhbEsAJprwvanDVDT3DSV1ioUjuGxMVYCYlzfd2E=",
+        "lastModified": 1748329542,
+        "narHash": "sha256-bx4cgSSa5vxFVaySWFsU6wGbUdHN/eMEPWkTpccf9sE=",
         "owner": "ocaml",
         "repo": "opam-repository",
-        "rev": "aa131f3eda80ed7121debe7582faaf50448bc105",
+        "rev": "e9ce8525130a382fac004612302b2f2268f4188c",
         "type": "github"
       },
       "original": {
@@ -1416,11 +1416,11 @@
     "tezos": {
       "flake": false,
       "locked": {
-        "lastModified": 1744025588,
-        "narHash": "sha256-I1Nr3ZxS6BS9zN3J818xpxBlT0bQtOCoE8wM2TUPT3E=",
+        "lastModified": 1749631672,
+        "narHash": "sha256-TuYBH94Hneg5PQ5hdLC09H6dErhqkRTVYy/vqPISvLE=",
         "owner": "tezos",
         "repo": "tezos",
-        "rev": "3f73c7248b6738e0263f242cd9fb149924e790b8",
+        "rev": "9758b259f7dd9de1fd4dbd0d4f63f2aac4465ddf",
         "type": "gitlab"
       },
       "original": {

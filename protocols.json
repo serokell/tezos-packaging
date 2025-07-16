@@ -28,10 +28,11 @@
     "PtNairob",
     "Proxford",
     "PtParisB",
-    "PsParisC"
+    "PsParisC",
+    "PsQuebec"
   ],
   "active": [
-    "PsQuebec",
-    "PsRiotum"
+    "PsRiotum",
+    "PtSeouLo"
   ]
 }
